@@ -1,0 +1,8 @@
+node_modules/
+*.d.ts
+!global.d.ts
+*.tgz
+*.js
+*.map
+.idea/
+*.log

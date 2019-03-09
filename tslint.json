@@ -1,0 +1,19 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:all", "tslint-config-prettier"],
+  "rules": {
+    "typedef": [
+      true,
+      "call-signature",
+      "parameter",
+      "member-variable-declaration"
+    ],
+    "no-any": true,
+    "no-inferred-empty-object-type": true,
+    "completed-docs": false,
+    "comment-format": false,
+    "file-name-casing": [true, "kebab-case"],
+    "interface-over-type-literal": false
+  },
+  "rulesDirectory": []
+}

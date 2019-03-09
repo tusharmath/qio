@@ -1,0 +1,9 @@
+*.ts
+!*.d.ts
+!*.js
+*.tgz
+test/
+tsconfig.json
+.idea/
+.prettierrc
+*.yml
