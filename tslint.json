@@ -2,18 +2,20 @@
   "defaultSeverity": "error",
   "extends": ["tslint:all", "tslint-config-prettier"],
   "rules": {
-    "typedef": [
-      true,
-      "call-signature",
-      "parameter",
-      "member-variable-declaration"
-    ],
-    "no-any": true,
-    "no-inferred-empty-object-type": true,
     "completed-docs": false,
     "comment-format": false,
-    "file-name-casing": [true, "kebab-case"],
-    "interface-over-type-literal": false
+    "interface-name": false,
+    "no-empty": false,
+    "no-implicit-dependencies": [true, "dev"],
+    "no-magic-numbers": false,
+    "no-parameter-properties": false,
+    "no-submodule-imports": false,
+    "prefer-template": false,
+    "no-void-expression": false,
+    "variable-name": [true, "allow-pascal-case"],
+    // TEMPORARY SETTINGS
+    "file-name-casing": [true, "pascal-case"],
+    "typedef": [true, "call-signature", "parameter"]
   },
   "rulesDirectory": []
 }
