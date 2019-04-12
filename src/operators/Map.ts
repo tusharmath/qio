@@ -1,12 +1,12 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-import {XIO} from '../internals/XIO'
 
-export class Map<A, B> implements XIO<B> {
+export class Map<A, B> implements FIO<B> {
   public constructor(
-    private readonly src: XIO<A>,
+    private readonly src: FIO<A>,
     private readonly ab: (a: A) => B
   ) {}
 

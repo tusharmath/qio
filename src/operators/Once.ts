@@ -3,24 +3,24 @@
  */
 import {IScheduler} from 'ts-scheduler'
 
-import {XIO} from '../internals/XIO'
+import {FIO} from '../internals/FIO'
 
 import {OnceCache} from './OnceCache'
 
-const wm = new WeakMap<XIO<unknown>, XIO<unknown>>()
-export class Once<A> implements XIO<XIO<A>> {
-  public constructor(private readonly io: XIO<A>) {}
+const wm = new WeakMap<FIO<unknown>, FIO<unknown>>()
+export class Once<A> implements FIO<FIO<A>> {
+  public constructor(private readonly io: FIO<A>) {}
   public fork(
     sh: IScheduler,
     rej: (e: Error) => void,
-    res: (a: XIO<A>) => void
+    res: (a: FIO<A>) => void
   ): () => void {
     return sh.asap(() => {
       const key = this.io
       if (!wm.has(key)) {
         wm.set(key, new OnceCache(key))
       }
-      res(wm.get(key) as XIO<A>)
+      res(wm.get(key) as FIO<A>)
     })
   }
 }

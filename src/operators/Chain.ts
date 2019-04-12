@@ -1,13 +1,13 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-import {XIO} from '../internals/XIO'
 
-export class Chain<A, B> implements XIO<B> {
+export class Chain<A, B> implements FIO<B> {
   public constructor(
-    private readonly src: XIO<A>,
-    private readonly ab: (a: A) => XIO<B>
+    private readonly src: FIO<A>,
+    private readonly ab: (a: A) => FIO<B>
   ) {}
 
   public fork(sh: IScheduler, rej: REJ, res: RES<B>): Cancel {

@@ -1,11 +1,11 @@
 import {LinkedList} from 'dbl-linked-list-ds'
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-import {XIO} from '../internals/XIO'
 
-export class OnceCache<A> implements XIO<A> {
+export class OnceCache<A> implements FIO<A> {
   private cancel: Cancel | undefined
   private error: Error | undefined
   private isForked = false
@@ -14,7 +14,7 @@ export class OnceCache<A> implements XIO<A> {
   private readonly Q = new LinkedList<{rej: REJ; res: RES<A>}>()
   private result: A | undefined
 
-  public constructor(private readonly io: XIO<A>) {}
+  public constructor(private readonly io: FIO<A>) {}
 
   public fork(sh: IScheduler, rej: REJ, res: RES<A>): Cancel {
     if (this.isResolved) {

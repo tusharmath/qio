@@ -1,11 +1,11 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {FIO} from '../internals/FIO'
 import {IOStatus} from '../internals/IOStatus'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-import {XIO} from '../internals/XIO'
 
-export class Computation<A> implements XIO<A> {
+export class Computation<A> implements FIO<A> {
   public constructor(
     private readonly cmp: (
       rej: REJ,

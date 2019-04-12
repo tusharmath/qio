@@ -1,12 +1,12 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-import {XIO} from '../internals/XIO'
 
 export type OR<A, B> = A & B extends never ? never : [A, B]
-export class Zip<A, B> implements XIO<OR<A, B>> {
-  public constructor(private readonly a: XIO<A>, private readonly b: XIO<B>) {}
+export class Zip<A, B> implements FIO<OR<A, B>> {
+  public constructor(private readonly a: FIO<A>, private readonly b: FIO<B>) {}
 
   public fork(sh: IScheduler, rej: REJ, res: RES<OR<A, B>>): Cancel {
     let responseA: A

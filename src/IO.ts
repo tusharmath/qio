@@ -4,9 +4,9 @@
 
 import {Cancel, IScheduler, scheduler} from 'ts-scheduler'
 
+import {FIO} from './internals/FIO'
 import {REJ} from './internals/REJ'
 import {RES} from './internals/RES'
-import {XIO} from './internals/XIO'
 import {Catch} from './operators/Catch'
 import {Chain} from './operators/Chain'
 import {Map} from './operators/Map'
@@ -22,7 +22,7 @@ type FORK1<A> = [REJ, RES<A>]
 type FORK2<A> = [IScheduler, REJ, RES<A>]
 type FORK<A> = FORK2<A> | FORK1<A>
 
-export class IO<A> implements XIO<A> {
+export class IO<A> implements FIO<A> {
   // tslint:disable-next-line:no-any
   public static encase<A, ARGS extends any[]>(
     fn: (...t: ARGS) => A
@@ -71,17 +71,17 @@ export class IO<A> implements XIO<A> {
       })
     )
   }
-  private static to<A>(io: XIO<A>): IO<A> {
+  private static to<A>(io: FIO<A>): IO<A> {
     return new IO<A>(io)
   }
-  private constructor(private readonly io: XIO<A>) {}
-  public and<B>(b: XIO<B>): IO<OR<A, B>> {
+  private constructor(private readonly io: FIO<A>) {}
+  public and<B>(b: FIO<B>): IO<OR<A, B>> {
     return IO.to<OR<A, B>>(new Zip(this.io, b))
   }
-  public catch<B>(ab: (a: Error) => XIO<B>): IO<A | B> {
+  public catch<B>(ab: (a: Error) => FIO<B>): IO<A | B> {
     return IO.to<A | B>(new Catch(this.io, ab))
   }
-  public chain<B>(ab: (a: A) => XIO<B>): IO<B> {
+  public chain<B>(ab: (a: A) => FIO<B>): IO<B> {
     return IO.to<B>(new Chain(this.io, ab))
   }
 
@@ -98,7 +98,7 @@ export class IO<A> implements XIO<A> {
   public once(): IO<A> {
     return IO.to(new Once(this)).chain(_ => _)
   }
-  public race<B>(b: XIO<B>): IO<A | B> {
+  public race<B>(b: FIO<B>): IO<A | B> {
     return IO.to(new Race(this.io, b))
   }
   public async toPromise(): Promise<A> {

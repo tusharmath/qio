@@ -1,11 +1,11 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-import {XIO} from '../internals/XIO'
 
-export class Race<A, B> implements XIO<A | B> {
-  public constructor(private readonly a: XIO<A>, private readonly b: XIO<B>) {}
+export class Race<A, B> implements FIO<A | B> {
+  public constructor(private readonly a: FIO<A>, private readonly b: FIO<B>) {}
 
   public fork(sh: IScheduler, rej: REJ, res: RES<A | B>): Cancel {
     const cancel = new Array<Cancel>()

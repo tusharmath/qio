@@ -4,14 +4,14 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {XIO} from '../../src/internals/XIO'
+import {FIO} from '../../src/internals/FIO'
 import {Chain} from '../../src/operators/Chain'
 import {Computation} from '../../src/sources/Computation'
 
 /**
  * Specifications for an IO that resolves
  */
-export const ResolvingIOSpec = <T>(fn: () => XIO<T>) => {
+export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
   context('ResolvingIOSpec', () => {
     it('should resolve in the end', () => {
       const S = testScheduler()
@@ -129,7 +129,7 @@ export const ResolvingIOSpec = <T>(fn: () => XIO<T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const createRejectingIOSpec = <T>(fn: () => XIO<T>) => {
+export const createRejectingIOSpec = <T>(fn: () => FIO<T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
       const S = testScheduler()

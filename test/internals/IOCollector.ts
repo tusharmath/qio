@@ -4,11 +4,11 @@
 
 import {testScheduler} from 'ts-scheduler/test'
 
-import {XIO} from '../../src/internals/XIO'
+import {FIO} from '../../src/internals/FIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A>(io: XIO<A>) => {
+export const IOCollector = <A>(io: FIO<A>) => {
   /**
    * Create an internal TestScheduler
    */
