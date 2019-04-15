@@ -7,6 +7,7 @@ import {scheduler} from 'ts-scheduler'
 
 import {IO} from '../'
 
+import {Counter} from './internals/Counter'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
@@ -78,8 +79,8 @@ describe('Computation', () => {
     )
   })
   it('should not cancel a cancelled IO', () => {
-    let count = 1000
-    const io = IO.from(() => () => (count += 1))
+    const counter = Counter(1000)
+    const io = counter.inc
     const {scheduler: S, fork} = IOCollector(io)
     S.runTo(200)
     const cancel = fork()
@@ -87,6 +88,6 @@ describe('Computation', () => {
     cancel()
     cancel()
     cancel()
-    assert.strictEqual(count, 1001)
+    assert.strictEqual(counter.getCount(), 1001)
   })
 })

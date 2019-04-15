@@ -4,8 +4,8 @@
 
 import {IO} from '../../src/IO'
 
-export const Counter = () => {
-  let count = 0
+export const Counter = (n: number = 0) => {
+  let count = n
 
   return {
     getCount: () => count,
