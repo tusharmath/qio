@@ -10,7 +10,7 @@ import {RES} from './internals/RES'
 import {Catch} from './operators/Catch'
 import {Chain} from './operators/Chain'
 import {Map} from './operators/Map'
-import {OnceCache} from './operators/OnceCache'
+import {Once} from './operators/Once'
 import {Race} from './operators/Race'
 import {OR, Zip} from './operators/Zip'
 import {Computation} from './sources/Computation'
@@ -96,7 +96,7 @@ export class IO<A> implements FIO<A> {
     return IO.to<B>(new Map(this.io, ab))
   }
   public once(): IO<IO<A>> {
-    return IO.of(IO.to(new OnceCache(this)))
+    return IO.of(IO.to(new Once(this)))
   }
   public race<B>(b: FIO<B>): IO<A | B> {
     return IO.to(new Race(this.io, b))

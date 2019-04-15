@@ -5,18 +5,18 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
-import {OnceCache} from '../src/operators/OnceCache'
+import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('OnceCache', () => {
-  ResolvingIOSpec(() => new OnceCache(IO.of(10)))
-  RejectingIOSpec(() => new OnceCache(IO.reject(new Error('FAILED'))))
+  ResolvingIOSpec(() => new Once(IO.of(10)))
+  RejectingIOSpec(() => new Once(IO.reject(new Error('FAILED'))))
 
   const createNeverEndingOnceIO = () => {
     let count = 0
-    const io = new OnceCache(
+    const io = new Once(
       IO.from<number>((rej, res, sh) => sh.asap(() => res((count += 1))))
     )
 
@@ -27,7 +27,7 @@ describe('OnceCache', () => {
   }
   const createResolvingOnceIO = (n: number) => {
     let count = 0
-    const io = new OnceCache(
+    const io = new Once(
       IO.from<number>((rej, res, sh) => sh.delay(() => res((count += 1)), n))
     )
 
@@ -38,7 +38,7 @@ describe('OnceCache', () => {
   }
   const createRejectingOnceIO = (n: number) => {
     let count = 0
-    const io = new OnceCache(
+    const io = new Once(
       IO.from<never>((rej, res, sh) =>
         sh.delay(() => rej(new Error('FAILED_' + (count += 1).toString())), n)
       )

@@ -5,7 +5,7 @@ import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
-export class OnceCache<A> implements FIO<A> {
+export class Once<A> implements FIO<A> {
   private cancel: Cancel | undefined
   private error: Error | undefined
   private isForked = false
