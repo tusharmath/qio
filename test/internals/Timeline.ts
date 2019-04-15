@@ -17,13 +17,35 @@ export type TimelineList<A> = Array<TimeSlice<A>>
  */
 export const Timeline = <A>(sh: IScheduler) => {
   const timeline = new Array<TimeSlice<A>>()
+  let resolvedValue: A | undefined
+  let rejectedValue: Error | undefined
 
   return {
     cancel: () => timeline.push(['CANCELLED', sh.now()]),
     create: <T>(...slice: TimelineList<T>): TimelineList<T> => slice,
     fork: () => timeline.push(['FORKED', sh.now()]),
+    getError: (): Error => {
+      if (typeof rejectedValue === 'undefined') {
+        throw new Error('IO not yet rejected')
+      }
+
+      return rejectedValue
+    },
+    getValue: (): A => {
+      if (typeof resolvedValue === 'undefined') {
+        throw new Error('IO not yet resolved')
+      }
+
+      return resolvedValue
+    },
     list: (): TimelineList<A> => timeline.slice(0),
-    reject: (e: Error) => timeline.push(['REJECT', sh.now(), e.toString()]),
-    resolve: (a: A) => timeline.push(['RESOLVE', sh.now(), a])
+    reject: (e: Error) => {
+      rejectedValue = e
+      timeline.push(['REJECT', sh.now(), e.toString()])
+    },
+    resolve: (a: A) => {
+      resolvedValue = a
+      timeline.push(['RESOLVE', sh.now(), a])
+    }
   }
 }
