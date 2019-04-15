@@ -23,8 +23,7 @@ type FORK2<A> = [IScheduler, REJ, RES<A>]
 type FORK<A> = FORK2<A> | FORK1<A>
 
 export class IO<A> implements FIO<A> {
-  // tslint:disable-next-line:no-any
-  public static encase<A, ARGS extends any[]>(
+  public static encase<A, ARGS extends unknown[]>(
     fn: (...t: ARGS) => A
   ): (...t: ARGS) => IO<A> {
     return (...t) =>
@@ -34,8 +33,7 @@ export class IO<A> implements FIO<A> {
         })
       )
   }
-  // tslint:disable-next-line:no-any
-  public static encaseP<A, ARGS extends any[]>(
+  public static encaseP<A, ARGS extends unknown[]>(
     fn: (...t: ARGS) => Promise<A>
   ): (...t: ARGS) => IO<A> {
     return (...t) =>
