@@ -10,7 +10,7 @@ import {RES} from './internals/RES'
 import {Catch} from './operators/Catch'
 import {Chain} from './operators/Chain'
 import {Map} from './operators/Map'
-import {Once} from './operators/Once'
+import {OnceCache} from './operators/OnceCache'
 import {Race} from './operators/Race'
 import {OR, Zip} from './operators/Zip'
 import {Computation} from './sources/Computation'
@@ -50,6 +50,7 @@ export class IO<A> implements FIO<A> {
   ): IO<A> {
     return IO.to<A>(new Computation(cmp))
   }
+
   public static never(): IO<never> {
     return IO.to(new Computation(RETURN_NOOP))
   }
@@ -72,7 +73,9 @@ export class IO<A> implements FIO<A> {
   private static to<A>(io: FIO<A>): IO<A> {
     return new IO<A>(io)
   }
+
   private constructor(private readonly io: FIO<A>) {}
+
   public and<B>(b: FIO<B>): IO<OR<A, B>> {
     return IO.to<OR<A, B>>(new Zip(this.io, b))
   }
@@ -82,7 +85,6 @@ export class IO<A> implements FIO<A> {
   public chain<B>(ab: (a: A) => FIO<B>): IO<B> {
     return IO.to<B>(new Chain(this.io, ab))
   }
-
   public fork(rej: REJ, res: RES<A>): Cancel
   public fork(sh: IScheduler, rej: REJ, res: RES<A>): Cancel
   public fork(...t: FORK<A>): Cancel {
@@ -93,8 +95,8 @@ export class IO<A> implements FIO<A> {
   public map<B>(ab: (a: A) => B): IO<B> {
     return IO.to<B>(new Map(this.io, ab))
   }
-  public once(): IO<A> {
-    return IO.to(new Once(this)).chain(_ => _)
+  public once(): IO<IO<A>> {
+    return IO.of(IO.to(new OnceCache(this)))
   }
   public race<B>(b: FIO<B>): IO<A | B> {
     return IO.to(new Race(this.io, b))
