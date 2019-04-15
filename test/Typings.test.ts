@@ -2,11 +2,10 @@
  * Created by tushar on 2019-03-11
  */
 
-import {assert} from 'chai'
-
 import {IO} from '../'
 
-const $ = <S extends object[], T>(fn: (...t: S) => T) => assert.ok(fn)
+import {$} from './internals/ProxyFunction'
+
 describe('typing', () => {
   describe('and', () => {
     it('should return IO<never> if one of them is of type IO<never>', () => {
