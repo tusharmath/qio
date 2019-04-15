@@ -5,16 +5,13 @@ import {assert} from 'chai'
 
 import {IO} from '../'
 
-import {
-  createRejectingIOSpec,
-  ResolvingIOSpec
-} from './internals/IOSpecification'
+import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
     IO.from(rej => rej(new Error('FAILED'))).catch(e => IO.of(e.message))
   )
-  createRejectingIOSpec(() =>
+  RejectingIOSpec(() =>
     IO.from(rej => rej(new Error('FAILED'))).catch(e => IO.reject(e))
   )
 

@@ -6,14 +6,11 @@ import * as assert from 'assert'
 import {IO} from '../'
 
 import {IOCollector} from './internals/IOCollector'
-import {
-  createRejectingIOSpec,
-  ResolvingIOSpec
-} from './internals/IOSpecification'
+import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Try', () => {
   ResolvingIOSpec(() => IO.try(() => void 0))
-  createRejectingIOSpec(() =>
+  RejectingIOSpec(() =>
     IO.try(() => {
       throw new Error('FAILURE')
     })

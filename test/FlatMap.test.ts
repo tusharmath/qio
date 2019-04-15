@@ -6,10 +6,7 @@ import {assert} from 'chai'
 
 import {IO} from '../'
 
-import {
-  createRejectingIOSpec,
-  ResolvingIOSpec
-} from './internals/IOSpecification'
+import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('flatMap', () => {
   it('should flatten the value', async () => {
@@ -20,7 +17,5 @@ describe('flatMap', () => {
     assert.equal(actual, expected)
   })
   ResolvingIOSpec(() => IO.of(10).chain(i => IO.of(100)))
-  createRejectingIOSpec(() =>
-    IO.of(10).chain(i => IO.reject(new Error('FAILED')))
-  )
+  RejectingIOSpec(() => IO.of(10).chain(i => IO.reject(new Error('FAILED'))))
 })

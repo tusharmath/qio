@@ -6,14 +6,11 @@ import {assert} from 'chai'
 import {IO} from '../'
 
 import {IOCollector} from './internals/IOCollector'
-import {
-  createRejectingIOSpec,
-  ResolvingIOSpec
-} from './internals/IOSpecification'
+import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Once', () => {
   ResolvingIOSpec(() => IO.from((rej, res) => res(10)).once())
-  createRejectingIOSpec(() => IO.from(rej => rej(new Error('FAILED'))).once())
+  RejectingIOSpec(() => IO.from(rej => rej(new Error('FAILED'))).once())
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = IO.from((rej, res, sh) =>

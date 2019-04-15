@@ -7,7 +7,7 @@ import {scheduler as sh} from 'ts-scheduler'
 
 import {IO} from '../'
 
-import {createRejectingIOSpec} from './internals/IOSpecification'
+import {RejectingIOSpec} from './internals/IOSpecification'
 
 describe('reject', () => {
   it('creates a rejected io', async () => {
@@ -25,5 +25,5 @@ describe('reject', () => {
     cb()
   })
 
-  createRejectingIOSpec(() => IO.reject(new Error('FAILED')))
+  RejectingIOSpec(() => IO.reject(new Error('FAILED')))
 })

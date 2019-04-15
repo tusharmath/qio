@@ -129,7 +129,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const createRejectingIOSpec = <T>(fn: () => FIO<T>) => {
+export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
       const S = testScheduler()

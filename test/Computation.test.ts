@@ -8,14 +8,11 @@ import {scheduler} from 'ts-scheduler'
 import {IO} from '../'
 
 import {IOCollector} from './internals/IOCollector'
-import {
-  createRejectingIOSpec,
-  ResolvingIOSpec
-} from './internals/IOSpecification'
+import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
   ResolvingIOSpec(() => IO.from((rej, res) => res(10)))
-  createRejectingIOSpec(() => IO.from(rej => rej(new Error('FAILED'))))
+  RejectingIOSpec(() => IO.from(rej => rej(new Error('FAILED'))))
 
   const sh = scheduler
   it('should defer computations', async () => {

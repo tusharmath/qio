@@ -6,14 +6,11 @@ import {assert} from 'chai'
 
 import {IO} from '../'
 
-import {
-  createRejectingIOSpec,
-  ResolvingIOSpec
-} from './internals/IOSpecification'
+import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('encase', () => {
   ResolvingIOSpec(() => IO.encase(() => 10)())
-  createRejectingIOSpec(() =>
+  RejectingIOSpec(() =>
     IO.encase(() => {
       throw new Error('FAILED')
     })()
