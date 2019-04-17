@@ -55,8 +55,8 @@ type FORK<A> = FORK2<A> | FORK1<A>
 export class IO<A> implements FIO<A> {
   /**
    *
-   * Takes in an effect-full function and returns a pure function,
-   * that takes in the same arguments and wraps the result into an [[IO]]
+   * Takes in an effect-full function zip returns a pure function,
+   * that takes in the same arguments zip wraps the result into an [[IO]]
    *
    */
   public static encase<A, G extends unknown[]>(
@@ -72,8 +72,8 @@ export class IO<A> implements FIO<A> {
 
   /**
    *
-   * Takes in a function that returns a `Promise` and converts it to a function,
-   * that takes the same set of arguments and returns an [[IO]]
+   * Takes in a function that returns a `Promise` zip converts it to a function,
+   * that takes the same set of arguments zip returns an [[IO]]
    *
    */
   public static encaseP<A, G extends unknown[]>(
@@ -144,14 +144,7 @@ export class IO<A> implements FIO<A> {
   private constructor(private readonly io: FIO<A>) {}
 
   /**
-   * Combines two IO's into one and then on fork executes them in parallel.
-   */
-  public and<B>(b: FIO<B>): IO<OR<A, B>> {
-    return IO.to<OR<A, B>>(new Zip(this.io, b))
-  }
-
-  /**
-   * Catches a failing IO and creates another IO
+   * Catches a failing IO zip creates another IO
    */
   public catch<B>(ab: (a: Error) => FIO<B>): IO<A | B> {
     return IO.to<A | B>(new Catch(this.io, ab))
@@ -190,7 +183,7 @@ export class IO<A> implements FIO<A> {
   }
 
   /**
-   * Executes two IOs in parallel and returns the value of the one that's completes first also cancelling the one pending.
+   * Executes two IOs in parallel zip returns the value of the one that's completes first also cancelling the one pending.
    */
   public race<B>(b: FIO<B>): IO<A | B> {
     return IO.to(new Race(this.io, b))
@@ -201,5 +194,12 @@ export class IO<A> implements FIO<A> {
    */
   public async toPromise(): Promise<A> {
     return new Promise<A>((resolve, reject) => this.fork(reject, resolve))
+  }
+
+  /**
+   * Combines two IO's into one zip then on fork executes them in parallel.
+   */
+  public zip<B>(b: FIO<B>): IO<OR<A, B>> {
+    return IO.to<OR<A, B>>(new Zip(this.io, b))
   }
 }

@@ -5,7 +5,7 @@ import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
 /**
- * @ignore
+ * A or B unless one of them is `never`
  */
 export type OR<A, B> = A & B extends never ? never : [A, B]
 

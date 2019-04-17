@@ -7,15 +7,15 @@ import {IO} from '../'
 import {$} from './internals/ProxyFunction'
 
 describe('typing', () => {
-  describe('and', () => {
+  describe('zip', () => {
     it('should return IO<never> if one of them is of type IO<never>', () => {
-      $((a: IO<never>, b: IO<string>): IO<never> => a.and(b))
+      $((a: IO<never>, b: IO<string>): IO<never> => a.zip(b))
     })
     it('should return IO<never> if both the ios are of type IO<never>', () => {
-      $((a: IO<never>, b: IO<never>): IO<never> => a.and(b))
+      $((a: IO<never>, b: IO<never>): IO<never> => a.zip(b))
     })
     it('should return IO<[A, B]> if none of the ios are of type IO<never>', () => {
-      $((a: IO<string>, b: IO<number>): IO<[string, number]> => a.and(b))
+      $((a: IO<string>, b: IO<number>): IO<[string, number]> => a.zip(b))
     })
   })
   describe('race', () => {
