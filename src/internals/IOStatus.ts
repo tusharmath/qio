@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 export enum IOStatus {
   PENDING,
   FORKED,

@@ -6,7 +6,9 @@ import {Cancel, IScheduler} from 'ts-scheduler'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-
+/**
+ * @ignore
+ */
 export class Timeout<A> implements FIO<A> {
   public constructor(
     private readonly duration: number,

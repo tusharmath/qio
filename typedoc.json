@@ -7,5 +7,5 @@
   "out": "docs",
   "entryPoint": "IO",
   "exclude": ["test/**"],
-  "theme": "minimal"
+  "theme": "default"
 }

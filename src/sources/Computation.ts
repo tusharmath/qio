@@ -5,6 +5,9 @@ import {IOStatus} from '../internals/IOStatus'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
+/**
+ * @ignore
+ */
 export class Computation<A> implements FIO<A> {
   public constructor(
     private readonly cmp: (

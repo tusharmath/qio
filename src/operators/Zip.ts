@@ -4,7 +4,14 @@ import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
+/**
+ * @ignore
+ */
 export type OR<A, B> = A & B extends never ? never : [A, B]
+
+/**
+ * @ignore
+ */
 export class Zip<A, B> implements FIO<OR<A, B>> {
   public constructor(private readonly a: FIO<A>, private readonly b: FIO<B>) {}
 

@@ -4,6 +4,9 @@ import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
+/**
+ * @ignore
+ */
 export class Catch<A, B> implements FIO<A | B> {
   public constructor(
     private readonly src: FIO<A>,

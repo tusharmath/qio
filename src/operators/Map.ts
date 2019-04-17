@@ -4,6 +4,9 @@ import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
+/**
+ * @ignore
+ */
 export class Map<A, B> implements FIO<B> {
   public constructor(
     private readonly src: FIO<A>,
