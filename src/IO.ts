@@ -22,6 +22,36 @@ type FORK1<A> = [REJ, RES<A>]
 type FORK2<A> = [IScheduler, REJ, RES<A>]
 type FORK<A> = FORK2<A> | FORK1<A>
 
+/**
+ * Base class for fearless IO.
+ * It contains all the operators (`map`, `chain` etc.) that help in creating powerful compositions.
+ *
+ * @example
+ *
+ * ```typescript
+ *
+ * import {IO} from 'fearless-io'
+ *
+ * // Create a pure version of `console.log` called `putStrLn`
+ * const putStrLn = IO.encase((str: string) => console.log(str))
+ *
+ * const onError = (err) => {
+ *   console.log(err)
+ *   process.exit(1)
+ * }
+ *
+ * const onSuccess = () => {
+ *   console.log('Done!')
+ * }
+ *
+ * const hello = putStrLn('Hello World!')
+ *
+ * hello.fork(onError, onSuccess)
+ *
+ * ```
+ * @typeparam A The output of the side-effect.
+ *
+ */
 export class IO<A> implements FIO<A> {
   public static encase<A, ARGS extends unknown[]>(
     fn: (...t: ARGS) => A

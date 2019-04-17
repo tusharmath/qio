@@ -1,0 +1,11 @@
+{
+  "excludeExternals": false,
+  "excludeNotExported": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "mode": "file",
+  "out": "docs",
+  "entryPoint": "IO",
+  "exclude": ["test/**"],
+  "theme": "minimal"
+}

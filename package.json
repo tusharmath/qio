@@ -26,7 +26,8 @@
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
     "semantic-release": "semantic-release",
     "test": "mocha --require=ts-node/register --watch-extensions ts test/*.ts",
-    "travis-deploy-once": "travis-deploy-once --pro"
+    "travis-deploy-once": "travis-deploy-once --pro",
+    "create-docs": "typedoc"
   },
   "version": "0.0.0-development",
   "devDependencies": {
@@ -42,6 +43,7 @@
     "ts-node": "^8.1.0",
     "tslint": "^5.15.0",
     "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.14.2",
     "typescript": "^3.4.3",
     "typescript-tslint-plugin": "^0.3.1"
   },
