@@ -15,6 +15,7 @@ branches:
 script:
   - yarn lint
   - yarn test
+  - yarn create-docs
 
 deploy:
   provider: pages
