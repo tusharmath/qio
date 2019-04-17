@@ -5,27 +5,27 @@
 
 A typesafe functional module that solves practical IO problems on node and the browser.
 
-# Installation
+# Index
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Documentation](https://tusharm.com/fearless-io)
+
+## Installation
 
 ```bash
 npm i fearless-io
 ```
 
-# Usage
+## Usage
 
 ```typescript
 import {IO} from 'fearless-io'
+
 // Create a pure version of `console.log` called `putStrLn`
 const putStrLn = IO.encase((str: string) => console.log(str))
-const onError = (err) => {
-  console.log(err)
-  process.exit(1)
-}
-const onSuccess = () => {
-  console.log('Done!')
-}
-const hello = putStrLn('Hello World!')
-hello.fork(onError, onSuccess)
-```
 
-[Getting Started](https://tusharm.com/fearless-io)
+const hello = putStrLn('Hello World!')
+
+hello.fork(() => {}, () => {})
+```
