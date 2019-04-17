@@ -53,9 +53,15 @@ type FORK<A> = FORK2<A> | FORK1<A>
  *
  */
 export class IO<A> implements FIO<A> {
-  public static encase<A, ARGS extends unknown[]>(
-    fn: (...t: ARGS) => A
-  ): (...t: ARGS) => IO<A> {
+  /**
+   *
+   * Takes in an effect-full function and returns a pure function,
+   * that takes in the same arguments and wraps the result into an [[IO]]
+   *
+   */
+  public static encase<A, G extends unknown[]>(
+    fn: (...t: G) => A
+  ): (...t: G) => IO<A> {
     return (...t) =>
       IO.to(
         new Computation<A>((rej, res) => {
@@ -63,9 +69,16 @@ export class IO<A> implements FIO<A> {
         })
       )
   }
-  public static encaseP<A, ARGS extends unknown[]>(
-    fn: (...t: ARGS) => Promise<A>
-  ): (...t: ARGS) => IO<A> {
+
+  /**
+   *
+   * Takes in a function that returns a `Promise` and converts it to a function,
+   * that takes the same set of arguments and returns an [[IO]]
+   *
+   */
+  public static encaseP<A, G extends unknown[]>(
+    fn: (...t: G) => Promise<A>
+  ): (...t: G) => IO<A> {
     return (...t) =>
       IO.to(
         new Computation<A>((rej, res) => {
@@ -75,46 +88,85 @@ export class IO<A> implements FIO<A> {
         })
       )
   }
+
+  /**
+   * Constructor function to create an IO
+   */
   public static from<A>(
     cmp: (rej: REJ, res: RES<A>, sh: IScheduler) => Cancel | void
   ): IO<A> {
     return IO.to<A>(new Computation(cmp))
   }
 
+  /**
+   * Creates an [[IO]] that never completes.
+   */
   public static never(): IO<never> {
     return IO.to(new Computation(RETURN_NOOP))
   }
+
+  /**
+   * Creates an [[IO]] that always resolves with the same value.
+   */
   public static of<A>(value: A): IO<A> {
     return IO.to(new Computation<A>((rej, res) => res(value)))
   }
-  public static reject(value: Error): IO<never> {
-    return IO.to<never>(new Computation(rej => rej(value)))
+
+  /**
+   * Creates an IO that always rejects with an error
+   */
+  public static reject(error: Error): IO<never> {
+    return IO.to<never>(new Computation(rej => rej(error)))
   }
-  public static timeout<A>(value: A, n: number): IO<A> {
-    return IO.to(new Timeout(n, value))
+
+  /**
+   * Creates an IO that resolves with the given value after a certain duration of time.
+   */
+  public static timeout<A>(value: A, duration: number): IO<A> {
+    return IO.to(new Timeout(duration, value))
   }
-  public static try<A>(f: () => A): IO<A> {
+
+  /**
+   * A function that wraps a synchronous side-effect causing function into an IO
+   */
+  public static try<A>(fn: () => A): IO<A> {
     return IO.to(
       new Computation((rej, res) => {
-        res(f())
+        res(fn())
       })
     )
   }
+
   private static to<A>(io: FIO<A>): IO<A> {
     return new IO<A>(io)
   }
 
   private constructor(private readonly io: FIO<A>) {}
 
+  /**
+   * Combines two IO's into one and then on fork executes them in parallel.
+   */
   public and<B>(b: FIO<B>): IO<OR<A, B>> {
     return IO.to<OR<A, B>>(new Zip(this.io, b))
   }
+
+  /**
+   * Catches a failing IO and creates another IO
+   */
   public catch<B>(ab: (a: Error) => FIO<B>): IO<A | B> {
     return IO.to<A | B>(new Catch(this.io, ab))
   }
+
+  /**
+   * Chains two IOs such that one is executed after the other.
+   */
   public chain<B>(ab: (a: A) => FIO<B>): IO<B> {
     return IO.to<B>(new Chain(this.io, ab))
   }
+
+  /**
+   * Actually executes the IO
+   */
   public fork(rej: REJ, res: RES<A>): Cancel
   public fork(sh: IScheduler, rej: REJ, res: RES<A>): Cancel
   public fork(...t: FORK<A>): Cancel {
@@ -122,15 +174,31 @@ export class IO<A> implements FIO<A> {
       ? this.io.fork(t[0], t[1], t[2])
       : this.io.fork(scheduler, t[0], t[1])
   }
+
+  /**
+   * Applies transformation on the resolve value of the IO
+   */
   public map<B>(ab: (a: A) => B): IO<B> {
     return IO.to<B>(new Map(this.io, ab))
   }
+
+  /**
+   * Creates a new IO<IO<A>> that executes only once
+   */
   public once(): IO<IO<A>> {
     return IO.of(IO.to(new Once(this)))
   }
+
+  /**
+   * Executes two IOs in parallel and returns the value of the one that's completes first also cancelling the one pending.
+   */
   public race<B>(b: FIO<B>): IO<A | B> {
     return IO.to(new Race(this.io, b))
   }
+
+  /**
+   * Converts the IO into a Promise
+   */
   public async toPromise(): Promise<A> {
     return new Promise<A>((resolve, reject) => this.fork(reject, resolve))
   }
