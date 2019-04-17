@@ -5,7 +5,6 @@
   "excludeProtected": true,
   "mode": "file",
   "out": "docs",
-  "entryPoint": "IO",
   "exclude": ["test/**"],
   "theme": "default"
 }
