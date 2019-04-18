@@ -1,9 +1,16 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
 import {FIO} from '../internals/FIO'
-import {IOStatus} from '../internals/IOStatus'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
+
+enum IOStatus {
+  PENDING,
+  FORKED,
+  RESOLVED,
+  REJECTED,
+  CANCELLED
+}
 
 /**
  * @ignore
