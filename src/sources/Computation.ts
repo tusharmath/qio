@@ -5,7 +5,6 @@ import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
 
 enum IOStatus {
-  PENDING,
   FORKED,
   RESOLVED,
   REJECTED,
