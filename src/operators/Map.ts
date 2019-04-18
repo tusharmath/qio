@@ -3,14 +3,7 @@ import {Cancel, IScheduler} from 'ts-scheduler'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
-
-const SafeResolve = <A>(a: A, rej: REJ, res: RES<A>) => {
-  try {
-    res(a)
-  } catch (e) {
-    rej(e as Error)
-  }
-}
+import {SafeResolve} from '../internals/SafeResolve'
 
 /**
  * @ignore
