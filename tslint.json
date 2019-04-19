@@ -3,7 +3,6 @@
   "extends": ["tslint:all", "tslint-config-prettier"],
   "rules": {
     "completed-docs": false,
-    "comment-format": false,
     "interface-name": false,
     "no-empty": false,
     "no-implicit-dependencies": [true, "dev"],
