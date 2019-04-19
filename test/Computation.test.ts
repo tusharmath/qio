@@ -29,7 +29,7 @@ describe('Computation', () => {
       return () => results.push('STOP')
     })
 
-    // issue a cancelled IO
+    // Issue a cancelled IO
     a.fork(scheduler, noop, noop)()
     assert.deepEqual(results, [])
   })

@@ -49,10 +49,46 @@ describe('IO', () => {
     ResolvingIOSpec(() => IO.of(10).provide({}))
     RejectingIOSpec(() => IO.reject(new Error('FAILED')).provide({}))
 
-    it('should pass on the env', () => assert.fail('not implemented'))
+    it.skip('should pass on the env', () => {
+      throw new TypeError('Not implemented')
+    })
   })
   describe('access()', () => {
-    // ResolvingIOSpec(() => IO.access(10).provide({}))
-    // RejectingIOSpec(() => IO.reject(new Error('FAILED')).provide({}))
+    it('should create an IO[R, A] ', () => {
+      interface Console {
+        print(str: string): void
+      }
+
+      interface HasConsole {
+        console: Console
+      }
+
+      const Console = () => {
+        const strings = new Array<string>()
+
+        return {
+          list: () => strings.slice(0),
+          print: (str: string) => void strings.push(str)
+        }
+      }
+
+      const putStrLn = (line: string) =>
+        IO.access((_: HasConsole) => _.console.print(line))
+
+      const cons = Console()
+      const env: HasConsole = {console: cons}
+      ForkNRun(env)(putStrLn('HELLO WORLD'))
+
+      const actual = cons.list()
+      const expected = ['HELLO WORLD']
+
+      assert.deepStrictEqual(actual, expected)
+    })
+    ResolvingIOSpec(() => IO.access(() => 10))
+    RejectingIOSpec(() =>
+      IO.access(() => {
+        throw new Error('FAILED')
+      })
+    )
   })
 })

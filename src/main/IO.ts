@@ -55,7 +55,11 @@ type FORK<R, A> = FORK2<R, A> | FORK1<R, A>
  */
 export class IO<R1, A1> implements FIO<R1, A1> {
   public static access<R, A>(fn: (env: R) => A): IO<R, A> {
-    throw new TypeError('Not implemented')
+    return IO.to(
+      new Computation((sh, env1, rej, res) => {
+        res(fn(env1))
+      })
+    )
   }
 
   /**
