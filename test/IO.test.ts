@@ -91,4 +91,67 @@ describe('IO', () => {
       })
     )
   })
+
+  describe('accessM()', () => {
+    it('should create an IO[R, A] ', () => {
+      interface Console {
+        print(str: string): IO<DefaultEnv, void>
+      }
+
+      interface HasConsole {
+        console: Console
+      }
+
+      const Console = () => {
+        const strings = new Array<string>()
+
+        return {
+          list: () => strings.slice(0),
+          print: IO.encase((str: string) => void strings.push(str))
+        }
+      }
+
+      const putStrLn = (line: string) =>
+        IO.accessM((_: HasConsole) => _.console.print(line))
+
+      const cons = Console()
+      const env: HasConsole = {console: cons}
+      ForkNRun(env)(putStrLn('HELLO WORLD'))
+
+      const actual = cons.list()
+      const expected = ['HELLO WORLD']
+
+      assert.deepStrictEqual(actual, expected)
+    })
+    ResolvingIOSpec(() => IO.accessM(() => IO.of(10)))
+    RejectingIOSpec(() =>
+      IO.accessM(() => {
+        throw new Error('FAILED')
+      })
+    )
+  })
+  describe('environment()', () => {
+    it('should return the env its being forked with', () => {
+      interface Console {
+        console: {print(str: string): void}
+      }
+      const io = IO.environment<Console>()
+      const out = new Array<string>()
+      const env = {
+        console: {
+          print: (str: string): void => {
+            out.push(str)
+          }
+        }
+      }
+      const {timeline} = ForkNRun(env)(io)
+
+      const actual = timeline.list()
+      const expected = [['RESOLVE', 1, env]]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+
+    ResolvingIOSpec(() => IO.environment())
+  })
 })

@@ -62,6 +62,10 @@ export class IO<R1, A1> implements FIO<R1, A1> {
     )
   }
 
+  public static accessM<R, A>(fn: (env: R) => IO<R, A>): IO<R, A> {
+    return IO.environment<R>().chain(fn)
+  }
+
   /**
    * Returns the default env in which an IO would run
    */
@@ -103,6 +107,13 @@ export class IO<R1, A1> implements FIO<R1, A1> {
             .catch(rej)
         })
       )
+  }
+
+  /**
+   * Creates an IO that resolves with the provided env
+   */
+  public static environment<R1 = unknown>(): IO<R1, R1> {
+    return IO.to(new Computation((sh, env1, rej, res) => res(env1)))
   }
 
   /**
