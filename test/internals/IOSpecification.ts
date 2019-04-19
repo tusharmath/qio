@@ -4,6 +4,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
+import {defaultEnv, DefaultEnv} from '../../src/internals/DefaultEnv'
 import {FIO} from '../../src/internals/FIO'
 import {Chain} from '../../src/operators/Chain'
 import {Computation} from '../../src/sources/Computation'
@@ -11,7 +12,7 @@ import {Computation} from '../../src/sources/Computation'
 /**
  * Specifications for an IO that resolves
  */
-export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
+export const ResolvingIOSpec = <T>(fn: () => FIO<DefaultEnv, T>) => {
   context('ResolvingIOSpec', () => {
     it('should resolve in the end', () => {
       const S = testScheduler()
@@ -21,6 +22,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (status.rejected = true),
         () => (status.resolved = true)
       )
@@ -35,6 +37,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (status.rejected = true),
         () => (status.resolved = true)
       )
@@ -46,6 +49,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       let completionTime = -1
       fn().fork(
         S,
+        defaultEnv,
         () => {
           throw new Error('Should not reject')
         },
@@ -64,6 +68,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       let rejectionError = ''
       fn().fork(
         S,
+        defaultEnv,
         err => (rejectionError = err.message),
         () => {
           throw new Error(ERROR_MESSAGE)
@@ -80,6 +85,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (actual.rejected = true),
         () => (actual.resolved = true)
       )
@@ -93,6 +99,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (actual.resolved = true),
         () => (actual.resolved = true)
       )()
@@ -108,10 +115,12 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
       let isCancelled = false
       const io = new Chain(
         fn(),
-        () => new Computation<never>(() => () => (isCancelled = true))
+        () =>
+          new Computation<DefaultEnv, never>(() => () => (isCancelled = true))
       )
       const cancel = io.fork(
         S,
+        defaultEnv,
         () => {
           assert.fail('IO should not reject')
         },
@@ -129,7 +138,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
+export const RejectingIOSpec = <T>(fn: () => FIO<DefaultEnv, T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
       const S = testScheduler()
@@ -139,6 +148,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (status.rejected = true),
         () => (status.resolved = true)
       )
@@ -153,6 +163,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (status.rejected = true),
         () => (status.resolved = true)
       )
@@ -164,6 +175,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
       let completionTime = -1
       fn().fork(
         S,
+        defaultEnv,
         () => (completionTime = S.now()),
         () => {
           throw new Error('Should not resolve')
@@ -184,6 +196,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (actual.rejected = true),
         () => (actual.resolved = true)
       )
@@ -197,6 +210,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<T>) => {
       }
       fn().fork(
         S,
+        defaultEnv,
         () => (actual.resolved = true),
         () => (actual.resolved = true)
       )()

@@ -4,6 +4,7 @@
 
 import {Cancel, IScheduler, scheduler} from 'ts-scheduler'
 
+import {defaultEnv, DefaultEnv} from './internals/DefaultEnv'
 import {FIO} from './internals/FIO'
 import {REJ} from './internals/REJ'
 import {RES} from './internals/RES'
@@ -18,9 +19,9 @@ import {Timeout} from './sources/Timeout'
 
 const NOOP = () => {}
 const RETURN_NOOP = () => NOOP
-type FORK1<A> = [REJ, RES<A>]
-type FORK2<A> = [IScheduler, REJ, RES<A>]
-type FORK<A> = FORK2<A> | FORK1<A>
+type FORK1<R, A> = [R, REJ, RES<A>]
+type FORK2<R, A> = [IScheduler, R, REJ, RES<A>]
+type FORK<R, A> = FORK2<R, A> | FORK1<R, A>
 
 /**
  * Base class for fearless IO.
@@ -52,7 +53,18 @@ type FORK<A> = FORK2<A> | FORK1<A>
  * @typeparam A The output of the side-effect.
  *
  */
-export class IO<A> implements FIO<A> {
+export class IO<R1, A1> implements FIO<R1, A1> {
+  public static access<R, A>(fn: (env: R) => A): IO<R, A> {
+    throw new TypeError('Not implemented')
+  }
+
+  /**
+   * Returns the default env in which an IO would run
+   */
+  public static defaultEnv(): DefaultEnv {
+    return defaultEnv
+  }
+
   /**
    *
    * Takes in an effect-full function zip returns a pure function,
@@ -61,10 +73,10 @@ export class IO<A> implements FIO<A> {
    */
   public static encase<A, G extends unknown[]>(
     fn: (...t: G) => A
-  ): (...t: G) => IO<A> {
+  ): (...t: G) => IO<DefaultEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<A>((rej, res) => {
+        new Computation<DefaultEnv, A>((sh, env, rej, res) => {
           res(fn(...t))
         })
       )
@@ -78,10 +90,10 @@ export class IO<A> implements FIO<A> {
    */
   public static encaseP<A, G extends unknown[]>(
     fn: (...t: G) => Promise<A>
-  ): (...t: G) => IO<A> {
+  ): (...t: G) => IO<DefaultEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<A>((rej, res) => {
+        new Computation<DefaultEnv, A>((sh, env, rej, res) => {
           void fn(...t)
             .then(res)
             .catch(rej)
@@ -90,116 +102,133 @@ export class IO<A> implements FIO<A> {
   }
 
   /**
-   * Constructor function to create an IO
+   * Constructor function to create an IO.
+   * In most cases you should use [encase] [encaseP] etc. to create new IOs.
+   * `from` is for more advanced usages and is intended to be used internally.
    */
   public static from<A>(
-    cmp: (rej: REJ, res: RES<A>, sh: IScheduler) => Cancel | void
-  ): IO<A> {
-    return IO.to<A>(new Computation(cmp))
+    cmp: (
+      sh: IScheduler,
+      env: DefaultEnv,
+      rej: REJ,
+      res: RES<A>
+    ) => Cancel | void
+  ): IO<DefaultEnv, A> {
+    return IO.to(new Computation(cmp))
   }
 
   /**
    * Creates an [[IO]] that never completes.
    */
-  public static never(): IO<never> {
+  public static never(): IO<DefaultEnv, never> {
     return IO.to(new Computation(RETURN_NOOP))
   }
 
   /**
    * Creates an [[IO]] that always resolves with the same value.
    */
-  public static of<A>(value: A): IO<A> {
-    return IO.to(new Computation<A>((rej, res) => res(value)))
+  public static of<A>(value: A): IO<DefaultEnv, A> {
+    return IO.to(new Computation((sh, env, rej, res) => res(value)))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
-  public static reject(error: Error): IO<never> {
-    return IO.to<never>(new Computation(rej => rej(error)))
+  public static reject(error: Error): IO<DefaultEnv, never> {
+    return IO.to(new Computation((sh, env, rej) => rej(error)))
   }
 
   /**
    * Creates an IO that resolves with the given value after a certain duration of time.
    */
-  public static timeout<A>(value: A, duration: number): IO<A> {
+  public static timeout<A>(value: A, duration: number): IO<DefaultEnv, A> {
     return IO.to(new Timeout(duration, value))
   }
 
   /**
    * A function that wraps a synchronous side-effect causing function into an IO
    */
-  public static try<A>(fn: () => A): IO<A> {
+  public static try<A>(fn: () => A): IO<DefaultEnv, A> {
     return IO.to(
-      new Computation((rej, res) => {
+      new Computation((sh, env, rej, res) => {
         res(fn())
       })
     )
   }
 
-  private static to<A>(io: FIO<A>): IO<A> {
-    return new IO<A>(io)
+  private static to<R, A>(io: FIO<R, A>): IO<R, A> {
+    return new IO(io)
   }
 
-  private constructor(private readonly io: FIO<A>) {}
+  private constructor(private readonly io: FIO<R1, A1>) {}
 
   /**
    * Catches a failing IO zip creates another IO
    */
-  public catch<B>(ab: (a: Error) => FIO<B>): IO<A | B> {
-    return IO.to<A | B>(new Catch(this.io, ab))
+  public catch<R2, A2>(ab: (a: Error) => FIO<R2, A2>): IO<R1 & R2, A1 | A2> {
+    return IO.to(new Catch(this.io, ab))
   }
 
   /**
    * Chains two IOs such that one is executed after the other.
    */
-  public chain<B>(ab: (a: A) => FIO<B>): IO<B> {
-    return IO.to<B>(new Chain(this.io, ab))
+  public chain<R2, A2>(ab: (a: A1) => FIO<R2, A2>): IO<R1 & R2, A2> {
+    return IO.to(new Chain(this.io, ab))
   }
 
   /**
    * Actually executes the IO
    */
-  public fork(rej: REJ, res: RES<A>): Cancel
-  public fork(sh: IScheduler, rej: REJ, res: RES<A>): Cancel
-  public fork(...t: FORK<A>): Cancel {
-    return t.length === 3
-      ? this.io.fork(t[0], t[1], t[2])
-      : this.io.fork(scheduler, t[0], t[1])
+  public fork(env: R1, rej: REJ, res: RES<A1>): Cancel
+  public fork(sh: IScheduler, env: R1, rej: REJ, res: RES<A1>): Cancel
+  public fork(...t: FORK<R1, A1>): Cancel {
+    return t.length === 4
+      ? this.io.fork(t[0], t[1], t[2], t[3])
+      : this.io.fork(scheduler, t[0], t[1], t[2])
   }
 
   /**
    * Applies transformation on the resolve value of the IO
    */
-  public map<B>(ab: (a: A) => B): IO<B> {
-    return IO.to<B>(new Map(this.io, ab))
+  public map<B>(ab: (a: A1) => B): IO<R1, B> {
+    return IO.to(new Map(this.io, ab))
   }
 
   /**
    * Creates a new IO<IO<A>> that executes only once
    */
-  public once(): IO<IO<A>> {
+  public once(): IO<DefaultEnv, IO<R1, A1>> {
     return IO.of(IO.to(new Once(this)))
+  }
+
+  /**
+   * Eliminates the dependency on the IOs original environment.
+   * Creates an IO that can run in [DefaultEnv].
+   */
+  public provide(env: R1): IO<DefaultEnv, A1> {
+    return IO.to(
+      new Computation((sh, env1, rej, res) => this.io.fork(sh, env, rej, res))
+    )
   }
 
   /**
    * Executes two IOs in parallel zip returns the value of the one that's completes first also cancelling the one pending.
    */
-  public race<B>(b: FIO<B>): IO<A | B> {
+  public race<R2, A2>(b: FIO<R2, A2>): IO<R1 & R2, A1 | A2> {
     return IO.to(new Race(this.io, b))
   }
 
   /**
    * Converts the IO into a Promise
    */
-  public async toPromise(): Promise<A> {
-    return new Promise<A>((resolve, reject) => this.fork(reject, resolve))
+  public async toPromise(env: R1): Promise<A1> {
+    return new Promise<A1>((resolve, reject) => this.fork(env, reject, resolve))
   }
 
   /**
    * Combines two IO's into one zip then on fork executes them in parallel.
    */
-  public zip<B>(b: FIO<B>): IO<OR<A, B>> {
-    return IO.to<OR<A, B>>(new Zip(this.io, b))
+  public zip<R2, A2>(b: FIO<R2, A2>): IO<R1 & R2, OR<A1, A2>> {
+    return IO.to(new Zip(this.io, b))
   }
 }

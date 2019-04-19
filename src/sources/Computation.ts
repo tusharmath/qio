@@ -14,16 +14,17 @@ enum IOStatus {
 /**
  * @ignore
  */
-export class Computation<A> implements FIO<A> {
+export class Computation<R, A> implements FIO<R, A> {
   public constructor(
     private readonly cmp: (
+      sh: IScheduler,
+      env: R,
       rej: REJ,
-      res: RES<A>,
-      sh: IScheduler
+      res: RES<A>
     ) => void | Cancel
   ) {}
 
-  public fork(sh: IScheduler, rej: REJ, res: RES<A>): Cancel {
+  public fork(sh: IScheduler, env: R, rej: REJ, res: RES<A>): Cancel {
     const cancellations = new Array<Cancel>()
     let status = IOStatus.FORKED
     const onRej: REJ = e => {
@@ -39,7 +40,7 @@ export class Computation<A> implements FIO<A> {
     cancellations.push(
       sh.asap(() => {
         try {
-          const cancel = this.cmp(onRej, onRes, sh)
+          const cancel = this.cmp(sh, env, onRej, onRes)
           if (typeof cancel === 'function') {
             cancellations.push(cancel)
           }

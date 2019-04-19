@@ -5,19 +5,21 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
+import {defaultEnv} from '../src/internals/DefaultEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('OnceCache', () => {
+  const dC = IOCollector(defaultEnv)
   ResolvingIOSpec(() => new Once(IO.of(10)))
   RejectingIOSpec(() => new Once(IO.reject(new Error('FAILED'))))
 
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      IO.from<number>((rej, res, sh) => sh.asap(() => res((count += 1))))
+      IO.from<number>((sh, env, rej, res) => sh.asap(() => res((count += 1))))
     )
 
     return {
@@ -28,7 +30,9 @@ describe('OnceCache', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<number>((rej, res, sh) => sh.delay(() => res((count += 1)), n))
+      IO.from<number>((sh, env, rej, res) =>
+        sh.delay(() => res((count += 1)), n)
+      )
     )
 
     return {
@@ -39,7 +43,7 @@ describe('OnceCache', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<never>((rej, res, sh) =>
+      IO.from<never>((sh, env, rej, res) =>
         sh.delay(() => rej(new Error('FAILED_' + (count += 1).toString())), n)
       )
     )
@@ -52,7 +56,7 @@ describe('OnceCache', () => {
 
   it('should compute only once', () => {
     const {io, isComputedOnce} = createNeverEndingOnceIO()
-    const {fork, scheduler} = IOCollector(io)
+    const {fork, scheduler} = dC(io)
 
     fork()
     fork()
@@ -63,7 +67,7 @@ describe('OnceCache', () => {
 
   it('should be resolved for each fork', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     fork()
@@ -77,7 +81,7 @@ describe('OnceCache', () => {
 
   it('should be rejected for each fork', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     fork()
@@ -94,7 +98,7 @@ describe('OnceCache', () => {
 
   it('should not reject cancelled forks', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     fork()()
@@ -108,7 +112,7 @@ describe('OnceCache', () => {
 
   it('should not resolve completed io', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     scheduler.runTo(300)
@@ -123,7 +127,7 @@ describe('OnceCache', () => {
 
   it('should not reject completed io', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     scheduler.runTo(300)
@@ -139,7 +143,7 @@ describe('OnceCache', () => {
 
   it('should resolve forks after completion', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     scheduler.runTo(300)
@@ -155,7 +159,7 @@ describe('OnceCache', () => {
 
   it('should reject forks after completion', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(io)
+    const {fork, scheduler, timeline} = dC(io)
 
     fork()
     scheduler.runTo(300)

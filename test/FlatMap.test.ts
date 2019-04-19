@@ -5,6 +5,7 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
+import {defaultEnv} from '../src/internals/DefaultEnv'
 
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
@@ -12,7 +13,7 @@ describe('flatMap', () => {
   it('should flatten the value', async () => {
     const actual = await IO.of(10)
       .chain((i: number) => IO.of(i + 1))
-      .toPromise()
+      .toPromise(defaultEnv)
     const expected = 11
     assert.equal(actual, expected)
   })

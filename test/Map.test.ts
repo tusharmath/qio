@@ -4,22 +4,24 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
+import {defaultEnv} from '../src/internals/DefaultEnv'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('map', () => {
+  const fR = ForkNRun(defaultEnv)
   it('should convert the value', async () => {
     const actual = await IO.of(10)
       .map((i: number) => i + 1)
-      .toPromise()
+      .toPromise(defaultEnv)
     const expected = 11
     assert.equal(actual, expected)
   })
   it('should capture exceptions on resolve', () => {
     const counter = Counter()
-    const {timeline} = ForkNRun(
+    const {timeline} = fR(
       counter.inc.map(() => {
         throw new Error('FAILURE')
       })

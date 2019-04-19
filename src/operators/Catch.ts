@@ -7,16 +7,22 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Catch<A, B> implements FIO<A | B> {
+export class Catch<R1, R2, A1, A2> implements FIO<R1 & R2, A1 | A2> {
   public constructor(
-    private readonly src: FIO<A>,
-    private readonly onError: (a: Error) => FIO<B>
+    private readonly src: FIO<R1, A1>,
+    private readonly onError: (a: Error) => FIO<R2, A2>
   ) {}
 
-  public fork(sh: IScheduler, rej: REJ, res: RES<A | B>): Cancel {
+  public fork(
+    sh: IScheduler,
+    env: R1 & R2,
+    rej: REJ,
+    res: RES<A1 | A2>
+  ): Cancel {
     return this.src.fork(
       sh,
-      (err: Error) => this.onError(err).fork(sh, rej, res),
+      env,
+      (err: Error) => this.onError(err).fork(sh, env, rej, res),
       res
     )
   }

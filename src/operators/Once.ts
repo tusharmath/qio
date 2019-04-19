@@ -8,7 +8,7 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Once<A> implements FIO<A> {
+export class Once<R, A> implements FIO<R, A> {
   private cancel: Cancel | undefined
   private error: Error | undefined
   private isForked = false
@@ -17,9 +17,9 @@ export class Once<A> implements FIO<A> {
   private readonly Q = new LinkedList<{rej: REJ; res: RES<A>}>()
   private result: A | undefined
 
-  public constructor(private readonly io: FIO<A>) {}
+  public constructor(private readonly io: FIO<R, A>) {}
 
-  public fork(sh: IScheduler, rej: REJ, res: RES<A>): Cancel {
+  public fork(sh: IScheduler, env: R, rej: REJ, res: RES<A>): Cancel {
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))
     }
@@ -32,7 +32,7 @@ export class Once<A> implements FIO<A> {
 
     if (!this.isForked) {
       this.isForked = true
-      this.cancel = this.io.fork(sh, this.onReject, this.onResolve)
+      this.cancel = this.io.fork(sh, env, this.onReject, this.onResolve)
     }
 
     return () => {

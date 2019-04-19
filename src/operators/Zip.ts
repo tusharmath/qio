@@ -12,10 +12,18 @@ export type OR<A, B> = A & B extends never ? never : [A, B]
 /**
  * @ignore
  */
-export class Zip<A, B> implements FIO<OR<A, B>> {
-  public constructor(private readonly a: FIO<A>, private readonly b: FIO<B>) {}
+export class Zip<R1, R2, A, B> implements FIO<R1 & R2, OR<A, B>> {
+  public constructor(
+    private readonly a: FIO<R1, A>,
+    private readonly b: FIO<R2, B>
+  ) {}
 
-  public fork(sh: IScheduler, rej: REJ, res: RES<OR<A, B>>): Cancel {
+  public fork(
+    sh: IScheduler,
+    env: R1 & R2,
+    rej: REJ,
+    res: RES<OR<A, B>>
+  ): Cancel {
     let responseA: A
     let responseB: B
     let count = 0
@@ -33,11 +41,11 @@ export class Zip<A, B> implements FIO<OR<A, B>> {
     }
 
     cancel.push(
-      this.a.fork(sh, onError(1), result => {
+      this.a.fork(sh, env, onError(1), result => {
         responseA = result
         onSuccess()
       }),
-      this.b.fork(sh, onError(0), result => {
+      this.b.fork(sh, env, onError(0), result => {
         responseB = result
         onSuccess()
       })

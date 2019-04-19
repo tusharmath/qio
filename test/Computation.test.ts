@@ -6,20 +6,23 @@ import {assert} from 'chai'
 import {scheduler} from 'ts-scheduler'
 
 import {IO} from '../'
+import {defaultEnv} from '../src/internals/DefaultEnv'
 
 import {Counter} from './internals/Counter'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
-  ResolvingIOSpec(() => IO.from((rej, res) => res(10)))
-  RejectingIOSpec(() => IO.from(rej => rej(new Error('FAILED'))))
+  const dC = IOCollector(defaultEnv)
+  ResolvingIOSpec(() => IO.from((sh, env, rej, res) => res(10)))
+  RejectingIOSpec(() =>
+    IO.from((sh, env, rej, res) => rej(new Error('FAILED')))
+  )
 
-  const sh = scheduler
   it('should defer computations', async () => {
     const noop = () => {}
     const results: string[] = []
-    const a = IO.from<void>((rej, res) => {
+    const a = IO.from<void>((sh, env, rej, res) => {
       results.push('RUN')
       res(undefined)
 
@@ -27,14 +30,14 @@ describe('Computation', () => {
     })
 
     // issue a cancelled IO
-    a.fork(sh, noop, noop)()
+    a.fork(scheduler, noop, noop)()
     assert.deepEqual(results, [])
   })
   it('should handle sync exceptions', cb => {
     IO.from(() => {
       throw new Error('Waka')
     }).fork(
-      sh,
+      scheduler,
       e => {
         assert.equal(e.message, 'Waka')
         cb()
@@ -44,14 +47,14 @@ describe('Computation', () => {
   })
   it('should not cancel a resolved io', cb => {
     let cancelled = false
-    const cancel = IO.from((rej, res) => {
+    const cancel = IO.from((sh, env, rej, res) => {
       const id = setTimeout(res, 0, 100)
 
       return () => {
         clearTimeout(id)
         cancelled = true
       }
-    }).fork(sh, cb, data => {
+    }).fork(scheduler, cb, data => {
       cancel()
       assert.equal(data, 100)
       assert.isFalse(cancelled)
@@ -60,7 +63,7 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', cb => {
     let cancelled = false
-    const cancel = IO.from((rej, res) => {
+    const cancel = IO.from((sh, env, rej, res) => {
       const id = setTimeout(rej, 0, new Error('YO!'))
 
       return () => {
@@ -68,7 +71,7 @@ describe('Computation', () => {
         cancelled = true
       }
     }).fork(
-      sh,
+      scheduler,
       err => {
         cancel()
         assert.equal(err.message, 'YO!')
@@ -81,7 +84,7 @@ describe('Computation', () => {
   it('should not cancel a cancelled IO', () => {
     const counter = Counter(1000)
     const io = counter.inc
-    const {scheduler: S, fork} = IOCollector(io)
+    const {scheduler: S, fork} = dC(io)
     S.runTo(200)
     const cancel = fork()
     S.runTo(210)

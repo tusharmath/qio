@@ -7,17 +7,17 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Chain<A, B> implements FIO<B> {
+export class Chain<R1, R2, A1, A2> implements FIO<R1 & R2, A2> {
   public constructor(
-    private readonly src: FIO<A>,
-    private readonly ab: (a: A) => FIO<B>
+    private readonly src: FIO<R1, A1>,
+    private readonly ab: (a: A1) => FIO<R2, A2>
   ) {}
 
-  public fork(sh: IScheduler, rej: REJ, res: RES<B>): Cancel {
+  public fork(sh: IScheduler, env: R1 & R2, rej: REJ, res: RES<A2>): Cancel {
     const cancellations = new Array<Cancel>()
     cancellations.push(
-      this.src.fork(sh, rej, a => {
-        cancellations.push(this.ab(a).fork(sh, rej, res))
+      this.src.fork(sh, env, rej, a => {
+        cancellations.push(this.ab(a).fork(sh, env, rej, res))
       })
     )
 

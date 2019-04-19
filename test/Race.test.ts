@@ -3,19 +3,20 @@
  */
 
 import {assert} from 'chai'
-import {scheduler as sh} from 'ts-scheduler'
+import {scheduler} from 'ts-scheduler'
 
 import {IO} from '../'
+import {defaultEnv} from '../src/internals/DefaultEnv'
 
 describe('race', () => {
   it('should resolve with fastest io', async () => {
-    const a = IO.from((rej, res) => {
+    const a = IO.from((sh, env, rej, res) => {
       res('A')
 
       return () => {}
     })
     const b = IO.never()
-    const actual = await a.race(b).toPromise()
+    const actual = await a.race(b).toPromise(defaultEnv)
     const expected = 'A'
     assert.equal(actual, expected)
   })
@@ -24,7 +25,7 @@ describe('race', () => {
     const a = IO.of('A')
     const b = IO.reject(error)
     a.race(b).fork(
-      sh,
+      scheduler,
       err => assert.fail('Should not throw: ' + err.message),
       value => assert.equal(value, 'A')
     )
@@ -34,7 +35,7 @@ describe('race', () => {
     const a = IO.reject(error)
     const b = IO.of('B')
     a.race(b).fork(
-      sh,
+      scheduler,
       err => assert.equal(error, err),
       value => assert.fail('Should not resolve: ' + value)
     )
@@ -43,7 +44,7 @@ describe('race', () => {
     let cancelled = 0
     const a = IO.from<never>(() => () => (cancelled = cancelled + 1))
     const b = IO.of(100)
-    const result = await a.race(b).toPromise()
+    const result = await a.race(b).toPromise(defaultEnv)
     assert.equal(result, 100)
     assert.equal(cancelled, 1)
   })
@@ -53,7 +54,7 @@ describe('race', () => {
     const b = IO.reject(new Error('YO'))
     const message = await a
       .race(b)
-      .toPromise()
+      .toPromise(defaultEnv)
       .catch((err: Error) => err.message)
     assert.equal(message, 'YO')
     assert.equal(cancelled, 1)

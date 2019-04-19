@@ -8,7 +8,7 @@ import {FIO} from '../../src/internals/FIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A>(io: FIO<A>) => {
+export const IOCollector = <R>(env: R) => <A>(io: FIO<R, A>) => {
   /**
    * Create an internal TestScheduler
    */
@@ -22,7 +22,7 @@ export const IOCollector = <A>(io: FIO<A>) => {
   /**
    * Forks the IO operation
    */
-  const fork = () => io.fork(scheduler, timeline.reject, timeline.resolve)
+  const fork = () => io.fork(scheduler, env, timeline.reject, timeline.resolve)
 
   return {
     fork,

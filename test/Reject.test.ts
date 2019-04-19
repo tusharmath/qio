@@ -6,6 +6,7 @@ import {assert} from 'chai'
 import {scheduler as sh} from 'ts-scheduler'
 
 import {IO} from '../'
+import {defaultEnv} from '../src/internals/DefaultEnv'
 
 import {RejectingIOSpec} from './internals/IOSpecification'
 
@@ -13,7 +14,7 @@ describe('reject', () => {
   it('creates a rejected io', async () => {
     const error = new Error('Bananas')
     const actual = await IO.reject(error)
-      .toPromise()
+      .toPromise(defaultEnv)
       .catch((err: Error) => 'ERR:' + err.message)
     const expected = 'ERR:' + error.message
     assert.strictEqual(actual, expected)

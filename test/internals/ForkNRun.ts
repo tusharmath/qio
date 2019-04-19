@@ -10,10 +10,14 @@ import {IOCollector} from './IOCollector'
  * Helpful wrapper over IOCollector
  * Forks the IO and runs everything in the queue.
  */
-export const ForkNRun = <A>(io: FIO<A>) => {
-  const {fork, timeline, scheduler} = IOCollector(io)
-  fork()
-  scheduler.run()
+export const ForkNRun = <R>(env: R) => {
+  const collector = IOCollector(env)
 
-  return {timeline}
+  return <A>(io: FIO<R, A>) => {
+    const {fork, timeline, scheduler} = collector(io)
+    fork()
+    scheduler.run()
+
+    return {timeline}
+  }
 }
