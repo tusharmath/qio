@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {scheduler} from 'ts-scheduler'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/internals/DefaultEnv'
+import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {Counter} from './internals/Counter'
 import {IOCollector} from './internals/IOCollector'
@@ -30,14 +30,14 @@ describe('Computation', () => {
     })
 
     // Issue a cancelled IO
-    a.fork(scheduler, noop, noop)()
+    a.fork({scheduler}, noop, noop)()
     assert.deepEqual(results, [])
   })
   it('should handle sync exceptions', cb => {
     IO.from(() => {
       throw new Error('Waka')
     }).fork(
-      scheduler,
+      {scheduler},
       e => {
         assert.equal(e.message, 'Waka')
         cb()
@@ -54,7 +54,7 @@ describe('Computation', () => {
         clearTimeout(id)
         cancelled = true
       }
-    }).fork(scheduler, cb, data => {
+    }).fork({scheduler}, cb, data => {
       cancel()
       assert.equal(data, 100)
       assert.isFalse(cancelled)
@@ -71,7 +71,7 @@ describe('Computation', () => {
         cancelled = true
       }
     }).fork(
-      scheduler,
+      {scheduler},
       err => {
         cancel()
         assert.equal(err.message, 'YO!')

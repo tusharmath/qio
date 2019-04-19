@@ -4,7 +4,7 @@
 
 import {Cancel, IScheduler, scheduler} from 'ts-scheduler'
 
-import {defaultEnv, DefaultEnv} from '../internals/DefaultEnv'
+import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
@@ -67,13 +67,6 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   }
 
   /**
-   * Returns the default env in which an IO would run
-   */
-  public static defaultEnv(): DefaultEnv {
-    return defaultEnv
-  }
-
-  /**
    *
    * Takes in an effect-full function zip returns a pure function,
    * that takes in the same arguments zip wraps the result into an [[IO]]
@@ -81,10 +74,10 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static encase<A, G extends unknown[]>(
     fn: (...t: G) => A
-  ): (...t: G) => IO<DefaultEnv, A> {
+  ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<DefaultEnv, A>((sh, env, rej, res) => {
+        new Computation<SchedulerEnv, A>((sh, env, rej, res) => {
           res(fn(...t))
         })
       )
@@ -98,10 +91,10 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static encaseP<A, G extends unknown[]>(
     fn: (...t: G) => Promise<A>
-  ): (...t: G) => IO<DefaultEnv, A> {
+  ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<DefaultEnv, A>((sh, env, rej, res) => {
+        new Computation<SchedulerEnv, A>((sh, env, rej, res) => {
           void fn(...t)
             .then(res)
             .catch(rej)
@@ -124,46 +117,46 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   public static from<A>(
     cmp: (
       sh: IScheduler,
-      env: DefaultEnv,
+      env: SchedulerEnv,
       rej: REJ,
       res: RES<A>
     ) => Cancel | void
-  ): IO<DefaultEnv, A> {
+  ): IO<SchedulerEnv, A> {
     return IO.to(new Computation(cmp))
   }
 
   /**
    * Creates an [[IO]] that never completes.
    */
-  public static never(): IO<DefaultEnv, never> {
+  public static never(): IO<SchedulerEnv, never> {
     return IO.to(new Computation(RETURN_NOOP))
   }
 
   /**
    * Creates an [[IO]] that always resolves with the same value.
    */
-  public static of<A>(value: A): IO<DefaultEnv, A> {
+  public static of<A>(value: A): IO<SchedulerEnv, A> {
     return IO.to(new Computation((sh, env, rej, res) => res(value)))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
-  public static reject(error: Error): IO<DefaultEnv, never> {
+  public static reject(error: Error): IO<SchedulerEnv, never> {
     return IO.to(new Computation((sh, env, rej) => rej(error)))
   }
 
   /**
    * Creates an IO that resolves with the given value after a certain duration of time.
    */
-  public static timeout<A>(value: A, duration: number): IO<DefaultEnv, A> {
+  public static timeout<A>(value: A, duration: number): IO<SchedulerEnv, A> {
     return IO.to(new Timeout(duration, value))
   }
 
   /**
    * A function that wraps a synchronous side-effect causing function into an IO
    */
-  public static try<A>(fn: () => A): IO<DefaultEnv, A> {
+  public static try<A>(fn: () => A): IO<SchedulerEnv, A> {
     return IO.to(
       new Computation((sh, env, rej, res) => {
         res(fn())
@@ -212,7 +205,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   /**
    * Creates a new IO<IO<A>> that executes only once
    */
-  public once(): IO<DefaultEnv, IO<R1, A1>> {
+  public once(): IO<SchedulerEnv, IO<R1, A1>> {
     return IO.of(IO.to(new Once(this)))
   }
 
@@ -220,7 +213,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Eliminates the dependency on the IOs original environment.
    * Creates an IO that can run in [DefaultEnv].
    */
-  public provide(env: R1): IO<DefaultEnv, A1> {
+  public provide(env: R1): IO<SchedulerEnv, A1> {
     return IO.to(
       new Computation((sh, env1, rej, res) => this.io.fork(sh, env, rej, res))
     )

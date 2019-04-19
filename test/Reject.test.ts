@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {scheduler as sh} from 'ts-scheduler'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/internals/DefaultEnv'
+import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {RejectingIOSpec} from './internals/IOSpecification'
 
@@ -22,7 +22,7 @@ describe('reject', () => {
 
   it('should abort rejected io', cb => {
     const error = new Error('Bananas')
-    IO.reject(error).fork(sh, cb, cb)()
+    IO.reject(error).fork({scheduler: sh}, cb, cb)()
     cb()
   })
 

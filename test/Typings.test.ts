@@ -3,11 +3,11 @@
  */
 
 import {IO} from '../'
-import {DefaultEnv} from '../src/internals/DefaultEnv'
+import {SchedulerEnv} from '../src/envs/SchedulerEnv'
 
 import {$} from './internals/ProxyFunction'
 
-type DIO<A> = IO<DefaultEnv, A>
+type DIO<A> = IO<SchedulerEnv, A>
 describe('typing', () => {
   describe('zip', () => {
     it('should return DIO<never> if one of them is of type DIO<never>', () => {

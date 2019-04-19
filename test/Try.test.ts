@@ -4,7 +4,7 @@
 import * as assert from 'assert'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/internals/DefaultEnv'
+import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'

@@ -4,7 +4,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {defaultEnv, DefaultEnv} from '../../src/internals/DefaultEnv'
+import {defaultEnv, SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
 import {Chain} from '../../src/operators/Chain'
 import {Computation} from '../../src/sources/Computation'
@@ -12,7 +12,7 @@ import {Computation} from '../../src/sources/Computation'
 /**
  * Specifications for an IO that resolves
  */
-export const ResolvingIOSpec = <T>(fn: () => FIO<DefaultEnv, T>) => {
+export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
   context('ResolvingIOSpec', () => {
     it('should resolve in the end', () => {
       const S = testScheduler()
@@ -116,7 +116,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<DefaultEnv, T>) => {
       const io = new Chain(
         fn(),
         () =>
-          new Computation<DefaultEnv, never>(() => () => (isCancelled = true))
+          new Computation<SchedulerEnv, never>(() => () => (isCancelled = true))
       )
       const cancel = io.fork(
         S,
@@ -138,7 +138,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<DefaultEnv, T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const RejectingIOSpec = <T>(fn: () => FIO<DefaultEnv, T>) => {
+export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
       const S = testScheduler()

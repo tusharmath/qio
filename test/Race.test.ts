@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {scheduler} from 'ts-scheduler'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/internals/DefaultEnv'
+import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 describe('race', () => {
   it('should resolve with fastest io', async () => {
@@ -25,7 +25,7 @@ describe('race', () => {
     const a = IO.of('A')
     const b = IO.reject(error)
     a.race(b).fork(
-      scheduler,
+      {scheduler},
       err => assert.fail('Should not throw: ' + err.message),
       value => assert.equal(value, 'A')
     )
@@ -35,7 +35,7 @@ describe('race', () => {
     const a = IO.reject(error)
     const b = IO.of('B')
     a.race(b).fork(
-      scheduler,
+      {scheduler},
       err => assert.equal(error, err),
       value => assert.fail('Should not resolve: ' + value)
     )

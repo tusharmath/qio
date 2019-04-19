@@ -5,7 +5,7 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/internals/DefaultEnv'
+import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 

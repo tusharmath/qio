@@ -4,7 +4,7 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/internals/DefaultEnv'
+import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 describe('encaseP', () => {
   it('should resolve via promises', async () => {

@@ -3,8 +3,10 @@
  */
 
 import {assert} from 'chai'
+import {testScheduler} from 'ts-scheduler/test'
 
-import {defaultEnv, DefaultEnv} from '../src/internals/DefaultEnv'
+import {AnyEnv} from '../src/envs/AnyEnv'
+import {defaultEnv, SchedulerEnv} from '../src/envs/SchedulerEnv'
 import {IO} from '../src/main/IO'
 
 import {Counter} from './internals/Counter'
@@ -21,10 +23,10 @@ describe('IO', () => {
     context('typings', () => {
       it('should return a an IO< IO< A > >', () => {
         interface TestENV {
-          name: IO<DefaultEnv, string>
+          name: IO<SchedulerEnv, string>
         }
         $(
-          (_: IO<TestENV, number>): IO<DefaultEnv, IO<TestENV, number>> =>
+          (_: IO<TestENV, number>): IO<SchedulerEnv, IO<TestENV, number>> =>
             _.once()
         )
       })
@@ -46,8 +48,10 @@ describe('IO', () => {
     })
   })
   describe('provide()', () => {
-    ResolvingIOSpec(() => IO.of(10).provide({}))
-    RejectingIOSpec(() => IO.reject(new Error('FAILED')).provide({}))
+    ResolvingIOSpec(() => IO.of(10).provide({scheduler: testScheduler()}))
+    RejectingIOSpec(() =>
+      IO.reject(new Error('FAILED')).provide({scheduler: testScheduler()})
+    )
 
     it.skip('should pass on the env', () => {
       throw new TypeError('Not implemented')
@@ -95,7 +99,7 @@ describe('IO', () => {
   describe('accessM()', () => {
     it('should create an IO[R, A] ', () => {
       interface Console {
-        print(str: string): IO<DefaultEnv, void>
+        print(str: string): IO<AnyEnv, void>
       }
 
       interface HasConsole {
