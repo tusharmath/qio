@@ -4,18 +4,18 @@
 
 import {Cancel, IScheduler, scheduler} from 'ts-scheduler'
 
-import {defaultEnv, DefaultEnv} from './internals/DefaultEnv'
-import {FIO} from './internals/FIO'
-import {REJ} from './internals/REJ'
-import {RES} from './internals/RES'
-import {Catch} from './operators/Catch'
-import {Chain} from './operators/Chain'
-import {Map} from './operators/Map'
-import {Once} from './operators/Once'
-import {Race} from './operators/Race'
-import {OR, Zip} from './operators/Zip'
-import {Computation} from './sources/Computation'
-import {Timeout} from './sources/Timeout'
+import {defaultEnv, DefaultEnv} from '../internals/DefaultEnv'
+import {FIO} from '../internals/FIO'
+import {REJ} from '../internals/REJ'
+import {RES} from '../internals/RES'
+import {Catch} from '../operators/Catch'
+import {Chain} from '../operators/Chain'
+import {Map} from '../operators/Map'
+import {Once} from '../operators/Once'
+import {Race} from '../operators/Race'
+import {OR, Zip} from '../operators/Zip'
+import {Computation} from '../sources/Computation'
+import {Timeout} from '../sources/Timeout'
 
 const NOOP = () => {}
 const RETURN_NOOP = () => NOOP

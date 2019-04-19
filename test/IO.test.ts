@@ -5,7 +5,7 @@
 import {assert} from 'chai'
 
 import {defaultEnv, DefaultEnv} from '../src/internals/DefaultEnv'
-import {IO} from '../src/IO'
+import {IO} from '../src/main/IO'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'
