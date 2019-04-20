@@ -53,8 +53,13 @@ describe('IO', () => {
       IO.reject(new Error('FAILED')).provide({scheduler: testScheduler()})
     )
 
-    it.skip('should pass on the env', () => {
-      throw new TypeError('Not implemented')
+    it('should pass on the env', () => {
+      const env = {scheduler: testScheduler(), test: {a: 'a', b: 'b'}}
+      const {timeline} = ForkNRun({})(IO.of(10).provide(env))
+      const actual = timeline.list()
+      const expected = [['RESOLVE', 1, 10]]
+
+      assert.deepStrictEqual(actual, expected)
     })
   })
   describe('access()', () => {
