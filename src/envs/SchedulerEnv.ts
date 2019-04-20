@@ -13,6 +13,7 @@ export interface SchedulerEnv {
 
 /**
  * @ignore
+ * @deprecated
  */
 export const defaultEnv: SchedulerEnv = {
   scheduler

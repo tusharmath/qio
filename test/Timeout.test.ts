@@ -2,6 +2,7 @@
  * Created by tushar on 2019-03-22
  */
 import * as assert from 'assert'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -11,7 +12,7 @@ import {ResolvingIOSpec} from './internals/IOSpecification'
 import {TimeSlice} from './internals/Timeline'
 
 describe('Timeout', () => {
-  const dC = IOCollector(defaultEnv)
+  const dC = IOCollector({scheduler: testScheduler()})
   ResolvingIOSpec(() => IO.timeout('DONE', 1000))
   it('should resolve at the provided time', () => {
     const io = IO.timeout('Bananas', 1000)

@@ -3,6 +3,7 @@
  */
 
 import {assert} from 'chai'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -20,7 +21,9 @@ describe('encase', () => {
   it('should resolve to the return value of the function supplied', async () => {
     const fetch = (...t: string[]) => t.join(',')
     const fetchF = IO.encase(fetch)
-    const actual = await fetchF('a', 'b', 'c').toPromise(defaultEnv)
+    const actual = await fetchF('a', 'b', 'c').toPromise({
+      scheduler: testScheduler()
+    })
 
     const expected = 'a,b,c'
     assert.equal(actual, expected)
@@ -31,7 +34,7 @@ describe('encase', () => {
     })
     const actual = await errorF()
       .catch(() => IO.of('caught error'))
-      .toPromise(defaultEnv)
+      .toPromise({scheduler: testScheduler()})
     const expected = 'caught error'
     assert.equal(actual, expected)
   })

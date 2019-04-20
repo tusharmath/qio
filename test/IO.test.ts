@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {AnyEnv} from '../src/envs/AnyEnv'
-import {defaultEnv, SchedulerEnv} from '../src/envs/SchedulerEnv'
+import {SchedulerEnv} from '../src/envs/SchedulerEnv'
 import {IO} from '../src/main/IO'
 
 import {Counter} from './internals/Counter'
@@ -15,8 +15,8 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 import {$} from './internals/ProxyFunction'
 
-const fR = ForkNRun(defaultEnv)
-const dC = IOCollector(defaultEnv)
+const fR = ForkNRun({scheduler: testScheduler()})
+const dC = IOCollector({scheduler: testScheduler()})
 
 describe('IO', () => {
   describe('once()', () => {

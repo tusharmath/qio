@@ -2,6 +2,7 @@
  * Created by tushar on 2019-03-11
  */
 import {assert} from 'chai'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -11,11 +12,11 @@ import {ForkNRun} from './internals/ForkNRun'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('map', () => {
-  const fR = ForkNRun(defaultEnv)
+  const fR = ForkNRun({scheduler: testScheduler()})
   it('should convert the value', async () => {
     const actual = await IO.of(10)
       .map((i: number) => i + 1)
-      .toPromise(defaultEnv)
+      .toPromise({scheduler: testScheduler()})
     const expected = 11
     assert.equal(actual, expected)
   })

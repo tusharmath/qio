@@ -4,16 +4,16 @@
 
 import {assert} from 'chai'
 import {scheduler} from 'ts-scheduler'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {Counter} from './internals/Counter'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
-  const dC = IOCollector(defaultEnv)
+  const dC = IOCollector({scheduler: testScheduler()})
   ResolvingIOSpec(() => IO.from((env, rej, res) => res(10)))
   RejectingIOSpec(() => IO.from((env, rej, res) => rej(new Error('FAILED'))))
 

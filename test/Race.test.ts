@@ -4,6 +4,7 @@
 
 import {assert} from 'chai'
 import {scheduler} from 'ts-scheduler'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -16,7 +17,7 @@ describe('race', () => {
       return () => {}
     })
     const b = IO.never()
-    const actual = await a.race(b).toPromise(defaultEnv)
+    const actual = await a.race(b).toPromise({scheduler: testScheduler()})
     const expected = 'A'
     assert.equal(actual, expected)
   })
@@ -44,7 +45,7 @@ describe('race', () => {
     let cancelled = 0
     const a = IO.from<never>(() => () => (cancelled = cancelled + 1))
     const b = IO.of(100)
-    const result = await a.race(b).toPromise(defaultEnv)
+    const result = await a.race(b).toPromise({scheduler: testScheduler()})
     assert.equal(result, 100)
     assert.equal(cancelled, 1)
   })
@@ -54,7 +55,7 @@ describe('race', () => {
     const b = IO.reject(new Error('YO'))
     const message = await a
       .race(b)
-      .toPromise(defaultEnv)
+      .toPromise({scheduler: testScheduler()})
       .catch((err: Error) => err.message)
     assert.equal(message, 'YO')
     assert.equal(cancelled, 1)

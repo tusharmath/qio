@@ -3,6 +3,7 @@
  */
 
 import {assert} from 'chai'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -12,7 +13,7 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('OnceCache', () => {
-  const dC = IOCollector(defaultEnv)
+  const dC = IOCollector({scheduler: testScheduler()})
   ResolvingIOSpec(() => new Once(IO.of(10)))
   RejectingIOSpec(() => new Once(IO.reject(new Error('FAILED'))))
 

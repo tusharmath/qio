@@ -3,6 +3,7 @@
  */
 
 import {assert} from 'chai'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -13,7 +14,7 @@ describe('flatMap', () => {
   it('should flatten the value', async () => {
     const actual = await IO.of(10)
       .chain((i: number) => IO.of(i + 1))
-      .toPromise(defaultEnv)
+      .toPromise({scheduler: testScheduler()})
     const expected = 11
     assert.equal(actual, expected)
   })

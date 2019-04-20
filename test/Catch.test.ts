@@ -2,6 +2,7 @@
  * Created by tushar on 2019-03-11
  */
 import {assert} from 'chai'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {defaultEnv} from '../src/envs/SchedulerEnv'
@@ -26,14 +27,14 @@ describe('catch', () => {
       throw error
     })()
       .catch((err: Error) => IO.of('ERR:' + err.message))
-      .toPromise(defaultEnv)
+      .toPromise({scheduler: testScheduler()})
     const expected = 'ERR:' + error.message
     assert.strictEqual(actual, expected)
   })
   it('should be forward results', async () => {
     const actual = await IO.of('ok!')
       .catch(err => IO.of('ERR:' + err.message))
-      .toPromise(defaultEnv)
+      .toPromise({scheduler: testScheduler()})
     const expected = 'ok!'
     assert.strictEqual(actual, expected)
   })
