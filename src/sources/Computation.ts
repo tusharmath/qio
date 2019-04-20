@@ -17,10 +17,10 @@ enum IOStatus {
 export class Computation<R, A> implements FIO<R, A> {
   public constructor(
     private readonly cmp: (
-      sh: IScheduler,
       env: R,
       rej: REJ,
-      res: RES<A>
+      res: RES<A>,
+      sh: IScheduler
     ) => void | Cancel
   ) {}
 
@@ -40,7 +40,7 @@ export class Computation<R, A> implements FIO<R, A> {
     cancellations.push(
       sh.asap(() => {
         try {
-          const cancel = this.cmp(sh, env, onRej, onRes)
+          const cancel = this.cmp(env, onRej, onRes, sh)
           if (typeof cancel === 'function') {
             cancellations.push(cancel)
           }

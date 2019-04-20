@@ -54,14 +54,20 @@ type FORK<R, A> = FORK2<R, A> | FORK1<R, A>
  *
  */
 export class IO<R1, A1> implements FIO<R1, A1> {
+  /**
+   * Needs access to an environment to create an IO
+   */
   public static access<R, A>(fn: (env: R) => A): IO<R, A> {
     return IO.to(
-      new Computation((sh, env1, rej, res) => {
+      new Computation((env1, rej, res) => {
         res(fn(env1))
       })
     )
   }
 
+  /**
+   * Effectfully accesses the environment of the effect.
+   */
   public static accessM<R, A>(fn: (env: R) => IO<R, A>): IO<R, A> {
     return IO.environment<R>().chain(fn)
   }
@@ -77,7 +83,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<SchedulerEnv, A>((sh, env, rej, res) => {
+        new Computation<SchedulerEnv, A>((env, rej, res) => {
           res(fn(...t))
         })
       )
@@ -94,7 +100,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<SchedulerEnv, A>((sh, env, rej, res) => {
+        new Computation<SchedulerEnv, A>((env, rej, res) => {
           void fn(...t)
             .then(res)
             .catch(rej)
@@ -106,7 +112,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an IO that resolves with the provided env
    */
   public static environment<R1 = unknown>(): IO<R1, R1> {
-    return IO.to(new Computation((sh, env1, rej, res) => res(env1)))
+    return IO.to(new Computation((env1, rej, res) => res(env1)))
   }
 
   /**
@@ -116,10 +122,10 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static from<A>(
     cmp: (
-      sh: IScheduler,
       env: SchedulerEnv,
       rej: REJ,
-      res: RES<A>
+      res: RES<A>,
+      sh: IScheduler
     ) => Cancel | void
   ): IO<SchedulerEnv, A> {
     return IO.to(new Computation(cmp))
@@ -136,14 +142,14 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an [[IO]] that always resolves with the same value.
    */
   public static of<A>(value: A): IO<SchedulerEnv, A> {
-    return IO.to(new Computation((sh, env, rej, res) => res(value)))
+    return IO.to(new Computation((env, rej, res) => res(value)))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
   public static reject(error: Error): IO<SchedulerEnv, never> {
-    return IO.to(new Computation((sh, env, rej) => rej(error)))
+    return IO.to(new Computation((env, rej) => rej(error)))
   }
 
   /**
@@ -158,7 +164,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static try<A>(fn: () => A): IO<SchedulerEnv, A> {
     return IO.to(
-      new Computation((sh, env, rej, res) => {
+      new Computation((env, rej, res) => {
         res(fn())
       })
     )
@@ -215,7 +221,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public provide(env: R1): IO<SchedulerEnv, A1> {
     return IO.to(
-      new Computation((sh, env1, rej, res) => this.io.fork(sh, env, rej, res))
+      new Computation((env1, rej, res, sh) => this.io.fork(sh, env, rej, res))
     )
   }
 

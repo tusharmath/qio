@@ -14,15 +14,13 @@ import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
   const dC = IOCollector(defaultEnv)
-  ResolvingIOSpec(() => IO.from((sh, env, rej, res) => res(10)))
-  RejectingIOSpec(() =>
-    IO.from((sh, env, rej, res) => rej(new Error('FAILED')))
-  )
+  ResolvingIOSpec(() => IO.from((env, rej, res) => res(10)))
+  RejectingIOSpec(() => IO.from((env, rej, res) => rej(new Error('FAILED'))))
 
   it('should defer computations', async () => {
     const noop = () => {}
     const results: string[] = []
-    const a = IO.from<void>((sh, env, rej, res) => {
+    const a = IO.from<void>((env, rej, res) => {
       results.push('RUN')
       res(undefined)
 
@@ -47,7 +45,7 @@ describe('Computation', () => {
   })
   it('should not cancel a resolved io', cb => {
     let cancelled = false
-    const cancel = IO.from((sh, env, rej, res) => {
+    const cancel = IO.from((env, rej, res) => {
       const id = setTimeout(res, 0, 100)
 
       return () => {
@@ -63,7 +61,7 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', cb => {
     let cancelled = false
-    const cancel = IO.from((sh, env, rej, res) => {
+    const cancel = IO.from((env, rej, res) => {
       const id = setTimeout(rej, 0, new Error('YO!'))
 
       return () => {

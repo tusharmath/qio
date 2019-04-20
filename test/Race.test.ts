@@ -10,7 +10,7 @@ import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 describe('race', () => {
   it('should resolve with fastest io', async () => {
-    const a = IO.from((sh, env, rej, res) => {
+    const a = IO.from((env, rej, res) => {
       res('A')
 
       return () => {}

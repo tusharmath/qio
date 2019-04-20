@@ -43,7 +43,7 @@ describe('zip', () => {
   it('should cancel the second io if one of them is rejected (TEST_SCHEDULER)', async () => {
     let cancelled = 0
     const a = IO.from<never>(() => () => (cancelled = cancelled + 1))
-    const b = IO.from((sh, env, rej, res) =>
+    const b = IO.from((env, rej, res, sh) =>
       sh.delay(() => rej(new Error('Save Me!')), 100)
     )
     const {scheduler, fork} = dC(a.zip(b))

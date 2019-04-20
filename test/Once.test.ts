@@ -19,7 +19,7 @@ describe('OnceCache', () => {
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      IO.from<number>((sh, env, rej, res) => sh.asap(() => res((count += 1))))
+      IO.from<number>((env, rej, res, sh) => sh.asap(() => res((count += 1))))
     )
 
     return {
@@ -30,7 +30,7 @@ describe('OnceCache', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<number>((sh, env, rej, res) =>
+      IO.from<number>((env, rej, res, sh) =>
         sh.delay(() => res((count += 1)), n)
       )
     )
@@ -43,7 +43,7 @@ describe('OnceCache', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<never>((sh, env, rej, res) =>
+      IO.from<never>((env, rej, res, sh) =>
         sh.delay(() => rej(new Error('FAILED_' + (count += 1).toString())), n)
       )
     )

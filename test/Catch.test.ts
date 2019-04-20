@@ -10,12 +10,12 @@ import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
-    IO.from((sh, env, rej, res) => rej(new Error('FAILED'))).catch(e =>
+    IO.from((env, rej, res) => rej(new Error('FAILED'))).catch(e =>
       IO.of(e.message)
     )
   )
   RejectingIOSpec(() =>
-    IO.from((sh, env, rej, res) => rej(new Error('FAILED'))).catch(e =>
+    IO.from((env, rej, res) => rej(new Error('FAILED'))).catch(e =>
       IO.reject(e)
     )
   )
