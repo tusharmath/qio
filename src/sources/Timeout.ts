@@ -17,10 +17,10 @@ export class Timeout<A> implements FIO<SchedulerEnv, A> {
   ) {}
 
   public fork(
-    sh: IScheduler,
     env: SchedulerEnv,
     rej: REJ,
-    res: RES<A>
+    res: RES<A>,
+    sh: IScheduler
   ): Cancel {
     return sh.delay(() => {
       try {

@@ -11,11 +11,11 @@ import {RES} from './RES'
 export interface FIO<R, A> {
   /**
    * Impure function that executes the provided IO.
-   * @param sh  - IScheduler
+   * @param env - Execution env needed to run the IO
    * @param rej - Error Handler
    * @param res - Success Handler
-   * @param env - Execution env needed to run the IO
+   * @param sh  - IScheduler
    * @return Cancel
    */
-  fork(sh: IScheduler, env: R, rej: REJ, res: RES<A>): Cancel
+  fork(env: R, rej: REJ, res: RES<A>, sh: IScheduler): Cancel
 }

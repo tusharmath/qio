@@ -19,7 +19,7 @@ export class Once<R, A> implements FIO<R, A> {
 
   public constructor(private readonly io: FIO<R, A>) {}
 
-  public fork(sh: IScheduler, env: R, rej: REJ, res: RES<A>): Cancel {
+  public fork(env: R, rej: REJ, res: RES<A>, sh: IScheduler): Cancel {
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))
     }
@@ -32,7 +32,7 @@ export class Once<R, A> implements FIO<R, A> {
 
     if (!this.isForked) {
       this.isForked = true
-      this.cancel = this.io.fork(sh, env, this.onReject, this.onResolve)
+      this.cancel = this.io.fork(env, this.onReject, this.onResolve, sh)
     }
 
     return () => {

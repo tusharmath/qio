@@ -24,7 +24,7 @@ export class Computation<R, A> implements FIO<R, A> {
     ) => void | Cancel
   ) {}
 
-  public fork(sh: IScheduler, env: R, rej: REJ, res: RES<A>): Cancel {
+  public fork(env: R, rej: REJ, res: RES<A>, sh: IScheduler): Cancel {
     const cancellations = new Array<Cancel>()
     let status = IOStatus.FORKED
     const onRej: REJ = e => {

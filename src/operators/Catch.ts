@@ -14,16 +14,16 @@ export class Catch<R1, R2, A1, A2> implements FIO<R1 & R2, A1 | A2> {
   ) {}
 
   public fork(
-    sh: IScheduler,
     env: R1 & R2,
     rej: REJ,
-    res: RES<A1 | A2>
+    res: RES<A1 | A2>,
+    sh: IScheduler
   ): Cancel {
     return this.src.fork(
-      sh,
       env,
-      (err: Error) => this.onError(err).fork(sh, env, rej, res),
-      res
+      (err: Error) => this.onError(err).fork(env, rej, res, sh),
+      res,
+      sh
     )
   }
 }

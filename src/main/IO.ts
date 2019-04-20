@@ -19,9 +19,6 @@ import {Timeout} from '../sources/Timeout'
 
 const NOOP = () => {}
 const RETURN_NOOP = () => NOOP
-type FORK1<R, A> = [R, REJ, RES<A>]
-type FORK2<R, A> = [IScheduler, R, REJ, RES<A>]
-type FORK<R, A> = FORK2<R, A> | FORK1<R, A>
 
 /**
  * Base class for fearless IO.
@@ -66,7 +63,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   }
 
   /**
-   * Effectfully accesses the environment of the effect.
+   * Effect-fully accesses the environment of the effect.
    */
   public static accessM<R, A>(fn: (env: R) => IO<R, A>): IO<R, A> {
     return IO.environment<R>().chain(fn)
@@ -193,12 +190,13 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   /**
    * Actually executes the IO
    */
-  public fork(env: R1, rej: REJ, res: RES<A1>): Cancel
-  public fork(sh: IScheduler, env: R1, rej: REJ, res: RES<A1>): Cancel
-  public fork(...t: FORK<R1, A1>): Cancel {
-    return t.length === 4
-      ? this.io.fork(t[0], t[1], t[2], t[3])
-      : this.io.fork(scheduler, t[0], t[1], t[2])
+  public fork(
+    env: R1,
+    rej: REJ,
+    res: RES<A1>,
+    sh: IScheduler = scheduler
+  ): Cancel {
+    return this.io.fork(env, rej, res, sh)
   }
 
   /**
@@ -221,7 +219,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public provide(env: R1): IO<SchedulerEnv, A1> {
     return IO.to(
-      new Computation((env1, rej, res, sh) => this.io.fork(sh, env, rej, res))
+      new Computation((env1, rej, res, sh) => this.io.fork(env, rej, res, sh))
     )
   }
 

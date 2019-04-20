@@ -22,7 +22,7 @@ export const IOCollector = <R>(env: R) => <A>(io: FIO<R, A>) => {
   /**
    * Forks the IO operation
    */
-  const fork = () => io.fork(scheduler, env, timeline.reject, timeline.resolve)
+  const fork = () => io.fork(env, timeline.reject, timeline.resolve, scheduler)
 
   return {
     fork,

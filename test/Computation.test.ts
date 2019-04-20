@@ -33,11 +33,11 @@ describe('Computation', () => {
   })
   it('should handle sync exceptions', cb => {
     IO.from(() => {
-      throw new Error('Waka')
+      throw new Error('APPLE')
     }).fork(
       {scheduler},
       e => {
-        assert.equal(e.message, 'Waka')
+        assert.equal(e.message, 'APPLE')
         cb()
       },
       () => {}

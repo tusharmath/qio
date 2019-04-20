@@ -7,21 +7,26 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Race<R1, R2, A, B> implements FIO<R1 & R2, A | B> {
+export class Race<R1, R2, A1, A2> implements FIO<R1 & R2, A1 | A2> {
   public constructor(
-    private readonly a: FIO<R1, A>,
-    private readonly b: FIO<R2, B>
+    private readonly a: FIO<R1, A1>,
+    private readonly b: FIO<R2, A2>
   ) {}
 
-  public fork(sh: IScheduler, env: R1 & R2, rej: REJ, res: RES<A | B>): Cancel {
+  public fork(
+    env: R1 & R2,
+    rej: REJ,
+    res: RES<A1 | A2>,
+    sh: IScheduler
+  ): Cancel {
     const cancel = new Array<Cancel>()
     const onResponse = <T>(cancelID: number, cb: RES<T>) => (t: T) => {
       cancel[cancelID]()
       cb(t)
     }
     cancel.push(
-      this.a.fork(sh, env, onResponse(1, rej), onResponse(1, res)),
-      this.b.fork(sh, env, onResponse(0, rej), onResponse(0, res))
+      this.a.fork(env, onResponse(1, rej), onResponse(1, res), sh),
+      this.b.fork(env, onResponse(0, rej), onResponse(0, res), sh)
     )
 
     return () => cancel.forEach(i => i())
