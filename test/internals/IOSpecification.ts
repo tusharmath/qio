@@ -4,7 +4,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {defaultEnv, SchedulerEnv} from '../../src/envs/SchedulerEnv'
+import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
 import {Chain} from '../../src/operators/Chain'
 import {Computation} from '../../src/sources/Computation'

@@ -5,7 +5,6 @@ import * as assert from 'assert'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {IOCollector} from './internals/IOCollector'
 import {ResolvingIOSpec} from './internals/IOSpecification'

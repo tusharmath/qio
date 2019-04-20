@@ -6,7 +6,6 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/envs/SchedulerEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'

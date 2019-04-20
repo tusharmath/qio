@@ -5,7 +5,6 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'

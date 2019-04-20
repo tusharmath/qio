@@ -7,7 +7,6 @@ import {scheduler} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 describe('race', () => {
   it('should resolve with fastest io', async () => {

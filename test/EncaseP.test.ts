@@ -5,7 +5,6 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {defaultEnv} from '../src/envs/SchedulerEnv'
 
 describe('encaseP', () => {
   it('should resolve via promises', async () => {
