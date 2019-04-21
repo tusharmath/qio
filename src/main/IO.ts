@@ -91,7 +91,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    *
    * Takes in a function that returns a `Promise` zip converts it to a function,
    * that takes the same set of arguments zip returns an [[IO]]
-   *
+   * TODO: remove dependency on SchedulerEnv
    */
   public static encaseP<A, G extends unknown[]>(
     fn: (...t: G) => Promise<A>
@@ -119,7 +119,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * `from` is for more advanced usages and is intended to be used internally.
    */
   public static from<R, A>(
-    cmp: (env: R, rej: REJ, res: RES<A>, sh: IScheduler) => Cancel | void
+    cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
   ): IO<R, A> {
     return IO.to(new Computation(cmp))
   }
@@ -192,7 +192,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
     res: RES<A1>,
     sh: IScheduler = scheduler
   ): Cancel {
-    return this.io.fork(env, rej, res, sh)
+    return this.io.fork(env, rej, res)
   }
 
   /**
@@ -213,9 +213,9 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Eliminates the dependency on the IOs original environment.
    * Creates an IO that can run in [DefaultEnv].
    */
-  public provide(env: R1): IO<SchedulerEnv, A1> {
+  public provide(env: R1): IO<AnyEnv, A1> {
     return IO.to(
-      new Computation((env1, rej, res, sh) => this.io.fork(env, rej, res, sh))
+      new Computation((env1, rej, res) => this.io.fork(env, rej, res))
     )
   }
 

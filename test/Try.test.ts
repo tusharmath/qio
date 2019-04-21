@@ -6,6 +6,7 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
+import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
@@ -26,9 +27,9 @@ describe('Try', () => {
     return {timeline}
   }
 
-  it('should compute the computation', async () => {
+  it('should compute the computation', () => {
     let i = 0
-    await IO.try(() => (i = i + 1)).toPromise({scheduler: testScheduler()})
+    GetTimeline(IO.try(() => (i = i + 1)))
     assert.strictEqual(i, 1)
   })
 

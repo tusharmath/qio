@@ -28,8 +28,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (status.rejected = true),
-        () => (status.resolved = true),
-        S
+        () => (status.resolved = true)
       )
       S.run()
       assert.ok(status.resolved)
@@ -43,8 +42,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (status.rejected = true),
-        () => (status.resolved = true),
-        S
+        () => (status.resolved = true)
       )
       S.run()
       assert.notOk(status.rejected)
@@ -57,8 +55,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
         () => {
           throw new Error('Should not reject')
         },
-        () => (completionTime = S.now()),
-        S
+        () => (completionTime = S.now())
       )
       const forkTime = S.now()
       S.run()
@@ -76,8 +73,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
         err => (rejectionError = err.message),
         () => {
           throw new Error(ERROR_MESSAGE)
-        },
-        S
+        }
       )
       S.run()
       assert.strictEqual(rejectionError, ERROR_MESSAGE)
@@ -91,8 +87,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (actual.rejected = true),
-        () => (actual.resolved = true),
-        S
+        () => (actual.resolved = true)
       )
       assert.notOk(actual.resolved)
     })
@@ -105,8 +100,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (actual.resolved = true),
-        () => (actual.resolved = true),
-        S
+        () => (actual.resolved = true)
       )()
       S.run()
       const expected = {
@@ -130,8 +124,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
         },
         () => {
           assert.fail('IO should not resolve')
-        },
-        S
+        }
       )
       S.run()
       cancel()
@@ -154,8 +147,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (status.rejected = true),
-        () => (status.resolved = true),
-        S
+        () => (status.resolved = true)
       )
       S.run()
       assert.ok(status.rejected)
@@ -169,8 +161,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (status.rejected = true),
-        () => (status.resolved = true),
-        S
+        () => (status.resolved = true)
       )
       S.run()
       assert.notOk(status.resolved)
@@ -183,8 +174,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
         () => (completionTime = S.now()),
         () => {
           throw new Error('Should not resolve')
-        },
-        S
+        }
       )
       const forkTime = S.now()
       S.run()
@@ -202,8 +192,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (actual.rejected = true),
-        () => (actual.resolved = true),
-        S
+        () => (actual.resolved = true)
       )
       assert.notOk(actual.rejected)
     })
@@ -216,8 +205,7 @@ export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       fn().fork(
         {scheduler: S},
         () => (actual.resolved = true),
-        () => (actual.resolved = true),
-        S
+        () => (actual.resolved = true)
       )()
       S.run()
       const expected = {

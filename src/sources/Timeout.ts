@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 2019-03-22
  */
-import {Cancel, IScheduler} from 'ts-scheduler'
+import {Cancel} from 'ts-scheduler'
 
 import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'
@@ -17,13 +17,8 @@ export class Timeout<A> implements FIO<SchedulerEnv, A> {
     private readonly value: A
   ) {}
 
-  public fork(
-    env: SchedulerEnv,
-    rej: REJ,
-    res: RES<A>,
-    sh: IScheduler
-  ): Cancel {
-    return sh.delay(() => {
+  public fork(env: SchedulerEnv, rej: REJ, res: RES<A>): Cancel {
+    return env.scheduler.delay(() => {
       try {
         res(this.value)
       } catch (e) {

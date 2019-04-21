@@ -1,6 +1,7 @@
 import {LinkedList} from 'dbl-linked-list-ds'
-import {Cancel, IScheduler} from 'ts-scheduler'
+import {Cancel} from 'ts-scheduler'
 
+import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
@@ -8,7 +9,7 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Once<R, A> implements FIO<R, A> {
+export class Once<R, A> implements FIO<R & SchedulerEnv, A> {
   private cancel: Cancel | undefined
   private error: Error | undefined
   private isForked = false
@@ -19,7 +20,8 @@ export class Once<R, A> implements FIO<R, A> {
 
   public constructor(private readonly io: FIO<R, A>) {}
 
-  public fork(env: R, rej: REJ, res: RES<A>, sh: IScheduler): Cancel {
+  public fork(env: R & SchedulerEnv, rej: REJ, res: RES<A>): Cancel {
+    const sh = env.scheduler
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))
     }
@@ -32,7 +34,7 @@ export class Once<R, A> implements FIO<R, A> {
 
     if (!this.isForked) {
       this.isForked = true
-      this.cancel = this.io.fork(env, this.onReject, this.onResolve, sh)
+      this.cancel = this.io.fork(env, this.onReject, this.onResolve)
     }
 
     return () => {

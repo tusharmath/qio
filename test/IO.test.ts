@@ -47,11 +47,6 @@ describe('IO', () => {
     })
   })
   describe('provide()', () => {
-    ResolvingIOSpec(() => IO.of(10).provide({scheduler: testScheduler()}))
-    RejectingIOSpec(() =>
-      IO.reject(new Error('FAILED')).provide({scheduler: testScheduler()})
-    )
-
     it('should pass on the env', () => {
       const env = {scheduler: testScheduler(), test: {a: 'a', b: 'b'}}
       const {timeline} = ForkNRun(env, IO.of(10).provide(env))

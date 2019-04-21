@@ -14,7 +14,7 @@ export class Map<R, A, B> implements FIO<R, B> {
     private readonly ab: (a: A) => B
   ) {}
 
-  public fork(env: R, rej: REJ, res: RES<B>, sh: IScheduler): Cancel {
-    return this.src.fork(env, rej, a => SafeResolve(this.ab(a), rej, res), sh)
+  public fork(env: R, rej: REJ, res: RES<B>): Cancel {
+    return this.src.fork(env, rej, a => SafeResolve(this.ab(a), rej, res))
   }
 }

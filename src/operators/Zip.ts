@@ -18,12 +18,7 @@ export class Zip<R1, R2, A, B> implements FIO<R1 & R2, OR<A, B>> {
     private readonly b: FIO<R2, B>
   ) {}
 
-  public fork(
-    env: R1 & R2,
-    rej: REJ,
-    res: RES<OR<A, B>>,
-    sh: IScheduler
-  ): Cancel {
+  public fork(env: R1 & R2, rej: REJ, res: RES<OR<A, B>>): Cancel {
     let responseA: A
     let responseB: B
     let count = 0
@@ -41,24 +36,14 @@ export class Zip<R1, R2, A, B> implements FIO<R1 & R2, OR<A, B>> {
     }
 
     cancel.push(
-      this.a.fork(
-        env,
-        onError(1),
-        result => {
-          responseA = result
-          onSuccess()
-        },
-        sh
-      ),
-      this.b.fork(
-        env,
-        onError(0),
-        result => {
-          responseB = result
-          onSuccess()
-        },
-        sh
-      )
+      this.a.fork(env, onError(1), result => {
+        responseA = result
+        onSuccess()
+      }),
+      this.b.fork(env, onError(0), result => {
+        responseB = result
+        onSuccess()
+      })
     )
 
     return () => cancel.forEach(_ => _())

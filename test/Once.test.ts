@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {AnyEnv} from '../src/envs/AnyEnv'
+import {SchedulerEnv} from '../src/envs/SchedulerEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
@@ -19,8 +19,8 @@ describe('Once', () => {
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      IO.from<AnyEnv, number>((env, rej, res, sh) =>
-        sh.asap(() => res((count += 1)))
+      IO.from<SchedulerEnv, number>((env, rej, res) =>
+        env.scheduler.asap(() => res((count += 1)))
       )
     )
 
@@ -32,8 +32,8 @@ describe('Once', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<AnyEnv, number>((env, rej, res, sh) =>
-        sh.delay(() => res((count += 1)), n)
+      IO.from<SchedulerEnv, number>((env, rej, res) =>
+        env.scheduler.delay(() => res((count += 1)), n)
       )
     )
 
@@ -45,8 +45,11 @@ describe('Once', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<AnyEnv, never>((env, rej, res, sh) =>
-        sh.delay(() => rej(new Error('FAILED_' + (count += 1).toString())), n)
+      IO.from<SchedulerEnv, never>((env, rej) =>
+        env.scheduler.delay(
+          () => rej(new Error('FAILED_' + (count += 1).toString())),
+          n
+        )
       )
     )
 

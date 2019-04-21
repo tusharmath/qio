@@ -8,13 +8,12 @@ import {IO} from '../'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'
+import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('map', () => {
-  it('should convert the value', async () => {
-    const actual = await IO.of(10)
-      .map((i: number) => i + 1)
-      .toPromise({scheduler: testScheduler()})
+  it('should convert the value', () => {
+    const actual = GetTimeline(IO.of(10).map((i: number) => i + 1)).getValue()
     const expected = 11
     assert.equal(actual, expected)
   })

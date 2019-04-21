@@ -4,19 +4,21 @@
 
 import {assert} from 'chai'
 import {scheduler} from 'ts-scheduler'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
+import {AnyEnv} from '../src/envs/AnyEnv'
+
+import {GetTimeline} from './internals/GetTimeline'
 
 describe('race', () => {
-  it('should resolve with fastest io', async () => {
-    const a = IO.from((env, rej, res) => {
+  it('should resolve with fastest io', () => {
+    const a = IO.from<AnyEnv, string>((env, rej, res) => {
       res('A')
 
       return () => {}
     })
     const b = IO.never()
-    const actual = await a.race(b).toPromise({scheduler: testScheduler()})
+    const actual = GetTimeline(a.race(b)).getValue()
     const expected = 'A'
     assert.equal(actual, expected)
   })
@@ -40,22 +42,19 @@ describe('race', () => {
       value => assert.fail('Should not resolve: ' + value)
     )
   })
-  it('should cancel the second io on resolution of one', async () => {
+  it('should cancel the second io on resolution of one', () => {
     let cancelled = 0
     const a = IO.from(() => () => (cancelled = cancelled + 1))
     const b = IO.of(100)
-    const result = await a.race(b).toPromise({scheduler: testScheduler()})
+    const result = GetTimeline(a.race(b)).getValue()
     assert.equal(result, 100)
     assert.equal(cancelled, 1)
   })
-  it('should cancel the second io on rejection of one', async () => {
+  it('should cancel the second io on rejection of one', () => {
     let cancelled = 0
     const a = IO.from(() => () => (cancelled = cancelled + 1))
     const b = IO.reject(new Error('YO'))
-    const message = await a
-      .race(b)
-      .toPromise({scheduler: testScheduler()})
-      .catch((err: Error) => err.message)
+    const message = GetTimeline(a.race(b)).getError().message
     assert.equal(message, 'YO')
     assert.equal(cancelled, 1)
   })

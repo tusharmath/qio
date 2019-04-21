@@ -7,6 +7,8 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
+import {ForkNRun} from './internals/ForkNRun'
+import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('encase', () => {
@@ -17,24 +19,22 @@ describe('encase', () => {
     })()
   )
 
-  it('should resolve to the return value of the function supplied', async () => {
+  it('should resolve to the return value of the function supplied', () => {
     const fetch = (...t: string[]) => t.join(',')
     const fetchF = IO.encase(fetch)
-    const actual = await fetchF('a', 'b', 'c').toPromise({
-      scheduler: testScheduler()
-    })
+    const actual = GetTimeline(fetchF('a', 'b', 'c')).getValue()
 
     const expected = 'a,b,c'
     assert.equal(actual, expected)
   })
-  it('should catch errors', async () => {
+
+  it('should catch errors', () => {
     const errorF = IO.encase<string, []>(() => {
-      throw new Error('My Error')
+      throw new Error('Bup!')
     })
-    const actual = await errorF()
-      .catch(() => IO.of('caught error'))
-      .toPromise({scheduler: testScheduler()})
-    const expected = 'caught error'
+    const actual = GetTimeline(errorF()).getError().message
+
+    const expected = 'Bup!'
     assert.equal(actual, expected)
   })
 })

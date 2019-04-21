@@ -17,18 +17,21 @@ describe('Computation', () => {
   ResolvingIOSpec(() => IO.from<AnyEnv, number>((env, rej, res) => res(10)))
   RejectingIOSpec(() => IO.from((env, rej, res) => rej(new Error('FAILED'))))
 
-  it('should defer computations', async () => {
-    const noop = () => {}
+  it('should defer computations', () => {
     const results: string[] = []
-    const a = IO.from<AnyEnv, void>((env, rej, res) => {
-      results.push('RUN')
-      res(undefined)
 
-      return () => results.push('STOP')
-    })
+    const {fork} = IOCollector(
+      {scheduler: testScheduler()},
+      IO.from<AnyEnv, void>((env, rej, res) => {
+        results.push('RUN')
+        res(undefined)
+
+        return () => results.push('STOP')
+      })
+    )
+    fork()()
 
     // Issue a cancelled IO
-    a.fork({scheduler}, noop, noop)()
     assert.deepEqual(results, [])
   })
   it('should handle sync exceptions', cb => {
@@ -61,7 +64,7 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', cb => {
     let cancelled = false
-    const cancel = IO.from((env, rej, res) => {
+    const cancel = IO.from((env, rej) => {
       const id = setTimeout(rej, 0, new Error('YO!'))
 
       return () => {

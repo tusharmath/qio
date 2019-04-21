@@ -4,19 +4,17 @@
 
 import {assert} from 'chai'
 import {scheduler as sh} from 'ts-scheduler'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
+import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec} from './internals/IOSpecification'
 
 describe('reject', () => {
-  it('creates a rejected io', async () => {
+  it('creates a rejected io', () => {
     const error = new Error('Bananas')
-    const actual = await IO.reject(error)
-      .toPromise({scheduler: testScheduler()})
-      .catch((err: Error) => 'ERR:' + err.message)
-    const expected = 'ERR:' + error.message
+    const actual = GetTimeline(IO.reject(error)).getError().message
+    const expected = error.message
     assert.strictEqual(actual, expected)
   })
 

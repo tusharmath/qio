@@ -6,6 +6,7 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
+import {ForkNRun} from './internals/ForkNRun'
 import {
   CancellationIOSpec,
   RejectingIOSpec,
@@ -22,20 +23,22 @@ describe('catch', () => {
   CancellationIOSpec(io => IO.reject(new Error('!!!')).catch(() => io))
   CancellationIOSpec(io => io.catch(() => IO.of('Caught')))
 
-  it('should be catchable', async () => {
+  it('should be catchable', () => {
     const error = new Error('Bup!')
-    const actual = await IO.encase<string, []>(() => {
-      throw error
-    })()
-      .catch((err: Error) => IO.of('ERR:' + err.message))
-      .toPromise({scheduler: testScheduler()})
-    const expected = 'ERR:' + error.message
+    const actual = ForkNRun(
+      {scheduler: testScheduler()},
+      IO.reject(error).catch(e => IO.of(e.message))
+    ).timeline.getValue()
+
+    const expected = 'Bup!'
     assert.strictEqual(actual, expected)
   })
-  it('should be forward results', async () => {
-    const actual = await IO.of('ok!')
-      .catch(err => IO.of('ERR:' + err.message))
-      .toPromise({scheduler: testScheduler()})
+  it('should forward results', () => {
+    const actual = ForkNRun(
+      {scheduler: testScheduler()},
+      IO.of('ok!').catch(err => IO.of('ERR:' + err.message))
+    ).timeline.getValue()
+
     const expected = 'ok!'
     assert.strictEqual(actual, expected)
   })

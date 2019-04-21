@@ -26,14 +26,18 @@ export const Timeline = <A>(sh: IScheduler) => {
     fork: () => timeline.push(['FORKED', sh.now()]),
     getError: (): Error => {
       if (typeof rejectedValue === 'undefined') {
-        throw new Error('IO not yet rejected')
+        throw new Error(
+          'IO not rejected, may be you are looking for getValue()'
+        )
       }
 
       return rejectedValue
     },
     getValue: (): A => {
       if (typeof resolvedValue === 'undefined') {
-        throw new Error('IO not yet resolved')
+        throw new Error(
+          'IO not yet resolved, may be you are looking for getError()'
+        )
       }
 
       return resolvedValue

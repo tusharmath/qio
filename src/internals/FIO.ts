@@ -14,8 +14,7 @@ export interface FIO<R, A> {
    * @param env - Execution env needed to run the IO
    * @param rej - Error Handler
    * @param res - Success Handler
-   * @param sh  - IScheduler
    * @return Cancel
    */
-  fork(env: R, rej: REJ, res: RES<A>, sh: IScheduler): Cancel
+  fork(env: R, rej: REJ, res: RES<A>): Cancel
 }

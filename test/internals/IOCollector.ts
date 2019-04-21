@@ -2,8 +2,6 @@
  * Created by tushar on 2019-03-20
  */
 
-import {testScheduler} from 'ts-scheduler/test'
-
 import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
 
@@ -23,7 +21,7 @@ export const IOCollector = <A, R>(env: R & SchedulerEnv, io: FIO<R, A>) => {
   /**
    * Forks the IO operation
    */
-  const fork = () => io.fork(env, timeline.reject, timeline.resolve, scheduler)
+  const fork = () => io.fork(env, timeline.reject, timeline.resolve)
 
   return {
     fork,

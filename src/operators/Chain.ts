@@ -13,17 +13,12 @@ export class Chain<R1, R2, A1, A2> implements FIO<R1 & R2, A2> {
     private readonly ab: (a: A1) => FIO<R2, A2>
   ) {}
 
-  public fork(env: R1 & R2, rej: REJ, res: RES<A2>, sh: IScheduler): Cancel {
+  public fork(env: R1 & R2, rej: REJ, res: RES<A2>): Cancel {
     const cancellations = new Array<Cancel>()
     cancellations.push(
-      this.src.fork(
-        env,
-        rej,
-        a => {
-          cancellations.push(this.ab(a).fork(env, rej, res, sh))
-        },
-        sh
-      )
+      this.src.fork(env, rej, a => {
+        cancellations.push(this.ab(a).fork(env, rej, res))
+      })
     )
 
     return () => {

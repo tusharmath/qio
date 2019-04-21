@@ -1,5 +1,6 @@
 import {Cancel, IScheduler} from 'ts-scheduler'
 
+import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
@@ -14,17 +15,13 @@ enum IOStatus {
 /**
  * @ignore
  */
-export class Computation<R, A> implements FIO<R, A> {
+export class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
   public constructor(
-    private readonly cmp: (
-      env: R,
-      rej: REJ,
-      res: RES<A>,
-      sh: IScheduler
-    ) => void | Cancel
+    private readonly cmp: (env: R, rej: REJ, res: RES<A>) => void | Cancel
   ) {}
 
-  public fork(env: R, rej: REJ, res: RES<A>, sh: IScheduler): Cancel {
+  public fork(env: R & SchedulerEnv, rej: REJ, res: RES<A>): Cancel {
+    const sh = env.scheduler
     const cancellations = new Array<Cancel>()
     let status = IOStatus.FORKED
     const onRej: REJ = e => {
@@ -40,7 +37,7 @@ export class Computation<R, A> implements FIO<R, A> {
     cancellations.push(
       sh.asap(() => {
         try {
-          const cancel = this.cmp(env, onRej, onRes, sh)
+          const cancel = this.cmp(env, onRej, onRes)
           if (typeof cancel === 'function') {
             cancellations.push(cancel)
           }

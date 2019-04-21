@@ -13,20 +13,14 @@ export class Catch<R1, R2, A1, A2> implements FIO<R1 & R2, A1 | A2> {
     private readonly onError: (a: Error) => FIO<R2, A2>
   ) {}
 
-  public fork(
-    env: R1 & R2,
-    rej: REJ,
-    res: RES<A1 | A2>,
-    sh: IScheduler
-  ): Cancel {
+  public fork(env: R1 & R2, rej: REJ, res: RES<A1 | A2>): Cancel {
     const cancellations = new Array<Cancel>()
     cancellations.push(
       this.src.fork(
         env,
         (err: Error) =>
-          cancellations.push(this.onError(err).fork(env, rej, res, sh)),
-        res,
-        sh
+          cancellations.push(this.onError(err).fork(env, rej, res)),
+        res
       )
     )
 
