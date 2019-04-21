@@ -16,6 +16,7 @@ import {Race} from '../operators/Race'
 import {OR, Zip} from '../operators/Zip'
 import {Computation} from '../sources/Computation'
 import {Timeout} from '../sources/Timeout'
+import {AnyEnv} from '../envs/AnyEnv'
 
 const NOOP = () => {}
 const RETURN_NOOP = () => NOOP
@@ -117,14 +118,9 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * In most cases you should use [encase] [encaseP] etc. to create new IOs.
    * `from` is for more advanced usages and is intended to be used internally.
    */
-  public static from<A>(
-    cmp: (
-      env: SchedulerEnv,
-      rej: REJ,
-      res: RES<A>,
-      sh: IScheduler
-    ) => Cancel | void
-  ): IO<SchedulerEnv, A> {
+  public static from<R = AnyEnv, A = never>(
+    cmp: (env: R, rej: REJ, res: RES<A>, sh: IScheduler) => Cancel | void
+  ): IO<R, A> {
     return IO.to(new Computation(cmp))
   }
 

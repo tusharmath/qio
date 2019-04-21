@@ -43,7 +43,7 @@ describe('OnceCache', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<never>((env, rej, res, sh) =>
+      IO.from((env, rej, res, sh) =>
         sh.delay(() => rej(new Error('FAILED_' + (count += 1).toString())), n)
       )
     )

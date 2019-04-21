@@ -42,7 +42,7 @@ describe('race', () => {
   })
   it('should cancel the second io on resolution of one', async () => {
     let cancelled = 0
-    const a = IO.from<never>(() => () => (cancelled = cancelled + 1))
+    const a = IO.from(() => () => (cancelled = cancelled + 1))
     const b = IO.of(100)
     const result = await a.race(b).toPromise({scheduler: testScheduler()})
     assert.equal(result, 100)
@@ -50,7 +50,7 @@ describe('race', () => {
   })
   it('should cancel the second io on rejection of one', async () => {
     let cancelled = 0
-    const a = IO.from<never>(() => () => (cancelled = cancelled + 1))
+    const a = IO.from(() => () => (cancelled = cancelled + 1))
     const b = IO.reject(new Error('YO'))
     const message = await a
       .race(b)
