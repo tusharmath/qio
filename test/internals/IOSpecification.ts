@@ -4,10 +4,16 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
+import {AnyEnv} from '../../src/envs/AnyEnv'
 import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
+import {IO} from '../../src/main/IO'
 import {Chain} from '../../src/operators/Chain'
 import {Computation} from '../../src/sources/Computation'
+
+import {ForkNRun} from './ForkNRun'
+import {IOCollector} from './IOCollector'
+import {NeverEnding} from './NeverEnding'
 
 /**
  * Specifications for an IO that resolves
@@ -221,5 +227,23 @@ export const RejectingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
       }
       assert.deepEqual(actual, expected)
     })
+  })
+}
+
+/**
+ * Checks if the IO gets cancelled or not
+ */
+export const CancellationIOSpec = <T>(
+  fn: (cancellable: IO<AnyEnv, never>) => FIO<SchedulerEnv, T>
+) => {
+  it('should release resources', () => {
+    const neva = NeverEnding()
+    const {fork, scheduler} = IOCollector({scheduler: testScheduler()})(
+      fn(neva.io)
+    )
+    const cancel = fork()
+    scheduler.run()
+    cancel()
+    assert.ok(neva.isCancelled())
   })
 }
