@@ -1,4 +1,4 @@
-import {Cancel, IScheduler} from 'ts-scheduler'
+import {Cancel} from 'ts-scheduler'
 
 import {REJ} from './REJ'
 import {RES} from './RES'

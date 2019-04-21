@@ -1,4 +1,4 @@
-import {Cancel, IScheduler} from 'ts-scheduler'
+import {Cancel} from 'ts-scheduler'
 
 import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'

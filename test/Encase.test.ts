@@ -3,11 +3,9 @@
  */
 
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
-import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
