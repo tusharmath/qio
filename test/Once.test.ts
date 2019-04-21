@@ -6,20 +6,22 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
+import {AnyEnv} from '../src/envs/AnyEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
-describe('OnceCache', () => {
-  const dC = IOCollector({scheduler: testScheduler()})
+describe('Once', () => {
   ResolvingIOSpec(() => new Once(IO.of(10)))
   RejectingIOSpec(() => new Once(IO.reject(new Error('FAILED'))))
 
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      IO.from<number>((env, rej, res, sh) => sh.asap(() => res((count += 1))))
+      IO.from<AnyEnv, number>((env, rej, res, sh) =>
+        sh.asap(() => res((count += 1)))
+      )
     )
 
     return {
@@ -30,7 +32,7 @@ describe('OnceCache', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<number>((env, rej, res, sh) =>
+      IO.from<AnyEnv, number>((env, rej, res, sh) =>
         sh.delay(() => res((count += 1)), n)
       )
     )
@@ -43,7 +45,7 @@ describe('OnceCache', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from((env, rej, res, sh) =>
+      IO.from<AnyEnv, never>((env, rej, res, sh) =>
         sh.delay(() => rej(new Error('FAILED_' + (count += 1).toString())), n)
       )
     )
@@ -56,7 +58,7 @@ describe('OnceCache', () => {
 
   it('should compute only once', () => {
     const {io, isComputedOnce} = createNeverEndingOnceIO()
-    const {fork, scheduler} = dC(io)
+    const {fork, scheduler} = IOCollector({scheduler: testScheduler()}, io)
 
     fork()
     fork()
@@ -67,7 +69,10 @@ describe('OnceCache', () => {
 
   it('should be resolved for each fork', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     fork()
@@ -81,7 +86,10 @@ describe('OnceCache', () => {
 
   it('should be rejected for each fork', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     fork()
@@ -98,7 +106,10 @@ describe('OnceCache', () => {
 
   it('should not reject cancelled forks', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     fork()()
@@ -112,7 +123,10 @@ describe('OnceCache', () => {
 
   it('should not resolve completed io', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     scheduler.runTo(300)
@@ -127,7 +141,10 @@ describe('OnceCache', () => {
 
   it('should not reject completed io', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     scheduler.runTo(300)
@@ -143,7 +160,10 @@ describe('OnceCache', () => {
 
   it('should resolve forks after completion', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     scheduler.runTo(300)
@@ -159,7 +179,10 @@ describe('OnceCache', () => {
 
   it('should reject forks after completion', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = dC(io)
+    const {fork, scheduler, timeline} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     fork()
     scheduler.runTo(300)

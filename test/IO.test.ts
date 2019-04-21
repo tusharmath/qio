@@ -15,9 +15,6 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 import {$} from './internals/ProxyFunction'
 
-const fR = ForkNRun({scheduler: testScheduler()})
-const dC = IOCollector({scheduler: testScheduler()})
-
 describe('IO', () => {
   describe('once()', () => {
     context('typings', () => {
@@ -36,8 +33,11 @@ describe('IO', () => {
     })
     it('should return an IO that is memoized', () => {
       const counter = Counter()
-      const ioP = fR(counter.inc.once())
-      const ioC = dC(ioP.timeline.getValue())
+      const ioP = ForkNRun({scheduler: testScheduler()}, counter.inc.once())
+      const ioC = IOCollector(
+        {scheduler: testScheduler()},
+        ioP.timeline.getValue()
+      )
       ioC.fork()
       ioC.fork()
       ioC.scheduler.run()
@@ -55,7 +55,7 @@ describe('IO', () => {
 
     it('should pass on the env', () => {
       const env = {scheduler: testScheduler(), test: {a: 'a', b: 'b'}}
-      const {timeline} = ForkNRun({})(IO.of(10).provide(env))
+      const {timeline} = ForkNRun({}, IO.of(10).provide(env))
       const actual = timeline.list()
       const expected = [['RESOLVE', 1, 10]]
 
@@ -86,7 +86,7 @@ describe('IO', () => {
 
       const cons = Console()
       const env: HasConsole = {console: cons}
-      ForkNRun(env)(putStrLn('HELLO WORLD'))
+      ForkNRun(env, putStrLn('HELLO WORLD'))
 
       const actual = cons.list()
       const expected = ['HELLO WORLD']
@@ -125,7 +125,7 @@ describe('IO', () => {
 
       const cons = Console()
       const env: HasConsole = {console: cons}
-      ForkNRun(env)(putStrLn('HELLO WORLD'))
+      ForkNRun(env, putStrLn('HELLO WORLD'))
 
       const actual = cons.list()
       const expected = ['HELLO WORLD']
@@ -153,7 +153,7 @@ describe('IO', () => {
           }
         }
       }
-      const {timeline} = ForkNRun(env)(io)
+      const {timeline} = ForkNRun(env, io)
 
       const actual = timeline.list()
       const expected = [['RESOLVE', 1, env]]

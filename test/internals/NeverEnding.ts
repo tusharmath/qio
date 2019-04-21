@@ -8,7 +8,7 @@ export const NeverEnding = () => {
   let cancelled = false
 
   return {
-    io: IO.from(() => () => (cancelled = true)),
+    io: IO.from<AnyEnv, never>(() => () => (cancelled = true)),
     isCancelled: () => cancelled
   }
 }

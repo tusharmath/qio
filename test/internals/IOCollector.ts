@@ -8,7 +8,7 @@ import {FIO} from '../../src/internals/FIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <R>(env: R) => <A>(io: FIO<R, A>) => {
+export const IOCollector = <A, R>(env: R, io: FIO<R, A>) => {
   /**
    * Create an internal TestScheduler
    */

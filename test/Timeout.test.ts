@@ -11,12 +11,14 @@ import {ResolvingIOSpec} from './internals/IOSpecification'
 import {TimeSlice} from './internals/Timeline'
 
 describe('Timeout', () => {
-  const dC = IOCollector({scheduler: testScheduler()})
   ResolvingIOSpec(() => IO.timeout('DONE', 1000))
   it('should resolve at the provided time', () => {
     const io = IO.timeout('Bananas', 1000)
 
-    const {scheduler, timeline, fork} = dC(io)
+    const {scheduler, timeline, fork} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     scheduler.runTo(100)
     fork()
@@ -30,7 +32,10 @@ describe('Timeout', () => {
 
   it('should be cancellable', () => {
     const io = IO.timeout('AAA', 1000)
-    const {scheduler, timeline, fork} = dC(io)
+    const {scheduler, timeline, fork} = IOCollector(
+      {scheduler: testScheduler()},
+      io
+    )
 
     scheduler.runTo(100)
     const cancel = fork()

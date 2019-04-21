@@ -11,7 +11,6 @@ import {ForkNRun} from './internals/ForkNRun'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('map', () => {
-  const fR = ForkNRun({scheduler: testScheduler()})
   it('should convert the value', async () => {
     const actual = await IO.of(10)
       .map((i: number) => i + 1)
@@ -21,7 +20,8 @@ describe('map', () => {
   })
   it('should capture exceptions on resolve', () => {
     const counter = Counter()
-    const {timeline} = fR(
+    const {timeline} = ForkNRun(
+      {scheduler: testScheduler()},
       counter.inc.map(() => {
         throw new Error('FAILURE')
       })

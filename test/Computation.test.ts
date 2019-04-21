@@ -7,20 +7,20 @@ import {scheduler} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
+import {AnyEnv} from '../src/envs/AnyEnv'
 
 import {Counter} from './internals/Counter'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
-  const dC = IOCollector({scheduler: testScheduler()})
-  ResolvingIOSpec(() => IO.from((env, rej, res) => res(10)))
+  ResolvingIOSpec(() => IO.from<AnyEnv, number>((env, rej, res) => res(10)))
   RejectingIOSpec(() => IO.from((env, rej, res) => rej(new Error('FAILED'))))
 
   it('should defer computations', async () => {
     const noop = () => {}
     const results: string[] = []
-    const a = IO.from<void>((env, rej, res) => {
+    const a = IO.from<AnyEnv, void>((env, rej, res) => {
       results.push('RUN')
       res(undefined)
 
@@ -82,7 +82,7 @@ describe('Computation', () => {
   it('should not cancel a cancelled IO', () => {
     const counter = Counter(1000)
     const io = counter.inc
-    const {scheduler: S, fork} = dC(io)
+    const {scheduler: S, fork} = IOCollector({scheduler: testScheduler()}, io)
     S.runTo(200)
     const cancel = fork()
     S.runTo(210)

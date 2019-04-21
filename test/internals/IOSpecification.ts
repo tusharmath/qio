@@ -11,7 +11,6 @@ import {IO} from '../../src/main/IO'
 import {Chain} from '../../src/operators/Chain'
 import {Computation} from '../../src/sources/Computation'
 
-import {ForkNRun} from './ForkNRun'
 import {IOCollector} from './IOCollector'
 import {NeverEnding} from './NeverEnding'
 
@@ -238,7 +237,8 @@ export const CancellationIOSpec = <T>(
 ) => {
   it('should release resources', () => {
     const neva = NeverEnding()
-    const {fork, scheduler} = IOCollector({scheduler: testScheduler()})(
+    const {fork, scheduler} = IOCollector(
+      {scheduler: testScheduler()},
       fn(neva.io)
     )
     const cancel = fork()

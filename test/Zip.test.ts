@@ -10,7 +10,6 @@ import {IO} from '../'
 import {IOCollector} from './internals/IOCollector'
 
 describe('zip', () => {
-  const dC = IOCollector({scheduler: testScheduler()})
   it('should resolve multiple ios', async () => {
     const actual = await IO.of('AAA')
       .zip(IO.of('BBB'))
@@ -46,7 +45,10 @@ describe('zip', () => {
     const b = IO.from((env, rej, res, sh) =>
       sh.delay(() => rej(new Error('Save Me!')), 100)
     )
-    const {scheduler, fork} = dC(a.zip(b))
+    const {scheduler, fork} = IOCollector(
+      {scheduler: testScheduler()},
+      a.zip(b)
+    )
     scheduler.runTo(10)
     fork()
     scheduler.runTo(111)

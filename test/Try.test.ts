@@ -10,7 +10,6 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Try', () => {
-  const dc = IOCollector({scheduler: testScheduler()})
   ResolvingIOSpec(() => IO.try(() => void 0))
   RejectingIOSpec(() =>
     IO.try(() => {
@@ -19,7 +18,10 @@ describe('Try', () => {
   )
   const tryNumberIO = () => {
     let i = 0
-    const {timeline, fork, scheduler} = dc(IO.try(() => (i += 1)))
+    const {timeline, fork, scheduler} = IOCollector(
+      {scheduler: testScheduler()},
+      IO.try(() => (i += 1))
+    )
     fork()
     scheduler.run()
 
