@@ -14,6 +14,7 @@ import {ForkNRun} from './internals/ForkNRun'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 import {$} from './internals/ProxyFunction'
+import {TestSchedulerEnv} from './internals/TestSchedulerEnv'
 
 describe('IO', () => {
   describe('once()', () => {
@@ -33,14 +34,12 @@ describe('IO', () => {
     })
     it('should return an IO that is memoized', () => {
       const counter = Counter()
-      const ioP = ForkNRun({scheduler: testScheduler()}, counter.inc.once())
-      const ioC = IOCollector(
-        {scheduler: testScheduler()},
-        ioP.timeline.getValue()
-      )
+      const S = testScheduler()
+      const ioP = ForkNRun({scheduler: S}, counter.inc.once())
+      const ioC = IOCollector({scheduler: S}, ioP.timeline.getValue())
       ioC.fork()
       ioC.fork()
-      ioC.scheduler.run()
+      S.run()
 
       const actual = counter.getCount()
       const expected = 1
@@ -55,7 +54,7 @@ describe('IO', () => {
 
     it('should pass on the env', () => {
       const env = {scheduler: testScheduler(), test: {a: 'a', b: 'b'}}
-      const {timeline} = ForkNRun({}, IO.of(10).provide(env))
+      const {timeline} = ForkNRun(env, IO.of(10).provide(env))
       const actual = timeline.list()
       const expected = [['RESOLVE', 1, 10]]
 
@@ -85,7 +84,10 @@ describe('IO', () => {
         IO.access((_: HasConsole) => _.console.print(line))
 
       const cons = Console()
-      const env: HasConsole = {console: cons}
+      const env: HasConsole & TestSchedulerEnv = {
+        console: cons,
+        scheduler: testScheduler()
+      }
       ForkNRun(env, putStrLn('HELLO WORLD'))
 
       const actual = cons.list()
@@ -124,7 +126,7 @@ describe('IO', () => {
         IO.accessM((_: HasConsole) => _.console.print(line))
 
       const cons = Console()
-      const env: HasConsole = {console: cons}
+      const env = {console: cons, scheduler: testScheduler()}
       ForkNRun(env, putStrLn('HELLO WORLD'))
 
       const actual = cons.list()
@@ -146,19 +148,21 @@ describe('IO', () => {
       }
       const io = IO.environment<Console>()
       const out = new Array<string>()
-      const env = {
-        console: {
-          print: (str: string): void => {
-            out.push(str)
-          }
+      const ConsoleService = {
+        print: (str: string): void => {
+          out.push(str)
         }
+      }
+      const env: Console & TestSchedulerEnv = {
+        console: ConsoleService,
+        scheduler: testScheduler()
       }
       const {timeline} = ForkNRun(env, io)
 
-      const actual = timeline.list()
-      const expected = [['RESOLVE', 1, env]]
+      const actual = timeline.getValue().console
+      const expected = ConsoleService
 
-      assert.deepStrictEqual(actual, expected)
+      assert.strictEqual(actual, expected)
     })
 
     ResolvingIOSpec(() => IO.environment())

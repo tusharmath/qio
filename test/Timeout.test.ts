@@ -15,10 +15,8 @@ describe('Timeout', () => {
   it('should resolve at the provided time', () => {
     const io = IO.timeout('Bananas', 1000)
 
-    const {scheduler, timeline, fork} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {timeline, fork} = IOCollector({scheduler}, io)
 
     scheduler.runTo(100)
     fork()
@@ -32,10 +30,8 @@ describe('Timeout', () => {
 
   it('should be cancellable', () => {
     const io = IO.timeout('AAA', 1000)
-    const {scheduler, timeline, fork} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {timeline, fork} = IOCollector({scheduler}, io)
 
     scheduler.runTo(100)
     const cancel = fork()

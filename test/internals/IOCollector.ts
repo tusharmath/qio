@@ -4,15 +4,16 @@
 
 import {testScheduler} from 'ts-scheduler/test'
 
+import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A, R>(env: R, io: FIO<R, A>) => {
+export const IOCollector = <A, R>(env: R & SchedulerEnv, io: FIO<R, A>) => {
   /**
-   * Create an internal TestScheduler
+   * access the testScheduler
    */
-  const scheduler = testScheduler()
+  const scheduler = env.scheduler
 
   /**
    * Contains a list of all internal events.
@@ -26,7 +27,6 @@ export const IOCollector = <A, R>(env: R, io: FIO<R, A>) => {
 
   return {
     fork,
-    scheduler,
     timeline
   }
 }

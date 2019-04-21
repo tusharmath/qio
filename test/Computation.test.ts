@@ -82,7 +82,8 @@ describe('Computation', () => {
   it('should not cancel a cancelled IO', () => {
     const counter = Counter(1000)
     const io = counter.inc
-    const {scheduler: S, fork} = IOCollector({scheduler: testScheduler()}, io)
+    const S = testScheduler()
+    const {fork} = IOCollector({scheduler: S}, io)
     S.runTo(200)
     const cancel = fork()
     S.runTo(210)

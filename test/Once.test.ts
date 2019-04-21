@@ -58,7 +58,8 @@ describe('Once', () => {
 
   it('should compute only once', () => {
     const {io, isComputedOnce} = createNeverEndingOnceIO()
-    const {fork, scheduler} = IOCollector({scheduler: testScheduler()}, io)
+    const scheduler = testScheduler()
+    const {fork} = IOCollector({scheduler}, io)
 
     fork()
     fork()
@@ -69,10 +70,8 @@ describe('Once', () => {
 
   it('should be resolved for each fork', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     fork()
@@ -86,10 +85,8 @@ describe('Once', () => {
 
   it('should be rejected for each fork', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     fork()
@@ -106,10 +103,8 @@ describe('Once', () => {
 
   it('should not reject cancelled forks', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     fork()()
@@ -123,10 +118,8 @@ describe('Once', () => {
 
   it('should not resolve completed io', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     scheduler.runTo(300)
@@ -141,10 +134,8 @@ describe('Once', () => {
 
   it('should not reject completed io', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     scheduler.runTo(300)
@@ -160,10 +151,8 @@ describe('Once', () => {
 
   it('should resolve forks after completion', () => {
     const {io} = createResolvingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     scheduler.runTo(300)
@@ -179,10 +168,8 @@ describe('Once', () => {
 
   it('should reject forks after completion', () => {
     const {io} = createRejectingOnceIO(100)
-    const {fork, scheduler, timeline} = IOCollector(
-      {scheduler: testScheduler()},
-      io
-    )
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
 
     fork()
     scheduler.runTo(300)

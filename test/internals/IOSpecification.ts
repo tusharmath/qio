@@ -237,10 +237,8 @@ export const CancellationIOSpec = <T>(
 ) => {
   it('should release resources', () => {
     const neva = NeverEnding()
-    const {fork, scheduler} = IOCollector(
-      {scheduler: testScheduler()},
-      fn(neva.io)
-    )
+    const scheduler = testScheduler()
+    const {fork} = IOCollector({scheduler}, fn(neva.io))
     const cancel = fork()
     scheduler.run()
     cancel()

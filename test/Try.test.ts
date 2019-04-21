@@ -18,10 +18,8 @@ describe('Try', () => {
   )
   const tryNumberIO = () => {
     let i = 0
-    const {timeline, fork, scheduler} = IOCollector(
-      {scheduler: testScheduler()},
-      IO.try(() => (i += 1))
-    )
+    const scheduler = testScheduler()
+    const {timeline, fork} = IOCollector({scheduler}, IO.try(() => (i += 1)))
     fork()
     scheduler.run()
 

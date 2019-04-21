@@ -45,10 +45,8 @@ describe('zip', () => {
     const b = IO.from((env, rej, res, sh) =>
       sh.delay(() => rej(new Error('Save Me!')), 100)
     )
-    const {scheduler, fork} = IOCollector(
-      {scheduler: testScheduler()},
-      a.zip(b)
-    )
+    const scheduler = testScheduler()
+    const {fork} = IOCollector({scheduler}, a.zip(b))
     scheduler.runTo(10)
     fork()
     scheduler.runTo(111)
