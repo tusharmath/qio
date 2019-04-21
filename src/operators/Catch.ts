@@ -19,11 +19,17 @@ export class Catch<R1, R2, A1, A2> implements FIO<R1 & R2, A1 | A2> {
     res: RES<A1 | A2>,
     sh: IScheduler
   ): Cancel {
-    return this.src.fork(
-      env,
-      (err: Error) => this.onError(err).fork(env, rej, res, sh),
-      res,
-      sh
+    const cancellations = new Array<Cancel>()
+    cancellations.push(
+      this.src.fork(
+        env,
+        (err: Error) =>
+          cancellations.push(this.onError(err).fork(env, rej, res, sh)),
+        res,
+        sh
+      )
     )
+
+    return () => cancellations.forEach(_ => _())
   }
 }

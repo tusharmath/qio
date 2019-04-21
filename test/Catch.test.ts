@@ -6,19 +6,21 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
-import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
+import {
+  CancellationIOSpec,
+  RejectingIOSpec,
+  ResolvingIOSpec
+} from './internals/IOSpecification'
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
-    IO.from((env, rej, res) => rej(new Error('FAILED'))).catch(e =>
-      IO.of(e.message)
-    )
+    IO.from((env, rej) => rej(new Error('FAILED'))).catch(e => IO.of(e.message))
   )
   RejectingIOSpec(() =>
-    IO.from((env, rej, res) => rej(new Error('FAILED'))).catch(e =>
-      IO.reject(e)
-    )
+    IO.from((env, rej) => rej(new Error('FAILED'))).catch(e => IO.reject(e))
   )
+  CancellationIOSpec(io => IO.reject(new Error('!!!')).catch(() => io))
+  CancellationIOSpec(io => io.catch(() => IO.of('Caught')))
 
   it('should be catchable', async () => {
     const error = new Error('Bup!')
