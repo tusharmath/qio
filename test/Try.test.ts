@@ -11,16 +11,16 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Try', () => {
-  ResolvingIOSpec(() => IO.try(() => void 0))
+  ResolvingIOSpec(() => IO.access(() => void 0))
   RejectingIOSpec(() =>
-    IO.try(() => {
+    IO.access(() => {
       throw new Error('FAILURE')
     })
   )
   const tryNumberIO = () => {
     let i = 0
     const scheduler = testScheduler()
-    const {timeline, fork} = IOCollector({scheduler}, IO.try(() => (i += 1)))
+    const {timeline, fork} = IOCollector({scheduler}, IO.access(() => (i += 1)))
     fork()
     scheduler.run()
 
@@ -29,7 +29,7 @@ describe('Try', () => {
 
   it('should compute the computation', () => {
     let i = 0
-    GetTimeline(IO.try(() => (i = i + 1)))
+    GetTimeline(IO.access(() => (i = i + 1)))
     assert.strictEqual(i, 1)
   })
 

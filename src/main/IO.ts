@@ -53,9 +53,9 @@ const RETURN_NOOP = () => NOOP
  */
 export class IO<R1, A1> implements FIO<R1, A1> {
   /**
-   * Needs access to an environment to create an IO
+   * Accesses an environment for the effect
    */
-  public static access<R, A>(fn: (env: R) => A): IO<R, A> {
+  public static access<R = AnyEnv, A = unknown>(fn: (env: R) => A): IO<R, A> {
     return IO.to(
       new Computation((env1, rej, res) => {
         res(fn(env1))
@@ -150,17 +150,6 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static timeout<A>(value: A, duration: number): IO<SchedulerEnv, A> {
     return IO.to(new Timeout(duration, value))
-  }
-
-  /**
-   * A function that wraps a synchronous side-effect causing function into an IO
-   */
-  public static try<A>(fn: () => A): IO<SchedulerEnv, A> {
-    return IO.to(
-      new Computation((env, rej, res) => {
-        res(fn())
-      })
-    )
   }
 
   private static to<R, A>(io: FIO<R, A>): IO<R, A> {

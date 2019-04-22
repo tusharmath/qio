@@ -9,6 +9,6 @@ export const Counter = (n: number = 0) => {
 
   return {
     getCount: () => count,
-    inc: IO.try(() => (count += 1))
+    inc: IO.access(() => (count += 1))
   }
 }
