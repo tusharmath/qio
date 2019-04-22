@@ -7,6 +7,7 @@ import {testScheduler} from 'ts-scheduler/test'
 import {IO} from '../'
 
 import {ForkNRun} from './internals/ForkNRun'
+import {GetTimeline} from './internals/GetTimeline'
 import {
   CancellationIOSpec,
   RejectingIOSpec,
@@ -25,19 +26,17 @@ describe('catch', () => {
 
   it('should be catchable', () => {
     const error = new Error('Bup!')
-    const actual = ForkNRun(
-      {scheduler: testScheduler()},
+    const actual = GetTimeline(
       IO.reject(error).catch(e => IO.of(e.message))
-    ).timeline.getValue()
+    ).getValue()
 
     const expected = 'Bup!'
     assert.strictEqual(actual, expected)
   })
   it('should forward results', () => {
-    const actual = ForkNRun(
-      {scheduler: testScheduler()},
+    const actual = GetTimeline(
       IO.of('ok!').catch(err => IO.of('ERR:' + err.message))
-    ).timeline.getValue()
+    ).getValue()
 
     const expected = 'ok!'
     assert.strictEqual(actual, expected)

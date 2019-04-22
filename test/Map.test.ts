@@ -2,12 +2,10 @@
  * Created by tushar on 2019-03-11
  */
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
 import {Counter} from './internals/Counter'
-import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
@@ -19,8 +17,7 @@ describe('map', () => {
   })
   it('should capture exceptions on resolve', () => {
     const counter = Counter()
-    const {timeline} = ForkNRun(
-      {scheduler: testScheduler()},
+    const timeline = GetTimeline(
       counter.inc.map(() => {
         throw new Error('FAILURE')
       })
