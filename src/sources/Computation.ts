@@ -15,7 +15,7 @@ enum IOStatus {
 /**
  * @ignore
  */
-export class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
+class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
   public constructor(
     private readonly cmp: (env: R, rej: REJ, res: RES<A>) => void | Cancel
   ) {}
@@ -55,3 +55,11 @@ export class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
     }
   }
 }
+
+/**
+ * Creates an instance of Computation
+ * @ignore
+ */
+export const C = <R, A>(
+  cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
+): FIO<R, A> => new Computation(cmp)

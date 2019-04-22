@@ -9,7 +9,7 @@ import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
 import {IO} from '../../src/main/IO'
 import {Chain} from '../../src/operators/Chain'
-import {Computation} from '../../src/sources/Computation'
+import {C} from '../../src/sources/Computation'
 
 import {IOCollector} from './IOCollector'
 import {NeverEnding} from './NeverEnding'
@@ -112,10 +112,8 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
     it('should cancel chained IO', () => {
       const S = testScheduler()
       let isCancelled = false
-      const io = new Chain(
-        fn(),
-        () =>
-          new Computation<SchedulerEnv, never>(() => () => (isCancelled = true))
+      const io = new Chain(fn(), () =>
+        C<SchedulerEnv, never>(() => () => (isCancelled = true))
       )
       const cancel = io.fork(
         {scheduler: S},

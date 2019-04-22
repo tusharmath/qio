@@ -2,7 +2,7 @@
  * Created by tushar on 2019-03-10
  */
 
-import {Cancel, IScheduler} from 'ts-scheduler'
+import {Cancel} from 'ts-scheduler'
 
 import {AnyEnv} from '../envs/AnyEnv'
 import {SchedulerEnv} from '../envs/SchedulerEnv'
@@ -15,7 +15,7 @@ import {Map} from '../operators/Map'
 import {Once} from '../operators/Once'
 import {Race} from '../operators/Race'
 import {OR, Zip} from '../operators/Zip'
-import {Computation} from '../sources/Computation'
+import {C} from '../sources/Computation'
 import {Timeout} from '../sources/Timeout'
 
 const NOOP = () => {}
@@ -57,7 +57,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static access<R = AnyEnv, A = unknown>(fn: (env: R) => A): IO<R, A> {
     return IO.to(
-      new Computation((env1, rej, res) => {
+      C((env1, rej, res) => {
         res(fn(env1))
       })
     )
@@ -81,7 +81,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<SchedulerEnv, A>((env, rej, res) => {
+        C<SchedulerEnv, A>((env, rej, res) => {
           res(fn(...t))
         })
       )
@@ -98,7 +98,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        new Computation<SchedulerEnv, A>((env, rej, res) => {
+        C<SchedulerEnv, A>((env, rej, res) => {
           void fn(...t)
             .then(res)
             .catch(rej)
@@ -110,7 +110,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an IO that resolves with the provided env
    */
   public static environment<R1 = unknown>(): IO<R1, R1> {
-    return IO.to(new Computation((env1, rej, res) => res(env1)))
+    return IO.to(C((env1, rej, res) => res(env1)))
   }
 
   /**
@@ -121,28 +121,28 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   public static from<R, A>(
     cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
   ): IO<R, A> {
-    return IO.to(new Computation(cmp))
+    return IO.to(C(cmp))
   }
 
   /**
    * Creates an [[IO]] that never completes.
    */
   public static never(): IO<SchedulerEnv, never> {
-    return IO.to(new Computation(RETURN_NOOP))
+    return IO.to(C(RETURN_NOOP))
   }
 
   /**
    * Creates an [[IO]] that always resolves with the same value.
    */
   public static of<A>(value: A): IO<SchedulerEnv, A> {
-    return IO.to(new Computation((env, rej, res) => res(value)))
+    return IO.to(C((env, rej, res) => res(value)))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
   public static reject(error: Error): IO<SchedulerEnv, never> {
-    return IO.to(new Computation((env, rej) => rej(error)))
+    return IO.to(C((env, rej) => rej(error)))
   }
 
   /**
@@ -205,9 +205,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an IO that can run in [DefaultEnv].
    */
   public provide(env: R1): IO<AnyEnv, A1> {
-    return IO.to(
-      new Computation((env1, rej, res) => this.io.fork(env, rej, res))
-    )
+    return IO.to(C((env1, rej, res) => this.io.fork(env, rej, res)))
   }
 
   /**
