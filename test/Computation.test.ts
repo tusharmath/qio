@@ -3,19 +3,20 @@
  */
 
 import {assert} from 'chai'
-import {scheduler} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {AnyEnv} from '../src/envs/AnyEnv'
+import {SchedulerEnv} from '../src/envs/SchedulerEnv'
 
 import {Counter} from './internals/Counter'
+import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
   ResolvingIOSpec(() => IO.from<AnyEnv, number>((env, rej, res) => res(10)))
-  RejectingIOSpec(() => IO.from((env, rej, res) => rej(new Error('FAILED'))))
+  RejectingIOSpec(() => IO.from((env, rej) => rej(new Error('FAILED'))))
 
   it('should defer computations', () => {
     const results: string[] = []
@@ -34,53 +35,55 @@ describe('Computation', () => {
     // Issue a cancelled IO
     assert.deepEqual(results, [])
   })
-  it('should handle sync exceptions', cb => {
-    IO.from(() => {
-      throw new Error('APPLE')
-    }).fork(
-      {scheduler},
-      e => {
-        assert.equal(e.message, 'APPLE')
-        cb()
-      },
-      () => {}
-    )
+  it('should handle sync exceptions', () => {
+    const actual = GetTimeline(
+      IO.from(() => {
+        throw new Error('APPLE')
+      })
+    ).getError().message
+    const expected = 'APPLE'
+
+    assert.strictEqual(actual, expected)
   })
-  it('should not cancel a resolved io', cb => {
+  it('should not cancel a resolved io', () => {
     let cancelled = false
-    const cancel = IO.from((env, rej, res) => {
-      const id = setTimeout(res, 0, 100)
+    const scheduler = testScheduler()
+    const io = IO.from<SchedulerEnv, number>((env, rej, res) => {
+      const c = env.scheduler.delay(() => res(100), 10)
 
       return () => {
-        clearTimeout(id)
+        c()
         cancelled = true
       }
-    }).fork({scheduler}, cb, data => {
-      cancel()
-      assert.equal(data, 100)
-      assert.isFalse(cancelled)
-      cb()
     })
+    const {fork, timeline} = IOCollector({scheduler}, io)
+    const cancel = fork()
+    scheduler.run()
+    cancel()
+
+    const actual = timeline.getValue()
+    const expected = 100
+    assert.strictEqual(actual, expected)
+    assert.isFalse(cancelled)
   })
-  it('should not cancel a rejected io', cb => {
+  it('should not cancel a rejected io', () => {
     let cancelled = false
-    const cancel = IO.from((env, rej) => {
-      const id = setTimeout(rej, 0, new Error('YO!'))
+    const io = IO.from<SchedulerEnv, never>((env, rej) => {
+      const c = env.scheduler.delay(() => rej(new Error('Bup!')), 10)
 
       return () => {
-        clearTimeout(id)
+        c()
         cancelled = true
       }
-    }).fork(
-      {scheduler},
-      err => {
-        cancel()
-        assert.equal(err.message, 'YO!')
-        assert.isFalse(cancelled)
-        cb()
-      },
-      cb
-    )
+    })
+    const scheduler = testScheduler()
+    const {fork, timeline} = IOCollector({scheduler}, io)
+    const cancel = fork()
+    scheduler.run()
+    cancel()
+
+    assert.equal(timeline.getError().message, 'Bup!')
+    assert.isFalse(cancelled)
   })
   it('should not cancel a cancelled IO', () => {
     const counter = Counter(1000)

@@ -184,6 +184,13 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   }
 
   /**
+   * Delays an IO execution by the provided duration
+   */
+  public delay(duration: number): IO<R1, A1> {
+    return IO.timeout(this.io, duration).chain(_ => _)
+  }
+
+  /**
    * Actually executes the IO
    */
   public fork(

@@ -3,7 +3,7 @@
  */
 
 import {assert} from 'chai'
-import {scheduler} from 'ts-scheduler'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 import {AnyEnv} from '../src/envs/AnyEnv'
@@ -24,15 +24,15 @@ describe('race', () => {
   })
   it('should ignore rejections once resolved', () => {
     const error = new Error('B')
-    const a = IO.of('A')
-    const b = IO.reject(error)
-    a.race(b).fork(
-      {scheduler},
-      err => assert.fail('Should not throw: ' + err.message),
-      value => assert.equal(value, 'A')
-    )
+    const io = IO.of('A').race(IO.reject(error).delay(10))
+
+    const actual = GetTimeline(io).getValue()
+    const expected = 'A'
+
+    assert.strictEqual(actual, expected)
   })
   it('should ignore resolutions once rejected', () => {
+    const scheduler = testScheduler()
     const error = new Error('A')
     const a = IO.reject(error)
     const b = IO.of('B')

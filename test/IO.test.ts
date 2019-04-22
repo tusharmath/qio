@@ -11,8 +11,13 @@ import {IO} from '../src/main/IO'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'
+import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
-import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
+import {
+  CancellationIOSpec,
+  RejectingIOSpec,
+  ResolvingIOSpec
+} from './internals/IOSpecification'
 import {$} from './internals/ProxyFunction'
 import {TestSchedulerEnv} from './internals/TestSchedulerEnv'
 
@@ -97,7 +102,6 @@ describe('IO', () => {
       })
     )
   })
-
   describe('accessM()', () => {
     it('should create an IO[R, A] ', () => {
       interface Console {
@@ -161,5 +165,20 @@ describe('IO', () => {
     })
 
     ResolvingIOSpec(() => IO.environment())
+  })
+  describe('delay()', () => {
+    ResolvingIOSpec(() => IO.of(1).delay(10))
+    RejectingIOSpec(() => IO.reject(new Error('Bup!')).delay(10))
+    CancellationIOSpec(cancel => cancel.delay(10))
+    it('should delay the execution by the given duration', () => {
+      const io = IO.from<SchedulerEnv, number>((env1, rej, res) => {
+        res(env1.scheduler.now())
+      }).delay(100)
+
+      const actual = GetTimeline(io).getValue()
+      const expected = 100
+
+      assert.strictEqual(actual, expected)
+    })
   })
 })
