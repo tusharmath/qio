@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "dbl-linked-list-ds": "^2.0.0",
-    "ts-scheduler": "^4.1.0"
+    "ts-scheduler": "^4.1.2"
   }
 }

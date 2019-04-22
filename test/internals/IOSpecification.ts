@@ -112,9 +112,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
     it('should cancel chained IO', () => {
       const S = testScheduler()
       let isCancelled = false
-      const io = new Chain(fn(), () =>
-        C<SchedulerEnv, never>(() => () => (isCancelled = true))
-      )
+      const io = new Chain(fn(), () => C(() => () => (isCancelled = true)))
       const cancel = io.fork(
         {scheduler: S},
         () => {

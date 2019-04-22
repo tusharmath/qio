@@ -5756,10 +5756,10 @@ ts-node@^8.1.0:
     source-map-support "^0.5.6"
     yn "^3.0.0"
 
-ts-scheduler@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/ts-scheduler/-/ts-scheduler-4.1.0.tgz#0ca0a9ceaf5821b50a5f0a9fd73a93900de50f00"
-  integrity sha512-T9dRzSNfnMhu4dUAd9zo4IxeA9fnvw9pqEbftjxz2wXmxoKmFLkTFGRUjtRJmTt0eStep86dnP4b08AxNoo1rg==
+ts-scheduler@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/ts-scheduler/-/ts-scheduler-4.1.2.tgz#7180eb9376e375cd838dc8be22df9ee4459c7eda"
+  integrity sha512-tIuIcydYdwscCggJYd+2rfhtOjvb1tEzl/k5gJuj4XbjiyW8MiGSZ7GKCbGBzfhyrPCuPfZTAtoxn4My4PCDnw==
   dependencies:
     dbl-linked-list-ds "^2.0.0"
     detect-node "^2.0.4"

@@ -79,12 +79,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   public static encase<A, G extends unknown[]>(
     fn: (...t: G) => A
   ): (...t: G) => IO<SchedulerEnv, A> {
-    return (...t) =>
-      IO.to(
-        C<SchedulerEnv, A>((env, rej, res) => {
-          res(fn(...t))
-        })
-      )
+    return (...t) => IO.to(C((env, rej, res) => res(fn(...t))))
   }
 
   /**
@@ -98,7 +93,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
       IO.to(
-        C<SchedulerEnv, A>((env, rej, res) => {
+        C((env, rej, res) => {
           void fn(...t)
             .then(res)
             .catch(rej)

@@ -1,5 +1,6 @@
 import {Cancel} from 'ts-scheduler'
 
+import {AnyEnv} from '../envs/AnyEnv'
 import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
@@ -60,6 +61,6 @@ class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
  * Creates an instance of Computation
  * @ignore
  */
-export const C = <R, A>(
+export const C = <R = AnyEnv, A = unknown>(
   cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
-): FIO<R, A> => new Computation(cmp)
+): FIO<R & SchedulerEnv, A> => new Computation(cmp)
