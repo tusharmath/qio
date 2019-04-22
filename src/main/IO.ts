@@ -2,7 +2,7 @@
  * Created by tushar on 2019-03-10
  */
 
-import {Cancel, IScheduler, scheduler} from 'ts-scheduler'
+import {Cancel, IScheduler} from 'ts-scheduler'
 
 import {AnyEnv} from '../envs/AnyEnv'
 import {SchedulerEnv} from '../envs/SchedulerEnv'
@@ -182,12 +182,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   /**
    * Actually executes the IO
    */
-  public fork(
-    env: R1,
-    rej: REJ,
-    res: RES<A1>,
-    sh: IScheduler = scheduler
-  ): Cancel {
+  public fork(env: R1, rej: REJ, res: RES<A1>): Cancel {
     return this.io.fork(env, rej, res)
   }
 

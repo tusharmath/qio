@@ -3,7 +3,6 @@
  */
 
 import {assert} from 'chai'
-import {scheduler as sh} from 'ts-scheduler'
 
 import {IO} from '../'
 
@@ -16,12 +15,6 @@ describe('reject', () => {
     const actual = GetTimeline(IO.reject(error)).getError().message
     const expected = error.message
     assert.strictEqual(actual, expected)
-  })
-
-  it('should abort rejected io', cb => {
-    const error = new Error('Bananas')
-    IO.reject(error).fork({scheduler: sh}, cb, cb)()
-    cb()
   })
 
   RejectingIOSpec(() => IO.reject(new Error('FAILED')))
