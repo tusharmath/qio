@@ -139,6 +139,7 @@ describe('IO', () => {
         throw new Error('FAILED')
       })
     )
+    RejectingIOSpec(() => IO.accessM(() => IO.reject(new Error('FAILED'))))
   })
   describe('environment()', () => {
     it('should return the env its being forked with', () => {
