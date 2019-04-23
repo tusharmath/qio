@@ -56,11 +56,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Accesses an environment for the effect
    */
   public static access<R = AnyEnv, A = unknown>(fn: (env: R) => A): IO<R, A> {
-    return IO.to(
-      C((env1, rej, res) => {
-        res(fn(env1))
-      })
-    )
+    return IO.from((env1, rej, res) => res(fn(env1)))
   }
 
   /**
@@ -79,7 +75,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   public static encase<A, G extends unknown[]>(
     fn: (...t: G) => A
   ): (...t: G) => IO<SchedulerEnv, A> {
-    return (...t) => IO.to(C((env, rej, res) => res(fn(...t))))
+    return (...t) => IO.from((env, rej, res) => res(fn(...t)))
   }
 
   /**
@@ -92,12 +88,11 @@ export class IO<R1, A1> implements FIO<R1, A1> {
     fn: (...t: G) => Promise<A>
   ): (...t: G) => IO<SchedulerEnv, A> {
     return (...t) =>
-      IO.to(
-        C((env, rej, res) => {
+      IO.from(
+        (env, rej, res) =>
           void fn(...t)
             .then(res)
             .catch(rej)
-        })
       )
   }
 
@@ -105,7 +100,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an IO that resolves with the provided env
    */
   public static environment<R1 = unknown>(): IO<R1, R1> {
-    return IO.to(C((env1, rej, res) => res(env1)))
+    return IO.from((env1, rej, res) => res(env1))
   }
 
   /**
@@ -113,7 +108,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * In most cases you should use [encase] [encaseP] etc. to create new IOs.
    * `from` is for more advanced usages and is intended to be used internally.
    */
-  public static from<R, A>(
+  public static from<R = SchedulerEnv, A = unknown>(
     cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
   ): IO<R, A> {
     return IO.to(C(cmp))
@@ -123,21 +118,21 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an [[IO]] that never completes.
    */
   public static never(): IO<SchedulerEnv, never> {
-    return IO.to(C(RETURN_NOOP))
+    return IO.from(RETURN_NOOP)
   }
 
   /**
    * Creates an [[IO]] that always resolves with the same value.
    */
   public static of<A>(value: A): IO<SchedulerEnv, A> {
-    return IO.to(C((env, rej, res) => res(value)))
+    return IO.from((env, rej, res) => res(value))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
   public static reject(error: Error): IO<SchedulerEnv, never> {
-    return IO.to(C((env, rej) => rej(error)))
+    return IO.from((env, rej) => rej(error))
   }
 
   /**
@@ -200,7 +195,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Creates an IO that can run in [DefaultEnv].
    */
   public provide(env: R1): IO<AnyEnv, A1> {
-    return IO.to(C((env1, rej, res) => this.io.fork(env, rej, res)))
+    return IO.from((env1, rej, res) => this.io.fork(env, rej, res))
   }
 
   /**
