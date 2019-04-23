@@ -3,6 +3,7 @@
   "excludeNotExported": true,
   "excludePrivate": true,
   "excludeProtected": true,
+  "hideGenerator": true,
   "mode": "file",
   "out": "docs",
   "exclude": ["test/**"],
