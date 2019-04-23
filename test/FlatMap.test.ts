@@ -24,6 +24,11 @@ describe('chain()', () => {
   })
   ResolvingIOSpec(() => IO.of(10).chain(i => IO.of(100)))
   RejectingIOSpec(() => IO.of(10).chain(i => IO.reject(new Error('FAILED'))))
+  RejectingIOSpec(() =>
+    IO.of(10).chain(() => {
+      throw new Error('FAILED')
+    })
+  )
   CancellationIOSpec(cancellable => IO.of(10).chain(i => cancellable))
   CancellationIOSpec(cancellable => cancellable.chain(i => IO.of(10)))
 })

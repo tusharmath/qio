@@ -4,7 +4,7 @@ import {REJ} from './REJ'
 import {RES} from './RES'
 
 /**
- * Base interface for fearless-io
+ * Base interface for fearless-io.
  * @typeparam R The environment needed to run the IO
  * @typeparam A The output of the IO
  */
