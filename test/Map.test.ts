@@ -29,7 +29,7 @@ describe('map', () => {
   })
   ResolvingIOSpec(() => IO.of(10).map(i => 100))
   RejectingIOSpec(() =>
-    IO.of(10).map(i => {
+    IO.of(10).map(() => {
       throw new Error('FAILED')
     })
   )

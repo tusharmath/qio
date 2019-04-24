@@ -10,11 +10,16 @@ import {SchedulerEnv} from '../src/envs/SchedulerEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
-import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
+import {
+  CancellationIOSpec,
+  RejectingIOSpec,
+  ResolvingIOSpec
+} from './internals/IOSpecification'
 
 describe('Once', () => {
   ResolvingIOSpec(() => new Once(IO.of(10)))
   RejectingIOSpec(() => new Once(IO.reject(new Error('FAILED'))))
+  CancellationIOSpec(cancellable => new Once(cancellable))
 
   const createNeverEndingOnceIO = () => {
     let count = 0
@@ -187,6 +192,4 @@ describe('Once', () => {
     )
     assert.deepEqual(actual, expected)
   })
-
-  it.skip('should be referentially transparent')
 })

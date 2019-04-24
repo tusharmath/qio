@@ -8,8 +8,6 @@ import {AnyEnv} from '../../src/envs/AnyEnv'
 import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
 import {FIO} from '../../src/internals/FIO'
 import {IO} from '../../src/main/IO'
-import {Chain} from '../../src/operators/Chain'
-import {C} from '../../src/sources/Computation'
 
 import {IOCollector} from './IOCollector'
 import {NeverEnding} from './NeverEnding'
@@ -108,23 +106,6 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, T>) => {
         resolved: false
       }
       assert.deepEqual(actual, expected)
-    })
-    it('should cancel chained IO', () => {
-      const S = testScheduler()
-      let isCancelled = false
-      const io = new Chain(fn(), () => C(() => () => (isCancelled = true)))
-      const cancel = io.fork(
-        {scheduler: S},
-        () => {
-          assert.fail('IO should not reject')
-        },
-        () => {
-          assert.fail('IO should not resolve')
-        }
-      )
-      S.run()
-      cancel()
-      assert.ok(isCancelled)
     })
   })
 }

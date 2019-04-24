@@ -2,11 +2,9 @@
  * Created by tushar on 2019-03-11
  */
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
 
-import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'
 import {
   CancellationIOSpec,
