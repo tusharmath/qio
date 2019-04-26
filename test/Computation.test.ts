@@ -8,6 +8,7 @@ import {testScheduler} from 'ts-scheduler/test'
 import {IO} from '../'
 import {AnyEnv} from '../src/envs/AnyEnv'
 import {SchedulerEnv} from '../src/envs/SchedulerEnv'
+import {RES} from '../src/internals/RES'
 
 import {Counter} from './internals/Counter'
 import {GetTimeline} from './internals/GetTimeline'
@@ -15,7 +16,7 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
-  ResolvingIOSpec(() => IO.from((env, rej, res) => res(10)))
+  ResolvingIOSpec(() => IO.from<AnyEnv, number>((env, rej, res) => res(10)))
   RejectingIOSpec(() => IO.from((env, rej) => rej(new Error('FAILED'))))
 
   it('should defer computations', () => {
