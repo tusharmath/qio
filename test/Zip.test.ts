@@ -38,7 +38,7 @@ describe('zip', () => {
   it('should cancel the second io if one of them is rejected (TEST_SCHEDULER)', () => {
     let cancelled = 0
     const a = IO.from(() => () => (cancelled = cancelled + 1))
-    const b = IO.from<SchedulerEnv, never>((env, rej) =>
+    const b = IO.from<SchedulerEnv>((env, rej) =>
       env.scheduler.delay(() => rej(new Error('Save Me!')), 100)
     )
     const scheduler = testScheduler()

@@ -6,5 +6,6 @@
     "plugins": [
       {"name": "typescript-tslint-plugin", "configFile": "./tslint.json"}
     ]
-  }
+  },
+  "exclude": ["type-test"]
 }

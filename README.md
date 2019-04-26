@@ -1,4 +1,4 @@
-# fearless-io
+# Fearless IO
 
 [![Build Status](https://travis-ci.com/tusharmath/fearless-io.svg?branch=master)](https://travis-ci.com/tusharmath/fearless-io)
 ![npm](https://img.shields.io/npm/v/fearless-io.svg)

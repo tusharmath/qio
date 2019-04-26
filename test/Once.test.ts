@@ -50,7 +50,7 @@ describe('Once', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<SchedulerEnv, never>((env, rej) =>
+      IO.from<SchedulerEnv>((env, rej) =>
         env.scheduler.delay(
           () => rej(new Error('FAILED_' + (count += 1).toString())),
           n

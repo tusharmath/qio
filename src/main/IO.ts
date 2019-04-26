@@ -108,9 +108,9 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * In most cases you should use [encase] [encaseP] etc. to create new IOs.
    * `from` is for more advanced usages and is intended to be used internally.
    */
-  public static from<R = SchedulerEnv, A = unknown>(
+  public static from<R = AnyEnv, A = never>(
     cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
-  ): IO<R, A> {
+  ): IO<R & SchedulerEnv, A> {
     return IO.to(C(cmp))
   }
 

@@ -15,7 +15,7 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
-  ResolvingIOSpec(() => IO.from<AnyEnv, number>((env, rej, res) => res(10)))
+  ResolvingIOSpec(() => IO.from((env, rej, res) => res(10)))
   RejectingIOSpec(() => IO.from((env, rej) => rej(new Error('FAILED'))))
 
   it('should defer computations', () => {
@@ -68,7 +68,7 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', () => {
     let cancelled = false
-    const io = IO.from<SchedulerEnv, never>((env, rej) => {
+    const io = IO.from<SchedulerEnv>((env, rej) => {
       const c = env.scheduler.delay(() => rej(new Error('Bup!')), 10)
 
       return () => {

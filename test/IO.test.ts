@@ -18,22 +18,10 @@ import {
   RejectingIOSpec,
   ResolvingIOSpec
 } from './internals/IOSpecification'
-import {$} from './internals/ProxyFunction'
 import {TestSchedulerEnv} from './internals/TestSchedulerEnv'
 
 describe('IO', () => {
   describe('once()', () => {
-    context('typings', () => {
-      it('should return a an IO< IO< A > >', () => {
-        interface TestENV {
-          name: IO<SchedulerEnv, string>
-        }
-        $(
-          (_: IO<TestENV, number>): IO<SchedulerEnv, IO<TestENV, number>> =>
-            _.once()
-        )
-      })
-    })
     it('should not throw to exit on calling once', () => {
       assert.doesNotThrow(() => IO.of(10).once())
     })
