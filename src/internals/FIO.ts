@@ -6,9 +6,10 @@ import {RES} from './RES'
 /**
  * Base interface for fearless-io.
  * @typeparam R The environment needed to run the IO
+ * @typeparam E The possible failures from the IO
  * @typeparam A The output of the IO
  */
-export interface FIO<R, A> {
+export interface FIO<R, E, A> {
   /**
    * Impure function that executes the provided IO.
    * @param env - Execution env needed to run the IO
@@ -16,5 +17,5 @@ export interface FIO<R, A> {
    * @param res - Success Handler
    * @return Cancel
    */
-  fork(env: R, rej: REJ, res: RES<A>): Cancel
+  fork(env: R, rej: REJ<E>, res: RES<A>): Cancel
 }

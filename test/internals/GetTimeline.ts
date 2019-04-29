@@ -8,5 +8,5 @@ import {FIO} from '../../src/internals/FIO'
 
 import {ForkNRun} from './ForkNRun'
 
-export const GetTimeline = <A>(io: FIO<AnyEnv, A>) =>
+export const GetTimeline = <A, E>(io: FIO<AnyEnv, E, A>) =>
   ForkNRun({scheduler: testScheduler()}, io).timeline

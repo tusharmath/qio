@@ -51,18 +51,20 @@ const RETURN_NOOP = () => NOOP
  * @typeparam A The output of the side-effect.
  *
  */
-export class IO<R1, A1> implements FIO<R1, A1> {
+export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   /**
    * Accesses an environment for the effect
    */
-  public static access<R = AnyEnv, A = unknown>(fn: (env: R) => A): IO<R, A> {
+  public static access<R = AnyEnv, E = Error, A = unknown>(
+    fn: (env: R) => A
+  ): IO<R, E, A> {
     return IO.from((env1, rej, res) => res(fn(env1)))
   }
 
   /**
    * Effect-fully accesses the environment of the effect.
    */
-  public static accessM<R, A>(fn: (env: R) => IO<R, A>): IO<R, A> {
+  public static accessM<R, E, A>(fn: (env: R) => IO<R, E, A>): IO<R, E, A> {
     return IO.environment<R>().chain(fn)
   }
 
@@ -74,7 +76,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static encase<A, G extends unknown[]>(
     fn: (...t: G) => A
-  ): (...t: G) => IO<SchedulerEnv, A> {
+  ): (...t: G) => IO<SchedulerEnv, Error, A> {
     return (...t) => IO.from((env, rej, res) => res(fn(...t)))
   }
 
@@ -86,7 +88,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    */
   public static encaseP<A, G extends unknown[]>(
     fn: (...t: G) => Promise<A>
-  ): (...t: G) => IO<SchedulerEnv, A> {
+  ): (...t: G) => IO<SchedulerEnv, Error, A> {
     return (...t) =>
       IO.from(
         (env, rej, res) =>
@@ -99,7 +101,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   /**
    * Creates an IO that resolves with the provided env
    */
-  public static environment<R1 = unknown>(): IO<R1, R1> {
+  public static environment<R1 = unknown>(): IO<R1, never, R1> {
     return IO.from((env1, rej, res) => res(env1))
   }
 
@@ -108,85 +110,92 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * In most cases you should use [encase] [encaseP] etc. to create new IOs.
    * `from` is for more advanced usages and is intended to be used internally.
    */
-  public static from<R = AnyEnv, A = never>(
-    cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
-  ): IO<R & SchedulerEnv, A> {
+  public static from<R = AnyEnv, E = never, A = never>(
+    cmp: (env: R, rej: REJ<E>, res: RES<A>) => Cancel | void
+  ): IO<R & SchedulerEnv, E, A> {
     return IO.to(C(cmp))
   }
 
   /**
    * Creates an [[IO]] that never completes.
    */
-  public static never(): IO<SchedulerEnv, never> {
+  public static never(): IO<SchedulerEnv, never, never> {
     return IO.from(RETURN_NOOP)
   }
 
   /**
    * Creates an [[IO]] that always resolves with the same value.
    */
-  public static of<A>(value: A): IO<SchedulerEnv, A> {
+  public static of<A>(value: A): IO<SchedulerEnv, never, A> {
     return IO.from((env, rej, res) => res(value))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
-  public static reject(error: Error): IO<SchedulerEnv, never> {
+  public static reject<E>(error: E): IO<SchedulerEnv, E, never> {
     return IO.from((env, rej) => rej(error))
   }
 
   /**
    * Creates an IO that resolves with the given value after a certain duration of time.
    */
-  public static timeout<A>(value: A, duration: number): IO<SchedulerEnv, A> {
+  public static timeout<A>(
+    value: A,
+    duration: number
+  ): IO<SchedulerEnv, Error, A> {
     return IO.to(new Timeout(duration, value))
   }
 
-  private static to<R, A>(io: FIO<R, A>): IO<R, A> {
+  private static to<R, E, A>(io: FIO<R, E, A>): IO<R, E, A> {
     return new IO(io)
   }
 
-  private constructor(private readonly io: FIO<R1, A1>) {}
+  private constructor(private readonly io: FIO<R1, E1, A1>) {}
 
   /**
    * Catches a failing IO zip creates another IO
    */
-  public catch<R2, A2>(ab: (a: Error) => FIO<R2, A2>): IO<R1 & R2, A1 | A2> {
+  public catch<R2, E2, A2>(
+    ab: (a: E1) => FIO<R2, E2, A2>
+  ): IO<R1 & R2, E2, A1 | A2> {
     return IO.to(new Catch(this.io, ab))
   }
 
   /**
    * Chains two IOs such that one is executed after the other.
    */
-  public chain<R2, A2>(ab: (a: A1) => FIO<R2, A2>): IO<R1 & R2, A2> {
+  public chain<R2, E2, A2>(
+    ab: (a: A1) => FIO<R2, E2, A2>
+  ): IO<R1 & R2, E1 | E2, A2> {
     return IO.to(new Chain(this.io, ab))
   }
 
   /**
    * Delays an IO execution by the provided duration
    */
-  public delay(duration: number): IO<R1, A1> {
+  public delay(duration: number): IO<R1 & SchedulerEnv, Error | E1, A1> {
     return IO.timeout(this.io, duration).chain(_ => _)
   }
 
   /**
    * Actually executes the IO
    */
-  public fork(env: R1, rej: REJ, res: RES<A1>): Cancel {
+  public fork(env: R1, rej: REJ<E1>, res: RES<A1>): Cancel {
     return this.io.fork(env, rej, res)
   }
 
   /**
    * Applies transformation on the resolve value of the IO
    */
-  public map<B>(ab: (a: A1) => B): IO<R1, B> {
+  public map<B>(ab: (a: A1) => B): IO<R1, E1 | Error, B> {
     return IO.to(new Map(this.io, ab))
   }
 
   /**
    * Creates a new IO<IO<A>> that executes only once
    */
-  public once(): IO<SchedulerEnv, IO<R1, A1>> {
+  public once(): IO<SchedulerEnv, never, IO<R1, E1, A1>> {
     return IO.of(IO.to(new Once(this)))
   }
 
@@ -194,14 +203,14 @@ export class IO<R1, A1> implements FIO<R1, A1> {
    * Eliminates the dependency on the IOs original environment.
    * Creates an IO that can run in [DefaultEnv].
    */
-  public provide(env: R1): IO<AnyEnv, A1> {
+  public provide(env: R1): IO<AnyEnv, E1, A1> {
     return IO.from((env1, rej, res) => this.io.fork(env, rej, res))
   }
 
   /**
    * Executes two IOs in parallel zip returns the value of the one that's completes first also cancelling the one pending.
    */
-  public race<R2, A2>(b: FIO<R2, A2>): IO<R1 & R2, A1 | A2> {
+  public race<R2, E2, A2>(b: FIO<R2, E2, A2>): IO<R1 & R2, E1 | E2, A1 | A2> {
     return IO.to(new Race(this.io, b))
   }
 
@@ -215,7 +224,7 @@ export class IO<R1, A1> implements FIO<R1, A1> {
   /**
    * Combines two IO's into one zip then on fork executes them in parallel.
    */
-  public zip<R2, A2>(b: FIO<R2, A2>): IO<R1 & R2, OR<A1, A2>> {
+  public zip<R2, E2, A2>(b: FIO<R2, E2, A2>): IO<R1 & R2, E1 | E2, OR<A1, A2>> {
     return IO.to(new Zip(this.io, b))
   }
 }

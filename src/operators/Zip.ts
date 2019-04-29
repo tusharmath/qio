@@ -12,18 +12,19 @@ export type OR<A, B> = A & B extends never ? never : [A, B]
 /**
  * @ignore
  */
-export class Zip<R1, R2, A, B> implements FIO<R1 & R2, OR<A, B>> {
+export class Zip<R1, R2, E1, E2, A, B>
+  implements FIO<R1 & R2, E1 | E2, OR<A, B>> {
   public constructor(
-    private readonly a: FIO<R1, A>,
-    private readonly b: FIO<R2, B>
+    private readonly a: FIO<R1, E1, A>,
+    private readonly b: FIO<R2, E2, B>
   ) {}
 
-  public fork(env: R1 & R2, rej: REJ, res: RES<OR<A, B>>): Cancel {
+  public fork(env: R1 & R2, rej: REJ<E1 | E2>, res: RES<OR<A, B>>): Cancel {
     let responseA: A
     let responseB: B
     let count = 0
     const cancel = new Array<Cancel>()
-    const onError = (cancelID: number) => (err: Error) => {
+    const onError = (cancelID: number) => (err: E1 | E2) => {
       cancel[cancelID]()
       rej(err)
     }

@@ -4,6 +4,7 @@
 import {assert} from 'chai'
 
 import {IO} from '../'
+import {AnyEnv} from '../src/envs/AnyEnv'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {
@@ -14,10 +15,14 @@ import {
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
-    IO.from((env, rej) => rej(new Error('FAILED'))).catch(e => IO.of(e.message))
+    IO.from<AnyEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(e =>
+      IO.of(e.message)
+    )
   )
   RejectingIOSpec(() =>
-    IO.from((env, rej) => rej(new Error('FAILED'))).catch(e => IO.reject(e))
+    IO.from<AnyEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(e =>
+      IO.reject(e)
+    )
   )
   CancellationIOSpec(io => IO.reject(new Error('!!!')).catch(() => io))
   CancellationIOSpec(io => io.catch(() => IO.of('Caught')))
@@ -33,7 +38,7 @@ describe('catch', () => {
   })
   it('should forward results', () => {
     const actual = GetTimeline(
-      IO.of('ok!').catch(err => IO.of('ERR:' + err.message))
+      IO.of('ok!').catch(err => IO.of('ERR!'))
     ).getValue()
 
     const expected = 'ok!'

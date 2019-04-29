@@ -29,6 +29,6 @@ describe('chain()', () => {
       throw new Error('FAILED')
     })
   )
-  CancellationIOSpec(cancellable => IO.of(10).chain(i => cancellable))
-  CancellationIOSpec(cancellable => cancellable.chain(i => IO.of(10)))
+  CancellationIOSpec(cancellable => IO.of(10).chain(() => cancellable))
+  CancellationIOSpec(cancellable => cancellable.chain(() => IO.of(10)))
 })

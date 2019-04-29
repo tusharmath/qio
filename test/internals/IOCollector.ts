@@ -7,7 +7,10 @@ import {FIO} from '../../src/internals/FIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A, R>(env: R & SchedulerEnv, io: FIO<R, A>) => {
+export const IOCollector = <A, E, R>(
+  env: R & SchedulerEnv,
+  io: FIO<R, E, A>
+) => {
   /**
    * access the testScheduler
    */
@@ -16,7 +19,7 @@ export const IOCollector = <A, R>(env: R & SchedulerEnv, io: FIO<R, A>) => {
   /**
    * Contains a list of all internal events.
    */
-  const timeline = Timeline<A>(scheduler)
+  const timeline = Timeline<E, A>(scheduler)
 
   /**
    * Forks the IO operation

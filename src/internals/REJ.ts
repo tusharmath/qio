@@ -1,4 +1,4 @@
 /**
  * Rejecting function
  */
-export type REJ = (e: Error) => void
+export type REJ<E> = (e: E) => void

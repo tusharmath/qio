@@ -7,23 +7,20 @@ import {SchedulerEnv} from '../envs/SchedulerEnv'
 import {FIO} from '../internals/FIO'
 import {REJ} from '../internals/REJ'
 import {RES} from '../internals/RES'
+import {SafeResolve} from '../internals/SafeResolve'
 
 /**
  * @ignore
  */
-export class Timeout<A> implements FIO<SchedulerEnv, A> {
+export class Timeout<A> implements FIO<SchedulerEnv, Error, A> {
   public constructor(
     private readonly duration: number,
     private readonly value: A
   ) {}
 
-  public fork(env: SchedulerEnv, rej: REJ, res: RES<A>): Cancel {
+  public fork(env: SchedulerEnv, rej: REJ<Error>, res: RES<A>): Cancel {
     return env.scheduler.delay(() => {
-      try {
-        res(this.value)
-      } catch (e) {
-        rej(e as Error)
-      }
+      SafeResolve(this.value, rej, res)
     }, this.duration)
   }
 }

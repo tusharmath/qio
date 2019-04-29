@@ -12,7 +12,7 @@ import {GetTimeline} from './internals/GetTimeline'
 
 describe('race', () => {
   it('should resolve with fastest io', () => {
-    const a = IO.from<AnyEnv, string>((env, rej, res) => {
+    const a = IO.from<AnyEnv, never, string>((env, rej, res) => {
       res('A')
 
       return () => {}

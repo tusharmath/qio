@@ -16,16 +16,16 @@ enum IOStatus {
 /**
  * @ignore
  */
-class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
+class Computation<R, E, A> implements FIO<R & SchedulerEnv, E, A> {
   public constructor(
-    private readonly cmp: (env: R, rej: REJ, res: RES<A>) => void | Cancel
+    private readonly cmp: (env: R, rej: REJ<E>, res: RES<A>) => void | Cancel
   ) {}
 
-  public fork(env: R & SchedulerEnv, rej: REJ, res: RES<A>): Cancel {
+  public fork(env: R & SchedulerEnv, rej: REJ<E>, res: RES<A>): Cancel {
     const sh = env.scheduler
     const cancellations = new Array<Cancel>()
     let status = IOStatus.FORKED
-    const onRej: REJ = e => {
+    const onRej: REJ<E> = e => {
       status = IOStatus.REJECTED
       rej(e)
     }
@@ -43,7 +43,7 @@ class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
             cancellations.push(cancel)
           }
         } catch (e) {
-          rej(e as Error)
+          rej(e as E)
         }
       })
     )
@@ -61,6 +61,6 @@ class Computation<R, A> implements FIO<R & SchedulerEnv, A> {
  * Creates an instance of Computation
  * @ignore
  */
-export const C = <R = AnyEnv, A = unknown>(
-  cmp: (env: R, rej: REJ, res: RES<A>) => Cancel | void
-): FIO<R & SchedulerEnv, A> => new Computation(cmp)
+export const C = <R = AnyEnv, E = Error, A = unknown>(
+  cmp: (env: R, rej: REJ<E>, res: RES<A>) => Cancel | void
+): FIO<R & SchedulerEnv, E, A> => new Computation(cmp)

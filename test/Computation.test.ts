@@ -8,7 +8,6 @@ import {testScheduler} from 'ts-scheduler/test'
 import {IO} from '../'
 import {AnyEnv} from '../src/envs/AnyEnv'
 import {SchedulerEnv} from '../src/envs/SchedulerEnv'
-import {RES} from '../src/internals/RES'
 
 import {Counter} from './internals/Counter'
 import {GetTimeline} from './internals/GetTimeline'
@@ -16,15 +15,19 @@ import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
-  ResolvingIOSpec(() => IO.from<AnyEnv, number>((env, rej, res) => res(10)))
-  RejectingIOSpec(() => IO.from((env, rej) => rej(new Error('FAILED'))))
+  ResolvingIOSpec(() =>
+    IO.from<AnyEnv, never, number>((env, rej, res) => res(10))
+  )
+  RejectingIOSpec(() =>
+    IO.from<AnyEnv, Error>((env, rej) => rej(new Error('FAILED')))
+  )
 
   it('should defer computations', () => {
     const results: string[] = []
 
     const {fork} = IOCollector(
       {scheduler: testScheduler()},
-      IO.from<AnyEnv, void>((env, rej, res) => {
+      IO.from<AnyEnv, never, void>((env, rej, res) => {
         results.push('RUN')
         res(undefined)
 
@@ -38,7 +41,7 @@ describe('Computation', () => {
   })
   it('should handle sync exceptions', () => {
     const actual = GetTimeline(
-      IO.from(() => {
+      IO.from<AnyEnv, Error>(() => {
         throw new Error('APPLE')
       })
     ).getError().message
@@ -49,7 +52,7 @@ describe('Computation', () => {
   it('should not cancel a resolved io', () => {
     let cancelled = false
     const scheduler = testScheduler()
-    const io = IO.from<SchedulerEnv, number>((env, rej, res) => {
+    const io = IO.from<SchedulerEnv, never, number>((env, rej, res) => {
       const c = env.scheduler.delay(() => res(100), 10)
 
       return () => {
@@ -69,7 +72,7 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', () => {
     let cancelled = false
-    const io = IO.from<SchedulerEnv>((env, rej) => {
+    const io = IO.from<SchedulerEnv, Error>((env, rej) => {
       const c = env.scheduler.delay(() => rej(new Error('Bup!')), 10)
 
       return () => {

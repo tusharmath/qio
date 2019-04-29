@@ -9,25 +9,25 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Once<R, A> implements FIO<R & SchedulerEnv, A> {
+export class Once<R, E, A> implements FIO<R & SchedulerEnv, E, A> {
   private cancel: Cancel | undefined
-  private error: Error | undefined
+  private error: E | undefined
   private isForked = false
   private isRejected = false
   private isResolved = false
-  private readonly Q = new LinkedList<{rej: REJ; res: RES<A>}>()
+  private readonly Q = new LinkedList<{rej: REJ<E>; res: RES<A>}>()
   private result: A | undefined
 
-  public constructor(private readonly io: FIO<R, A>) {}
+  public constructor(private readonly io: FIO<R, E, A>) {}
 
-  public fork(env: R & SchedulerEnv, rej: REJ, res: RES<A>): Cancel {
+  public fork(env: R & SchedulerEnv, rej: REJ<E>, res: RES<A>): Cancel {
     const sh = env.scheduler
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))
     }
 
     if (this.isRejected) {
-      return sh.asap(() => rej(this.error as Error))
+      return sh.asap(() => rej(this.error as E))
     }
 
     const id = this.Q.add({res, rej})
@@ -45,7 +45,7 @@ export class Once<R, A> implements FIO<R & SchedulerEnv, A> {
     }
   }
 
-  private readonly onReject = (err: Error) => {
+  private readonly onReject = (err: E) => {
     this.isRejected = true
     this.error = err
     this.Q.forEach(_ => _.value.rej(err))

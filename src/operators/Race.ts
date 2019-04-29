@@ -7,13 +7,14 @@ import {RES} from '../internals/RES'
 /**
  * @ignore
  */
-export class Race<R1, R2, A1, A2> implements FIO<R1 & R2, A1 | A2> {
+export class Race<R1, R2, E1, E2, A1, A2>
+  implements FIO<R1 & R2, E1 | E2, A1 | A2> {
   public constructor(
-    private readonly a: FIO<R1, A1>,
-    private readonly b: FIO<R2, A2>
+    private readonly a: FIO<R1, E1, A1>,
+    private readonly b: FIO<R2, E2, A2>
   ) {}
 
-  public fork(env: R1 & R2, rej: REJ, res: RES<A1 | A2>): Cancel {
+  public fork(env: R1 & R2, rej: REJ<E1 | E2>, res: RES<A1 | A2>): Cancel {
     const cancel = new Array<Cancel>()
     const onResponse = <T>(cancelID: number, cb: RES<T>) => (t: T) => {
       cancel[cancelID]()

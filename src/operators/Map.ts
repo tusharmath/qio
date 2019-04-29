@@ -8,13 +8,13 @@ import {SafeResolve} from '../internals/SafeResolve'
 /**
  * @ignore
  */
-export class Map<R, A, B> implements FIO<R, B> {
+export class Map<R, E, A, B> implements FIO<R, E, B> {
   public constructor(
-    private readonly src: FIO<R, A>,
+    private readonly src: FIO<R, E, A>,
     private readonly ab: (a: A) => B
   ) {}
 
-  public fork(env: R, rej: REJ, res: RES<B>): Cancel {
+  public fork(env: R, rej: REJ<E>, res: RES<B>): Cancel {
     return this.src.fork(env, rej, a => SafeResolve(this.ab(a), rej, res))
   }
 }

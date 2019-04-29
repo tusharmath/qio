@@ -93,7 +93,7 @@ describe('IO', () => {
   describe('accessM()', () => {
     it('should create an IO[R, A] ', () => {
       interface Console {
-        print(str: string): IO<AnyEnv, void>
+        print(str: string): IO<AnyEnv, Error, void>
       }
 
       interface HasConsole {
@@ -160,7 +160,7 @@ describe('IO', () => {
     RejectingIOSpec(() => IO.reject(new Error('Bup!')).delay(10))
     CancellationIOSpec(cancel => cancel.delay(10))
     it('should delay the execution by the given duration', () => {
-      const io = IO.from<SchedulerEnv, number>((env1, rej, res) => {
+      const io = IO.from<SchedulerEnv, never, number>((env1, rej, res) => {
         res(env1.scheduler.now())
       }).delay(100)
 
