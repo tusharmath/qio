@@ -5,7 +5,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {IO} from '../'
+import {FIO} from '../'
 import {DefaultEnv} from '../src/envs/DefaultEnv'
 import {Once} from '../src/operators/Once'
 
@@ -17,14 +17,14 @@ import {
 } from './internals/IOSpecification'
 
 describe('Once', () => {
-  ResolvingIOSpec(() => new Once(IO.of(10)))
-  RejectingIOSpec(() => new Once(IO.reject(new Error('FAILED'))))
+  ResolvingIOSpec(() => new Once(FIO.of(10)))
+  RejectingIOSpec(() => new Once(FIO.reject(new Error('FAILED'))))
   CancellationIOSpec(cancellable => new Once(cancellable))
 
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      IO.from<DefaultEnv, never, number>((env, rej, res) =>
+      FIO.from<DefaultEnv, never, number>((env, rej, res) =>
         env.scheduler.asap(() => res((count += 1)))
       )
     )
@@ -37,7 +37,7 @@ describe('Once', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<DefaultEnv, never, number>((env, rej, res) =>
+      FIO.from<DefaultEnv, never, number>((env, rej, res) =>
         env.scheduler.delay(() => res((count += 1)), n)
       )
     )
@@ -50,7 +50,7 @@ describe('Once', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<DefaultEnv, Error>((env, rej) =>
+      FIO.from<DefaultEnv, Error>((env, rej) =>
         env.scheduler.delay(
           () => rej(new Error('FAILED_' + (count += 1).toString())),
           n

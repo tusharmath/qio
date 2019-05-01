@@ -4,7 +4,7 @@
 
 import {assert} from 'chai'
 
-import {IO} from '../'
+import {FIO} from '../'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {
@@ -16,19 +16,19 @@ import {
 describe('chain()', () => {
   it('should flatten the value', () => {
     const actual = GetTimeline(
-      IO.of(10).chain((i: number) => IO.of(i + 1))
+      FIO.of(10).chain((i: number) => FIO.of(i + 1))
     ).getValue()
 
     const expected = 11
     assert.equal(actual, expected)
   })
-  ResolvingIOSpec(() => IO.of(10).chain(i => IO.of(100)))
-  RejectingIOSpec(() => IO.of(10).chain(i => IO.reject(new Error('FAILED'))))
+  ResolvingIOSpec(() => FIO.of(10).chain(i => FIO.of(100)))
+  RejectingIOSpec(() => FIO.of(10).chain(i => FIO.reject(new Error('FAILED'))))
   RejectingIOSpec(() =>
-    IO.of(10).chain(() => {
+    FIO.of(10).chain(() => {
       throw new Error('FAILED')
     })
   )
-  CancellationIOSpec(cancellable => IO.of(10).chain(() => cancellable))
-  CancellationIOSpec(cancellable => cancellable.chain(() => IO.of(10)))
+  CancellationIOSpec(cancellable => FIO.of(10).chain(() => cancellable))
+  CancellationIOSpec(cancellable => cancellable.chain(() => FIO.of(10)))
 })

@@ -5,7 +5,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {IO} from '../'
+import {FIO} from '../'
 import {DefaultEnv} from '../src/envs/DefaultEnv'
 
 import {Counter} from './internals/Counter'
@@ -15,10 +15,10 @@ import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
   ResolvingIOSpec(() =>
-    IO.from<DefaultEnv, never, number>((env, rej, res) => res(10))
+    FIO.from<DefaultEnv, never, number>((env, rej, res) => res(10))
   )
   RejectingIOSpec(() =>
-    IO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED')))
+    FIO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED')))
   )
 
   it('should defer computations', () => {
@@ -26,7 +26,7 @@ describe('Computation', () => {
 
     const {fork} = IOCollector(
       {scheduler: testScheduler()},
-      IO.from<DefaultEnv, never, void>((env, rej, res) => {
+      FIO.from<DefaultEnv, never, void>((env, rej, res) => {
         results.push('RUN')
         res(undefined)
 
@@ -40,7 +40,7 @@ describe('Computation', () => {
   })
   it('should handle sync exceptions', () => {
     const actual = GetTimeline(
-      IO.from<DefaultEnv, Error>(() => {
+      FIO.from<DefaultEnv, Error>(() => {
         throw new Error('APPLE')
       })
     ).getError().message
@@ -51,7 +51,7 @@ describe('Computation', () => {
   it('should not cancel a resolved io', () => {
     let cancelled = false
     const scheduler = testScheduler()
-    const io = IO.from<DefaultEnv, never, number>((env, rej, res) => {
+    const io = FIO.from<DefaultEnv, never, number>((env, rej, res) => {
       const c = env.scheduler.delay(() => res(100), 10)
 
       return () => {
@@ -71,7 +71,7 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', () => {
     let cancelled = false
-    const io = IO.from<DefaultEnv, Error>((env, rej) => {
+    const io = FIO.from<DefaultEnv, Error>((env, rej) => {
       const c = env.scheduler.delay(() => rej(new Error('Bup!')), 10)
 
       return () => {

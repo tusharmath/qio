@@ -2,7 +2,7 @@ import {Cancel} from 'ts-scheduler'
 
 import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
-import {FIO} from '../internals/FIO'
+import {IFIO} from '../internals/IFIO'
 
 enum IOStatus {
   FORKED,
@@ -14,7 +14,7 @@ enum IOStatus {
 /**
  * @ignore
  */
-class Computation<R, E, A> implements FIO<R & DefaultEnv, E, A> {
+class Computation<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
   public constructor(
     private readonly cmp: (env: R, rej: CB<E>, res: CB<A>) => void | Cancel
   ) {}
@@ -61,4 +61,4 @@ class Computation<R, E, A> implements FIO<R & DefaultEnv, E, A> {
  */
 export const C = <R = DefaultEnv, E = Error, A = unknown>(
   cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
-): FIO<R & DefaultEnv, E, A> => new Computation(cmp)
+): IFIO<R & DefaultEnv, E, A> => new Computation(cmp)

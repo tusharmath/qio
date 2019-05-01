@@ -1,3 +1,3 @@
 /* tslint:disable:file-name-casing */
-export {IO} from './src/main/IO'
+export {FIO} from './src/main/FIO'
 export {DefaultEnv} from './src/envs/DefaultEnv'

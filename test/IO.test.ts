@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {DefaultEnv} from '../src/envs/DefaultEnv'
-import {IO} from '../src/main/IO'
+import {FIO} from '../src/main/FIO'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'
@@ -22,7 +22,7 @@ import {TestEnv} from './internals/TestEnv'
 describe('IO', () => {
   describe('once()', () => {
     it('should not throw to exit on calling once', () => {
-      assert.doesNotThrow(() => IO.of(10).once())
+      assert.doesNotThrow(() => FIO.of(10).once())
     })
     it('should return an IO that is memoized', () => {
       const counter = Counter()
@@ -41,7 +41,7 @@ describe('IO', () => {
   describe('provide()', () => {
     it('should pass on the env', () => {
       const env = {scheduler: testScheduler(), test: {a: 'a', b: 'b'}}
-      const {timeline} = ForkNRun(env, IO.of(10).provide(env))
+      const {timeline} = ForkNRun(env, FIO.of(10).provide(env))
       const actual = timeline.list()
       const expected = [['RESOLVE', 1, 10]]
 
@@ -68,7 +68,7 @@ describe('IO', () => {
       }
 
       const putStrLn = (line: string) =>
-        IO.access((_: HasConsole) => _.console.print(line))
+        FIO.access((_: HasConsole) => _.console.print(line))
 
       const cons = Console()
       const env: HasConsole & TestEnv = {
@@ -82,9 +82,9 @@ describe('IO', () => {
 
       assert.deepStrictEqual(actual, expected)
     })
-    ResolvingIOSpec(() => IO.access(() => 10))
+    ResolvingIOSpec(() => FIO.access(() => 10))
     RejectingIOSpec(() =>
-      IO.access(() => {
+      FIO.access(() => {
         throw new Error('FAILED')
       })
     )
@@ -92,7 +92,7 @@ describe('IO', () => {
   describe('accessM()', () => {
     it('should create an IO[R, A] ', () => {
       interface Console {
-        print(str: string): IO<DefaultEnv, Error, void>
+        print(str: string): FIO<DefaultEnv, Error, void>
       }
 
       interface HasConsole {
@@ -104,12 +104,12 @@ describe('IO', () => {
 
         return {
           list: () => strings.slice(0),
-          print: IO.encase((str: string) => void strings.push(str))
+          print: FIO.encase((str: string) => void strings.push(str))
         }
       }
 
       const putStrLn = (line: string) =>
-        IO.accessM((_: HasConsole & DefaultEnv) => _.console.print(line))
+        FIO.accessM((_: HasConsole & DefaultEnv) => _.console.print(line))
 
       const cons = Console()
       const env = {console: cons, scheduler: testScheduler()}
@@ -120,20 +120,20 @@ describe('IO', () => {
 
       assert.deepStrictEqual(actual, expected)
     })
-    ResolvingIOSpec(() => IO.accessM(() => IO.of(10)))
+    ResolvingIOSpec(() => FIO.accessM(() => FIO.of(10)))
     RejectingIOSpec(() =>
-      IO.accessM(() => {
+      FIO.accessM(() => {
         throw new Error('FAILED')
       })
     )
-    RejectingIOSpec(() => IO.accessM(() => IO.reject(new Error('FAILED'))))
+    RejectingIOSpec(() => FIO.accessM(() => FIO.reject(new Error('FAILED'))))
   })
   describe('environment()', () => {
     it('should return the env its being forked with', () => {
       interface Console {
         console: {print(str: string): void}
       }
-      const io = IO.environment<Console>()
+      const io = FIO.environment<Console>()
       const out = new Array<string>()
       const ConsoleService = {
         print: (str: string): void => {
@@ -152,14 +152,14 @@ describe('IO', () => {
       assert.strictEqual(actual, expected)
     })
 
-    ResolvingIOSpec(() => IO.environment())
+    ResolvingIOSpec(() => FIO.environment())
   })
   describe('delay()', () => {
-    ResolvingIOSpec(() => IO.of(1).delay(10))
-    RejectingIOSpec(() => IO.reject(new Error('Bup!')).delay(10))
+    ResolvingIOSpec(() => FIO.of(1).delay(10))
+    RejectingIOSpec(() => FIO.reject(new Error('Bup!')).delay(10))
     CancellationIOSpec(cancel => cancel.delay(10))
     it('should delay the execution by the given duration', () => {
-      const io = IO.from<DefaultEnv, never, number>((env1, rej, res) => {
+      const io = FIO.from<DefaultEnv, never, number>((env1, rej, res) => {
         res(env1.scheduler.now())
       }).delay(100)
 

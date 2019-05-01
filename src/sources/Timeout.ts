@@ -5,13 +5,13 @@ import {Cancel} from 'ts-scheduler'
 
 import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
-import {FIO} from '../internals/FIO'
+import {IFIO} from '../internals/IFIO'
 import {SafeResolve} from '../internals/SafeResolve'
 
 /**
  * @ignore
  */
-export class Timeout<A> implements FIO<DefaultEnv, Error, A> {
+export class Timeout<A> implements IFIO<DefaultEnv, Error, A> {
   public constructor(
     private readonly duration: number,
     private readonly value: A

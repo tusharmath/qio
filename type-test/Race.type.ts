@@ -2,19 +2,19 @@
  * Created by tushar on 2019-04-24
  */
 
-import {IO} from '../src/main/IO'
+import {FIO} from '../src/main/FIO'
 
-// $ExpectType IO<DefaultEnv, never, never>
-IO.never().race(IO.never())
+// $ExpectType FIO<DefaultEnv, never, never>
+FIO.never().race(FIO.never())
 
-// $ExpectType IO<DefaultEnv, never, number>
-IO.never().race(IO.of(10))
+// $ExpectType FIO<DefaultEnv, never, number>
+FIO.never().race(FIO.of(10))
 
-// $ExpectType IO<DefaultEnv, never, number>
-IO.never().race(IO.of(10))
+// $ExpectType FIO<DefaultEnv, never, number>
+FIO.never().race(FIO.of(10))
 
-// $ExpectType IO<DefaultEnv, never, number | Date>
-IO.of(1000).race(IO.of(new Date()))
+// $ExpectType FIO<DefaultEnv, never, number | Date>
+FIO.of(1000).race(FIO.of(new Date()))
 
-// $ExpectType IO<DefaultEnv, number, never>
-IO.never().race(IO.reject(10))
+// $ExpectType FIO<DefaultEnv, number, never>
+FIO.never().race(FIO.reject(10))

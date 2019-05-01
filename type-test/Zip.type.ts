@@ -2,16 +2,16 @@
  * Created by tushar on 2019-04-24
  */
 
-import {IO} from '../src/main/IO'
+import {FIO} from '../src/main/FIO'
 
-// $ExpectType IO<DefaultEnv, never, never>
-IO.never().zip(IO.of(10))
+// $ExpectType FIO<DefaultEnv, never, never>
+FIO.never().zip(FIO.of(10))
 
-// $ExpectType IO<DefaultEnv, never, never>
-IO.never().zip(IO.never())
+// $ExpectType FIO<DefaultEnv, never, never>
+FIO.never().zip(FIO.never())
 
-// $ExpectType IO<DefaultEnv, never, [number, Date]>
-IO.of(1000).zip(IO.of(new Date()))
+// $ExpectType FIO<DefaultEnv, never, [number, Date]>
+FIO.of(1000).zip(FIO.of(new Date()))
 
-// $ExpectType IO<DefaultEnv, never, [number, Date]>
-IO.of(1000).zip(IO.of(new Date()))
+// $ExpectType FIO<DefaultEnv, never, [number, Date]>
+FIO.of(1000).zip(FIO.of(new Date()))

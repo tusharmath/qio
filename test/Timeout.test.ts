@@ -4,16 +4,16 @@
 import * as assert from 'assert'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {IO} from '../'
+import {FIO} from '../'
 
 import {IOCollector} from './internals/IOCollector'
 import {ResolvingIOSpec} from './internals/IOSpecification'
 import {TimeSlice} from './internals/Timeline'
 
 describe('Timeout', () => {
-  ResolvingIOSpec(() => IO.timeout('DONE', 1000))
+  ResolvingIOSpec(() => FIO.timeout('DONE', 1000))
   it('should resolve at the provided time', () => {
-    const io = IO.timeout('Bananas', 1000)
+    const io = FIO.timeout('Bananas', 1000)
 
     const scheduler = testScheduler()
     const {timeline, fork} = IOCollector({scheduler}, io)
@@ -29,7 +29,7 @@ describe('Timeout', () => {
   })
 
   it('should be cancellable', () => {
-    const io = IO.timeout('AAA', 1000)
+    const io = FIO.timeout('AAA', 1000)
     const scheduler = testScheduler()
     const {timeline, fork} = IOCollector({scheduler}, io)
 

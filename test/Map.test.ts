@@ -3,7 +3,7 @@
  */
 import {assert} from 'chai'
 
-import {IO} from '../'
+import {FIO} from '../'
 
 import {Counter} from './internals/Counter'
 import {GetTimeline} from './internals/GetTimeline'
@@ -11,7 +11,7 @@ import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('map', () => {
   it('should convert the value', () => {
-    const actual = GetTimeline(IO.of(10).map((i: number) => i + 1)).getValue()
+    const actual = GetTimeline(FIO.of(10).map((i: number) => i + 1)).getValue()
     const expected = 11
     assert.equal(actual, expected)
   })
@@ -27,9 +27,9 @@ describe('map', () => {
 
     assert.deepStrictEqual(actual, expected)
   })
-  ResolvingIOSpec(() => IO.of(10).map(i => 100))
+  ResolvingIOSpec(() => FIO.of(10).map(i => 100))
   RejectingIOSpec(() =>
-    IO.of(10).map(() => {
+    FIO.of(10).map(() => {
       throw new Error('FAILED')
     })
   )

@@ -1,4 +1,4 @@
-import {IO} from '../../src/main/IO'
+import {FIO} from '../../src/main/FIO'
 
 /**
  * An IO that never completes but can be cancelled
@@ -7,7 +7,7 @@ export const NeverEnding = () => {
   let cancelled = false
 
   return {
-    io: IO.from(() => () => (cancelled = true)),
+    io: FIO.from(() => () => (cancelled = true)),
     isCancelled: () => cancelled
   }
 }

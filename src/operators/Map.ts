@@ -1,15 +1,15 @@
 import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {FIO} from '../internals/FIO'
+import {IFIO} from '../internals/IFIO'
 import {SafeResolve} from '../internals/SafeResolve'
 
 /**
  * @ignore
  */
-export class Map<R, E, A, B> implements FIO<R, E, B> {
+export class Map<R, E, A, B> implements IFIO<R, E, B> {
   public constructor(
-    private readonly src: FIO<R, E, A>,
+    private readonly src: IFIO<R, E, A>,
     private readonly ab: (a: A) => B
   ) {}
 

@@ -1,16 +1,16 @@
 import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {FIO} from '../internals/FIO'
+import {IFIO} from '../internals/IFIO'
 
 /**
  * @ignore
  */
 export class Race<R1, R2, E1, E2, A1, A2>
-  implements FIO<R1 & R2, E1 | E2, A1 | A2> {
+  implements IFIO<R1 & R2, E1 | E2, A1 | A2> {
   public constructor(
-    private readonly a: FIO<R1, E1, A1>,
-    private readonly b: FIO<R2, E2, A2>
+    private readonly a: IFIO<R1, E1, A1>,
+    private readonly b: IFIO<R2, E2, A2>
   ) {}
 
   public fork(env: R1 & R2, rej: CB<E1 | E2>, res: CB<A1 | A2>): Cancel {

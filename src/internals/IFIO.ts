@@ -8,7 +8,7 @@ import {CB} from './CB'
  * @typeparam E The possible failures from the IO
  * @typeparam A The output of the IO
  */
-export interface FIO<R, E, A> {
+export interface IFIO<R, E, A> {
   /**
    * Impure function that executes the provided IO.
    * @param env - Execution env needed to run the IO

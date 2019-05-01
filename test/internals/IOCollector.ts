@@ -3,11 +3,14 @@
  */
 
 import {DefaultEnv} from '../../src/envs/DefaultEnv'
-import {FIO} from '../../src/internals/FIO'
+import {IFIO} from '../../src/internals/IFIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A, E, R>(env: R & DefaultEnv, io: FIO<R, E, A>) => {
+export const IOCollector = <A, E, R>(
+  env: R & DefaultEnv,
+  io: IFIO<R, E, A>
+) => {
   /**
    * access the testScheduler
    */

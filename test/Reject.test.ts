@@ -4,7 +4,7 @@
 
 import {assert} from 'chai'
 
-import {IO} from '../'
+import {FIO} from '../'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec} from './internals/IOSpecification'
@@ -12,10 +12,10 @@ import {RejectingIOSpec} from './internals/IOSpecification'
 describe('reject', () => {
   it('creates a rejected io', () => {
     const error = new Error('Bananas')
-    const actual = GetTimeline(IO.reject(error)).getError().message
+    const actual = GetTimeline(FIO.reject(error)).getError().message
     const expected = error.message
     assert.strictEqual(actual, expected)
   })
 
-  RejectingIOSpec(() => IO.reject(new Error('FAILED')))
+  RejectingIOSpec(() => FIO.reject(new Error('FAILED')))
 })

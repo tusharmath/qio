@@ -3,12 +3,12 @@ import {Cancel} from 'ts-scheduler'
 
 import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
-import {FIO} from '../internals/FIO'
+import {IFIO} from '../internals/IFIO'
 
 /**
  * @ignore
  */
-export class Once<R, E, A> implements FIO<R & DefaultEnv, E, A> {
+export class Once<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
   private cancel: Cancel | undefined
   private error: E | undefined
   private isForked = false
@@ -17,7 +17,7 @@ export class Once<R, E, A> implements FIO<R & DefaultEnv, E, A> {
   private readonly Q = new LinkedList<{rej: CB<E>; res: CB<A>}>()
   private result: A | undefined
 
-  public constructor(private readonly io: FIO<R, E, A>) {}
+  public constructor(private readonly io: IFIO<R, E, A>) {}
 
   public fork(env: R & DefaultEnv, rej: CB<E>, res: CB<A>): Cancel {
     const sh = env.scheduler

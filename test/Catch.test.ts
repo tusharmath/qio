@@ -3,7 +3,7 @@
  */
 import {assert} from 'chai'
 
-import {IO} from '../'
+import {FIO} from '../'
 import {DefaultEnv} from '../src/envs/DefaultEnv'
 
 import {GetTimeline} from './internals/GetTimeline'
@@ -15,22 +15,22 @@ import {
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
-    IO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(
-      e => IO.of(e.message)
+    FIO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(
+      e => FIO.of(e.message)
     )
   )
   RejectingIOSpec(() =>
-    IO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(
-      e => IO.reject(e)
+    FIO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(
+      e => FIO.reject(e)
     )
   )
-  CancellationIOSpec(io => IO.reject(new Error('!!!')).catch(() => io))
-  CancellationIOSpec(io => io.catch(() => IO.of('Caught')))
+  CancellationIOSpec(io => FIO.reject(new Error('!!!')).catch(() => io))
+  CancellationIOSpec(io => io.catch(() => FIO.of('Caught')))
 
   it('should be catchable', () => {
     const error = new Error('Bup!')
     const actual = GetTimeline(
-      IO.reject(error).catch(e => IO.of(e.message))
+      FIO.reject(error).catch(e => FIO.of(e.message))
     ).getValue()
 
     const expected = 'Bup!'
@@ -38,7 +38,7 @@ describe('catch', () => {
   })
   it('should forward results', () => {
     const actual = GetTimeline(
-      IO.of('ok!').catch(err => IO.of('ERR!'))
+      FIO.of('ok!').catch(err => FIO.of('ERR!'))
     ).getValue()
 
     const expected = 'ok!'

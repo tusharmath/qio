@@ -4,23 +4,26 @@
 import * as assert from 'assert'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {IO} from '../'
+import {FIO} from '../'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Try', () => {
-  ResolvingIOSpec(() => IO.access(() => void 0))
+  ResolvingIOSpec(() => FIO.access(() => void 0))
   RejectingIOSpec(() =>
-    IO.access(() => {
+    FIO.access(() => {
       throw new Error('FAILURE')
     })
   )
   const tryNumberIO = () => {
     let i = 0
     const scheduler = testScheduler()
-    const {timeline, fork} = IOCollector({scheduler}, IO.access(() => (i += 1)))
+    const {timeline, fork} = IOCollector(
+      {scheduler},
+      FIO.access(() => (i += 1))
+    )
     fork()
     scheduler.run()
 
@@ -29,7 +32,7 @@ describe('Try', () => {
 
   it('should compute the computation', () => {
     let i = 0
-    GetTimeline(IO.access(() => (i = i + 1)))
+    GetTimeline(FIO.access(() => (i = i + 1)))
     assert.strictEqual(i, 1)
   })
 
