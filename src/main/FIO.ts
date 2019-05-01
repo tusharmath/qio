@@ -3,7 +3,6 @@
  */
 
 import {Cancel, scheduler} from 'ts-scheduler'
-import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
 import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
