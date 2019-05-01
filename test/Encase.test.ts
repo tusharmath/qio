@@ -27,7 +27,7 @@ describe('encase', () => {
   })
 
   it('should catch errors', () => {
-    const errorF = FIO.encase<string, []>(() => {
+    const errorF = FIO.encase<Error, []>(() => {
       throw new Error('Bup!')
     })
     const actual = GetTimeline(errorF()).getError().message

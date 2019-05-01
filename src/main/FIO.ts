@@ -81,9 +81,9 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * that takes in the same arguments zip wraps the result into an [[IO]]
    *
    */
-  public static encase<A, G extends unknown[]>(
+  public static encase<E = never, A = never, G extends unknown[] = []>(
     fn: (...t: G) => A
-  ): (...t: G) => FIO<DefaultEnv, Error, A> {
+  ): (...t: G) => FIO<DefaultEnv, E, A> {
     return (...t) => FIO.from((env, rej, res) => res(fn(...t)))
   }
 

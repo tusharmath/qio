@@ -25,3 +25,6 @@ FIO.reject(1000)
 
 // $ExpectType FIO<DefaultEnv, never, number>
 FIO.reject(1000).catch(() => FIO.of(10))
+
+// $ExpectType FIO<DefaultEnv, never, number>
+FIO.encase((a: string, b: number) => parseInt(a, 10) + b)('10', 2)
