@@ -1,8 +1,7 @@
 import {Cancel} from 'ts-scheduler'
 
+import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
-import {REJ} from '../internals/REJ'
-import {RES} from '../internals/RES'
 
 /**
  * A or B unless one of them is `never`
@@ -19,7 +18,7 @@ export class Zip<R1, R2, E1, E2, A, B>
     private readonly b: FIO<R2, E2, B>
   ) {}
 
-  public fork(env: R1 & R2, rej: REJ<E1 | E2>, res: RES<OR<A, B>>): Cancel {
+  public fork(env: R1 & R2, rej: CB<E1 | E2>, res: CB<OR<A, B>>): Cancel {
     let responseA: A
     let responseB: B
     let count = 0

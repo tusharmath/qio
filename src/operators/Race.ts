@@ -1,8 +1,7 @@
 import {Cancel} from 'ts-scheduler'
 
+import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
-import {REJ} from '../internals/REJ'
-import {RES} from '../internals/RES'
 
 /**
  * @ignore
@@ -14,9 +13,9 @@ export class Race<R1, R2, E1, E2, A1, A2>
     private readonly b: FIO<R2, E2, A2>
   ) {}
 
-  public fork(env: R1 & R2, rej: REJ<E1 | E2>, res: RES<A1 | A2>): Cancel {
+  public fork(env: R1 & R2, rej: CB<E1 | E2>, res: CB<A1 | A2>): Cancel {
     const cancel = new Array<Cancel>()
-    const onResponse = <T>(cancelID: number, cb: RES<T>) => (t: T) => {
+    const onResponse = <T>(cancelID: number, cb: CB<T>) => (t: T) => {
       cancel[cancelID]()
       cb(t)
     }

@@ -6,9 +6,8 @@ import {Cancel} from 'ts-scheduler'
 
 import {AnyEnv} from '../envs/AnyEnv'
 import {SchedulerEnv} from '../envs/SchedulerEnv'
+import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
-import {REJ} from '../internals/REJ'
-import {RES} from '../internals/RES'
 import {Catch} from '../operators/Catch'
 import {Chain} from '../operators/Chain'
 import {Map} from '../operators/Map'
@@ -111,7 +110,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
    * `from` is for more advanced usages and is intended to be used internally.
    */
   public static from<R = AnyEnv, E = never, A = never>(
-    cmp: (env: R, rej: REJ<E>, res: RES<A>) => Cancel | void
+    cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
   ): IO<R & SchedulerEnv, E, A> {
     return IO.to(C(cmp))
   }
@@ -181,7 +180,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   /**
    * Actually executes the IO
    */
-  public fork(env: R1, rej: REJ<E1>, res: RES<A1>): Cancel {
+  public fork(env: R1, rej: CB<E1>, res: CB<A1>): Cancel {
     return this.io.fork(env, rej, res)
   }
 

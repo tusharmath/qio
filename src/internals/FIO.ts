@@ -1,7 +1,6 @@
 import {Cancel} from 'ts-scheduler'
 
-import {REJ} from './REJ'
-import {RES} from './RES'
+import {CB} from './CB'
 
 /**
  * Base interface for fearless-io.
@@ -17,5 +16,5 @@ export interface FIO<R, E, A> {
    * @param res - Success Handler
    * @return Cancel
    */
-  fork(env: R, rej: REJ<E>, res: RES<A>): Cancel
+  fork(env: R, rej: CB<E>, res: CB<A>): Cancel
 }

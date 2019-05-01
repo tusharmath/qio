@@ -1,8 +1,7 @@
 import {Cancel} from 'ts-scheduler'
 
+import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
-import {REJ} from '../internals/REJ'
-import {RES} from '../internals/RES'
 import {SafeResolve} from '../internals/SafeResolve'
 
 /**
@@ -14,7 +13,7 @@ export class Map<R, E, A, B> implements FIO<R, E, B> {
     private readonly ab: (a: A) => B
   ) {}
 
-  public fork(env: R, rej: REJ<E>, res: RES<B>): Cancel {
+  public fork(env: R, rej: CB<E>, res: CB<B>): Cancel {
     return this.src.fork(env, rej, a => SafeResolve(this.ab(a), rej, res))
   }
 }
