@@ -19,7 +19,7 @@ import {
 } from './internals/IOSpecification'
 import {TestEnv} from './internals/TestEnv'
 
-describe('IO', () => {
+describe('FIO', () => {
   describe('once()', () => {
     it('should not throw to exit on calling once', () => {
       assert.doesNotThrow(() => FIO.of(10).once())
