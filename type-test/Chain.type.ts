@@ -3,7 +3,7 @@
  */
 import {IO} from '../src/main/IO'
 
-// $ExpectType IO<SchedulerEnv, never, number>
+// $ExpectType IO<DefaultEnv, never, number>
 IO.of(10).chain(_ => IO.of(_))
 
 interface E1 {

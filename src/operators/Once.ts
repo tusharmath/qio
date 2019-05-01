@@ -1,14 +1,14 @@
 import {LinkedList} from 'dbl-linked-list-ds'
 import {Cancel} from 'ts-scheduler'
 
-import {SchedulerEnv} from '../envs/SchedulerEnv'
+import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
 
 /**
  * @ignore
  */
-export class Once<R, E, A> implements FIO<R & SchedulerEnv, E, A> {
+export class Once<R, E, A> implements FIO<R & DefaultEnv, E, A> {
   private cancel: Cancel | undefined
   private error: E | undefined
   private isForked = false
@@ -19,7 +19,7 @@ export class Once<R, E, A> implements FIO<R & SchedulerEnv, E, A> {
 
   public constructor(private readonly io: FIO<R, E, A>) {}
 
-  public fork(env: R & SchedulerEnv, rej: CB<E>, res: CB<A>): Cancel {
+  public fork(env: R & DefaultEnv, rej: CB<E>, res: CB<A>): Cancel {
     const sh = env.scheduler
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))

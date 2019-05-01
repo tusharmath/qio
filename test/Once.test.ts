@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {SchedulerEnv} from '../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../src/envs/DefaultEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
@@ -24,7 +24,7 @@ describe('Once', () => {
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      IO.from<SchedulerEnv, never, number>((env, rej, res) =>
+      IO.from<DefaultEnv, never, number>((env, rej, res) =>
         env.scheduler.asap(() => res((count += 1)))
       )
     )
@@ -37,7 +37,7 @@ describe('Once', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<SchedulerEnv, never, number>((env, rej, res) =>
+      IO.from<DefaultEnv, never, number>((env, rej, res) =>
         env.scheduler.delay(() => res((count += 1)), n)
       )
     )
@@ -50,7 +50,7 @@ describe('Once', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      IO.from<SchedulerEnv, Error>((env, rej) =>
+      IO.from<DefaultEnv, Error>((env, rej) =>
         env.scheduler.delay(
           () => rej(new Error('FAILED_' + (count += 1).toString())),
           n

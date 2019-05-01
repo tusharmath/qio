@@ -1,7 +1,6 @@
 import {Cancel} from 'ts-scheduler'
 
-import {AnyEnv} from '../envs/AnyEnv'
-import {SchedulerEnv} from '../envs/SchedulerEnv'
+import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
 
@@ -15,12 +14,12 @@ enum IOStatus {
 /**
  * @ignore
  */
-class Computation<R, E, A> implements FIO<R & SchedulerEnv, E, A> {
+class Computation<R, E, A> implements FIO<R & DefaultEnv, E, A> {
   public constructor(
     private readonly cmp: (env: R, rej: CB<E>, res: CB<A>) => void | Cancel
   ) {}
 
-  public fork(env: R & SchedulerEnv, rej: CB<E>, res: CB<A>): Cancel {
+  public fork(env: R & DefaultEnv, rej: CB<E>, res: CB<A>): Cancel {
     const sh = env.scheduler
     const cancellations = new Array<Cancel>()
     let status = IOStatus.FORKED
@@ -60,6 +59,6 @@ class Computation<R, E, A> implements FIO<R & SchedulerEnv, E, A> {
  * Creates an instance of Computation
  * @ignore
  */
-export const C = <R = AnyEnv, E = Error, A = unknown>(
+export const C = <R = DefaultEnv, E = Error, A = unknown>(
   cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
-): FIO<R & SchedulerEnv, E, A> => new Computation(cmp)
+): FIO<R & DefaultEnv, E, A> => new Computation(cmp)

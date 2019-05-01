@@ -2,15 +2,12 @@
  * Created by tushar on 2019-03-20
  */
 
-import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../../src/envs/DefaultEnv'
 import {FIO} from '../../src/internals/FIO'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A, E, R>(
-  env: R & SchedulerEnv,
-  io: FIO<R, E, A>
-) => {
+export const IOCollector = <A, E, R>(env: R & DefaultEnv, io: FIO<R, E, A>) => {
   /**
    * access the testScheduler
    */

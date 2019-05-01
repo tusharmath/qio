@@ -4,8 +4,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {AnyEnv} from '../../src/envs/AnyEnv'
-import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../../src/envs/DefaultEnv'
 import {FIO} from '../../src/internals/FIO'
 import {IO} from '../../src/main/IO'
 
@@ -15,7 +14,7 @@ import {NeverEnding} from './NeverEnding'
 /**
  * Specifications for an IO that resolves
  */
-export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, Error, T>) => {
+export const ResolvingIOSpec = <T>(fn: () => FIO<DefaultEnv, Error, T>) => {
   context('ResolvingIOSpec', () => {
     it('should resolve in the end', () => {
       const S = testScheduler()
@@ -113,7 +112,7 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<SchedulerEnv, Error, T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const RejectingIOSpec = <T, E>(fn: () => FIO<SchedulerEnv, E, T>) => {
+export const RejectingIOSpec = <T, E>(fn: () => FIO<DefaultEnv, E, T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
       const S = testScheduler()
@@ -198,7 +197,7 @@ export const RejectingIOSpec = <T, E>(fn: () => FIO<SchedulerEnv, E, T>) => {
  * Checks if the IO gets cancelled or not
  */
 export const CancellationIOSpec = <E, T>(
-  fn: (cancellable: IO<AnyEnv, never, never>) => FIO<SchedulerEnv, E, T>
+  fn: (cancellable: IO<DefaultEnv, never, never>) => FIO<DefaultEnv, E, T>
 ) => {
   it('should release resources', () => {
     const neva = NeverEnding()

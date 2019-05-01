@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {IO} from '../'
-import {SchedulerEnv} from '../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../src/envs/DefaultEnv'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
@@ -38,7 +38,7 @@ describe('zip', () => {
   it('should cancel the second io if one of them is rejected (TEST_SCHEDULER)', () => {
     let cancelled = 0
     const a = IO.from(() => () => (cancelled = cancelled + 1))
-    const b = IO.from<SchedulerEnv, Error>((env, rej) =>
+    const b = IO.from<DefaultEnv, Error>((env, rej) =>
       env.scheduler.delay(() => rej(new Error('Save Me!')), 100)
     )
     const scheduler = testScheduler()

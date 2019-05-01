@@ -3,25 +3,25 @@
  */
 
 import {IO} from '../'
-import {SchedulerEnv} from '../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../src/envs/DefaultEnv'
 
-// $ExpectType IO<SchedulerEnv, never, never>
+// $ExpectType IO<DefaultEnv, never, never>
 IO.from((env1, rej, res) => res(10))
 
-// $ExpectType IO<SchedulerEnv, never, never>
-IO.from((env: SchedulerEnv, rej, res) => env.scheduler.delay(() => res(10), 10))
+// $ExpectType IO<DefaultEnv, never, never>
+IO.from((env: DefaultEnv, rej, res) => env.scheduler.delay(() => res(10), 10))
 
-// $ExpectType IO<SchedulerEnv, never, never>
+// $ExpectType IO<DefaultEnv, never, never>
 IO.from((env, rej, res) => res(10))
 
-// $ExpectType IO<SchedulerEnv, never, string>
-IO.from<SchedulerEnv, never, string>((env, rej, res) => res(10))
+// $ExpectType IO<DefaultEnv, never, string>
+IO.from<DefaultEnv, never, string>((env, rej, res) => res(10))
 
-// $ExpectType IO<SchedulerEnv, never, number>
+// $ExpectType IO<DefaultEnv, never, number>
 IO.of(1000)
 
-// $ExpectType IO<SchedulerEnv, number, never>
+// $ExpectType IO<DefaultEnv, number, never>
 IO.reject(1000)
 
-// $ExpectType IO<SchedulerEnv, never, number>
+// $ExpectType IO<DefaultEnv, never, number>
 IO.reject(1000).catch(() => IO.of(10))

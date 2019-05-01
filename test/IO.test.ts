@@ -5,8 +5,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {AnyEnv} from '../src/envs/AnyEnv'
-import {SchedulerEnv} from '../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../src/envs/DefaultEnv'
 import {IO} from '../src/main/IO'
 
 import {Counter} from './internals/Counter'
@@ -18,7 +17,7 @@ import {
   RejectingIOSpec,
   ResolvingIOSpec
 } from './internals/IOSpecification'
-import {TestSchedulerEnv} from './internals/TestSchedulerEnv'
+import {TestEnv} from './internals/TestEnv'
 
 describe('IO', () => {
   describe('once()', () => {
@@ -72,7 +71,7 @@ describe('IO', () => {
         IO.access((_: HasConsole) => _.console.print(line))
 
       const cons = Console()
-      const env: HasConsole & TestSchedulerEnv = {
+      const env: HasConsole & TestEnv = {
         console: cons,
         scheduler: testScheduler()
       }
@@ -93,7 +92,7 @@ describe('IO', () => {
   describe('accessM()', () => {
     it('should create an IO[R, A] ', () => {
       interface Console {
-        print(str: string): IO<AnyEnv, Error, void>
+        print(str: string): IO<DefaultEnv, Error, void>
       }
 
       interface HasConsole {
@@ -110,7 +109,7 @@ describe('IO', () => {
       }
 
       const putStrLn = (line: string) =>
-        IO.accessM((_: HasConsole) => _.console.print(line))
+        IO.accessM((_: HasConsole & DefaultEnv) => _.console.print(line))
 
       const cons = Console()
       const env = {console: cons, scheduler: testScheduler()}
@@ -141,7 +140,7 @@ describe('IO', () => {
           out.push(str)
         }
       }
-      const env: Console & TestSchedulerEnv = {
+      const env: Console & TestEnv = {
         console: ConsoleService,
         scheduler: testScheduler()
       }
@@ -160,7 +159,7 @@ describe('IO', () => {
     RejectingIOSpec(() => IO.reject(new Error('Bup!')).delay(10))
     CancellationIOSpec(cancel => cancel.delay(10))
     it('should delay the execution by the given duration', () => {
-      const io = IO.from<SchedulerEnv, never, number>((env1, rej, res) => {
+      const io = IO.from<DefaultEnv, never, number>((env1, rej, res) => {
         res(env1.scheduler.now())
       }).delay(100)
 

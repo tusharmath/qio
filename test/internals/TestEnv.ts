@@ -3,8 +3,8 @@
  */
 import {TestScheduler} from 'ts-scheduler/test'
 
-import {SchedulerEnv} from '../../src/envs/SchedulerEnv'
+import {DefaultEnv} from '../../src/envs/DefaultEnv'
 
-export interface TestSchedulerEnv extends SchedulerEnv {
+export interface TestEnv extends DefaultEnv {
   scheduler: TestScheduler
 }

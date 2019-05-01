@@ -3,9 +3,9 @@
  */
 
 import {Cancel, scheduler} from 'ts-scheduler'
+import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
-import {AnyEnv} from '../envs/AnyEnv'
-import {SchedulerEnv} from '../envs/SchedulerEnv'
+import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
 import {FIO} from '../internals/FIO'
 import {Catch} from '../operators/Catch'
@@ -54,7 +54,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   /**
    * Accesses an environment for the effect
    */
-  public static access<R = AnyEnv, E = Error, A = unknown>(
+  public static access<R = DefaultEnv, E = Error, A = unknown>(
     fn: (env: R) => A
   ): IO<R, E, A> {
     return IO.from((env1, rej, res) => res(fn(env1)))
@@ -63,8 +63,17 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   /**
    * Effect-fully accesses the environment of the effect.
    */
-  public static accessM<R, E, A>(fn: (env: R) => IO<R, E, A>): IO<R, E, A> {
-    return IO.environment<R>().chain(fn)
+  public static accessM<R1, E1, A1>(
+    fn: (env: R1) => IO<R1, E1, A1>
+  ): IO<R1, E1, A1> {
+    return IO.environment<R1>().chain(fn)
+  }
+
+  /**
+   * Helper utility that returns the default env
+   */
+  public static defaultEnv(): DefaultEnv {
+    return {scheduler}
   }
 
   /**
@@ -75,7 +84,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
    */
   public static encase<A, G extends unknown[]>(
     fn: (...t: G) => A
-  ): (...t: G) => IO<SchedulerEnv, Error, A> {
+  ): (...t: G) => IO<DefaultEnv, Error, A> {
     return (...t) => IO.from((env, rej, res) => res(fn(...t)))
   }
 
@@ -87,7 +96,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
    */
   public static encaseP<A, G extends unknown[]>(
     fn: (...t: G) => Promise<A>
-  ): (...t: G) => IO<SchedulerEnv, Error, A> {
+  ): (...t: G) => IO<DefaultEnv, Error, A> {
     return (...t) =>
       IO.from(
         (env, rej, res) =>
@@ -109,38 +118,31 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
    * In most cases you should use [encase] [encaseP] etc. to create new IOs.
    * `from` is for more advanced usages and is intended to be used internally.
    */
-  public static from<R = AnyEnv, E = never, A = never>(
+  public static from<R = DefaultEnv, E = never, A = never>(
     cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
-  ): IO<R & SchedulerEnv, E, A> {
+  ): IO<R & DefaultEnv, E, A> {
     return IO.to(C(cmp))
   }
 
   /**
    * Creates an [[IO]] that never completes.
    */
-  public static never(): IO<SchedulerEnv, never, never> {
+  public static never(): IO<DefaultEnv, never, never> {
     return IO.from(RETURN_NOOP)
   }
 
   /**
    * Creates an [[IO]] that always resolves with the same value.
    */
-  public static of<A>(value: A): IO<SchedulerEnv, never, A> {
+  public static of<A>(value: A): IO<DefaultEnv, never, A> {
     return IO.from((env, rej, res) => res(value))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
-  public static reject<E>(error: E): IO<SchedulerEnv, E, never> {
+  public static reject<E>(error: E): IO<DefaultEnv, E, never> {
     return IO.from((env, rej) => rej(error))
-  }
-
-  /**
-   * Helper utility that returns a scheduler env
-   */
-  public static schedulerEnv(): SchedulerEnv {
-    return {scheduler}
   }
 
   /**
@@ -149,7 +151,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   public static timeout<A>(
     value: A,
     duration: number
-  ): IO<SchedulerEnv, Error, A> {
+  ): IO<DefaultEnv, Error, A> {
     return IO.to(new Timeout(duration, value))
   }
 
@@ -180,7 +182,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   /**
    * Delays an IO execution by the provided duration
    */
-  public delay(duration: number): IO<R1 & SchedulerEnv, Error | E1, A1> {
+  public delay(duration: number): IO<R1 & DefaultEnv, Error | E1, A1> {
     return IO.timeout(this.io, duration).chain(_ => _)
   }
 
@@ -201,7 +203,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
   /**
    * Creates a new IO<IO<A>> that executes only once
    */
-  public once(): IO<SchedulerEnv, never, IO<R1, E1, A1>> {
+  public once(): IO<DefaultEnv, never, IO<R1, E1, A1>> {
     return IO.of(IO.to(new Once(this)))
   }
 
@@ -209,7 +211,7 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
    * Eliminates the dependency on the IOs original environment.
    * Creates an IO that can run in [DefaultEnv].
    */
-  public provide(env: R1): IO<AnyEnv, E1, A1> {
+  public provide(env: R1): IO<DefaultEnv, E1, A1> {
     return IO.from((env1, rej, res) => this.io.fork(env, rej, res))
   }
 
