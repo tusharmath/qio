@@ -9,15 +9,15 @@ A type-safe functional module that solves practical IO problems on node and the 
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Documentation](https://tusharm.com/fearless-io)
+- [Documentation](https://tusharmath.com/fearless-io)
 
-## Installation
+# Installation
 
 ```bash
 npm i fearless-io
 ```
 
-## Usage
+# Usage
 
 ```typescript
 import {IO} from 'fearless-io'
