@@ -2,7 +2,7 @@
  * Created by tushar on 2019-03-10
  */
 
-import {Cancel} from 'ts-scheduler'
+import {Cancel, scheduler} from 'ts-scheduler'
 
 import {AnyEnv} from '../envs/AnyEnv'
 import {SchedulerEnv} from '../envs/SchedulerEnv'
@@ -134,6 +134,13 @@ export class IO<R1, E1, A1> implements FIO<R1, E1, A1> {
    */
   public static reject<E>(error: E): IO<SchedulerEnv, E, never> {
     return IO.from((env, rej) => rej(error))
+  }
+
+  /**
+   * Helper utility that returns a scheduler env
+   */
+  public static schedulerEnv(): SchedulerEnv {
+    return {scheduler}
   }
 
   /**
