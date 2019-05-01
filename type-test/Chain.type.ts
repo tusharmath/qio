@@ -3,11 +3,18 @@
  */
 import {IO} from '../src/main/IO'
 
-// $ExpectType IO<SchedulerEnv, number>
+// $ExpectType IO<SchedulerEnv, never, number>
 IO.of(10).chain(_ => IO.of(_))
 
-declare const a: IO<{console: Console}, void>
-declare const b: IO<{process: NodeJS.Process}, string>
+interface E1 {
+  e: 'e1'
+}
+interface E2 {
+  e: 'e2'
+}
 
-// $ExpectType IO<{ console: Console; } & { process: Process; }, string>
+declare const a: IO<{console: Console}, E1, number>
+declare const b: IO<{process: NodeJS.Process}, E2, string>
+
+// $ExpectType IO<{ console: Console; } & { process: Process; }, E1 | E2, string>
 a.chain(() => b)
