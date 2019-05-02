@@ -9,7 +9,10 @@ A type-safe functional module that solves practical IO problems on node and the 
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Getting Started]
 - [Documentation](https://tusharmath.com/fearless-io)
+
+[getting started]: https://github.com/tusharmath/fearless-io/blob/master/GETTING_STARTED.md
 
 # Installation
 
