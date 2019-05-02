@@ -69,13 +69,6 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   }
 
   /**
-   * Helper utility that returns the default env
-   */
-  public static defaultEnv(): DefaultEnv {
-    return {scheduler}
-  }
-
-  /**
    *
    * Takes in an effect-full function zip returns a pure function,
    * that takes in the same arguments zip wraps the result into an [[IO]]
