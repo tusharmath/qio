@@ -157,6 +157,13 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   private constructor(private readonly io: IFIO<R1, E1, A1>) {}
 
   /**
+   * Runs one IO after the other
+   */
+  public and<R2, E2, A2>(b: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
+    return this.chain(() => b)
+  }
+
+  /**
    * Catches a failing IO zip creates another IO
    */
   public catch<R2, E2, A2>(
