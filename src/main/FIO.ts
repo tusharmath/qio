@@ -16,8 +16,11 @@ import {OR, Zip} from '../operators/Zip'
 import {C} from '../sources/Computation'
 import {Timeout} from '../sources/Timeout'
 
-const NOOP = () => {}
-const RETURN_NOOP = () => NOOP
+const noop = () => {}
+const rNoop = () => noop
+const onError = <E>(e: E) => {
+  throw e
+}
 
 /**
  * Base class for fearless IO.
@@ -120,7 +123,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Creates an [[IO]] that never completes.
    */
   public static never(): FIO<DefaultEnv, never, never> {
-    return FIO.from(RETURN_NOOP)
+    return FIO.from(rNoop)
   }
 
   /**
@@ -181,7 +184,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Actually executes the IO
    */
-  public fork(env: R1, rej: CB<E1>, res: CB<A1>): Cancel {
+  public fork(env: R1, rej: CB<E1> = onError, res: CB<A1> = noop): Cancel {
     return this.io.fork(env, rej, res)
   }
 
