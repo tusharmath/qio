@@ -14,6 +14,7 @@ export interface DefaultEnv {
  *
  * @example
  * ```ts
+ *
  * import {defaultEnv, FIO} from 'fearless-io'
  *
  * const putStrLn = FIO.encase((msg: string) => console.log(msg))
