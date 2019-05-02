@@ -56,9 +56,9 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Accesses an environment for the effect
    */
-  public static access<R = DefaultEnv, E = Error, A = unknown>(
+  public static access<R = DefaultEnv, E = never, A = never>(
     fn: (env: R) => A
-  ): FIO<R, E, A> {
+  ): FIO<R & DefaultEnv, E, A> {
     return FIO.from((env1, rej, res) => res(fn(env1)))
   }
 
@@ -69,6 +69,17 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
     fn: (env: R1) => FIO<R1, E1, A1>
   ): FIO<R1, E1, A1> {
     return FIO.environment<R1>().chain(fn)
+  }
+
+  /**
+   * Effect-fully accesses an environment using a promise
+   */
+  public static accessP<R = DefaultEnv, E = Error, A = unknown>(
+    fn: (env: R) => Promise<A>
+  ): FIO<R & DefaultEnv, E, A> {
+    const io = FIO.encaseP(fn)
+
+    return FIO.accessM<R, Error, A>(io)
   }
 
   /**
