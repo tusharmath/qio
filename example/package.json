@@ -1,0 +1,15 @@
+{
+  "name": "fio-example",
+  "private": true,
+  "version": "1.0.0",
+  "description": "example application using FIO",
+  "scripts": {
+    "test": "mocha --require=ts-node/register --watch-extensions ts test/*.ts"
+  },
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@types/promptly": "^1.1.28",
+    "promptly": "^3.0.3"
+  }
+}
