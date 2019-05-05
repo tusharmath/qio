@@ -2,7 +2,7 @@
  * Created by tushar on 2019-03-10
  */
 
-import {Cancel, scheduler} from 'ts-scheduler'
+import {Cancel} from 'ts-scheduler'
 
 import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
@@ -56,30 +56,28 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Accesses an environment for the effect
    */
-  public static access<R = DefaultEnv, E = never, A = never>(
+  public static access<R = unknown, E = never, A = never>(
     fn: (env: R) => A
   ): FIO<R & DefaultEnv, E, A> {
-    return FIO.from((env1, rej, res) => res(fn(env1)))
+    return FIO.environment<R & DefaultEnv>().map(fn)
   }
 
   /**
    * Effect-fully accesses the environment of the effect.
    */
-  public static accessM<R1, E1, A1>(
-    fn: (env: R1) => FIO<R1, E1, A1>
-  ): FIO<R1, E1, A1> {
-    return FIO.environment<R1>().chain(fn)
+  public static accessM<R1 = unknown, R2 = R1, E1 = never, A1 = never>(
+    fn: (env: R1) => FIO<R2, E1, A1>
+  ): FIO<R1 & R2 & DefaultEnv, E1, A1> {
+    return FIO.environment<R1 & DefaultEnv>().chain(fn)
   }
 
   /**
    * Effect-fully accesses an environment using a promise
    */
-  public static accessP<R = DefaultEnv, E = Error, A = unknown>(
+  public static accessP<R = unknown, A = unknown>(
     fn: (env: R) => Promise<A>
-  ): FIO<R & DefaultEnv, E, A> {
-    const io = FIO.encaseP(fn)
-
-    return FIO.accessM<R, Error, A>(io)
+  ): FIO<R & DefaultEnv, Error, A> {
+    return FIO.accessM(FIO.encaseP(fn))
   }
 
   /**
@@ -115,7 +113,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Creates an IO that resolves with the provided env
    */
-  public static environment<R1 = unknown>(): FIO<R1, never, R1> {
+  public static environment<R1 = unknown>(): FIO<R1 & DefaultEnv, never, R1> {
     return FIO.from((env1, rej, res) => res(env1))
   }
 
@@ -124,7 +122,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * In most cases you should use [encase] [encaseP] etc. to create new IOs.
    * `from` is for more advanced usages and is intended to be used internally.
    */
-  public static from<R = DefaultEnv, E = never, A = never>(
+  public static from<R = unknown, E = never, A = never>(
     cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
   ): FIO<R & DefaultEnv, E, A> {
     return FIO.to(C(cmp))
@@ -202,21 +200,20 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Actually executes the IO
    */
-  public fork(env: R1, rej: CB<E1> = onError, res: CB<A1> = noop): Cancel {
-    return this.io.fork(env, rej, res)
-  }
+  public fork = (env: R1, rej: CB<E1> = onError, res: CB<A1> = noop): Cancel =>
+    this.io.fork(env, rej, res)
 
   /**
    * Applies transformation on the resolve value of the IO
    */
-  public map<B>(ab: (a: A1) => B): FIO<R1, E1 | Error, B> {
+  public map<B>(ab: (a: A1) => B): FIO<R1, E1, B> {
     return FIO.to(new Map(this.io, ab))
   }
 
   /**
    * Creates a new IO<IO<A>> that executes only once
    */
-  public once(): FIO<DefaultEnv, never, FIO<R1, E1, A1>> {
+  public once(): FIO<DefaultEnv, never, FIO<R1 & DefaultEnv, E1, A1>> {
     return FIO.of(FIO.to(new Once(this)))
   }
 
