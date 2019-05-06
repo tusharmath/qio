@@ -1,4 +1,4 @@
-import {DefaultEnv, FIO} from '../index'
+import {DefaultEnv, FIO} from '../../index'
 
 export interface ConsoleService {
   getStrLn(question: string): Promise<string>

@@ -4,9 +4,9 @@
 
 import {prompt} from 'promptly'
 
-import {defaultEnv} from '../src/envs/DefaultEnv'
+import {defaultEnv} from '../../src/envs/DefaultEnv'
 
-import {program} from './Greetings'
+import {program} from './Program'
 
 program.fork({
   ...defaultEnv,
