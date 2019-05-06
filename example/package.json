@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "example application using FIO",
   "scripts": {
-    "test": "mocha --require=ts-node/register --watch-extensions ts test/*.ts"
+    "test": "mocha --require=ts-node/register --watch-extensions ts test/*.ts",
+    "start": "node Run.js"
   },
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "license": "ISC",
