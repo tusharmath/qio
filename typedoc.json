@@ -6,6 +6,7 @@
   "hideGenerator": true,
   "mode": "file",
   "out": "docs",
-  "exclude": ["test/**"],
-  "theme": "default"
+  "exclude": ["test/**", "example/**"],
+  "theme": "default",
+  "listInvalidSymbolLinks": true
 }

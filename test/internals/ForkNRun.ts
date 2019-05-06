@@ -2,10 +2,10 @@
  * Created by tushar on 2019-04-18
  */
 
+import {TestEnv} from '../../src/envs/TestEnv'
 import {IFIO} from '../../src/internals/IFIO'
 
 import {IOCollector} from './IOCollector'
-import {TestEnv} from './TestEnv'
 
 /**
  * Helpful wrapper over IOCollector

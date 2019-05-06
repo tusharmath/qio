@@ -6,6 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {DefaultEnv} from '../src/envs/DefaultEnv'
+import {TestEnv} from '../src/envs/TestEnv'
 import {FIO} from '../src/main/FIO'
 
 import {Counter} from './internals/Counter'
@@ -17,7 +18,6 @@ import {
   RejectingIOSpec,
   ResolvingIOSpec
 } from './internals/IOSpecification'
-import {TestEnv} from './internals/TestEnv'
 
 describe('FIO', () => {
   describe('once()', () => {
