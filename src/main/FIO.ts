@@ -2,6 +2,7 @@
  * Created by tushar on 2019-03-10
  */
 
+import {inNode} from 'in-node'
 import {Cancel} from 'ts-scheduler'
 
 import {DefaultEnv} from '../envs/DefaultEnv'
@@ -19,7 +20,11 @@ import {Timeout} from '../sources/Timeout'
 const noop = () => {}
 const rNoop = () => noop
 const onError = <E>(e: E) => {
-  throw e
+  // tslint:disable-next-line:no-console
+  console.error(e)
+  if (inNode) {
+    process.exitCode = 1
+  }
 }
 
 /**

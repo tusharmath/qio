@@ -2769,6 +2769,11 @@ imurmurhash@^0.1.4:
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
   integrity sha1-khi5srkoojixPcT7a21XbyMUU+o=
 
+in-node@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/in-node/-/in-node-1.0.0.tgz#a112a9a85fb129c2ce6f6368dbadb1443ad83175"
+  integrity sha512-Z8CU6aoZ0C8G74EACRM4LnwCPtTelVR/mJXWfK+I7pllrCVPWxog4KhbWSgIJaCMYC73Z8OK0ZHEI+ajH2tRbw==
+
 indent-string@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/indent-string/-/indent-string-3.2.0.tgz#4a5fd6d27cc332f37e5419a504dbb837105c9289"
