@@ -8,6 +8,7 @@ import {Cancel} from 'ts-scheduler'
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
+import {noop} from '../internals/Noop'
 import {Catch} from '../operators/Catch'
 import {Chain} from '../operators/Chain'
 import {Map} from '../operators/Map'
@@ -15,18 +16,11 @@ import {Once} from '../operators/Once'
 import {Race} from '../operators/Race'
 import {OR, Zip} from '../operators/Zip'
 import {defaultRuntime, DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 import {C} from '../sources/Computation'
 import {Timeout} from '../sources/Timeout'
 
-const noop = () => {}
 const rNoop = () => noop
-const onError = <E>(e: E) => {
-  // tslint:disable-next-line:no-console
-  console.error(e)
-  if (inNode) {
-    process.exitCode = 1
-  }
-}
 
 /**
  * Base class for fearless IO.
@@ -206,12 +200,8 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Actually executes the IO
    */
-  public fork = (
-    env: R1,
-    rej: CB<E1> = onError,
-    res: CB<A1> = noop,
-    runtime = defaultRuntime()
-  ): Cancel => this.io.fork(env, rej, res, runtime)
+  public fork = (env: R1, rej: CB<E1>, res: CB<A1>, runtime: Runtime): Cancel =>
+    this.io.fork(env, rej, res, runtime)
 
   /**
    * Applies transformation on the resolve value of the IO
@@ -229,7 +219,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
 
   /**
    * Eliminates the dependency on the IOs original environment.
-   * Creates an IO that can run in [DefaultEnv].
+   * Creates an IO that can run without any env.
    */
   public provide(env: R1): FIO<NoEnv, E1, A1> {
     return FIO.from((env1, rej, res, runtime) =>
@@ -248,7 +238,9 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Converts the IO into a Promise
    */
   public async toPromise(env: R1): Promise<A1> {
-    return new Promise<A1>((resolve, reject) => this.fork(env, reject, resolve))
+    return new Promise<A1>((resolve, reject) =>
+      this.fork(env, reject, resolve, defaultRuntime())
+    )
   }
 
   /**

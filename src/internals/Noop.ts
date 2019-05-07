@@ -1,0 +1,4 @@
+/**
+ * @ignore
+ */
+export const noop = () => {}

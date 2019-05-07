@@ -7,6 +7,7 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
 import {NoEnv} from '../src/envs/NoEnv'
+import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {GetTimeline} from './internals/GetTimeline'
 
@@ -31,15 +32,17 @@ describe('race', () => {
 
     assert.strictEqual(actual, expected)
   })
+
+  // FIXME: This test doesn't even run
   it('should ignore resolutions once rejected', () => {
-    const scheduler = testScheduler()
     const error = new Error('A')
     const a = FIO.reject(error)
     const b = FIO.of('B')
     a.race(b).fork(
-      {scheduler},
+      undefined,
       err => assert.equal(error, err),
-      value => assert.fail('Should not resolve: ' + value)
+      value => assert.fail('Should not resolve: ' + value),
+      testRuntime()
     )
   })
   it('should cancel the second io on resolution of one', () => {

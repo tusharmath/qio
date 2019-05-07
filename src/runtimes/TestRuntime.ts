@@ -1,15 +1,16 @@
 /**
  * Created by tushar on 2019-04-21
  */
-import {testScheduler, TestScheduler} from 'ts-scheduler/test'
+import {testScheduler} from 'ts-scheduler/test'
 
-import {DefaultRuntime} from './DefaultRuntime'
+import {Runtime} from './Runtime'
 
 /**
  * Extension of the [[DefaultRuntime]] that can be used for executing unit tests.
  */
-export interface TestRuntime extends DefaultRuntime {
-  scheduler: TestScheduler
+
+export class TestRuntime extends Runtime {
+  public readonly scheduler = testScheduler()
 }
 
 /**
@@ -26,21 +27,20 @@ export interface TestRuntime extends DefaultRuntime {
  *
  * ```ts
  * import {FIO} from 'fearless-io'
- * import {testEnv} from 'fearless-io/test'
+ * import {testRuntime} from 'fearless-io/test'
  *
  * let result: string = 'FOO'
  *
  * // Technically async code that should take 1000ms to complete
  * const io = FIO.timeout('BAR', 1000)
- * const env = testEnv()
- * io.fork(env, (i) => result = i)
  *
- * // Runs the async code synchronously
- * env.scheduler.run()
+ * // Create a new runtime
+ * const runtime = testRuntime()
+ *
+ * // Execute the IO
+ * runtime.execute(io, assert.fail, i => result = i)
  *
  * assert.strictEqual(result, 10)
  * ```
  */
-export const testRuntime = (): TestRuntime => ({
-  scheduler: testScheduler()
-})
+export const testRuntime = () => new TestRuntime()
