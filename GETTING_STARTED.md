@@ -52,7 +52,7 @@ The interface also contains a `fork` method that actually executes the side-effe
 
 Fork utlizies the three type params viz `R`, `E` & `A` as follows —
 
-- `R` Is the first param and is used to inject the environement to the IO.
+- `R` Is the first param and is used to inject the environment to the IO.
 - `E` Is used in the `onError` callback to handle exceptions in a type-safe manner.
 - `A` Is used in the `onSuccess` callback to handle the resolved values, also in a type-safe manner.
 
