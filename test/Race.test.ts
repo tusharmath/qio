@@ -6,13 +6,14 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
-import {DefaultEnv} from '../src/envs/DefaultEnv'
+import {NoEnv} from '../src/envs/NoEnv'
+import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'
 
 import {GetTimeline} from './internals/GetTimeline'
 
 describe('race', () => {
   it('should resolve with fastest io', () => {
-    const a = FIO.from<DefaultEnv, never, string>((env, rej, res) => {
+    const a = FIO.from<NoEnv, never, string>((env, rej, res) => {
       res('A')
 
       return () => {}

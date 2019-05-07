@@ -5,9 +5,10 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {DefaultEnv} from '../src/envs/DefaultEnv'
-import {TestEnv} from '../src/envs/TestEnv'
+import {NoEnv} from '../src/envs/NoEnv'
 import {FIO} from '../src/main/FIO'
+import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'
+import {TestRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'
@@ -26,12 +27,11 @@ describe('FIO', () => {
     })
     it('should return an IO that is memoized', () => {
       const counter = Counter()
-      const S = testScheduler()
-      const ioP = ForkNRun({scheduler: S}, counter.inc.once())
-      const ioC = IOCollector({scheduler: S}, ioP.timeline.getValue())
+      const ioP = ForkNRun(undefined, counter.inc.once())
+      const ioC = IOCollector(undefined, ioP.timeline.getValue())
       ioC.fork()
       ioC.fork()
-      S.run()
+      ioC.runtime.scheduler.run()
 
       const actual = counter.getCount()
       const expected = 1
@@ -71,9 +71,8 @@ describe('FIO', () => {
         FIO.access((_: HasConsole) => _.console.print(line))
 
       const cons = Console()
-      const env: HasConsole & TestEnv = {
-        console: cons,
-        scheduler: testScheduler()
+      const env: HasConsole = {
+        console: cons
       }
       ForkNRun(env, putStrLn('HELLO WORLD'))
 
@@ -92,7 +91,7 @@ describe('FIO', () => {
   describe('accessM()', () => {
     it('should create an IO[R, A] ', () => {
       interface Console {
-        print(str: string): FIO<DefaultEnv, Error, void>
+        print(str: string): FIO<NoEnv, Error, void>
       }
 
       interface HasConsole {
@@ -109,7 +108,7 @@ describe('FIO', () => {
       }
 
       const putStrLn = (line: string) =>
-        FIO.accessM((_: HasConsole & DefaultEnv) => _.console.print(line))
+        FIO.accessM((_: HasConsole) => _.console.print(line))
 
       const cons = Console()
       const env = {console: cons, scheduler: testScheduler()}
@@ -140,9 +139,8 @@ describe('FIO', () => {
           out.push(str)
         }
       }
-      const env: Console & TestEnv = {
-        console: ConsoleService,
-        scheduler: testScheduler()
+      const env: Console = {
+        console: ConsoleService
       }
       const {timeline} = ForkNRun(env, io)
 
@@ -159,8 +157,8 @@ describe('FIO', () => {
     RejectingIOSpec(() => FIO.reject(new Error('Bup!')).delay(10))
     CancellationIOSpec(cancel => cancel.delay(10))
     it('should delay the execution by the given duration', () => {
-      const io = FIO.from<DefaultEnv, never, number>((env1, rej, res) => {
-        res(env1.scheduler.now())
+      const io = FIO.from<NoEnv, never, number>((env1, rej, res, runtime) => {
+        res(runtime.scheduler.now())
       }).delay(100)
 
       const actual = GetTimeline(io).getValue()

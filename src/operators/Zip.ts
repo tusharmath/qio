@@ -2,6 +2,7 @@ import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
+import {DefaultRuntime} from '../runtimes/DefaultRuntime'
 
 /**
  * A or B unless one of them is `never`
@@ -18,7 +19,12 @@ export class Zip<R1, R2, E1, E2, A1, A2>
     private readonly b: IFIO<R2, E2, A2>
   ) {}
 
-  public fork(env: R1 & R2, rej: CB<E1 | E2>, res: CB<OR<A1, A2>>): Cancel {
+  public fork(
+    env: R1 & R2,
+    rej: CB<E1 | E2>,
+    res: CB<OR<A1, A2>>,
+    runtime: DefaultRuntime
+  ): Cancel {
     let responseA: A1
     let responseB: A2
     let count = 0
@@ -36,14 +42,24 @@ export class Zip<R1, R2, E1, E2, A1, A2>
     }
 
     cancel.push(
-      this.a.fork(env, onError(1), result => {
-        responseA = result
-        onSuccess()
-      }),
-      this.b.fork(env, onError(0), result => {
-        responseB = result
-        onSuccess()
-      })
+      this.a.fork(
+        env,
+        onError(1),
+        result => {
+          responseA = result
+          onSuccess()
+        },
+        runtime
+      ),
+      this.b.fork(
+        env,
+        onError(0),
+        result => {
+          responseB = result
+          onSuccess()
+        },
+        runtime
+      )
     )
 
     return () => cancel.forEach(_ => _())

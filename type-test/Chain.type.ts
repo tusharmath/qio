@@ -3,7 +3,7 @@
  */
 import {FIO} from '../src/main/FIO'
 
-// $ExpectType FIO<DefaultEnv, never, number>
+// $ExpectType FIO<unknown, never, number>
 FIO.of(10).chain(_ => FIO.of(_))
 
 interface E1 {

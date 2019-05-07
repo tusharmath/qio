@@ -3,10 +3,10 @@
  */
 
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
+import {Cancel} from 'ts-scheduler'
 
 import {FIO} from '../'
-import {DefaultEnv} from '../src/envs/DefaultEnv'
+import {NoEnv} from '../src/envs/NoEnv'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
@@ -37,15 +37,18 @@ describe('zip', () => {
 
   it('should cancel the second io if one of them is rejected (TEST_SCHEDULER)', () => {
     let cancelled = 0
-    const a = FIO.from(() => () => (cancelled = cancelled + 1))
-    const b = FIO.from<DefaultEnv, Error>((env, rej) =>
-      env.scheduler.delay(() => rej(new Error('Save Me!')), 100)
+    const {fork, runtime} = IOCollector(
+      {},
+      FIO.from(() => () => (cancelled = cancelled + 1)).zip(
+        FIO.from<NoEnv, Error>(
+          (env, rej): Cancel =>
+            runtime.scheduler.delay(() => rej(new Error('Save Me!')), 100)
+        )
+      )
     )
-    const scheduler = testScheduler()
-    const {fork} = IOCollector({scheduler}, a.zip(b))
-    scheduler.runTo(10)
+    runtime.scheduler.runTo(10)
     fork()
-    scheduler.runTo(111)
+    runtime.scheduler.runTo(111)
     assert.equal(cancelled, 1)
   })
 })

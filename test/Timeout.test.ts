@@ -15,12 +15,11 @@ describe('Timeout', () => {
   it('should resolve at the provided time', () => {
     const io = FIO.timeout('Bananas', 1000)
 
-    const scheduler = testScheduler()
-    const {timeline, fork} = IOCollector({scheduler}, io)
+    const {timeline, fork, runtime} = IOCollector(undefined, io)
 
-    scheduler.runTo(100)
+    runtime.scheduler.runTo(100)
     fork()
-    scheduler.runTo(1100)
+    runtime.scheduler.runTo(1100)
 
     const actual = timeline.list()
     const expected = [['RESOLVE', 1100, 'Bananas']]

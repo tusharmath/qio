@@ -4,9 +4,11 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {DefaultEnv} from '../../src/envs/DefaultEnv'
+import {NoEnv} from '../../src/envs/NoEnv'
 import {IFIO} from '../../src/internals/IFIO'
 import {FIO} from '../../src/main/FIO'
+import {DefaultRuntime} from '../../src/runtimes/DefaultRuntime'
+import {testRuntime} from '../../src/runtimes/TestRuntime'
 
 import {IOCollector} from './IOCollector'
 import {NeverEnding} from './NeverEnding'
@@ -14,92 +16,98 @@ import {NeverEnding} from './NeverEnding'
 /**
  * Specifications for an IO that resolves
  */
-export const ResolvingIOSpec = <T>(fn: () => IFIO<DefaultEnv, Error, T>) => {
+export const ResolvingIOSpec = <T>(fn: () => IFIO<NoEnv, Error, T>) => {
   context('ResolvingIOSpec', () => {
     it('should resolve in the end', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const status = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (status.rejected = true),
-        () => (status.resolved = true)
+        () => (status.resolved = true),
+        runtime
       )
-      S.run()
+      runtime.scheduler.run()
       assert.ok(status.resolved)
     })
     it('should not reject in the end', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const status = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (status.rejected = true),
-        () => (status.resolved = true)
+        () => (status.resolved = true),
+        runtime
       )
-      S.run()
+      runtime.scheduler.run()
       assert.notOk(status.rejected)
     })
     it('should have resolving time gt fork time', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       let completionTime = -1
       fn().fork(
-        {scheduler: S},
+        {},
         () => {
           throw new Error('Should not reject')
         },
-        () => (completionTime = S.now())
+        () => (completionTime = runtime.scheduler.now()),
+        runtime
       )
-      const forkTime = S.now()
-      S.run()
+      const forkTime = runtime.scheduler.now()
+      runtime.scheduler.run()
       assert.ok(
         completionTime > forkTime,
         `fork@${forkTime} !> completion@${completionTime}`
       )
     })
     it('should capture exceptions thrown by onResolve', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const ERROR_MESSAGE = 'SYNC_ERROR'
       let rejectionError = ''
       fn().fork(
-        {scheduler: S},
+        {},
         err => (rejectionError = err.message),
         () => {
           throw new Error(ERROR_MESSAGE)
-        }
+        },
+        runtime
       )
-      S.run()
+      runtime.scheduler.run()
       assert.strictEqual(rejectionError, ERROR_MESSAGE)
     })
     it('should not resolve on current tick', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const actual = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (actual.rejected = true),
-        () => (actual.resolved = true)
+        () => (actual.resolved = true),
+        runtime
       )
       assert.notOk(actual.resolved)
     })
     it('should never reject once cancelled', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const actual = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (actual.resolved = true),
-        () => (actual.resolved = true)
+        () => (actual.resolved = true),
+        runtime
       )()
-      S.run()
+      runtime.scheduler.run()
       const expected = {
         rejected: false,
         resolved: false
@@ -112,78 +120,83 @@ export const ResolvingIOSpec = <T>(fn: () => IFIO<DefaultEnv, Error, T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const RejectingIOSpec = <T, E>(fn: () => IFIO<DefaultEnv, E, T>) => {
+export const RejectingIOSpec = <T, E>(fn: () => IFIO<NoEnv, E, T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const status = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (status.rejected = true),
-        () => (status.resolved = true)
+        () => (status.resolved = true),
+        runtime
       )
-      S.run()
+      runtime.scheduler.run()
       assert.ok(status.rejected)
     })
     it('should not resolve in the end', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const status = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (status.rejected = true),
-        () => (status.resolved = true)
+        () => (status.resolved = true),
+        runtime
       )
-      S.run()
+      runtime.scheduler.run()
       assert.notOk(status.resolved)
     })
     it('should have rejection time gt fork time', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       let completionTime = -1
       fn().fork(
-        {scheduler: S},
-        () => (completionTime = S.now()),
+        {},
+        () => (completionTime = runtime.scheduler.now()),
         () => {
           throw new Error('Should not resolve')
-        }
+        },
+        runtime
       )
-      const forkTime = S.now()
-      S.run()
+      const forkTime = runtime.scheduler.now()
+      runtime.scheduler.run()
       assert.ok(
         completionTime > forkTime,
         `fork@${forkTime} !> completion@${completionTime}`
       )
     })
     it('should not reject on current tick', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const actual = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (actual.rejected = true),
-        () => (actual.resolved = true)
+        () => (actual.resolved = true),
+        runtime
       )
       assert.notOk(actual.rejected)
     })
     it('should never reject once cancelled', () => {
-      const S = testScheduler()
+      const runtime = testRuntime()
       const actual = {
         rejected: false,
         resolved: false
       }
       fn().fork(
-        {scheduler: S},
+        {},
         () => (actual.resolved = true),
-        () => (actual.resolved = true)
+        () => (actual.resolved = true),
+        runtime
       )()
-      S.run()
+      runtime.scheduler.run()
       const expected = {
         rejected: false,
         resolved: false
@@ -197,14 +210,13 @@ export const RejectingIOSpec = <T, E>(fn: () => IFIO<DefaultEnv, E, T>) => {
  * Checks if the IO gets cancelled or not
  */
 export const CancellationIOSpec = <E, T>(
-  fn: (cancellable: FIO<DefaultEnv, never, never>) => IFIO<DefaultEnv, E, T>
+  fn: (cancellable: FIO<NoEnv, never, never>) => IFIO<NoEnv, E, T>
 ) => {
   it('should release resources', () => {
     const neva = NeverEnding()
-    const scheduler = testScheduler()
-    const {fork} = IOCollector({scheduler}, fn(neva.io))
+    const {fork, runtime} = IOCollector({}, fn(neva.io))
     const cancel = fork()
-    scheduler.run()
+    runtime.scheduler.run()
     cancel()
     assert.ok(neva.isCancelled())
   })

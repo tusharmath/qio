@@ -1,8 +1,8 @@
 import {Cancel} from 'ts-scheduler'
 
-import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
+import {DefaultRuntime} from '../runtimes/DefaultRuntime'
 
 enum IOStatus {
   FORKED,
@@ -14,13 +14,18 @@ enum IOStatus {
 /**
  * @ignore
  */
-class Computation<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
+class Computation<R, E, A> implements IFIO<R, E, A> {
   public constructor(
-    private readonly cmp: (env: R, rej: CB<E>, res: CB<A>) => void | Cancel
+    private readonly cmp: (
+      env: R,
+      rej: CB<E>,
+      res: CB<A>,
+      runtime: DefaultRuntime
+    ) => void | Cancel
   ) {}
 
-  public fork(env: R & DefaultEnv, rej: CB<E>, res: CB<A>): Cancel {
-    const sh = env.scheduler
+  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: DefaultRuntime): Cancel {
+    const sh = runtime.scheduler
     const cancellations = new Array<Cancel>()
     let status = IOStatus.FORKED
     const onRej: CB<E> = e => {
@@ -36,7 +41,7 @@ class Computation<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
     cancellations.push(
       sh.asap(() => {
         try {
-          const cancel = this.cmp(env, onRej, onRes)
+          const cancel = this.cmp(env, onRej, onRes, runtime)
           if (typeof cancel === 'function') {
             cancellations.push(cancel)
           }
@@ -59,6 +64,11 @@ class Computation<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
  * Creates an instance of Computation
  * @ignore
  */
-export const C = <R = DefaultEnv, E = Error, A = unknown>(
-  cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
-): IFIO<R & DefaultEnv, E, A> => new Computation(cmp)
+export const C = <R = DefaultRuntime, E = Error, A = unknown>(
+  cmp: (
+    env: R,
+    rej: CB<E>,
+    res: CB<A>,
+    runtime: DefaultRuntime
+  ) => Cancel | void
+): IFIO<R, E, A> => new Computation(cmp)

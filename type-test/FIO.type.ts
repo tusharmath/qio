@@ -3,28 +3,29 @@
  */
 
 import {FIO} from '../'
-import {DefaultEnv} from '../src/envs/DefaultEnv'
 
-// $ExpectType FIO<DefaultEnv, never, never>
+// $ExpectType FIO<unknown, never, never>
 FIO.from((env1, rej, res) => res(10))
 
-// $ExpectType FIO<DefaultEnv, never, never>
-FIO.from((env: DefaultEnv, rej, res) => env.scheduler.delay(() => res(10), 10))
+// $ExpectType FIO<{ a: number; }, never, never>
+FIO.from((env: {a: number}, rej, res, runtime) =>
+  runtime.scheduler.delay(() => {}, 10)
+)
 
-// $ExpectType FIO<DefaultEnv, never, never>
+// $ExpectType FIO<unknown, never, never>
 FIO.from((env, rej, res) => res(10))
 
-// $ExpectType FIO<DefaultEnv, never, string>
-FIO.from<DefaultEnv, never, string>((env, rej, res) => res(10))
+// $ExpectType FIO<{ a: number; }, never, string>
+FIO.from<{a: number}, never, string>((env, rej, res) => res(10))
 
-// $ExpectType FIO<DefaultEnv, never, number>
+// $ExpectType FIO<unknown, never, number>
 FIO.of(1000)
 
-// $ExpectType FIO<DefaultEnv, number, never>
+// $ExpectType FIO<unknown, number, never>
 FIO.reject(1000)
 
-// $ExpectType FIO<DefaultEnv, never, number>
+// $ExpectType FIO<unknown, never, number>
 FIO.reject(1000).catch(() => FIO.of(10))
 
-// $ExpectType FIO<DefaultEnv, never, number>
+// $ExpectType FIO<unknown, never, number>
 FIO.encase((a: string, b: number) => parseInt(a, 10) + b)('10', 2)

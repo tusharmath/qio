@@ -1,5 +1,7 @@
 import {IScheduler} from 'ts-scheduler'
 
+import {DefaultRuntime} from '../../src/runtimes/DefaultRuntime'
+
 /**
  * Created by tushar on 2019-03-22
  */
@@ -15,7 +17,8 @@ export type TimelineList<A> = Array<TimeSlice<A>>
 /**
  * A simple timeline of all the events that goes on in the IO world
  */
-export const Timeline = <E, A>(sh: IScheduler) => {
+export const Timeline = <E, A>(runTime: DefaultRuntime) => {
+  const sh = runTime.scheduler
   const timeline = new Array<TimeSlice<A>>()
   let resolvedValue: A | undefined
   let rejectedValue: E | undefined

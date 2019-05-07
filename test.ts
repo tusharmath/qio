@@ -3,4 +3,4 @@
  * Created by tushar on 2019-05-06
  */
 
-export {TestEnv, testEnv} from './src/envs/TestEnv'
+export {TestRuntime, testRuntime} from './src/runtimes/TestRuntime'

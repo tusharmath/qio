@@ -5,7 +5,7 @@
 import {inNode} from 'in-node'
 import {Cancel} from 'ts-scheduler'
 
-import {DefaultEnv} from '../envs/DefaultEnv'
+import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
 import {Catch} from '../operators/Catch'
@@ -14,6 +14,7 @@ import {Map} from '../operators/Map'
 import {Once} from '../operators/Once'
 import {Race} from '../operators/Race'
 import {OR, Zip} from '../operators/Zip'
+import {defaultRuntime, DefaultRuntime} from '../runtimes/DefaultRuntime'
 import {C} from '../sources/Computation'
 import {Timeout} from '../sources/Timeout'
 
@@ -63,8 +64,8 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    */
   public static access<R = unknown, E = never, A = never>(
     fn: (env: R) => A
-  ): FIO<R & DefaultEnv, E, A> {
-    return FIO.environment<R & DefaultEnv>().map(fn)
+  ): FIO<R, E, A> {
+    return FIO.environment<R>().map(fn)
   }
 
   /**
@@ -72,8 +73,8 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    */
   public static accessM<R1 = unknown, R2 = R1, E1 = never, A1 = never>(
     fn: (env: R1) => FIO<R2, E1, A1>
-  ): FIO<R1 & R2 & DefaultEnv, E1, A1> {
-    return FIO.environment<R1 & DefaultEnv>().chain(fn)
+  ): FIO<R1 & R2, E1, A1> {
+    return FIO.environment<R1>().chain(fn)
   }
 
   /**
@@ -81,7 +82,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    */
   public static accessP<R = unknown, A = unknown>(
     fn: (env: R) => Promise<A>
-  ): FIO<R & DefaultEnv, Error, A> {
+  ): FIO<R, Error, A> {
     return FIO.accessM(FIO.encaseP(fn))
   }
 
@@ -91,7 +92,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    */
   public static encase<E = never, A = never, G extends unknown[] = []>(
     fn: (...t: G) => A
-  ): (...t: G) => FIO<DefaultEnv, E, A> {
+  ): (...t: G) => FIO<NoEnv, E, A> {
     return (...t) => FIO.from((env, rej, res) => res(fn(...t)))
   }
 
@@ -103,7 +104,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    */
   public static encaseP<A, G extends unknown[]>(
     fn: (...t: G) => Promise<A>
-  ): (...t: G) => FIO<DefaultEnv, Error, A> {
+  ): (...t: G) => FIO<NoEnv, Error, A> {
     return (...t) =>
       FIO.from(
         (env, rej, res) =>
@@ -116,7 +117,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Creates an IO that resolves with the provided env
    */
-  public static environment<R1 = unknown>(): FIO<R1 & DefaultEnv, never, R1> {
+  public static environment<R1 = unknown>(): FIO<R1, never, R1> {
     return FIO.from((env1, rej, res) => res(env1))
   }
 
@@ -126,39 +127,41 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * `from` is for more advanced usages and is intended to be used internally.
    */
   public static from<R = unknown, E = never, A = never>(
-    cmp: (env: R, rej: CB<E>, res: CB<A>) => Cancel | void
-  ): FIO<R & DefaultEnv, E, A> {
+    cmp: (
+      env: R,
+      rej: CB<E>,
+      res: CB<A>,
+      runTime: DefaultRuntime
+    ) => Cancel | void
+  ): FIO<R, E, A> {
     return FIO.to(C(cmp))
   }
 
   /**
    * Creates an [[FIO]] that never completes.
    */
-  public static never(): FIO<DefaultEnv, never, never> {
+  public static never(): FIO<NoEnv, never, never> {
     return FIO.from(rNoop)
   }
 
   /**
    * Creates an [[FIO]] that always resolves with the same value.
    */
-  public static of<A>(value: A): FIO<DefaultEnv, never, A> {
+  public static of<A>(value: A): FIO<NoEnv, never, A> {
     return FIO.from((env, rej, res) => res(value))
   }
 
   /**
    * Creates an IO that always rejects with an error
    */
-  public static reject<E>(error: E): FIO<DefaultEnv, E, never> {
+  public static reject<E>(error: E): FIO<NoEnv, E, never> {
     return FIO.from((env, rej) => rej(error))
   }
 
   /**
    * Creates an IO that resolves with the given value after a certain duration of time.
    */
-  public static timeout<A>(
-    value: A,
-    duration: number
-  ): FIO<DefaultEnv, Error, A> {
+  public static timeout<A>(value: A, duration: number): FIO<NoEnv, Error, A> {
     return FIO.to(new Timeout(duration, value))
   }
 
@@ -196,15 +199,19 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Delays an IO execution by the provided duration
    */
-  public delay(duration: number): FIO<R1 & DefaultEnv, Error | E1, A1> {
+  public delay(duration: number): FIO<R1, Error | E1, A1> {
     return FIO.timeout(this.io, duration).chain(_ => _)
   }
 
   /**
    * Actually executes the IO
    */
-  public fork = (env: R1, rej: CB<E1> = onError, res: CB<A1> = noop): Cancel =>
-    this.io.fork(env, rej, res)
+  public fork = (
+    env: R1,
+    rej: CB<E1> = onError,
+    res: CB<A1> = noop,
+    runtime = defaultRuntime()
+  ): Cancel => this.io.fork(env, rej, res, runtime)
 
   /**
    * Applies transformation on the resolve value of the IO
@@ -216,7 +223,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Creates a new IO<IO<A>> that executes only once
    */
-  public once(): FIO<DefaultEnv, never, FIO<R1 & DefaultEnv, E1, A1>> {
+  public once(): FIO<NoEnv, never, FIO<R1, E1, A1>> {
     return FIO.of(FIO.to(new Once(this)))
   }
 
@@ -224,8 +231,10 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Eliminates the dependency on the IOs original environment.
    * Creates an IO that can run in [DefaultEnv].
    */
-  public provide(env: R1): FIO<DefaultEnv, E1, A1> {
-    return FIO.from((env1, rej, res) => this.io.fork(env, rej, res))
+  public provide(env: R1): FIO<NoEnv, E1, A1> {
+    return FIO.from((env1, rej, res, runtime) =>
+      this.io.fork(env, rej, res, runtime)
+    )
   }
 
   /**

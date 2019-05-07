@@ -1,14 +1,14 @@
 import {LinkedList} from 'dbl-linked-list-ds'
 import {Cancel} from 'ts-scheduler'
 
-import {DefaultEnv} from '../envs/DefaultEnv'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
+import {DefaultRuntime} from '../runtimes/DefaultRuntime'
 
 /**
  * @ignore
  */
-export class Once<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
+export class Once<R, E, A> implements IFIO<R, E, A> {
   private cancel: Cancel | undefined
   private error: E | undefined
   private isForked = false
@@ -19,8 +19,8 @@ export class Once<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
 
   public constructor(private readonly io: IFIO<R, E, A>) {}
 
-  public fork(env: R & DefaultEnv, rej: CB<E>, res: CB<A>): Cancel {
-    const sh = env.scheduler
+  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: DefaultRuntime): Cancel {
+    const sh = runtime.scheduler
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))
     }
@@ -33,7 +33,7 @@ export class Once<R, E, A> implements IFIO<R & DefaultEnv, E, A> {
 
     if (!this.isForked) {
       this.isForked = true
-      this.cancel = this.io.fork(env, this.onReject, this.onResolve)
+      this.cancel = this.io.fork(env, this.onReject, this.onResolve, runtime)
     }
 
     return () => {

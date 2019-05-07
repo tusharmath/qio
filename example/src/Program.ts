@@ -1,4 +1,4 @@
-import {DefaultEnv, FIO} from '../../index'
+import {DefaultRuntime, FIO} from '../../index'
 
 export interface ConsoleService {
   getStrLn(question: string): Promise<string>
@@ -39,7 +39,7 @@ const exit = (code?: number) =>
 
 const randomNumber = FIO.access((env: RandomEnv) => env.random.random())
 
-const enterNumber: FIO<DefaultEnv & ConsoleEnv, Error, number> = getStrLn(
+const enterNumber: FIO<DefaultRuntime & ConsoleEnv, Error, number> = getStrLn(
   `Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}:`
 )
   .map(_ => parseInt(_, 10))
@@ -50,7 +50,7 @@ const enterNumber: FIO<DefaultEnv & ConsoleEnv, Error, number> = getStrLn(
   )
 
 const game: FIO<
-  DefaultEnv & ConsoleEnv & SystemEnv & RandomEnv,
+  DefaultRuntime & ConsoleEnv & SystemEnv & RandomEnv,
   Error,
   void
 > = enterNumber

@@ -6,6 +6,7 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
 
+import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
@@ -19,15 +20,8 @@ describe('Try', () => {
   )
   const tryNumberIO = () => {
     let i = 0
-    const scheduler = testScheduler()
-    const {timeline, fork} = IOCollector(
-      {scheduler},
-      FIO.access(() => (i += 1))
-    )
-    fork()
-    scheduler.run()
 
-    return {timeline}
+    return ForkNRun(undefined, FIO.access(() => (i += 1)))
   }
 
   it('should compute the computation', () => {

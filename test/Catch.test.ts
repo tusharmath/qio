@@ -4,7 +4,8 @@
 import {assert} from 'chai'
 
 import {FIO} from '../'
-import {DefaultEnv} from '../src/envs/DefaultEnv'
+import {NoEnv} from '../src/envs/NoEnv'
+import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {
@@ -15,13 +16,13 @@ import {
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
-    FIO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(
-      e => FIO.of(e.message)
+    FIO.from<NoEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(e =>
+      FIO.of(e.message)
     )
   )
   RejectingIOSpec(() =>
-    FIO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(
-      e => FIO.reject(e)
+    FIO.from<NoEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(e =>
+      FIO.reject(e)
     )
   )
   CancellationIOSpec(io => FIO.reject(new Error('!!!')).catch(() => io))

@@ -1,11 +1,10 @@
 import {IScheduler, scheduler} from 'ts-scheduler'
 
 /**
- * Default env needed to create any FIO.
- * Not specific to browser or Node.js.
- * Actual implementation is available at [[defaultEnv]].
+ * Default runtime needed to execute any FIO.
+ * Actual implementation is available at [[defaultRuntime]].
  */
-export interface DefaultEnv {
+export interface DefaultRuntime {
   scheduler: IScheduler
 }
 
@@ -33,4 +32,4 @@ export interface DefaultEnv {
  * greet.fork(defaultEnv(), onRej, onRes)
  * ```
  */
-export const defaultEnv = (): DefaultEnv => ({scheduler})
+export const defaultRuntime = (): DefaultRuntime => ({scheduler})

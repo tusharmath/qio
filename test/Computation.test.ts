@@ -6,7 +6,7 @@ import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
-import {DefaultEnv} from '../src/envs/DefaultEnv'
+import {NoEnv} from '../src/envs/NoEnv'
 
 import {Counter} from './internals/Counter'
 import {GetTimeline} from './internals/GetTimeline'
@@ -15,10 +15,10 @@ import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Computation', () => {
   ResolvingIOSpec(() =>
-    FIO.from<DefaultEnv, never, number>((env, rej, res) => res(10))
+    FIO.from<NoEnv, never, number>((env, rej, res) => res(10))
   )
   RejectingIOSpec(() =>
-    FIO.from<DefaultEnv, Error>((env, rej) => rej(new Error('FAILED')))
+    FIO.from<NoEnv, Error>((env, rej) => rej(new Error('FAILED')))
   )
 
   it('should defer computations', () => {
@@ -26,7 +26,7 @@ describe('Computation', () => {
 
     const {fork} = IOCollector(
       {scheduler: testScheduler()},
-      FIO.from<DefaultEnv, never, void>((env, rej, res) => {
+      FIO.from<NoEnv, never, void>((env, rej, res) => {
         results.push('RUN')
         res(undefined)
 
@@ -40,7 +40,7 @@ describe('Computation', () => {
   })
   it('should handle sync exceptions', () => {
     const actual = GetTimeline(
-      FIO.from<DefaultEnv, Error>(() => {
+      FIO.from<NoEnv, Error>(() => {
         throw new Error('APPLE')
       })
     ).getError().message
@@ -50,18 +50,19 @@ describe('Computation', () => {
   })
   it('should not cancel a resolved io', () => {
     let cancelled = false
-    const scheduler = testScheduler()
-    const io = FIO.from<DefaultEnv, never, number>((env, rej, res) => {
-      const c = env.scheduler.delay(() => res(100), 10)
+    const {fork, timeline, runtime} = IOCollector(
+      undefined,
+      FIO.from<NoEnv, never, number>((env, rej, res) => {
+        const c = runtime.scheduler.delay(() => res(100), 10)
 
-      return () => {
-        c()
-        cancelled = true
-      }
-    })
-    const {fork, timeline} = IOCollector({scheduler}, io)
+        return () => {
+          c()
+          cancelled = true
+        }
+      })
+    )
     const cancel = fork()
-    scheduler.run()
+    runtime.scheduler.run()
     cancel()
 
     const actual = timeline.getValue()
@@ -71,18 +72,19 @@ describe('Computation', () => {
   })
   it('should not cancel a rejected io', () => {
     let cancelled = false
-    const io = FIO.from<DefaultEnv, Error>((env, rej) => {
-      const c = env.scheduler.delay(() => rej(new Error('Bup!')), 10)
+    const {fork, timeline, runtime} = IOCollector(
+      {},
+      FIO.from<NoEnv, Error>((env, rej) => {
+        const c = runtime.scheduler.delay(() => rej(new Error('Bup!')), 10)
 
-      return () => {
-        c()
-        cancelled = true
-      }
-    })
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+        return () => {
+          c()
+          cancelled = true
+        }
+      })
+    )
     const cancel = fork()
-    scheduler.run()
+    runtime.scheduler.run()
     cancel()
 
     assert.equal(timeline.getError().message, 'Bup!')
@@ -91,11 +93,10 @@ describe('Computation', () => {
   it('should not cancel a cancelled IO', () => {
     const counter = Counter(1000)
     const io = counter.inc
-    const S = testScheduler()
-    const {fork} = IOCollector({scheduler: S}, io)
-    S.runTo(200)
+    const {fork, runtime} = IOCollector(undefined, io)
+    runtime.scheduler.runTo(200)
     const cancel = fork()
-    S.runTo(210)
+    runtime.scheduler.runTo(210)
     cancel()
     cancel()
     cancel()

@@ -3,10 +3,9 @@
  */
 
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
-import {DefaultEnv} from '../src/envs/DefaultEnv'
+import {NoEnv} from '../src/envs/NoEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
@@ -24,8 +23,8 @@ describe('Once', () => {
   const createNeverEndingOnceIO = () => {
     let count = 0
     const io = new Once(
-      FIO.from<DefaultEnv, never, number>((env, rej, res) =>
-        env.scheduler.asap(() => res((count += 1)))
+      FIO.from<NoEnv, never, number>((env, rej, res, runtime) =>
+        runtime.scheduler.asap(() => res((count += 1)))
       )
     )
 
@@ -37,8 +36,8 @@ describe('Once', () => {
   const createResolvingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      FIO.from<DefaultEnv, never, number>((env, rej, res) =>
-        env.scheduler.delay(() => res((count += 1)), n)
+      FIO.from<NoEnv, never, number>((env, rej, res, runtime) =>
+        runtime.scheduler.delay(() => res((count += 1)), n)
       )
     )
 
@@ -50,8 +49,8 @@ describe('Once', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      FIO.from<DefaultEnv, Error>((env, rej) =>
-        env.scheduler.delay(
+      FIO.from<NoEnv, Error>((env, rej, res, runtime) =>
+        runtime.scheduler.delay(
           () => rej(new Error('FAILED_' + (count += 1).toString())),
           n
         )
@@ -66,24 +65,22 @@ describe('Once', () => {
 
   it('should compute only once', () => {
     const {io, isComputedOnce} = createNeverEndingOnceIO()
-    const scheduler = testScheduler()
-    const {fork} = IOCollector({scheduler}, io)
+    const {fork, runtime} = IOCollector(undefined, io)
 
     fork()
     fork()
-    scheduler.run()
+    runtime.scheduler.run()
 
     assert.ok(isComputedOnce())
   })
 
   it('should be resolved for each fork', () => {
     const {io} = createResolvingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
     fork()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(['RESOLVE', 101, 1], ['RESOLVE', 101, 1])
@@ -93,12 +90,11 @@ describe('Once', () => {
 
   it('should be rejected for each fork', () => {
     const {io} = createRejectingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
     fork()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(
@@ -111,12 +107,11 @@ describe('Once', () => {
 
   it('should not reject cancelled forks', () => {
     const {io} = createRejectingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
     fork()()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(['REJECT', 101, 'Error: FAILED_1'])
@@ -126,13 +121,12 @@ describe('Once', () => {
 
   it('should not resolve completed io', () => {
     const {io} = createResolvingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
-    scheduler.runTo(300)
+    runtime.scheduler.runTo(300)
     fork()()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(['RESOLVE', 101, 1])
@@ -142,14 +136,13 @@ describe('Once', () => {
 
   it('should not reject completed io', () => {
     const {io} = createRejectingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
-    scheduler.runTo(300)
+    runtime.scheduler.runTo(300)
 
     fork()()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(['REJECT', 101, 'Error: FAILED_1'])
@@ -159,14 +152,13 @@ describe('Once', () => {
 
   it('should resolve forks after completion', () => {
     const {io} = createResolvingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
-    scheduler.runTo(300)
+    runtime.scheduler.runTo(300)
 
     fork()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(['RESOLVE', 101, 1], ['RESOLVE', 301, 1])
@@ -176,14 +168,13 @@ describe('Once', () => {
 
   it('should reject forks after completion', () => {
     const {io} = createRejectingOnceIO(100)
-    const scheduler = testScheduler()
-    const {fork, timeline} = IOCollector({scheduler}, io)
+    const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
-    scheduler.runTo(300)
+    runtime.scheduler.runTo(300)
 
     fork()
-    scheduler.run()
+    runtime.scheduler.run()
 
     const actual = timeline.list()
     const expected = timeline.create(

@@ -4,12 +4,12 @@
 
 import {prompt} from 'promptly'
 
-import {defaultEnv} from '../../src/envs/DefaultEnv'
+import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 import {program} from './Program'
 
 program.fork({
-  ...defaultEnv(),
+  ...defaultRuntime(),
   console: {
     getStrLn: prompt,
     // tslint:disable-next-line:no-console

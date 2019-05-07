@@ -2,32 +2,30 @@
  * Created by tushar on 2019-03-20
  */
 
-import {DefaultEnv} from '../../src/envs/DefaultEnv'
 import {IFIO} from '../../src/internals/IFIO'
+import {testRuntime} from '../../src/runtimes/TestRuntime'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A, E, R>(
-  env: R & DefaultEnv,
-  io: IFIO<R, E, A>
-) => {
+export const IOCollector = <A, E, R>(env: R, io: IFIO<R, E, A>) => {
   /**
    * access the testScheduler
    */
-  const scheduler = env.scheduler
+  const runtime = testRuntime()
 
   /**
    * Contains a list of all internal events.
    */
-  const timeline = Timeline<E, A>(scheduler)
+  const timeline = Timeline<E, A>(runtime)
 
   /**
    * Forks the IO operation
    */
-  const fork = () => io.fork(env, timeline.reject, timeline.resolve)
+  const fork = () => io.fork(env, timeline.reject, timeline.resolve, runtime)
 
   return {
     fork,
+    runtime,
     timeline
   }
 }

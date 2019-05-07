@@ -3,22 +3,28 @@
  */
 import {Cancel} from 'ts-scheduler'
 
-import {DefaultEnv} from '../envs/DefaultEnv'
+import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
 import {SafeResolve} from '../internals/SafeResolve'
+import {DefaultRuntime} from '../runtimes/DefaultRuntime'
 
 /**
  * @ignore
  */
-export class Timeout<A> implements IFIO<DefaultEnv, Error, A> {
+export class Timeout<A> implements IFIO<NoEnv, Error, A> {
   public constructor(
     private readonly duration: number,
     private readonly value: A
   ) {}
 
-  public fork(env: DefaultEnv, rej: CB<Error>, res: CB<A>): Cancel {
-    return env.scheduler.delay(() => {
+  public fork(
+    env: NoEnv,
+    rej: CB<Error>,
+    res: CB<A>,
+    runtime: DefaultRuntime
+  ): Cancel {
+    return runtime.scheduler.delay(() => {
       SafeResolve(this.value, rej, res)
     }, this.duration)
   }
