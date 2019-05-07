@@ -9,7 +9,7 @@ import {defaultEnv} from '../../src/envs/DefaultEnv'
 import {program} from './Program'
 
 program.fork({
-  ...defaultEnv,
+  ...defaultEnv(),
   console: {
     getStrLn: prompt,
     // tslint:disable-next-line:no-console
