@@ -21,18 +21,9 @@ export class DefaultRuntime extends Runtime {
  * const putStrLn = FIO.encase((msg: string) => console.log(msg))
  * const greet = putStrLn('Hello World!')
  *
- * // Executing IO
- * const onRej = () => {
- *   console.log('Failure')
- *   process.exit(1)
- * }
- * const onRes = () => {
- *   process.exit(0)
- * }
- *
  * const runtime = defaultRuntime()
  *
- * runtime.execute(greet, onRej, onRes)
+ * runtime.execute(greet)
  * ```
  */
 export const defaultRuntime = () => new DefaultRuntime()

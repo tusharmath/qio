@@ -9,6 +9,7 @@ import {CB} from './CB'
  * @typeparam R The environment needed to run the IO
  * @typeparam E The possible failures from the IO
  * @typeparam A The output of the IO
+ * @ignore
  */
 export interface IFIO<R, E, A> {
   /**

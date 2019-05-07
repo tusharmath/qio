@@ -38,7 +38,7 @@ export class TestRuntime extends Runtime {
  * const runtime = testRuntime()
  *
  * // Execute the IO
- * runtime.execute(io, assert.fail, i => result = i)
+ * runtime.execute(io, i => result = i)
  *
  * assert.strictEqual(result, 10)
  * ```
