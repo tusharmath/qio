@@ -6,10 +6,7 @@ import {testScheduler, TestScheduler} from 'ts-scheduler/test'
 import {DefaultEnv} from './DefaultEnv'
 
 /**
- * Extension of the [[DefaultEnv]] that is used for writing unit tests.
- * Most IO related code is async and using the [[DefaultEnv]] one might have to use callbacks and promises while writing tests.
- * [[TestEnv]] mitigates this problem by providing a custom [scheduler]{@link https://github.com/tusharmath/ts-scheduler}.
- * The exact implementation and usage can be found inside of [[testEnv]].
+ * Extension of the [[DefaultEnv]] that can be used for writing unit tests.
  */
 export interface TestEnv extends DefaultEnv {
   scheduler: TestScheduler
@@ -18,9 +15,16 @@ export interface TestEnv extends DefaultEnv {
 /**
  * Creates a new [[TestEnv]].
  *
- * @example
- * ```ts
+ * Most IO related code is async and using the [[DefaultEnv]] one has to use callbacks and promises,
+ * and then wait for random amounts of time for them to resolve.
  *
+ * Using the [[TestEnv]] mitigates this problem by providing a different [scheduler]
+ * which runs jobs synchronously.
+ *
+ *
+ * [scheduler]: https://github.com/tusharmath/ts-scheduler
+ *
+ * ```ts
  * import {FIO} from 'fearless-io'
  * import {testEnv} from 'fearless-io/test'
  *

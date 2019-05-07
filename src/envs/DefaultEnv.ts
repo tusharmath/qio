@@ -10,11 +10,11 @@ export interface DefaultEnv {
 }
 
 /**
- * Helper utility that returns the default env
+ * Helper utility that returns the default env.
+ * Internally it contains a `scheduler` which defaults to [ts-scheduler]
+ * [ts-scheduler]: https://github.com/tusharmath/ts-scheduler
  *
- * @example
  * ```ts
- *
  * import {defaultEnv, FIO} from 'fearless-io'
  *
  * const putStrLn = FIO.encase((msg: string) => console.log(msg))
@@ -30,7 +30,7 @@ export interface DefaultEnv {
  * }
  *
  * // Pass `defaultEnv` as the first argument
- * greet.fork(defaultEnv, onRej, onRes)
+ * greet.fork(defaultEnv(), onRej, onRes)
  * ```
  */
-export const defaultEnv: DefaultEnv = {scheduler}
+export const defaultEnv = (): DefaultEnv => ({scheduler})

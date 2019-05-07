@@ -86,10 +86,8 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   }
 
   /**
-   *
    * Takes in an effect-full function zip returns a pure function,
-   * that takes in the same arguments zip wraps the result into an [[IO]]
-   *
+   * that takes in the same arguments zip wraps the result into an [[FIO]]
    */
   public static encase<E = never, A = never, G extends unknown[] = []>(
     fn: (...t: G) => A
@@ -100,7 +98,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    *
    * Takes in a function that returns a `Promise` zip converts it to a function,
-   * that takes the same set of arguments zip returns an [[IO]]
+   * that takes the same set of arguments zip returns an [[FIO]]
    * TODO: remove dependency on SchedulerEnv
    */
   public static encaseP<A, G extends unknown[]>(
@@ -134,14 +132,14 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   }
 
   /**
-   * Creates an [[IO]] that never completes.
+   * Creates an [[FIO]] that never completes.
    */
   public static never(): FIO<DefaultEnv, never, never> {
     return FIO.from(rNoop)
   }
 
   /**
-   * Creates an [[IO]] that always resolves with the same value.
+   * Creates an [[FIO]] that always resolves with the same value.
    */
   public static of<A>(value: A): FIO<DefaultEnv, never, A> {
     return FIO.from((env, rej, res) => res(value))
