@@ -7,7 +7,6 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
 import {NoEnv} from '../src/envs/NoEnv'
-import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'
 
 import {GetTimeline} from './internals/GetTimeline'
 

@@ -7,8 +7,6 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {NoEnv} from '../src/envs/NoEnv'
 import {FIO} from '../src/main/FIO'
-import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'
-import {TestRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 import {ForkNRun} from './internals/ForkNRun'

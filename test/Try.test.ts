@@ -2,13 +2,11 @@
  * Created by tushar on 2019-03-18
  */
 import * as assert from 'assert'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
 
 import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'
-import {IOCollector} from './internals/IOCollector'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
 describe('Try', () => {

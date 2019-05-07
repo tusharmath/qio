@@ -5,7 +5,6 @@ import {assert} from 'chai'
 
 import {FIO} from '../'
 import {NoEnv} from '../src/envs/NoEnv'
-import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {
