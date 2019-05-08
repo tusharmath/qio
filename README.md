@@ -23,12 +23,13 @@ npm i fearless-io
 # Usage
 
 ```typescript
-import {IO} from 'fearless-io'
+import {IO, defaultRuntime} from 'fearless-io'
 
 // Create a pure version of `console.log` called `putStrLn`
 const putStrLn = IO.encase((str: string) => console.log(str))
 
 const hello = putStrLn('Hello World!')
 
-hello.fork(() => {}, () => {})
+const runtime = defaultRuntime()
+runtime.execute(hello)
 ```

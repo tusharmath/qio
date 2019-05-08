@@ -1,29 +1,36 @@
 /**
  * Created by tushar on 2019-04-21
  */
+import {Cancel} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
+
+import {Timeline} from '../../test/internals/Timeline'
+import {NoEnv} from '../envs/NoEnv'
+import {IFIO} from '../internals/IFIO'
 
 import {Runtime} from './Runtime'
 
 /**
- * Extension of the [[DefaultRuntime]] that can be used for executing unit tests.
+ * Extension of the [[Runtime]] that can be used for executing unit tests.
  */
 
-export class TestRuntime extends Runtime {
+export class TestRuntime implements Runtime {
   public readonly scheduler = testScheduler()
+  public readonly timeline = Timeline(this)
+  public execute<E, A>(io: IFIO<NoEnv, E, A>): Cancel {
+    return io.fork(undefined, this.timeline.reject, this.timeline.resolve, this)
+  }
 }
-
 /**
  * Creates a new [[TestRuntime]].
  *
- * Most IO related code is async and using the [[DefaultRuntime]] one has to use callbacks and promises,
- * and then wait for random amounts of time for them to resolve.
+ * [[DefaultRuntime]] uses actual CPU clock to schedule jobs.
+ * So For instance if you want to write a program that waits for 1second and then completes,
+ * using the CPU clock the [[DefaultRuntime]] will ensure that the program actually waits for 1sec.
+ * At the same time your code will now be executed asynchronously.
  *
- * Using the [[TestRuntime]] mitigates this problem by providing a different [scheduler]
- * which runs jobs synchronously.
- *
- *
- * [scheduler]: https://github.com/tusharmath/ts-scheduler
+ * This wait can be completely removed if you use the [[TestRuntime]].
+ * It injects a virtual sense of time into [[FIO]] and runs code synchronously.
  *
  * ```ts
  * import {FIO} from 'fearless-io'
@@ -40,7 +47,8 @@ export class TestRuntime extends Runtime {
  * // Execute the IO
  * runtime.execute(io, i => result = i)
  *
- * assert.strictEqual(result, 10)
+ * assert.strictEqual(result, 'BAR')
  * ```
  */
+
 export const testRuntime = () => new TestRuntime()
