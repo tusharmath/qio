@@ -11,6 +11,7 @@ A type-safe functional module that solves practical IO problems on node and the 
 - [Usage](#usage)
 - [Getting Started]
 - [Documentation](https://tusharmath.com/fearless-io)
+- [Example](https://github.com/tusharmath/fearless-io/blob/master/example/README.md)
 
 [getting started]: https://github.com/tusharmath/fearless-io/blob/master/GETTING_STARTED.md
 

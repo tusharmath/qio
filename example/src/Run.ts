@@ -4,7 +4,7 @@
 
 import {prompt} from 'promptly'
 
-import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
+import {defaultRuntime} from '../../'
 
 import {program} from './Program'
 

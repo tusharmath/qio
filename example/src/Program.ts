@@ -1,4 +1,4 @@
-import {FIO} from '../../index'
+import {FIO} from '../../'
 
 export interface ConsoleService {
   getStrLn(question: string): Promise<string>

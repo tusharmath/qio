@@ -29,7 +29,8 @@
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "typedoc",
     "check-types": "typings-checker type-test/*",
-    "typings-checker": "typings-checker"
+    "typings-checker": "typings-checker",
+    "example": "node example/src/Run"
   },
   "version": "0.0.0-development",
   "devDependencies": {
