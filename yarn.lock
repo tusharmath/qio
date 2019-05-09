@@ -747,6 +747,11 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@types/benchmark@^1.0.31":
+  version "1.0.31"
+  resolved "https://registry.yarnpkg.com/@types/benchmark/-/benchmark-1.0.31.tgz#2dd3514e93396f362ba5551a7c9ff0da405c1d38"
+  integrity sha512-F6fVNOkGEkSdo/19yWYOwVKGvzbTeWkR/XQYBKtGBQ9oGRjBN9f/L4aJI4sDcVPJO58Y1CJZN8va9V2BhrZapA==
+
 "@types/chai@^4.1.7":
   version "4.1.7"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
@@ -1099,6 +1104,14 @@ before-after-hook@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-1.4.0.tgz#2b6bf23dca4f32e628fd2747c10a37c74a4b484d"
   integrity sha512-l5r9ir56nda3qu14nAXIlyq1MmUSs0meCIaFAh8HwkFwP1F8eToOuS3ah2VAHHcY04jaYD7FpJC5JTXHYRbkzg==
+
+benchmark@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/benchmark/-/benchmark-2.1.4.tgz#09f3de31c916425d498cc2ee565a0ebf3c2a5629"
+  integrity sha1-CfPeMckWQl1JjMLuVloOvzwqVik=
+  dependencies:
+    lodash "^4.17.4"
+    platform "^1.3.3"
 
 bin-links@^1.1.2:
   version "1.1.2"
@@ -1575,6 +1588,14 @@ concat-stream@^1.5.0, concat-stream@^1.5.2:
     inherits "^2.0.3"
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
+
+concurrify@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/concurrify/-/concurrify-1.1.1.tgz#e903b6500b2ce9af7ac51bd5f2161f8db33cfb41"
+  integrity sha512-m2UMqZAJ7Ys4Juu0IaToa/RbVuu5jR8dGVrwUOeQtfJjX0KDimUdPZ20tVrdSuqJwLaFbpI+lWxOmZSYxyCvmQ==
+  dependencies:
+    sanctuary-show "^1.0.0"
+    sanctuary-type-identifiers "^2.0.0"
 
 config-chain@^1.1.12:
   version "1.1.12"
@@ -2285,6 +2306,15 @@ flush-write-stream@^1.0.0:
   dependencies:
     inherits "^2.0.3"
     readable-stream "^2.3.6"
+
+fluture@^11.0.1:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/fluture/-/fluture-11.0.1.tgz#e7b0dace991bbe9670e73aa35cd170147ae00f4b"
+  integrity sha512-3sLKXzScs6mQByQefKrlJ4D6dPPIIcy6yvDivnUzs4GNxaKBLAQu9vxkZ9WQpFb7BuhpQgS+sr6z/+f4KLGrOg==
+  dependencies:
+    concurrify "^1.1.1"
+    sanctuary-show "^1.0.0"
+    sanctuary-type-identifiers "^2.0.0"
 
 for-in@^1.0.2:
   version "1.0.2"
@@ -4685,6 +4715,11 @@ pkg-dir@^2.0.0:
   dependencies:
     find-up "^2.1.0"
 
+platform@^1.3.3:
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
+  integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
+
 posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
@@ -5221,6 +5256,16 @@ safe-regex@^1.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
+
+sanctuary-show@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/sanctuary-show/-/sanctuary-show-1.0.0.tgz#72deb4812f9decec850e03286807dca1c97a1d61"
+  integrity sha512-63UqNGr5M6wkzKp6eGc/Gy6JBIV2PbzPd3q88+0F9z0qydAQsCWJ+7e4oor39rEEwj2GkZMDEhqGuiMl9eEnYw==
+
+sanctuary-type-identifiers@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/sanctuary-type-identifiers/-/sanctuary-type-identifiers-2.0.1.tgz#fc524cf6dd92cebfcbb0dd9509eff193159a20ed"
+  integrity sha1-/FJM9t2Szr/LsN2VCe/xkxWaIO0=
 
 semantic-release@^15.13.3:
   version "15.13.3"
