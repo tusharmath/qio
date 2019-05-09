@@ -4,12 +4,12 @@ import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
 import {DefaultRuntime} from '../runtimes/DefaultRuntime'
 
-enum IOStatus {
-  FORKED,
-  RESOLVED,
-  REJECTED,
-  CANCELLED
-}
+const FORKED: IOStatus = 0
+const RESOLVED: IOStatus = 1
+const REJECTED: IOStatus = 2
+const CANCELLED: IOStatus = 3
+
+type IOStatus = 0 | 1 | 2 | 3
 
 /**
  * @ignore
@@ -27,14 +27,14 @@ class Computation<R, E, A> implements IFIO<R, E, A> {
   public fork(env: R, rej: CB<E>, res: CB<A>, runtime: DefaultRuntime): Cancel {
     const sh = runtime.scheduler
     const cancellations = new Array<Cancel>()
-    let status = IOStatus.FORKED
+    let status = FORKED
     const onRej: CB<E> = e => {
-      status = IOStatus.REJECTED
+      status = REJECTED
       rej(e)
     }
 
     const onRes: CB<A> = a => {
-      status = IOStatus.RESOLVED
+      status = RESOLVED
       res(a)
     }
 
@@ -52,8 +52,8 @@ class Computation<R, E, A> implements IFIO<R, E, A> {
     )
 
     return () => {
-      if (status === IOStatus.FORKED) {
-        status = IOStatus.CANCELLED
+      if (status === FORKED) {
+        status = CANCELLED
         cancellations.forEach(_ => _())
       }
     }
