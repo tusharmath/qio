@@ -30,23 +30,19 @@ const rNoop = () => noop
  *
  * ```typescript
  *
- * import {IO} from 'fearless-io'
+ * import {IO, defaultRuntime} from 'fearless-io'
  *
  * // Create a pure version of `console.log` called `putStrLn`
  * const putStrLn = IO.encase((str: string) => console.log(str))
  *
- * const onError = (err) => {
- *   console.log(err)
- *   process.exit(1)
- * }
- *
- * const onSuccess = () => {
- *   console.log('Done!')
- * }
- *
+ * // Create FIO
  * const hello = putStrLn('Hello World!')
  *
- * hello.fork(onError, onSuccess)
+ * // Create runtime
+ * const runtime = defaultRuntime()
+ *
+ * // Execute the program
+ * runtime.execute(hello)
  *
  * ```
  * @typeparam A The output of the side-effect.
