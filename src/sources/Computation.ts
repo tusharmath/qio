@@ -2,7 +2,7 @@ import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 const FORKED: IOStatus = 0
 const RESOLVED: IOStatus = 1
@@ -20,11 +20,11 @@ class Computation<R, E, A> implements IFIO<R, E, A> {
       env: R,
       rej: CB<E>,
       res: CB<A>,
-      runtime: DefaultRuntime
+      runtime: Runtime
     ) => void | Cancel
   ) {}
 
-  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: DefaultRuntime): Cancel {
+  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): Cancel {
     const sh = runtime.scheduler
     const cancellations = new Array<Cancel>()
     let status = FORKED
@@ -64,11 +64,6 @@ class Computation<R, E, A> implements IFIO<R, E, A> {
  * Creates an instance of Computation
  * @ignore
  */
-export const C = <R = DefaultRuntime, E = Error, A = unknown>(
-  cmp: (
-    env: R,
-    rej: CB<E>,
-    res: CB<A>,
-    runtime: DefaultRuntime
-  ) => Cancel | void
+export const C = <R = unknown, E = Error, A = unknown>(
+  cmp: (env: R, rej: CB<E>, res: CB<A>, runtime: Runtime) => Cancel | void
 ): IFIO<R, E, A> => new Computation(cmp)

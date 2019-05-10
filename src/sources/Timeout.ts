@@ -7,7 +7,7 @@ import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
 import {SafeResolve} from '../internals/SafeResolve'
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 /**
  * @ignore
@@ -22,7 +22,7 @@ export class Timeout<A> implements IFIO<NoEnv, Error, A> {
     env: NoEnv,
     rej: CB<Error>,
     res: CB<A>,
-    runtime: DefaultRuntime
+    runtime: Runtime
   ): Cancel {
     return runtime.scheduler.delay(() => {
       SafeResolve(this.value, rej, res)
