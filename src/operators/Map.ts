@@ -3,7 +3,7 @@ import {Cancel} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
 import {SafeResolve} from '../internals/SafeResolve'
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 /**
  * @ignore
@@ -14,7 +14,7 @@ export class Map<R, E, A, B> implements IFIO<R, E, B> {
     private readonly ab: (a: A) => B
   ) {}
 
-  public fork(env: R, rej: CB<E>, res: CB<B>, runtime: DefaultRuntime): Cancel {
+  public fork(env: R, rej: CB<E>, res: CB<B>, runtime: Runtime): Cancel {
     return this.src.fork(
       env,
       rej,

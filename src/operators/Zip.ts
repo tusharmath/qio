@@ -2,7 +2,7 @@ import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 /**
  * A or B unless one of them is `never`
@@ -23,7 +23,7 @@ export class Zip<R1, R2, E1, E2, A1, A2>
     env: R1 & R2,
     rej: CB<E1 | E2>,
     res: CB<OR<A1, A2>>,
-    runtime: DefaultRuntime
+    runtime: Runtime
   ): Cancel {
     let responseA: A1
     let responseB: A2

@@ -3,7 +3,7 @@ import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 /**
  * @ignore
@@ -19,7 +19,7 @@ export class Once<R, E, A> implements IFIO<R, E, A> {
 
   public constructor(private readonly io: IFIO<R, E, A>) {}
 
-  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: DefaultRuntime): Cancel {
+  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): Cancel {
     const sh = runtime.scheduler
     if (this.isResolved) {
       return sh.asap(() => res(this.result as A))

@@ -2,7 +2,7 @@ import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 /**
  * @ignore
@@ -18,7 +18,7 @@ export class Chain<R1, R2, E1, E2, A1, A2>
     env: R1 & R2,
     rej: CB<E1 | E2>,
     res: CB<A2>,
-    runtime: DefaultRuntime
+    runtime: Runtime
   ): Cancel {
     const cancellations = new Array<Cancel>()
     cancellations.push(
