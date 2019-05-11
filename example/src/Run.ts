@@ -3,6 +3,8 @@
  */
 
 import {prompt} from 'promptly'
+// tslint:disable-next-line: no-import-side-effect
+import 'source-map-support/register'
 
 import {defaultRuntime} from '../../'
 
