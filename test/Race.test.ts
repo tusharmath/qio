@@ -3,11 +3,9 @@
  */
 
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
 import {NoEnv} from '../src/envs/NoEnv'
-import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'

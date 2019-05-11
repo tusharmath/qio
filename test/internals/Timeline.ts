@@ -1,5 +1,3 @@
-import {IScheduler} from 'ts-scheduler'
-
 import {DefaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 /**

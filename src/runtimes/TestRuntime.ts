@@ -2,7 +2,7 @@
  * Created by tushar on 2019-04-21
  */
 import {Cancel} from 'ts-scheduler'
-import {SchedulerOptions, testScheduler} from 'ts-scheduler/test'
+import {testScheduler} from 'ts-scheduler/test'
 
 import {Timeline} from '../../test/internals/Timeline'
 import {NoEnv} from '../envs/NoEnv'

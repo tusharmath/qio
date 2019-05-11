@@ -2,12 +2,10 @@
  * Created by tushar on 2019-03-31
  */
 import {assert} from 'chai'
-import {testScheduler} from 'ts-scheduler/test'
 
 import {NoEnv} from '../../src/envs/NoEnv'
 import {IFIO} from '../../src/internals/IFIO'
 import {FIO} from '../../src/main/FIO'
-import {DefaultRuntime} from '../../src/runtimes/DefaultRuntime'
 import {testRuntime} from '../../src/runtimes/TestRuntime'
 
 import {IOCollector} from './IOCollector'

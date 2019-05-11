@@ -3,7 +3,6 @@
  */
 
 import {IFIO} from '../../src/internals/IFIO'
-import {TestRuntime} from '../../src/runtimes/TestRuntime'
 
 import {IOCollector} from './IOCollector'
 
