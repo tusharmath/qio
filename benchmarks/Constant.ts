@@ -1,4 +1,3 @@
-/* tslint:disable */
 /**
  * Created by tushar on 2019-05-09
  */
@@ -8,7 +7,7 @@ import * as Fluture from 'fluture'
 import {FIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 
-// tslint:disable-next-line:no-require-imports
+import {PrintLn} from './internals/PrintLn'
 
 const suite = new Suite()
 
@@ -36,9 +35,14 @@ suite
   )
 
   .on('cycle', (event: Event) => {
-    console.log(String(event.target))
+    PrintLn(String(event.target))
   })
-  .on('complete', function(): void {
-    console.log('Fastest is ' + this.filter('fastest').map('name'))
+  .on('complete', function(this: Suite): void {
+    PrintLn(
+      'Fastest is ' +
+        this.filter('fastest')
+          .map((i: {name: string}) => i.name)
+          .join('')
+    )
   })
   .run()
