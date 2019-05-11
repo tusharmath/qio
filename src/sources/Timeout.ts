@@ -12,7 +12,7 @@ import {Runtime} from '../runtimes/Runtime'
 /**
  * @ignore
  */
-export class Timeout<A> implements IFIO<NoEnv, Error, A> {
+export class Timeout<A> implements IFIO<NoEnv, never, A> {
   public constructor(
     private readonly duration: number,
     private readonly value: A
@@ -20,7 +20,7 @@ export class Timeout<A> implements IFIO<NoEnv, Error, A> {
 
   public fork(
     env: NoEnv,
-    rej: CB<Error>,
+    rej: CB<never>,
     res: CB<A>,
     runtime: Runtime
   ): Cancel {

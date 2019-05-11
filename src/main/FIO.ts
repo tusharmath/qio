@@ -151,7 +151,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Creates an IO that resolves with the given value after a certain duration of time.
    */
-  public static timeout<A>(value: A, duration: number): FIO<NoEnv, Error, A> {
+  public static timeout<A>(value: A, duration: number): FIO<NoEnv, never, A> {
     return FIO.to(new Timeout(duration, value))
   }
 
@@ -189,7 +189,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
   /**
    * Delays an IO execution by the provided duration
    */
-  public delay(duration: number): FIO<R1, Error | E1, A1> {
+  public delay(duration: number): FIO<R1, E1, A1> {
     return FIO.timeout(this.io, duration).chain(_ => _)
   }
 

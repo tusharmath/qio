@@ -17,5 +17,5 @@ import {IFIO} from '../internals/IFIO'
  */
 export interface Runtime {
   scheduler: IScheduler
-  execute<E, A>(io: IFIO<NoEnv, E, A>, res: CB<A>, rej: CB<E>): Cancel
+  execute<E, A>(io: IFIO<NoEnv, E, A>, res: CB<A>, rej: CB<E | Error>): Cancel
 }

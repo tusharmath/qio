@@ -18,7 +18,7 @@ export class DefaultRuntime implements Runtime {
   public execute<E, A>(
     io: IFIO<NoEnv, E, A>,
     res: CB<A> = noop,
-    rej: CB<E> = onError
+    rej: CB<E | Error> = onError
   ): Cancel {
     return io.fork(undefined, rej, res, this)
   }
