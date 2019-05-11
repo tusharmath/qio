@@ -13,7 +13,12 @@ import {Runtime} from './Runtime'
 /**
  * Runtime options for the test env
  */
-export type TestRuntimeOptions = SchedulerOptions
+export interface TestRuntimeOptions {
+  /**
+   * Amount of time after with the test should bailout
+   */
+  bailout?: number
+}
 
 /**
  * Extension of the [[Runtime]] that can be used for executing unit tests.
