@@ -1,6 +1,6 @@
 import {Cancel} from 'ts-scheduler'
 
-import {DefaultRuntime} from '../runtimes/DefaultRuntime'
+import {Runtime} from '../runtimes/Runtime'
 
 import {CB} from './CB'
 
@@ -20,5 +20,5 @@ export interface IFIO<R, E, A> {
    * @param runtime - Runtime
    * @return Cancel
    */
-  fork(env: R, rej: CB<E>, res: CB<A>, runtime: DefaultRuntime): Cancel
+  fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): Cancel
 }
