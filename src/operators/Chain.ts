@@ -21,15 +21,20 @@ export class Chain<R1, R2, E1, E2, A1, A2>
     runtime: Runtime
   ): Cancel {
     const cancellations = new Array<Cancel>()
+
     cancellations.push(
-      this.src.fork(
-        env,
-        rej,
-        a => {
-          cancellations.push(this.ab(a).fork(env, rej, res, runtime))
-        },
-        runtime
-      )
+      runtime.scheduler.asap(() => {
+        cancellations.push(
+          this.src.fork(
+            env,
+            rej,
+            value => {
+              cancellations.push(this.ab(value).fork(env, rej, res, runtime))
+            },
+            runtime
+          )
+        )
+      })
     )
 
     return () => {

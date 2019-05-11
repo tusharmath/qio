@@ -2,16 +2,15 @@
  * Created by tushar on 2019-03-10
  */
 
-import {inNode} from 'in-node'
 import {Cancel} from 'ts-scheduler'
 
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
+import {Id} from '../internals/Id'
 import {IFIO} from '../internals/IFIO'
 import {noop} from '../internals/Noop'
 import {Catch} from '../operators/Catch'
 import {Chain} from '../operators/Chain'
-import {Map} from '../operators/Map'
 import {Once} from '../operators/Once'
 import {Race} from '../operators/Race'
 import {OR, Zip} from '../operators/Zip'
@@ -190,7 +189,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Delays an IO execution by the provided duration
    */
   public delay(duration: number): FIO<R1, E1, A1> {
-    return FIO.timeout(this.io, duration).chain(_ => _)
+    return FIO.timeout(this.io, duration).chain(Id)
   }
 
   /**
@@ -203,7 +202,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Applies transformation on the resolve value of the IO
    */
   public map<B>(ab: (a: A1) => B): FIO<R1, E1, B> {
-    return FIO.to(new Map(this.io, ab))
+    return this.chain(i => FIO.of(ab(i)))
   }
 
   /**
