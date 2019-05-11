@@ -160,7 +160,7 @@ describe('FIO', () => {
       }).delay(100)
 
       const actual = GetTimeline(io).getValue()
-      const expected = 100
+      const expected = 101
 
       assert.strictEqual(actual, expected)
     })

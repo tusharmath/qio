@@ -212,12 +212,32 @@ export const RejectingIOSpec = <T, E>(fn: () => IFIO<NoEnv, E, T>) => {
 export const CancellationIOSpec = <E, T>(
   fn: (cancellable: FIO<NoEnv, never, never>) => IFIO<NoEnv, E, T>
 ) => {
-  it('should release resources', () => {
-    const neva = NeverEnding()
-    const {fork, runtime} = IOCollector({}, fn(neva.io))
-    const cancel = fork()
-    runtime.scheduler.run()
-    cancel()
-    assert.ok(neva.isCancelled())
+  context('CancellationSpec', () => {
+    it('should release resources', () => {
+      const neva = NeverEnding()
+      const {fork, runtime} = IOCollector({}, fn(neva.io))
+      const cancel = fork()
+      runtime.scheduler.run()
+      cancel()
+      assert.ok(neva.isCancelled())
+    })
+  })
+}
+
+export const StackSafetySpec = <A>(
+  seed: FIO<unknown, never, A>,
+  fn: (io: FIO<unknown, never, A>) => FIO<unknown, never, A>
+) => {
+  context('StackSafetySpec', () => {
+    it('should be stack safe', () => {
+      let io = fn(seed)
+      for (let i = 0; i < 1e5; i = i + 1) {
+        io = fn(io)
+      }
+      const {fork, runtime} = IOCollector({}, io, {bailout: 2000})
+      fork()
+
+      runtime.scheduler.run()
+    })
   })
 }

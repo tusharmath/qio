@@ -3,15 +3,19 @@
  */
 
 import {IFIO} from '../../src/internals/IFIO'
-import {testRuntime} from '../../src/runtimes/TestRuntime'
+import {testRuntime, TestRuntimeOptions} from '../../src/runtimes/TestRuntime'
 
 import {Timeline} from './Timeline'
 
-export const IOCollector = <A, E, R>(env: R, io: IFIO<R, E, A>) => {
+export const IOCollector = <A, E, R>(
+  env: R,
+  io: IFIO<R, E, A>,
+  opt?: TestRuntimeOptions
+) => {
   /**
    * access the testScheduler
    */
-  const runtime = testRuntime()
+  const runtime = testRuntime(opt)
 
   /**
    * Contains a list of all internal events.

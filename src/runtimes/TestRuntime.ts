@@ -2,7 +2,7 @@
  * Created by tushar on 2019-04-21
  */
 import {Cancel} from 'ts-scheduler'
-import {testScheduler} from 'ts-scheduler/test'
+import {SchedulerOptions, testScheduler} from 'ts-scheduler/test'
 
 import {Timeline} from '../../test/internals/Timeline'
 import {NoEnv} from '../envs/NoEnv'
@@ -11,12 +11,18 @@ import {IFIO} from '../internals/IFIO'
 import {Runtime} from './Runtime'
 
 /**
+ * Runtime options for the test env
+ */
+export type TestRuntimeOptions = SchedulerOptions
+
+/**
  * Extension of the [[Runtime]] that can be used for executing unit tests.
  */
 
 export class TestRuntime implements Runtime {
-  public readonly scheduler = testScheduler()
+  public readonly scheduler = testScheduler(this.options)
   public readonly timeline = Timeline(this)
+  public constructor(private readonly options: TestRuntimeOptions) {}
   public execute<E, A>(io: IFIO<NoEnv, E, A>): Cancel {
     return io.fork(undefined, this.timeline.reject, this.timeline.resolve, this)
   }
@@ -51,4 +57,5 @@ export class TestRuntime implements Runtime {
  * ```
  */
 
-export const testRuntime = () => new TestRuntime()
+export const testRuntime = (options: TestRuntimeOptions = {}) =>
+  new TestRuntime(options)

@@ -178,6 +178,21 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
 
   /**
    * Chains two IOs such that one is executed after the other.
+   * The chain operator is stack safe, ie.
+   * you can recursively run a program like below without worrying about stack overflows.
+   *
+   * ```ts
+   * import {FIO, defaultRuntime} from 'fearless-io'
+   *
+   * const program = (count: number) => FIO.of(count)
+   *  .chain(_ => {
+   *    console.log(_)
+   *    return count === 0 ? FIO.of(0) : program(_ - 1)
+   *  })
+   *
+   *
+   * defaultRuntime().execute(program)
+   * ```
    */
   public chain<R2, E2, A2>(
     ab: (a: A1) => IFIO<R2, E2, A2>

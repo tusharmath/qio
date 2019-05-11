@@ -7,7 +7,11 @@ import {FIO} from '../'
 
 import {Counter} from './internals/Counter'
 import {GetTimeline} from './internals/GetTimeline'
-import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
+import {
+  RejectingIOSpec,
+  ResolvingIOSpec,
+  StackSafetySpec
+} from './internals/IOSpecification'
 
 describe('map', () => {
   it('should convert the value', () => {
@@ -33,4 +37,5 @@ describe('map', () => {
       throw new Error('FAILED')
     })
   )
+  StackSafetySpec(FIO.of(0), io => io.map(_ => _ + 1).map(_ => _ / 2))
 })

@@ -46,7 +46,7 @@
     "mocha": "^6.1.4",
     "prettier": "^1.17.0",
     "promptly": "^3.0.3",
-    "semantic-release": "^15.13.3",
+    "semantic-release": "^15.13.12",
     "source-map-support": "^0.5.12",
     "travis-deploy-once": "^5.0.11",
     "ts-node": "^8.1.0",
@@ -60,6 +60,6 @@
   "dependencies": {
     "dbl-linked-list-ds": "^2.0.0",
     "in-node": "^1.0.0",
-    "ts-scheduler": "^4.1.2"
+    "ts-scheduler": "^4.2.1"
   }
 }

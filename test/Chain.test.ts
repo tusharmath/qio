@@ -10,7 +10,8 @@ import {GetTimeline} from './internals/GetTimeline'
 import {
   CancellationIOSpec,
   RejectingIOSpec,
-  ResolvingIOSpec
+  ResolvingIOSpec,
+  StackSafetySpec
 } from './internals/IOSpecification'
 
 describe('chain()', () => {
@@ -31,4 +32,5 @@ describe('chain()', () => {
   )
   CancellationIOSpec(cancellable => FIO.of(10).chain(() => cancellable))
   CancellationIOSpec(cancellable => cancellable.chain(() => FIO.of(10)))
+  StackSafetySpec(FIO.of(0), io => io.chain(_ => FIO.of(_ + 1)))
 })

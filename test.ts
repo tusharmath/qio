@@ -3,4 +3,8 @@
  * Created by tushar on 2019-05-06
  */
 
-export {TestRuntime, testRuntime} from './src/runtimes/TestRuntime'
+export {
+  TestRuntime,
+  testRuntime,
+  TestRuntimeOptions
+} from './src/runtimes/TestRuntime'

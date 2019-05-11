@@ -23,6 +23,7 @@ export class Chain<R1, R2, E1, E2, A1, A2>
     const cancellations = new Array<Cancel>()
 
     cancellations.push(
+      // Async scheduling is done to avail stack safety inside chain
       runtime.scheduler.asap(() => {
         cancellations.push(
           this.src.fork(
