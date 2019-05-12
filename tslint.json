@@ -14,7 +14,11 @@
     "variable-name": [true, "allow-pascal-case"],
     // TEMPORARY SETTINGS
     "file-name-casing": [true, "pascal-case"],
-    "typedef": [true, "call-signature", "parameter"]
+    "typedef": [true, "call-signature", "parameter"],
+    "prefer-for-of": false,
+    "increment-decrement": false,
+    "max-classes-per-file": false,
+    "restrict-plus-operands": false
   },
   "rulesDirectory": []
 }
