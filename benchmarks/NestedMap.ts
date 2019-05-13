@@ -1,7 +1,9 @@
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
+
 import {FIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
+
 import {PrintLn} from './internals/PrintLn'
 
 /**
