@@ -17,6 +17,7 @@ import {OR, Zip} from '../operators/Zip'
 import {defaultRuntime, DefaultRuntime} from '../runtimes/DefaultRuntime'
 import {Runtime} from '../runtimes/Runtime'
 import {C} from '../sources/Computation'
+import {Constant} from '../sources/Constant'
 import {Timeout} from '../sources/Timeout'
 
 const rNoop = () => noop
@@ -137,7 +138,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Creates an [[FIO]] that always resolves with the same value.
    */
   public static of<A>(value: A): FIO<NoEnv, never, A> {
-    return FIO.from((env, rej, res) => res(value))
+    return FIO.to(new Constant(value))
   }
 
   /**

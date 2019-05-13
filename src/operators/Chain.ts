@@ -4,6 +4,27 @@ import {CB} from '../internals/CB'
 import {IFIO} from '../internals/IFIO'
 import {Runtime} from '../runtimes/Runtime'
 
+class ChainHandler<R1, R2, E1, E2, A1, A2> {
+  public constructor(
+    private readonly env: R1 & R2,
+    private readonly reject: CB<E1 | E2>,
+    private readonly resolve: CB<A2>,
+    private readonly runtime: Runtime,
+    private readonly cancellations: Cancel[],
+    private readonly aFb: (e: A1) => IFIO<R2, E2, A2>
+  ) {}
+
+  public onResolve = (a: A1) => {
+    try {
+      this.cancellations.push(
+        this.aFb(a).fork(this.env, this.reject, this.resolve, this.runtime)
+      )
+    } catch (e) {
+      this.reject(e as E2)
+    }
+  }
+}
+
 /**
  * @ignore
  */
@@ -29,9 +50,14 @@ export class Chain<R1, R2, E1, E2, A1, A2>
           this.src.fork(
             env,
             rej,
-            value => {
-              cancellations.push(this.ab(value).fork(env, rej, res, runtime))
-            },
+            new ChainHandler<R1, R2, E1, E2, A1, A2>(
+              env,
+              rej,
+              res,
+              runtime,
+              cancellations,
+              this.ab
+            ).onResolve,
             runtime
           )
         )
