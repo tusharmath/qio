@@ -1,7 +1,7 @@
 import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {IFIO} from '../internals/IFIO'
+import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
 
 const FORKED: IOStatus = 0
@@ -14,7 +14,7 @@ type IOStatus = 0 | 1 | 2 | 3
 /**
  * @ignore
  */
-class Computation<R, E, A> implements IFIO<R, E, A> {
+class Computation<R, E, A> extends FIO<R, E, A> {
   public constructor(
     private readonly cmp: (
       env: R,
@@ -22,7 +22,9 @@ class Computation<R, E, A> implements IFIO<R, E, A> {
       res: CB<A>,
       runtime: Runtime
     ) => void | Cancel
-  ) {}
+  ) {
+    super()
+  }
 
   public fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): Cancel {
     const sh = runtime.scheduler
@@ -66,4 +68,4 @@ class Computation<R, E, A> implements IFIO<R, E, A> {
  */
 export const C = <R = unknown, E = Error, A = unknown>(
   cmp: (env: R, rej: CB<E>, res: CB<A>, runtime: Runtime) => Cancel | void
-): IFIO<R, E, A> => new Computation(cmp)
+): FIO<R, E, A> => new Computation(cmp)

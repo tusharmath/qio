@@ -5,18 +5,20 @@ import {Cancel} from 'ts-scheduler'
 
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
-import {IFIO} from '../internals/IFIO'
 import {SafeResolve} from '../internals/SafeResolve'
+import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
 
 /**
  * @ignore
  */
-export class Timeout<A> implements IFIO<NoEnv, never, A> {
+export class Timeout<A> extends FIO<unknown, never, A> {
   public constructor(
     private readonly duration: number,
     private readonly value: A
-  ) {}
+  ) {
+    super()
+  }
 
   public fork(
     env: NoEnv,

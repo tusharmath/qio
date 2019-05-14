@@ -2,13 +2,13 @@ import {LinkedList} from 'dbl-linked-list-ds'
 import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {IFIO} from '../internals/IFIO'
+import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
 
 /**
  * @ignore
  */
-export class Once<R, E, A> implements IFIO<R, E, A> {
+export class Once<R, E, A> extends FIO<R, E, A> {
   private cancel: Cancel | undefined
   private error: E | undefined
   private isForked = false
@@ -17,7 +17,9 @@ export class Once<R, E, A> implements IFIO<R, E, A> {
   private readonly Q = new LinkedList<{rej: CB<E>; res: CB<A>}>()
   private result: A | undefined
 
-  public constructor(private readonly io: IFIO<R, E, A>) {}
+  public constructor(private readonly io: FIO<R, E, A>) {
+    super()
+  }
 
   public fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): Cancel {
     const sh = runtime.scheduler

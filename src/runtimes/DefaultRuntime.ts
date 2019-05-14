@@ -2,9 +2,9 @@ import {Cancel, scheduler} from 'ts-scheduler'
 
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
-import {IFIO} from '../internals/IFIO'
 import {noop} from '../internals/Noop'
 import {onError} from '../internals/OnError'
+import {FIO} from '../main/FIO'
 
 import {Runtime} from './Runtime'
 
@@ -16,7 +16,7 @@ export class DefaultRuntime implements Runtime {
   public readonly scheduler = scheduler
 
   public execute<E, A>(
-    io: IFIO<NoEnv, E, A>,
+    io: FIO<NoEnv, E, A>,
     res: CB<A> = noop,
     rej: CB<E | Error> = onError
   ): Cancel {

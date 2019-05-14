@@ -1,7 +1,7 @@
 import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {IFIO} from '../internals/IFIO'
+import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
 
 class ChainHandler<R1, R2, E1, E2, A1, A2> {
@@ -11,7 +11,7 @@ class ChainHandler<R1, R2, E1, E2, A1, A2> {
     private readonly resolve: CB<A2>,
     private readonly runtime: Runtime,
     private readonly cancellations: Cancel[],
-    private readonly aFb: (e: A1) => IFIO<R2, E2, A2>
+    private readonly aFb: (e: A1) => FIO<R2, E2, A2>
   ) {}
 
   public onResolve = (a: A1) => {
@@ -28,12 +28,13 @@ class ChainHandler<R1, R2, E1, E2, A1, A2> {
 /**
  * @ignore
  */
-export class Chain<R1, R2, E1, E2, A1, A2>
-  implements IFIO<R1 & R2, E1 | E2, A2> {
+export class Chain<R1, R2, E1, E2, A1, A2> extends FIO<R1 & R2, E1 | E2, A2> {
   public constructor(
-    private readonly src: IFIO<R1, E1, A1>,
-    private readonly ab: (a: A1) => IFIO<R2, E2, A2>
-  ) {}
+    private readonly src: FIO<R1, E1, A1>,
+    private readonly ab: (a: A1) => FIO<R2, E2, A2>
+  ) {
+    super()
+  }
 
   public fork(
     env: R1 & R2,

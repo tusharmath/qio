@@ -4,7 +4,6 @@
 import {assert} from 'chai'
 
 import {NoEnv} from '../../src/envs/NoEnv'
-import {IFIO} from '../../src/internals/IFIO'
 import {FIO} from '../../src/main/FIO'
 import {testRuntime} from '../../src/runtimes/TestRuntime'
 
@@ -14,7 +13,7 @@ import {NeverEnding} from './NeverEnding'
 /**
  * Specifications for an IO that resolves
  */
-export const ResolvingIOSpec = <T>(fn: () => IFIO<NoEnv, Error, T>) => {
+export const ResolvingIOSpec = <T>(fn: () => FIO<NoEnv, Error, T>) => {
   context('ResolvingIOSpec', () => {
     it('should resolve in the end', () => {
       const runtime = testRuntime()
@@ -118,7 +117,7 @@ export const ResolvingIOSpec = <T>(fn: () => IFIO<NoEnv, Error, T>) => {
 /**
  * Specifications for an IO that rejects
  */
-export const RejectingIOSpec = <T, E>(fn: () => IFIO<NoEnv, E, T>) => {
+export const RejectingIOSpec = <T, E>(fn: () => FIO<NoEnv, E, T>) => {
   context('RejectingIOSpec', () => {
     it('should reject in the end', () => {
       const runtime = testRuntime()
@@ -208,7 +207,7 @@ export const RejectingIOSpec = <T, E>(fn: () => IFIO<NoEnv, E, T>) => {
  * Checks if the IO gets cancelled or not
  */
 export const CancellationIOSpec = <E, T>(
-  fn: (cancellable: FIO<NoEnv, never, never>) => IFIO<NoEnv, E, T>
+  fn: (cancellable: FIO<NoEnv, never, never>) => FIO<NoEnv, E, T>
 ) => {
   context('CancellationSpec', () => {
     it('should release resources', () => {

@@ -1,3 +1,4 @@
+/* tslint:disable:no-use-before-declare ordered-imports */
 /**
  * Created by tushar on 2019-03-10
  */
@@ -7,18 +8,10 @@ import {Cancel} from 'ts-scheduler'
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {Id} from '../internals/Id'
-import {IFIO} from '../internals/IFIO'
 import {noop} from '../internals/Noop'
-import {Catch} from '../operators/Catch'
-import {Chain} from '../operators/Chain'
-import {Once} from '../operators/Once'
-import {Race} from '../operators/Race'
-import {OR, Zip} from '../operators/Zip'
+
 import {defaultRuntime, DefaultRuntime} from '../runtimes/DefaultRuntime'
 import {Runtime} from '../runtimes/Runtime'
-import {C} from '../sources/Computation'
-import {Constant} from '../sources/Constant'
-import {Timeout} from '../sources/Timeout'
 
 const rNoop = () => noop
 
@@ -48,7 +41,7 @@ const rNoop = () => noop
  * @typeparam A The output of the side-effect.
  *
  */
-export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
+export abstract class FIO<R1, E1, A1> {
   /**
    * Accesses an environment for the effect
    */
@@ -124,7 +117,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
       runTime: DefaultRuntime
     ) => Cancel | void
   ): FIO<R, E, A> {
-    return FIO.to(C(cmp))
+    return C(cmp)
   }
 
   /**
@@ -138,7 +131,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Creates an [[FIO]] that always resolves with the same value.
    */
   public static of<A>(value: A): FIO<NoEnv, never, A> {
-    return FIO.to(new Constant(value))
+    return new Constant(value)
   }
 
   /**
@@ -152,14 +145,8 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Creates an IO that resolves with the given value after a certain duration of time.
    */
   public static timeout<A>(value: A, duration: number): FIO<NoEnv, never, A> {
-    return FIO.to(new Timeout(duration, value))
+    return new Timeout(duration, value)
   }
-
-  private static to<R, E, A>(io: IFIO<R, E, A>): FIO<R, E, A> {
-    return new FIO(io)
-  }
-
-  private constructor(private readonly io: IFIO<R1, E1, A1>) {}
 
   /**
    * Runs one IO after the other
@@ -172,9 +159,9 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Catches a failing IO zip creates another IO
    */
   public catch<R2, E2, A2>(
-    ab: (a: E1) => IFIO<R2, E2, A2>
+    ab: (a: E1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E2, A1 | A2> {
-    return FIO.to(new Catch(this.io, ab))
+    return new Catch(this, ab)
   }
 
   /**
@@ -196,23 +183,27 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * ```
    */
   public chain<R2, E2, A2>(
-    ab: (a: A1) => IFIO<R2, E2, A2>
+    ab: (a: A1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E1 | E2, A2> {
-    return FIO.to(new Chain(this.io, ab))
+    return new Chain(this, ab)
   }
 
   /**
    * Delays an IO execution by the provided duration
    */
   public delay(duration: number): FIO<R1, E1, A1> {
-    return FIO.timeout(this.io, duration).chain(Id)
+    return FIO.timeout(this, duration).chain(Id)
   }
 
   /**
    * Actually executes the IO
    */
-  public fork = (env: R1, rej: CB<E1>, res: CB<A1>, runtime: Runtime): Cancel =>
-    this.io.fork(env, rej, res, runtime)
+  public abstract fork(
+    env: R1,
+    rej: CB<E1>,
+    res: CB<A1>,
+    runtime: Runtime
+  ): Cancel
 
   /**
    * Applies transformation on the resolve value of the IO
@@ -225,7 +216,7 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Creates a new IO<IO<A>> that executes only once
    */
   public once(): FIO<NoEnv, never, FIO<R1, E1, A1>> {
-    return FIO.of(FIO.to(new Once(this)))
+    return FIO.of(new Once(this))
   }
 
   /**
@@ -234,15 +225,15 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    */
   public provide(env: R1): FIO<NoEnv, E1, A1> {
     return FIO.from((env1, rej, res, runtime) =>
-      this.io.fork(env, rej, res, runtime)
+      this.fork(env, rej, res, runtime)
     )
   }
 
   /**
    * Executes two IOs in parallel zip returns the value of the one that's completes first also cancelling the one pending.
    */
-  public race<R2, E2, A2>(b: IFIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A1 | A2> {
-    return FIO.to(new Race(this.io, b))
+  public race<R2, E2, A2>(b: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A1 | A2> {
+    return new Race(this, b)
   }
 
   /**
@@ -258,8 +249,18 @@ export class FIO<R1, E1, A1> implements IFIO<R1, E1, A1> {
    * Combines two IO's into one zip then on fork executes them in parallel.
    */
   public zip<R2, E2, A2>(
-    b: IFIO<R2, E2, A2>
+    b: FIO<R2, E2, A2>
   ): FIO<R1 & R2, E1 | E2, OR<A1, A2>> {
-    return FIO.to(new Zip(this.io, b))
+    return new Zip(this, b)
   }
 }
+
+import {Catch} from '../operators/Catch'
+import {Chain} from '../operators/Chain'
+import {Once} from '../operators/Once'
+import {Race} from '../operators/Race'
+import {OR, Zip} from '../operators/Zip'
+
+import {C} from '../sources/Computation'
+import {Constant} from '../sources/Constant'
+import {Timeout} from '../sources/Timeout'

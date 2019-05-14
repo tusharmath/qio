@@ -1,7 +1,7 @@
 import {Cancel} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {IFIO} from '../internals/IFIO'
+import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
 
 /**
@@ -12,12 +12,17 @@ export type OR<A, B> = A & B extends never ? never : [A, B]
 /**
  * @ignore
  */
-export class Zip<R1, R2, E1, E2, A1, A2>
-  implements IFIO<R1 & R2, E1 | E2, OR<A1, A2>> {
+export class Zip<R1, R2, E1, E2, A1, A2> extends FIO<
+  R1 & R2,
+  E1 | E2,
+  OR<A1, A2>
+> {
   public constructor(
-    private readonly a: IFIO<R1, E1, A1>,
-    private readonly b: IFIO<R2, E2, A2>
-  ) {}
+    private readonly a: FIO<R1, E1, A1>,
+    private readonly b: FIO<R2, E2, A2>
+  ) {
+    super()
+  }
 
   public fork(
     env: R1 & R2,

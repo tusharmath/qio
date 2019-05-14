@@ -6,7 +6,7 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {Timeline} from '../../test/internals/Timeline'
 import {NoEnv} from '../envs/NoEnv'
-import {IFIO} from '../internals/IFIO'
+import {FIO} from '../main/FIO'
 
 import {Runtime} from './Runtime'
 
@@ -28,7 +28,7 @@ export class TestRuntime implements Runtime {
   public readonly scheduler = testScheduler(this.options)
   public readonly timeline = Timeline(this)
   public constructor(private readonly options: TestRuntimeOptions) {}
-  public execute<E, A>(io: IFIO<NoEnv, E, A>): Cancel {
+  public execute<E, A>(io: FIO<NoEnv, E, A>): Cancel {
     return io.fork(undefined, this.timeline.reject, this.timeline.resolve, this)
   }
 }
