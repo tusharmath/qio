@@ -208,8 +208,8 @@ export abstract class FIO<R1, E1, A1> {
   /**
    * Applies transformation on the resolve value of the IO
    */
-  public map<B>(ab: (a: A1) => B): FIO<R1, E1, B> {
-    return this.chain(i => FIO.of(ab(i)))
+  public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
+    return new Map(this, ab)
   }
 
   /**
@@ -256,6 +256,7 @@ export abstract class FIO<R1, E1, A1> {
 }
 
 import {Catch} from '../operators/Catch'
+import {Map} from '../operators/Map'
 import {Chain} from '../operators/Chain'
 import {Once} from '../operators/Once'
 import {Race} from '../operators/Race'
