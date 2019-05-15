@@ -12,8 +12,12 @@ import {ICancellable} from 'ts-scheduler'
 export class CancellationList {
   private readonly q = new LinkedList<ICancellable>()
 
-  public cancel = (): void => {
-    this.q.forEach(_ => _.value.cancel())
+  public cancel(): void {
+    let node = this.q.shift()
+    while (node !== undefined) {
+      node.cancel()
+      node = this.q.shift()
+    }
   }
 
   public cancelId(node: LinkedListNode<ICancellable>): void {
