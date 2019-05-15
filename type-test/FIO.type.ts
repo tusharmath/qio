@@ -8,9 +8,11 @@ import {FIO} from '../'
 FIO.from((env1, rej, res) => res(10))
 
 // $ExpectType FIO<{ a: number; }, never, never>
-FIO.from((env: {a: number}, rej, res, runtime) =>
-  runtime.scheduler.delay(() => {}, 10)
-)
+FIO.from((env: {a: number}, rej, res, runtime) => {
+  const cancel = runtime.scheduler.delay({execute: () => {}}, 10)
+
+  return () => cancel.cancel()
+})
 
 // $ExpectType FIO<unknown, never, never>
 FIO.from((env, rej, res) => res(10))
