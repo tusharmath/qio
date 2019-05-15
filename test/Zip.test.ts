@@ -3,10 +3,8 @@
  */
 
 import {assert} from 'chai'
-import {Cancel} from 'ts-scheduler'
 
 import {FIO} from '../'
-import {NoEnv} from '../src/envs/NoEnv'
 
 import {GetTimeline} from './internals/GetTimeline'
 import {IOCollector} from './internals/IOCollector'
@@ -40,10 +38,7 @@ describe('zip', () => {
     const {fork, runtime} = IOCollector(
       {},
       FIO.from(() => () => (cancelled = cancelled + 1)).zip(
-        FIO.from<NoEnv, Error>(
-          (env, rej): Cancel =>
-            runtime.scheduler.delay(() => rej(new Error('Save Me!')), 100)
-        )
+        FIO.reject(new Error('Save Me!')).delay(100)
       )
     )
     runtime.scheduler.runTo(10)

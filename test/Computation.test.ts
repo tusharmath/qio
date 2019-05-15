@@ -33,7 +33,7 @@ describe('Computation', () => {
         return () => results.push('STOP')
       })
     )
-    fork()()
+    fork().cancel()
 
     // Issue a cancelled IO
     assert.deepEqual(results, [])
@@ -53,17 +53,17 @@ describe('Computation', () => {
     const {fork, timeline, runtime} = IOCollector(
       undefined,
       FIO.from<NoEnv, never, number>((env, rej, res) => {
-        const c = runtime.scheduler.delay(() => res(100), 10)
+        const c = runtime.scheduler.delay({execute: () => res(100)}, 10)
 
         return () => {
-          c()
+          c.cancel()
           cancelled = true
         }
       })
     )
     const cancel = fork()
     runtime.scheduler.run()
-    cancel()
+    cancel.cancel()
 
     const actual = timeline.getValue()
     const expected = 100
@@ -75,17 +75,20 @@ describe('Computation', () => {
     const {fork, timeline, runtime} = IOCollector(
       {},
       FIO.from<NoEnv, Error>((env, rej) => {
-        const c = runtime.scheduler.delay(() => rej(new Error('Bup!')), 10)
+        const c = runtime.scheduler.delay(
+          {execute: () => rej(new Error('Bup!'))},
+          10
+        )
 
         return () => {
-          c()
+          c.cancel()
           cancelled = true
         }
       })
     )
     const cancel = fork()
     runtime.scheduler.run()
-    cancel()
+    cancel.cancel()
 
     assert.equal(timeline.getError().message, 'Bup!')
     assert.isFalse(cancelled)
@@ -97,9 +100,9 @@ describe('Computation', () => {
     runtime.scheduler.runTo(200)
     const cancel = fork()
     runtime.scheduler.runTo(210)
-    cancel()
-    cancel()
-    cancel()
+    cancel.cancel()
+    cancel.cancel()
+    cancel.cancel()
     assert.strictEqual(counter.getCount(), 1001)
   })
 })

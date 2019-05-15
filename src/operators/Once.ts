@@ -1,34 +1,74 @@
-import {LinkedList} from 'dbl-linked-list-ds'
-import {Cancel} from 'ts-scheduler'
-
+import {LinkedList, LinkedListNode} from 'dbl-linked-list-ds'
+import {ICancellable, IExecutable} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
+
+class ResolveCached<R, E, A> implements IExecutable {
+  public constructor(
+    private readonly op: Once<R, E, A>,
+    private readonly res: CB<A>
+  ) {}
+
+  public execute(): void {
+    this.res(this.op.result as A)
+  }
+}
+
+class RejectCached<R, E, A> implements IExecutable {
+  public constructor(
+    private readonly op: Once<R, E, A>,
+    private readonly rej: CB<E>
+  ) {}
+
+  public execute(): void {
+    this.rej(this.op.error as E)
+  }
+}
+
+interface Callbacks<E, A> {
+  rej: CB<E>
+  res: CB<A>
+}
+
+class RemoveNode<R, E, A> implements ICancellable {
+  public constructor(
+    private readonly id: LinkedListNode<Callbacks<E, A>>,
+    private readonly opt: Once<R, E, A>
+  ) {}
+
+  public cancel(): void {
+    this.opt.Q.remove(this.id)
+    if (this.opt.Q.length === 0 && typeof this.opt.cancel !== 'undefined') {
+      this.opt.cancel.cancel()
+    }
+  }
+}
 
 /**
  * @ignore
  */
 export class Once<R, E, A> extends FIO<R, E, A> {
-  private cancel: Cancel | undefined
-  private error: E | undefined
+  public cancel: ICancellable | undefined
+  public error: E | undefined
+  public readonly Q = new LinkedList<Callbacks<E, A>>()
+  public result: A | undefined
   private isForked = false
   private isRejected = false
   private isResolved = false
-  private readonly Q = new LinkedList<{rej: CB<E>; res: CB<A>}>()
-  private result: A | undefined
 
   public constructor(private readonly io: FIO<R, E, A>) {
     super()
   }
 
-  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): Cancel {
+  public fork(env: R, rej: CB<E>, res: CB<A>, runtime: Runtime): ICancellable {
     const sh = runtime.scheduler
     if (this.isResolved) {
-      return sh.asap(() => res(this.result as A))
+      return sh.asap(new ResolveCached(this, res))
     }
 
     if (this.isRejected) {
-      return sh.asap(() => rej(this.error as E))
+      return sh.asap(new RejectCached(this, rej))
     }
 
     const id = this.Q.add({res, rej})
@@ -38,18 +78,13 @@ export class Once<R, E, A> extends FIO<R, E, A> {
       this.cancel = this.io.fork(env, this.onReject, this.onResolve, runtime)
     }
 
-    return () => {
-      this.Q.remove(id)
-      if (this.Q.length === 0 && typeof this.cancel === 'function') {
-        this.cancel()
-      }
-    }
+    return new RemoveNode(id, this)
   }
 
-  private readonly onReject = (err: E) => {
+  private readonly onReject = (e: E) => {
     this.isRejected = true
-    this.error = err
-    this.Q.forEach(_ => _.value.rej(err))
+    this.error = e
+    this.Q.forEach(_ => _.value.rej(e))
   }
 
   private readonly onResolve = (a: A) => {

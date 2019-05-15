@@ -98,12 +98,14 @@ export const ResolvingIOSpec = <T>(fn: () => FIO<NoEnv, Error, T>) => {
         rejected: false,
         resolved: false
       }
-      fn().fork(
-        {},
-        () => (actual.resolved = true),
-        () => (actual.resolved = true),
-        runtime
-      )()
+      fn()
+        .fork(
+          {},
+          () => (actual.resolved = true),
+          () => (actual.resolved = true),
+          runtime
+        )
+        .cancel()
       runtime.scheduler.run()
       const expected = {
         rejected: false,
@@ -187,12 +189,14 @@ export const RejectingIOSpec = <T, E>(fn: () => FIO<NoEnv, E, T>) => {
         rejected: false,
         resolved: false
       }
-      fn().fork(
-        {},
-        () => (actual.resolved = true),
-        () => (actual.resolved = true),
-        runtime
-      )()
+      fn()
+        .fork(
+          {},
+          () => (actual.resolved = true),
+          () => (actual.resolved = true),
+          runtime
+        )
+        .cancel()
       runtime.scheduler.run()
       const expected = {
         rejected: false,
@@ -215,7 +219,7 @@ export const CancellationIOSpec = <E, T>(
       const {fork, runtime} = IOCollector({}, fn(neva.io))
       const cancel = fork()
       runtime.scheduler.run()
-      cancel()
+      cancel.cancel()
       assert.ok(neva.isCancelled())
     })
   })

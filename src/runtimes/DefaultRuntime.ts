@@ -1,5 +1,4 @@
-import {Cancel, scheduler} from 'ts-scheduler'
-
+import {ICancellable, scheduler} from 'ts-scheduler'
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {noop} from '../internals/Noop'
@@ -19,7 +18,7 @@ export class DefaultRuntime implements Runtime {
     io: FIO<NoEnv, E, A>,
     res: CB<A> = noop,
     rej: CB<E | Error> = onError
-  ): Cancel {
+  ): ICancellable {
     return io.fork(undefined, rej, res, this)
   }
 }

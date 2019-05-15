@@ -5,7 +5,6 @@
 import {assert} from 'chai'
 
 import {FIO} from '../'
-import {NoEnv} from '../src/envs/NoEnv'
 import {Once} from '../src/operators/Once'
 
 import {IOCollector} from './internals/IOCollector'
@@ -22,11 +21,7 @@ describe('Once', () => {
 
   const createNeverEndingOnceIO = () => {
     let count = 0
-    const io = new Once(
-      FIO.from<NoEnv, never, number>((env, rej, res, runtime) =>
-        runtime.scheduler.asap(() => res((count += 1)))
-      )
-    )
+    const io = new Once(FIO.try(() => (count += 1)))
 
     return {
       io,
@@ -35,11 +30,7 @@ describe('Once', () => {
   }
   const createResolvingOnceIO = (n: number) => {
     let count = 0
-    const io = new Once(
-      FIO.from<NoEnv, never, number>((env, rej, res, runtime) =>
-        runtime.scheduler.delay(() => res((count += 1)), n)
-      )
-    )
+    const io = new Once(FIO.try(() => (count += 1)).delay(n))
 
     return {
       io,
@@ -49,12 +40,9 @@ describe('Once', () => {
   const createRejectingOnceIO = (n: number) => {
     let count = 0
     const io = new Once(
-      FIO.from<NoEnv, Error>((env, rej, res, runtime) =>
-        runtime.scheduler.delay(
-          () => rej(new Error('FAILED_' + (count += 1).toString())),
-          n
-        )
-      )
+      FIO.try(() => (count += 1))
+        .chain(cnt => FIO.reject(new Error('FAILED_' + cnt)))
+        .delay(n)
     )
 
     return {
@@ -110,7 +98,7 @@ describe('Once', () => {
     const {fork, timeline, runtime} = IOCollector(undefined, io)
 
     fork()
-    fork()()
+    fork().cancel()
     runtime.scheduler.run()
 
     const actual = timeline.list()
@@ -125,7 +113,7 @@ describe('Once', () => {
 
     fork()
     runtime.scheduler.runTo(300)
-    fork()()
+    fork().cancel()
     runtime.scheduler.run()
 
     const actual = timeline.list()
@@ -141,7 +129,7 @@ describe('Once', () => {
     fork()
     runtime.scheduler.runTo(300)
 
-    fork()()
+    fork().cancel()
     runtime.scheduler.run()
 
     const actual = timeline.list()

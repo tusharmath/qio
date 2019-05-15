@@ -1,10 +1,9 @@
-/* tslint:disable:no-use-before-declare ordered-imports */
 /**
  * Created by tushar on 2019-03-10
  */
 
-import {Cancel} from 'ts-scheduler'
-
+/* tslint:disable:no-use-before-declare */
+import {ICancellable} from 'ts-scheduler'
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {Id} from '../internals/Id'
@@ -115,9 +114,9 @@ export abstract class FIO<R1, E1, A1> {
       rej: CB<E>,
       res: CB<A>,
       runTime: DefaultRuntime
-    ) => Cancel | void
+    ) => (() => void) | void
   ): FIO<R, E, A> {
-    return C(cmp)
+    return new Computation(cmp)
   }
 
   /**
@@ -146,6 +145,15 @@ export abstract class FIO<R1, E1, A1> {
    */
   public static timeout<A>(value: A, duration: number): FIO<NoEnv, never, A> {
     return new Timeout(duration, value)
+  }
+
+  /**
+   * Like [[encase]] takes in a function and returns a [[FIO]].
+   * On execution of the [[FIO]] calls the provided function and resolves the [[FIO]] with the return type of the
+   * function.
+   */
+  public static try<A>(fn: () => A): FIO<unknown, Error, A> {
+    return FIO.from((env1, rej, res) => res(fn()))
   }
 
   /**
@@ -203,7 +211,7 @@ export abstract class FIO<R1, E1, A1> {
     rej: CB<E1>,
     res: CB<A1>,
     runtime: Runtime
-  ): Cancel
+  ): ICancellable
 
   /**
    * Applies transformation on the resolve value of the IO
@@ -224,9 +232,11 @@ export abstract class FIO<R1, E1, A1> {
    * Creates an IO that can run without any env.
    */
   public provide(env: R1): FIO<NoEnv, E1, A1> {
-    return FIO.from((env1, rej, res, runtime) =>
-      this.fork(env, rej, res, runtime)
-    )
+    return FIO.from((env1, rej, res, runtime) => {
+      const iCancellable = this.fork(env, rej, res, runtime)
+
+      return () => iCancellable.cancel()
+    })
   }
 
   /**
@@ -256,12 +266,12 @@ export abstract class FIO<R1, E1, A1> {
 }
 
 import {Catch} from '../operators/Catch'
-import {Map} from '../operators/Map'
 import {Chain} from '../operators/Chain'
+import {Map} from '../operators/Map'
 import {Once} from '../operators/Once'
 import {Race} from '../operators/Race'
 import {OR, Zip} from '../operators/Zip'
+import {Computation} from '../sources/Computation'
 
-import {C} from '../sources/Computation'
 import {Constant} from '../sources/Constant'
 import {Timeout} from '../sources/Timeout'

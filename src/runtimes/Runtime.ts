@@ -1,8 +1,7 @@
 /**
  * Created by tushar on 2019-05-07
  */
-import {Cancel, IScheduler} from 'ts-scheduler'
-
+import {ICancellable, IScheduler} from 'ts-scheduler'
 import {NoEnv} from '../envs/NoEnv'
 import {CB} from '../internals/CB'
 import {FIO} from '../main/FIO'
@@ -17,5 +16,9 @@ import {FIO} from '../main/FIO'
  */
 export interface Runtime {
   scheduler: IScheduler
-  execute<E, A>(io: FIO<NoEnv, E, A>, res: CB<A>, rej: CB<E | Error>): Cancel
+  execute<E, A>(
+    io: FIO<NoEnv, E, A>,
+    res: CB<A>,
+    rej: CB<E | Error>
+  ): ICancellable
 }

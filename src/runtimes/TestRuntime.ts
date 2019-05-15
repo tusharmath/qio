@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 2019-04-21
  */
-import {Cancel} from 'ts-scheduler'
+import {ICancellable} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {Timeline} from '../../test/internals/Timeline'
@@ -28,7 +28,7 @@ export class TestRuntime implements Runtime {
   public readonly scheduler = testScheduler(this.options)
   public readonly timeline = Timeline(this)
   public constructor(private readonly options: TestRuntimeOptions) {}
-  public execute<E, A>(io: FIO<NoEnv, E, A>): Cancel {
+  public execute<E, A>(io: FIO<NoEnv, E, A>): ICancellable {
     return io.fork(undefined, this.timeline.reject, this.timeline.resolve, this)
   }
 }

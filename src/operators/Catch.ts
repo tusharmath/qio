@@ -1,5 +1,5 @@
-import {Cancel} from 'ts-scheduler'
-
+import {ICancellable} from 'ts-scheduler'
+import {CancellationList} from '../cancellables/CancellationList'
 import {CB} from '../internals/CB'
 import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
@@ -10,7 +10,7 @@ class CatchHandler<R1, R2, E1, E2, A1, A2> {
     private readonly reject: CB<E2>,
     private readonly resolve: CB<A1 | A2>,
     private readonly runtime: Runtime,
-    private readonly cancellations: Cancel[],
+    private readonly cancellations: CancellationList,
     private readonly onError: (e: E1) => FIO<R2, E2, A2>
   ) {}
 
@@ -37,8 +37,8 @@ export class Catch<R1, R2, E1, E2, A1, A2> extends FIO<R1 & R2, E2, A1 | A2> {
     rej: CB<E2>,
     res: CB<A1 | A2>,
     runtime: Runtime
-  ): Cancel {
-    const cancellations = new Array<Cancel>()
+  ): ICancellable {
+    const cancellations = new CancellationList()
 
     cancellations.push(
       this.src.fork(
@@ -56,6 +56,6 @@ export class Catch<R1, R2, E1, E2, A1, A2> extends FIO<R1 & R2, E2, A1 | A2> {
       )
     )
 
-    return () => cancellations.forEach(_ => _())
+    return cancellations
   }
 }

@@ -15,9 +15,7 @@ import {
 
 describe('catch', () => {
   ResolvingIOSpec(() =>
-    FIO.from<NoEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(e =>
-      FIO.of(e.message)
-    )
+    FIO.reject(new Error('FAILED')).catch(e => FIO.of(e.message))
   )
   RejectingIOSpec(() =>
     FIO.from<NoEnv, Error>((env, rej) => rej(new Error('FAILED'))).catch(e =>

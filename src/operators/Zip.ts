@@ -1,5 +1,5 @@
-import {Cancel} from 'ts-scheduler'
-
+import {ICancellable} from 'ts-scheduler'
+import {CancellationList} from '../cancellables/CancellationList'
 import {CB} from '../internals/CB'
 import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
@@ -29,15 +29,11 @@ export class Zip<R1, R2, E1, E2, A1, A2> extends FIO<
     rej: CB<E1 | E2>,
     res: CB<OR<A1, A2>>,
     runtime: Runtime
-  ): Cancel {
+  ): ICancellable {
     let responseA: A1
     let responseB: A2
     let count = 0
-    const cancel = new Array<Cancel>()
-    const onError = (cancelID: number) => (err: E1 | E2) => {
-      cancel[cancelID]()
-      rej(err)
-    }
+    const cancel = new CancellationList()
 
     const onSuccess = () => {
       count += 1
@@ -46,19 +42,29 @@ export class Zip<R1, R2, E1, E2, A1, A2> extends FIO<
       }
     }
 
-    cancel.push(
+    const nodeL = cancel.push(
       this.a.fork(
         env,
-        onError(1),
+        e => {
+          // tslint:disable-next-line: no-use-before-declare
+          cancel.cancelId(nodeR)
+          rej(e)
+        },
         result => {
           responseA = result
           onSuccess()
         },
         runtime
-      ),
+      )
+    )
+
+    const nodeR = cancel.push(
       this.b.fork(
         env,
-        onError(0),
+        e => {
+          cancel.cancelId(nodeL)
+          rej(e)
+        },
         result => {
           responseB = result
           onSuccess()
@@ -67,6 +73,6 @@ export class Zip<R1, R2, E1, E2, A1, A2> extends FIO<
       )
     )
 
-    return () => cancel.forEach(_ => _())
+    return cancel
   }
 }

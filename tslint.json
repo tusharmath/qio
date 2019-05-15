@@ -18,7 +18,11 @@
     "prefer-for-of": false,
     "increment-decrement": false,
     "max-classes-per-file": false,
-    "restrict-plus-operands": false
+    "restrict-plus-operands": false,
+    "ordered-imports": [true, {
+      "grouped-imports": false
+    }
+    ]
   },
   "rulesDirectory": []
 }

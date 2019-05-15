@@ -35,7 +35,7 @@ describe('Timeout', () => {
     scheduler.runTo(100)
     const cancel = fork()
     scheduler.runTo(500)
-    cancel()
+    cancel.cancel()
 
     const actual = timeline.list()
     const expected: Array<TimeSlice<string>> = []
