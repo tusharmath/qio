@@ -9,7 +9,7 @@ import {ForkNRun} from './internals/ForkNRun'
 import {GetTimeline} from './internals/GetTimeline'
 import {RejectingIOSpec, ResolvingIOSpec} from './internals/IOSpecification'
 
-describe('Try', () => {
+describe('access()', () => {
   ResolvingIOSpec(() => FIO.access(() => void 0))
   RejectingIOSpec(() =>
     FIO.access(() => {
