@@ -27,6 +27,11 @@ class MapExecutor<R1, E1, A1, A2> implements IExecutable {
     this.res(this.ab(a))
   }
 }
+
+/**
+ * Value transformer
+ * @ignore
+ */
 export class Map<R1, E1, A1, A2> extends FIO<R1, E1, A2> {
   public constructor(
     public readonly src: FIO<R1, E1, A1>,

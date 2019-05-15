@@ -7,6 +7,10 @@ import {SafeResolver} from '../internals/SafeResolver'
 import {FIO} from '../main/FIO'
 import {Runtime} from '../runtimes/Runtime'
 
+/**
+ * Optimized [[FIO]] that emits a constant value.
+ * @ignore
+ */
 export class Constant<A1> extends FIO<unknown, never, A1> {
   public constructor(private readonly value: A1) {
     super()

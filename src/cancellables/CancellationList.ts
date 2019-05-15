@@ -5,6 +5,10 @@ import {LinkedList, LinkedListNode} from 'dbl-linked-list-ds'
 
 import {ICancellable} from 'ts-scheduler'
 
+/**
+ * Collection of cancellables
+ * @ignore
+ */
 export class CancellationList {
   private readonly q = new LinkedList<ICancellable>()
 

@@ -156,9 +156,6 @@ export abstract class FIO<R1, E1, A1> {
     return FIO.from((env1, rej, res) => res(fn()))
   }
 
-  public fork$ = (e: R1, rej: CB<E1>, res: CB<A1>, runtime: Runtime) =>
-    this.fork(e, rej, res, runtime)
-
   /**
    * Runs one IO after the other
    */
@@ -215,6 +212,9 @@ export abstract class FIO<R1, E1, A1> {
     res: CB<A1>,
     runtime: Runtime
   ): ICancellable
+
+  public fork$ = (e: R1, rej: CB<E1>, res: CB<A1>, runtime: Runtime) =>
+    this.fork(e, rej, res, runtime)
 
   /**
    * Applies transformation on the resolve value of the IO
