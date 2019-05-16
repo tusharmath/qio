@@ -15,7 +15,9 @@ class MapExecutor<R1, E1, A1, A2> implements IExecutable {
     private readonly res: (e: A2) => void,
     private readonly runtime: Runtime,
     private readonly cancellations: CancellationList
-  ) {}
+  ) {
+    this.onResolve = this.onResolve.bind(this)
+  }
 
   public execute(): void {
     this.cancellations.push(
@@ -23,7 +25,7 @@ class MapExecutor<R1, E1, A1, A2> implements IExecutable {
     )
   }
 
-  private readonly onResolve = (a: A1) => {
+  private onResolve(a: A1): void {
     this.res(this.ab(a))
   }
 }
