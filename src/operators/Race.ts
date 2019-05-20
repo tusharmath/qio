@@ -31,12 +31,12 @@ export class Race<R1, R2, E1, E2, A1, A2> extends FIO<
         env,
         e => {
           // tslint:disable-next-line: no-use-before-declare
-          cancel.cancelId(right)
+          cancel.cancelById(right)
           rej(e)
         },
         a => {
           // tslint:disable-next-line: no-use-before-declare
-          cancel.cancelId(right)
+          cancel.cancelById(right)
           res(a)
         },
         runtime
@@ -47,11 +47,11 @@ export class Race<R1, R2, E1, E2, A1, A2> extends FIO<
       this.b.fork(
         env,
         e => {
-          cancel.cancelId(left)
+          cancel.cancelById(left)
           rej(e)
         },
         a => {
-          cancel.cancelId(left)
+          cancel.cancelById(left)
           res(a)
         },
         runtime

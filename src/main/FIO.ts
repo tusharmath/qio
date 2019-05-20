@@ -152,9 +152,20 @@ export abstract class FIO<R1, E1, A1> {
    * On execution of the [[FIO]] calls the provided function and resolves the [[FIO]] with the return type of the
    * function.
    */
-  public static try<A>(fn: () => A): FIO<unknown, Error, A> {
+  public static try<A, E = Error>(fn: () => A): FIO<unknown, E, A> {
     return FIO.from((env1, rej, res) => res(fn()))
   }
+
+  /**
+   * The property is added for contra-varient check
+   * @ignore
+   */
+  public fork$?: (
+    e: R1,
+    rej: CB<E1>,
+    res: CB<A1>,
+    runtime: Runtime
+  ) => FIO<R1, E1, A1>
 
   /**
    * Runs one IO after the other
@@ -213,9 +224,6 @@ export abstract class FIO<R1, E1, A1> {
     runtime: Runtime
   ): ICancellable
 
-  public fork$ = (e: R1, rej: CB<E1>, res: CB<A1>, runtime: Runtime) =>
-    this.fork(e, rej, res, runtime)
-
   /**
    * Applies transformation on the resolve value of the IO
    */
@@ -227,7 +235,7 @@ export abstract class FIO<R1, E1, A1> {
    * Creates a new IO<IO<A>> that executes only once
    */
   public once(): FIO<NoEnv, never, FIO<R1, E1, A1>> {
-    return FIO.of(new Once(this))
+    return FIO.try(() => new Once(this))
   }
 
   /**

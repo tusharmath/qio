@@ -47,7 +47,7 @@ export class Zip<R1, R2, E1, E2, A1, A2> extends FIO<
         env,
         e => {
           // tslint:disable-next-line: no-use-before-declare
-          cancel.cancelId(nodeR)
+          cancel.cancelById(nodeR)
           rej(e)
         },
         result => {
@@ -62,7 +62,7 @@ export class Zip<R1, R2, E1, E2, A1, A2> extends FIO<
       this.b.fork(
         env,
         e => {
-          cancel.cancelId(nodeL)
+          cancel.cancelById(nodeL)
           rej(e)
         },
         result => {

@@ -21,6 +21,7 @@ class MapExecutor<R1, E1, A1, A2> implements IExecutable {
 
   public execute(): void {
     this.cancellations.push(
+      // tslint:disable-next-line: no-unbound-method
       this.src.fork(this.env, this.rej, this.onResolve, this.runtime)
     )
   }
