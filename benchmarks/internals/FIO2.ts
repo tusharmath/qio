@@ -93,6 +93,9 @@ export const interpretSyncFIO2 = <R1, E1, A1>(io: FIO2<R1, E1, A1>): A1 => {
     } else if (i instanceof Map) {
       stack.push(FIO2.access(i.ab))
       stack.push(i.fio)
+    } else if (i instanceof Chain) {
+      stack.push(FIO2.accessM(i.aFb))
+      stack.push(i.fio)
     } else {
       returnValue = i
     }
