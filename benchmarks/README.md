@@ -26,3 +26,13 @@ Fluture x 8,280 ops/sec ±3.43% (73 runs sampled)
 FIO x 5,838 ops/sec ±1.03% (80 runs sampled)
 Fastest is Fluture
 ```
+
+## NestedChains
+
+```bash
+node benchmarks/NestedChain.js
+FIO2 x 389 ops/sec ±2.35% (75 runs sampled)
+FIO x 358 ops/sec ±1.94% (75 runs sampled)
+Fluture x 860 ops/sec ±2.18% (75 runs sampled)
+Fastest is Fluture
+```
