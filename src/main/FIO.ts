@@ -157,7 +157,7 @@ export abstract class FIO<R1, E1, A1> {
   }
 
   /**
-   * The property is added for contra-varient check
+   * The property is added for contra-variant check
    * @ignore
    */
   public fork$?: (
