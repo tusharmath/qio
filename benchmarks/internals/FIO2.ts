@@ -85,7 +85,7 @@ class Ticker {
   }
 }
 
-const ticker = new Ticker()
+export const ticker = new Ticker()
 
 const tick = <T extends unknown[]>(fn: (...t: T) => unknown) => {
   let isTicking = false
