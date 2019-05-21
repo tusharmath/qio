@@ -22,8 +22,9 @@ Fastest is FIO
 
 ```bash
 node benchmarks/NestedMap.js
-Fluture x 8,280 ops/sec ±3.43% (73 runs sampled)
-FIO x 5,838 ops/sec ±1.03% (80 runs sampled)
+FIO2 x 6,262 ops/sec ±2.32% (76 runs sampled)
+FIO x 6,885 ops/sec ±2.46% (78 runs sampled)
+Fluture x 8,697 ops/sec ±2.79% (81 runs sampled)
 Fastest is Fluture
 ```
 
