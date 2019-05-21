@@ -9,3 +9,5 @@ node_modules/
 docs/
 .vscode/
 *.0x/
+**repl**
+*.tsbuildinfo

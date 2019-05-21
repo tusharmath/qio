@@ -6,7 +6,8 @@
     "noUnusedLocals": true,
     "plugins": [
       {"name": "typescript-tslint-plugin", "configFile": "./tslint.json"}
-    ]
+    ],
+    "incremental": true
   },
   "exclude": ["type-test"]
 }

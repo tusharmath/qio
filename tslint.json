@@ -2,6 +2,7 @@
   "defaultSeverity": "error",
   "extends": ["tslint:all", "tslint-config-prettier"],
   "rules": {
+    "comment-format": false,
     "completed-docs": false,
     "interface-name": false,
     "no-empty": false,
