@@ -3,11 +3,10 @@
  */
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
-import {onError} from '../src/internals/OnError'
 
 import {FIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
-import {FIO2, interpretFIO2} from './internals/FIO2'
+import {FIO2, interpretSyncFIO2} from './internals/FIO2'
 import {inc} from './internals/Inc'
 
 import {PrintLn} from './internals/PrintLn'
@@ -37,14 +36,11 @@ interface Defer {
   reject(): void
   resolve(): void
 }
+
 suite
-  .add(
-    'FIO2',
-    (cb: Defer) => {
-      interpretFIO2(fio2, () => cb.resolve(), onError)
-    },
-    {defer: true}
-  )
+  .add('FIO2', () => {
+    interpretSyncFIO2(fio2)
+  })
   .add(
     'FIO',
     (cb: Defer) => {
