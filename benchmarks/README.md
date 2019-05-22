@@ -32,8 +32,8 @@ Fastest is FIO2
 
 ```bash
 node benchmarks/NestedChain.js
-FIO2 x 436 ops/sec ±1.32% (79 runs sampled)
-FIO x 351 ops/sec ±1.04% (77 runs sampled)
-Fluture x 833 ops/sec ±1.38% (79 runs sampled)
-Fastest is Fluture
+FIO2 x 1,080 ops/sec ±3.93% (93 runs sampled)
+FIO x 355 ops/sec ±1.45% (79 runs sampled)
+Fluture x 857 ops/sec ±1.60% (77 runs sampled)
+Fastest is FIO2
 ```
