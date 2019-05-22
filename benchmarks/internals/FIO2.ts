@@ -1,9 +1,25 @@
-/* tslint:disable: no-use-before-declare */
+/* tslint:disable: no-use-before-declare prefer-function-over-method */
 /**
  * Created by tushar on 2019-05-20
  */
 import {CB} from '../../src/internals/CB'
 import {ticker} from './Ticker'
+
+const isAccess = <R1, A1>(t: FIO2<R1, never, A1>): t is Access<R1, A1> =>
+  t.tag() === 5
+
+const isAccessM = <R1, E1, A1>(t: FIO2<R1, E1, A1>): t is AccessM<R1, E1, A1> =>
+  t.tag() === 4
+
+const isChain = <R1, E1, A1, R2, E2, A2>(
+  t: FIO2<R1 & R2, E1 | E2, A2>
+): t is Chain<R1, E1, A1, R2, E2, A2> => t.tag() === 2
+
+const isConstant = <R1, E1, A1>(t: FIO2<R1, E1, A1>): t is Constant<A1> =>
+  t.tag() === 0
+
+const isMap = <R1, E1, A1, A2>(t: FIO2<R1, E1, A2>): t is Map<R1, E1, A1, A2> =>
+  t.tag() === 3
 
 export abstract class FIO2<R1, E1, A1> {
   public static access<R1, A1, T extends unknown[]>(
@@ -34,11 +50,16 @@ export abstract class FIO2<R1, E1, A1> {
   public map<A2>(ab: (a: A1) => A2): FIO2<R1, E1, A2> {
     return new Map(this, ab)
   }
+  public abstract tag(): number
 }
 
 class Constant<A> extends FIO2<unknown, never, A> {
   public constructor(public readonly value: A) {
     super()
+  }
+
+  public tag(): number {
+    return 0
   }
 }
 
@@ -49,6 +70,9 @@ class Duration<R1, E1, A1> extends FIO2<R1, E1, A1> {
   ) {
     super()
   }
+  public tag(): number {
+    return 1
+  }
 }
 
 class Chain<R1, E1, A1, R2, E2, A2> extends FIO2<R1 & R2, E1 | E2, A2> {
@@ -57,6 +81,9 @@ class Chain<R1, E1, A1, R2, E2, A2> extends FIO2<R1 & R2, E1 | E2, A2> {
     public readonly aFb: (a: A1) => FIO2<R2, E2, A2>
   ) {
     super()
+  }
+  public tag(): number {
+    return 2
   }
 }
 
@@ -67,15 +94,24 @@ class Map<R1, E1, A1, A2> extends FIO2<R1, E1, A2> {
   ) {
     super()
   }
+  public tag(): number {
+    return 3
+  }
 }
 class AccessM<R1, E1, A1> extends FIO2<R1, E1, A1> {
   public constructor(public readonly cb: (env: R1) => FIO2<R1, E1, A1>) {
     super()
   }
+  public tag(): number {
+    return 4
+  }
 }
 class Access<R1, A1> extends FIO2<R1, never, A1> {
   public constructor(public readonly cb: (env: R1) => A1) {
     super()
+  }
+  public tag(): number {
+    return 5
   }
 }
 
@@ -83,17 +119,17 @@ export const interpretSyncFIO2 = <R1, E1, A1>(io: FIO2<R1, E1, A1>): A1 => {
   let returnValue: unknown
   const stack = new Array<FIO2<unknown, unknown, unknown>>(io)
   while (stack.length > 0) {
-    const i = stack.pop()
-    if (i instanceof Constant) {
+    const i = stack.pop() as FIO2<unknown, unknown, unknown>
+    if (isConstant(i)) {
       returnValue = i.value
-    } else if (i instanceof AccessM) {
+    } else if (isAccessM(i)) {
       stack.push(i.cb(returnValue))
-    } else if (i instanceof Access) {
+    } else if (isAccess(i)) {
       returnValue = i.cb(returnValue)
-    } else if (i instanceof Map) {
+    } else if (isMap(i)) {
       stack.push(FIO2.access(i.ab))
       stack.push(i.fio)
-    } else if (i instanceof Chain) {
+    } else if (isChain(i)) {
       stack.push(FIO2.accessM(i.aFb))
       stack.push(i.fio)
     } else {
