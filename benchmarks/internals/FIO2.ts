@@ -132,8 +132,6 @@ export const interpretSyncFIO2 = <R1, E1, A1>(io: FIO2<R1, E1, A1>): A1 => {
     } else if (isChain(i)) {
       stack.push(FIO2.accessM(i.aFb))
       stack.push(i.fio)
-    } else {
-      returnValue = i
     }
   }
 
