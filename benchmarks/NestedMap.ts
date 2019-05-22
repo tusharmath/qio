@@ -9,6 +9,7 @@ import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {FIO2, interpretSyncFIO2} from './internals/FIO2'
 import {inc} from './internals/Inc'
 
+import {noop} from '../src/internals/Noop'
 import {PrintLn} from './internals/PrintLn'
 
 const suite = new Suite('NestedMap')
@@ -38,9 +39,13 @@ interface Defer {
 }
 
 suite
-  .add('FIO2', () => {
-    interpretSyncFIO2(fio2)
-  })
+  .add(
+    'FIO2',
+    (cb: Defer) => {
+      interpretSyncFIO2(fio2, noop, () => cb.resolve())
+    },
+    {defer: true}
+  )
   .add(
     'FIO',
     (cb: Defer) => {

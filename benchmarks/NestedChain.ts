@@ -1,5 +1,6 @@
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
+import {noop} from '../src/internals/Noop'
 import {FIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {FIO2, interpretSyncFIO2} from './internals/FIO2'
@@ -38,9 +39,13 @@ interface Defer {
   resolve(): void
 }
 suite
-  .add('FIO2', () => {
-    interpretSyncFIO2(fio2)
-  })
+  .add(
+    'FIO2',
+    (cb: Defer) => {
+      interpretSyncFIO2(fio2, noop, () => cb.resolve())
+    },
+    {defer: true}
+  )
   .add(
     'FIO',
     (cb: Defer) => {
