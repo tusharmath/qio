@@ -112,7 +112,7 @@ export const interpretSyncFIO2 = <R1, E1, A1>(
     }
   }
 
-  res(returnValue as A1)
+  process.nextTick(res, returnValue as A1)
 }
 
 // NOTE: don't remove this comment. Its useful for testing
