@@ -21,10 +21,10 @@ Fastest is FIO
 ## NestedMaps
 
 ```bash
-node benchmarks/NestedMap.js
-FIO2 x 11,300 ops/sec ±0.96% (84 runs sampled)
-FIO x 7,177 ops/sec ±0.71% (82 runs sampled)
-Fluture x 9,544 ops/sec ±0.57% (81 runs sampled)
+deoptigate benchmarks/NestedMap.js
+FIO2 x 11,202 ops/sec ±1.55% (77 runs sampled)
+FIO x 7,257 ops/sec ±1.42% (77 runs sampled)
+Fluture x 9,507 ops/sec ±1.34% (79 runs sampled)
 Fastest is FIO2
 ```
 

@@ -42,7 +42,7 @@ suite
   .add(
     'FIO2',
     (cb: Defer) => {
-      interpretSyncFIO2(fio2, noop, () => cb.resolve())
+      interpretSyncFIO2(fio2, [], noop, () => cb.resolve())
     },
     {defer: true}
   )

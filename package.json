@@ -5,7 +5,7 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "description": "A typesafe functional module that solves practical IO problems for node and the browser.",
+  "description": "A type-safe functional module that solves practical IO problems for node and the browser.",
   "keywords": [
     "io",
     "functional",
