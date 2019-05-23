@@ -2,8 +2,8 @@ import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
 import {noop} from '../src/internals/Noop'
 import {FIO} from '../src/main/FIO'
+import {FIO2, interpretSyncFIO2} from '../src/main/FIO2'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
-import {FIO2, interpretSyncFIO2} from './internals/FIO2'
 import {PrintLn} from './internals/PrintLn'
 
 /**
@@ -42,7 +42,7 @@ suite
   .add(
     'FIO2',
     (cb: Defer) => {
-      interpretSyncFIO2(fio2, [], noop, () => cb.resolve())
+      interpretSyncFIO2(fio2, undefined, [], noop, () => cb.resolve())
     },
     {defer: true}
   )

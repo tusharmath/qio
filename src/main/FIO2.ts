@@ -3,7 +3,7 @@
  * Created by tushar on 2019-05-20
  */
 
-import {CB} from '../../src/internals/CB'
+import {CB} from '../internals/CB'
 
 export class FIO2<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static access<R1, A1>(cb: (env: R1) => A1): FIO2<R1, never, A1> {
@@ -16,8 +16,18 @@ export class FIO2<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO2(Tag.AccessM, cb)
   }
 
-  public static from<E1, A1>(
-    cb: (rej: CB<E1>, res: CB<A1>) => void | (() => void)
+  public static accessP<R1 = unknown, E1 = Error, A1 = unknown>(
+    cb: (env: R1) => Promise<A1>
+  ): FIO2<R1, E1, A1> {
+    return FIO2.from<R1, E1, A1>((env, rej, res) => {
+      cb(env)
+        .then(res)
+        .catch(rej)
+    })
+  }
+
+  public static from<R1 = unknown, E1 = unknown, A1 = unknown>(
+    cb: (env: R1, rej: CB<E1>, res: CB<A1>) => void | (() => void)
   ): FIO2<unknown, E1, A1> {
     return new FIO2(Tag.Async, cb)
   }
@@ -65,6 +75,7 @@ type Async = (rej: CB<unknown>, res: CB<unknown>) => void | (() => void)
 
 export const interpretSyncFIO2 = <R1, E1, A1>(
   io: FIO2<R1, E1, A1>,
+  env: R1,
   stack: FIO2[],
   rej: CB<E1>,
   res: CB<A1>
@@ -101,13 +112,21 @@ export const interpretSyncFIO2 = <R1, E1, A1>(
         err =>
           process.nextTick(
             interpretSyncFIO2,
+            env,
             FIO2.reject(err),
             stack,
             rej,
             res
           ),
         val =>
-          process.nextTick(interpretSyncFIO2, FIO2.of(val), stack, rej, res)
+          process.nextTick(
+            interpretSyncFIO2,
+            env,
+            FIO2.of(val),
+            stack,
+            rej,
+            res
+          )
       )
     }
   }
