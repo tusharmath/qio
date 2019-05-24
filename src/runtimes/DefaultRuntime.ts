@@ -24,7 +24,12 @@ export class DefaultRuntime<R> implements IRuntime<R> {
       this.scheduler
     )
   }
+
+  public async executePromise<E, A>(io: FIO<R, E, A>): Promise<A> {
+    return new Promise((res, rej) => {
+      this.execute(io, res, rej)
+    })
+  }
 }
 
-export const defaultRuntime = <R>(env: R): IRuntime<R> =>
-  new DefaultRuntime(env)
+export const defaultRuntime = <R>(env: R) => new DefaultRuntime(env)

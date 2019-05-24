@@ -1948,11 +1948,6 @@ detect-newline@^2.1.0:
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-2.1.0.tgz#f41f1c10be4b00e87b5f13da680759f2c5bfd3e2"
   integrity sha1-9B8cEL5LAOh7XxPaaAdZ8sW/0+I=
 
-detect-node@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.0.4.tgz#014ee8f8f669c5c58023da64b8179c083a28c46c"
-  integrity sha512-ZIzRpLJrOj7jjP2miAtgqIfmzbxa4ZOr5jJc601zklsfEx9oTzmmj2nVpIPRpNlRTIh8lc1kyViIY7BWSGNmKw==
-
 dezalgo@^1.0.0, dezalgo@~1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/dezalgo/-/dezalgo-1.0.3.tgz#7f742de066fc748bc8db820569dddce49bf0d456"
@@ -5990,14 +5985,14 @@ ts-node@^8.1.0:
     source-map-support "^0.5.6"
     yn "^3.0.0"
 
-ts-scheduler@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/ts-scheduler/-/ts-scheduler-7.0.1.tgz#01d7bb8f64f70da18d87c3266647cecb16c6e640"
-  integrity sha512-dkUTko98JamjK9OGfOWl5B982S1NXVQ3cDOGe6LtUot9z/IkpMsCz5bO5AwF1Pj7Fnu/QY3+/fzpVXGyl5qxLA==
+ts-scheduler@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/ts-scheduler/-/ts-scheduler-8.0.0.tgz#ed02f7912df1a5fb3e4f354c826423ffd0df1c01"
+  integrity sha512-DI88Z1yJVnW9eZOp88XGEGQ8OB7IHC9kweS/a3Ce/Qnt1kyyKsHWAOO0ODL9HMBBTAbSZ/rkGYcmb6WScHcVKQ==
   dependencies:
     checked-exceptions "^1.1.0"
     dbl-linked-list-ds "^2.0.0"
-    detect-node "^2.0.4"
+    in-node "^1.0.0"
 
 tslib@^1.8.0, tslib@^1.8.1:
   version "1.9.3"
