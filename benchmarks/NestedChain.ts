@@ -1,7 +1,7 @@
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
 import {noop} from '../src/internals/Noop'
-import {FIO2, interpretSyncFIO2} from '../src/main/FIO2'
+import {FIO, interpretSyncFIO} from '../src/main/FIO'
 import {PrintLn} from './internals/PrintLn'
 
 /**
@@ -19,10 +19,10 @@ for (let i = 0; i < MAX; i++) {
   fluture = fluture.chain(flutureMapper)
 }
 
-const fio2Mapper = (_: bigint) => FIO2.of(_ + BigInt(1))
-let fio2 = FIO2.of(BigInt(0))
+const fioMapper = (_: bigint) => FIO.of(_ + BigInt(1))
+let fio = FIO.of(BigInt(0))
 for (let i = 0; i < MAX; i++) {
-  fio2 = fio2.chain(fio2Mapper)
+  fio = fio.chain(fioMapper)
 }
 
 interface Defer {
@@ -31,9 +31,9 @@ interface Defer {
 }
 suite
   .add(
-    'FIO2',
+    'FIO',
     (cb: Defer) => {
-      interpretSyncFIO2(fio2, undefined, [], noop, () => cb.resolve())
+      interpretSyncFIO(fio, undefined, [], noop, () => cb.resolve())
     },
     {defer: true}
   )

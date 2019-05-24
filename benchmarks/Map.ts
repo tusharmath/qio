@@ -4,14 +4,14 @@
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
 import {noop} from '../src/internals/Noop'
-import {FIO2, interpretSyncFIO2} from '../src/main/FIO2'
+import {FIO, interpretSyncFIO} from '../src/main/FIO'
 
 import {PrintLn} from './internals/PrintLn'
 
 const suite = new Suite()
 
 const fluture = Fluture.of(10)
-const fio2 = FIO2.of(10)
+const fio = FIO.of(10)
 const nothing = () => {}
 interface Defer {
   resolve(): void
@@ -19,9 +19,9 @@ interface Defer {
 suite
 
   .add(
-    'FIO2',
+    'FIO',
     (cb: Defer) => {
-      interpretSyncFIO2(fio2, undefined, [], noop, () => cb.resolve())
+      interpretSyncFIO(fio, undefined, [], noop, () => cb.resolve())
     },
     {defer: true}
   )

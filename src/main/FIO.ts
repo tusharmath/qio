@@ -5,21 +5,21 @@
 
 import {CB} from '../internals/CB'
 
-export class FIO2<R1 = unknown, E1 = unknown, A1 = unknown> {
-  public static access<R1, A1>(cb: (env: R1) => A1): FIO2<R1, never, A1> {
-    return new FIO2(Tag.Access, cb)
+export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
+  public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
+    return new FIO(Tag.Access, cb)
   }
 
   public static accessM<R1, E1, A1>(
-    cb: (env: R1) => FIO2<R1, E1, A1>
-  ): FIO2<R1, E1, A1> {
-    return new FIO2(Tag.AccessM, cb)
+    cb: (env: R1) => FIO<R1, E1, A1>
+  ): FIO<R1, E1, A1> {
+    return new FIO(Tag.AccessM, cb)
   }
 
   public static accessP<R1 = unknown, E1 = Error, A1 = unknown>(
     cb: (env: R1) => Promise<A1>
-  ): FIO2<R1, E1, A1> {
-    return FIO2.from<R1, E1, A1>((env, rej, res) => {
+  ): FIO<R1, E1, A1> {
+    return FIO.from<R1, E1, A1>((env, rej, res) => {
       cb(env)
         .then(res)
         .catch(rej)
@@ -28,15 +28,15 @@ export class FIO2<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public static from<R1 = unknown, E1 = unknown, A1 = unknown>(
     cb: (env: R1, rej: CB<E1>, res: CB<A1>) => void | (() => void)
-  ): FIO2<unknown, E1, A1> {
-    return new FIO2(Tag.Async, cb)
+  ): FIO<unknown, E1, A1> {
+    return new FIO(Tag.Async, cb)
   }
 
-  public static of<A1>(value: A1): FIO2<unknown, never, A1> {
-    return new FIO2(Tag.Constant, value)
+  public static of<A1>(value: A1): FIO<unknown, never, A1> {
+    return new FIO(Tag.Constant, value)
   }
-  public static reject<E1>(error: E1): FIO2<unknown, E1, never> {
-    return new FIO2(Tag.Constant, error)
+  public static reject<E1>(error: E1): FIO<unknown, E1, never> {
+    return new FIO(Tag.Constant, error)
   }
 
   public constructor(
@@ -45,13 +45,13 @@ export class FIO2<R1 = unknown, E1 = unknown, A1 = unknown> {
   ) {}
 
   public chain<R2, E2, A2>(
-    aFb: (a: A1) => FIO2<R2, E2, A2>
-  ): FIO2<R1 & R2, E1 | E2, A2> {
-    return new FIO2(Tag.Chain, [this, aFb])
+    aFb: (a: A1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E1 | E2, A2> {
+    return new FIO(Tag.Chain, [this, aFb])
   }
 
-  public map<A2>(ab: (a: A1) => A2): FIO2<R1, E1, A2> {
-    return new FIO2(Tag.Map, [this, ab])
+  public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
+    return new FIO(Tag.Map, [this, ab])
   }
 }
 
@@ -67,27 +67,27 @@ enum Tag {
 
 // tslint:disable-next-line: no-empty-interface
 
-type AccessM = (value: unknown) => FIO2
+type AccessM = (value: unknown) => FIO
 type Access = (value: unknown) => unknown
-type Map = [FIO2, (a: unknown) => unknown]
-type Chain = [FIO2, (a: unknown) => FIO2]
+type Map = [FIO, (a: unknown) => unknown]
+type Chain = [FIO, (a: unknown) => FIO]
 type Async = (rej: CB<unknown>, res: CB<unknown>) => void | (() => void)
 
 const asyncify = <T extends unknown[], R>(fn: (...t: T) => R) => (...t: T) =>
   process.nextTick(fn, ...t)
 
-export const interpretSyncFIO2 = asyncify(
+export const interpretSyncFIO = asyncify(
   <R1, E1, A1>(
-    io: FIO2<R1, E1, A1>,
+    io: FIO<R1, E1, A1>,
     env: R1,
-    stack: FIO2[],
+    stack: FIO[],
     rej: CB<E1 | unknown>,
     res: CB<A1 | unknown>
   ): void => {
     let returnValue: unknown
     stack.push(io)
     while (stack.length > 0) {
-      const j = stack.pop() as FIO2
+      const j = stack.pop() as FIO
       if (Tag.Constant === j.tag) {
         const i = j.props
         returnValue = i
@@ -103,18 +103,18 @@ export const interpretSyncFIO2 = asyncify(
         returnValue = i(returnValue)
       } else if (Tag.Map === j.tag) {
         const i = j.props as Map
-        stack.push(FIO2.access(i[1]))
+        stack.push(FIO.access(i[1]))
         stack.push(i[0])
       } else if (Tag.Chain === j.tag) {
         const i = j.props as Chain
-        stack.push(FIO2.accessM(i[1]))
+        stack.push(FIO.accessM(i[1]))
         stack.push(i[0])
       } else if (Tag.Async === j.tag) {
         const i = j.props as Async
 
         i(
-          err => interpretSyncFIO2(FIO2.reject(err), env, stack, rej, res),
-          val => interpretSyncFIO2(FIO2.of(val), env, stack, rej, res)
+          err => interpretSyncFIO(FIO.reject(err), env, stack, rej, res),
+          val => interpretSyncFIO(FIO.of(val), env, stack, rej, res)
         )
 
         return
@@ -126,4 +126,4 @@ export const interpretSyncFIO2 = asyncify(
 )
 
 // NOTE: don't remove this comment. Its useful for testing
-// console.log(interpretSyncFIO2(FIO2.of(0).map(_ => _ + 12)))
+// console.log(interpretSyncFIO(FIO.of(0).map(_ => _ + 12)))
