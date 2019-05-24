@@ -73,66 +73,57 @@ type Map = [FIO2, (a: unknown) => unknown]
 type Chain = [FIO2, (a: unknown) => FIO2]
 type Async = (rej: CB<unknown>, res: CB<unknown>) => void | (() => void)
 
-export const interpretSyncFIO2 = <R1, E1, A1>(
-  io: FIO2<R1, E1, A1>,
-  env: R1,
-  stack: FIO2[],
-  rej: CB<E1>,
-  res: CB<A1>
-) => {
-  let returnValue: unknown
-  stack.push(io)
-  while (stack.length > 0) {
-    const j = stack.pop() as FIO2
-    if (Tag.Constant === j.tag) {
-      const i = j.props
-      returnValue = i
-    } else if (Tag.Reject === j.tag) {
-      const i = j.props
+const asyncify = <T extends unknown[], R>(fn: (...t: T) => R) => (...t: T) =>
+  process.nextTick(fn, ...t)
 
-      return rej(i as E1)
-    } else if (Tag.AccessM === j.tag) {
-      const i = j.props as AccessM
-      stack.push(i(returnValue))
-    } else if (Tag.Access === j.tag) {
-      const i = j.props as Access
-      returnValue = i(returnValue)
-    } else if (Tag.Map === j.tag) {
-      const i = j.props as Map
-      stack.push(FIO2.access(i[1]))
-      stack.push(i[0])
-    } else if (Tag.Chain === j.tag) {
-      const i = j.props as Chain
-      stack.push(FIO2.accessM(i[1]))
-      stack.push(i[0])
-    } else if (Tag.Async === j.tag) {
-      const i = j.props as Async
+export const interpretSyncFIO2 = asyncify(
+  <R1, E1, A1>(
+    io: FIO2<R1, E1, A1>,
+    env: R1,
+    stack: FIO2[],
+    rej: CB<E1 | unknown>,
+    res: CB<A1 | unknown>
+  ): void => {
+    let returnValue: unknown
+    stack.push(io)
+    while (stack.length > 0) {
+      const j = stack.pop() as FIO2
+      if (Tag.Constant === j.tag) {
+        const i = j.props
+        returnValue = i
+      } else if (Tag.Reject === j.tag) {
+        const i = j.props
 
-      return i(
-        err =>
-          process.nextTick(
-            interpretSyncFIO2,
-            env,
-            FIO2.reject(err),
-            stack,
-            rej,
-            res
-          ),
-        val =>
-          process.nextTick(
-            interpretSyncFIO2,
-            env,
-            FIO2.of(val),
-            stack,
-            rej,
-            res
-          )
-      )
+        return rej(i as E1)
+      } else if (Tag.AccessM === j.tag) {
+        const i = j.props as AccessM
+        stack.push(i(returnValue))
+      } else if (Tag.Access === j.tag) {
+        const i = j.props as Access
+        returnValue = i(returnValue)
+      } else if (Tag.Map === j.tag) {
+        const i = j.props as Map
+        stack.push(FIO2.access(i[1]))
+        stack.push(i[0])
+      } else if (Tag.Chain === j.tag) {
+        const i = j.props as Chain
+        stack.push(FIO2.accessM(i[1]))
+        stack.push(i[0])
+      } else if (Tag.Async === j.tag) {
+        const i = j.props as Async
+
+        i(
+          err => interpretSyncFIO2(FIO2.reject(err), env, stack, rej, res),
+          val => interpretSyncFIO2(FIO2.of(val), env, stack, rej, res)
+        )
+
+        return
+      }
     }
-  }
 
-  process.nextTick(res, returnValue as A1)
-}
+    res(returnValue as A1)
+  }
+)
 
 // NOTE: don't remove this comment. Its useful for testing
 // console.log(interpretSyncFIO2(FIO2.of(0).map(_ => _ + 12)))
