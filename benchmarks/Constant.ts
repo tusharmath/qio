@@ -3,26 +3,25 @@
  */
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
+import {noop} from '../src/internals/Noop'
 
-import {FIO} from '../src/main/FIO'
-import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
+import {FIO2, interpretSyncFIO2} from '../src/main/FIO2'
 
 import {PrintLn} from './internals/PrintLn'
 
 const suite = new Suite()
 
-const runtime = defaultRuntime()
 const fluture = Fluture.of(10)
-const fio = FIO.of(10)
+const fio2 = FIO2.of(10)
 const nothing = () => {}
 interface Defer {
   resolve(): void
 }
 suite
   .add(
-    'FIO',
+    'FIO2',
     (cb: Defer) => {
-      runtime.execute(fio, () => cb.resolve())
+      interpretSyncFIO2(fio2, undefined, [], noop, () => cb.resolve())
     },
     {defer: true}
   )

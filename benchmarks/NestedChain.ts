@@ -1,9 +1,7 @@
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
 import {noop} from '../src/internals/Noop'
-import {FIO} from '../src/main/FIO'
 import {FIO2, interpretSyncFIO2} from '../src/main/FIO2'
-import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {PrintLn} from './internals/PrintLn'
 
 /**
@@ -13,19 +11,12 @@ import {PrintLn} from './internals/PrintLn'
 const suite = new Suite('NestedMap')
 
 const MAX = 1e4
-const runtime = defaultRuntime()
 const nothing = () => {}
 
 const flutureMapper = (_: bigint) => Fluture.of(_ + BigInt(1))
 let fluture = Fluture.of(BigInt(0))
 for (let i = 0; i < MAX; i++) {
   fluture = fluture.chain(flutureMapper)
-}
-
-const fioMapper = (_: bigint) => FIO.of(_ + BigInt(1))
-let fio = FIO.of(BigInt(0))
-for (let i = 0; i < MAX; i++) {
-  fio = fio.chain(fioMapper)
 }
 
 const fio2Mapper = (_: bigint) => FIO2.of(_ + BigInt(1))
@@ -43,13 +34,6 @@ suite
     'FIO2',
     (cb: Defer) => {
       interpretSyncFIO2(fio2, undefined, [], noop, () => cb.resolve())
-    },
-    {defer: true}
-  )
-  .add(
-    'FIO',
-    (cb: Defer) => {
-      runtime.execute(fio, () => cb.resolve())
     },
     {defer: true}
   )
