@@ -4,7 +4,7 @@
   "rules": {
     "comment-format": false,
     "completed-docs": false,
-    "interface-name": false,
+    "interface-name": true,
     "no-empty": false,
     "no-implicit-dependencies": [true, "dev"],
     "no-magic-numbers": false,
@@ -20,9 +20,11 @@
     "increment-decrement": false,
     "max-classes-per-file": false,
     "restrict-plus-operands": false,
-    "ordered-imports": [true, {
-      "grouped-imports": false
-    }
+    "ordered-imports": [
+      true,
+      {
+        "grouped-imports": false
+      }
     ]
   },
   "rulesDirectory": []

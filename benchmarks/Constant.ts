@@ -5,7 +5,8 @@ import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
 import {noop} from '../src/internals/Noop'
 
-import {FIO, interpretSyncFIO} from '../src/main/FIO'
+import {FIO} from '../src/main/FIO'
+import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 
 import {PrintLn} from './internals/PrintLn'
 
@@ -13,22 +14,19 @@ const suite = new Suite()
 
 const fluture = Fluture.of(10)
 const fio = FIO.of(10)
-const nothing = () => {}
-interface Defer {
-  resolve(): void
-}
+const runtime = defaultRuntime(undefined)
 suite
   .add(
     'FIO',
-    (cb: Defer) => {
-      interpretSyncFIO(fio, undefined, [], noop, () => cb.resolve())
+    (cb: IDefer) => {
+      runtime.execute(fio, () => cb.resolve())
     },
     {defer: true}
   )
   .add(
     'Fluture',
-    (cb: Defer) => {
-      fluture.fork(nothing, () => cb.resolve())
+    (cb: IDefer) => {
+      fluture.fork(noop, () => cb.resolve())
     },
     {defer: true}
   )

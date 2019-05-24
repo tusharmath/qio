@@ -13,11 +13,7 @@ import {FIO} from '../main/FIO'
  * [scheduler]: https://github.com/tusharmath/ts-scheduler
  * Actual implementation is available at [[DefaultRuntime]] & [[TestRuntime]].
  */
-export interface Runtime {
+export interface IRuntime<R> {
   scheduler: IScheduler
-  execute<E, A>(
-    io: FIO<unknown, E, A>,
-    res: CB<A>,
-    rej: CB<E | Error>
-  ): ICancellable
+  execute<E, A>(io: FIO<R, E, A>, res?: CB<A>, rej?: CB<E>): ICancellable
 }
