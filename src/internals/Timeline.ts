@@ -1,4 +1,4 @@
-import {DefaultRuntime} from '../../src/runtimes/DefaultRuntime'
+import {DefaultRuntime} from '../runtimes/DefaultRuntime'
 
 /**
  * Created by tushar on 2019-03-22

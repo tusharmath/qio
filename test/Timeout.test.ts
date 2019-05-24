@@ -6,9 +6,9 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {FIO} from '../'
 
+import {TimeSlice} from '../src/internals/Timeline'
 import {IOCollector} from './internals/IOCollector'
 import {ResolvingIOSpec} from './internals/IOSpecification'
-import {TimeSlice} from './internals/Timeline'
 
 describe('Timeout', () => {
   ResolvingIOSpec(() => FIO.timeout('DONE', 1000))

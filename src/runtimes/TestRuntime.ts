@@ -4,8 +4,8 @@
 import {ICancellable} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {Timeline} from '../../test/internals/Timeline'
 import {NoEnv} from '../envs/NoEnv'
+import {Timeline} from '../internals/Timeline'
 import {FIO} from '../main/FIO'
 
 import {Runtime} from './Runtime'

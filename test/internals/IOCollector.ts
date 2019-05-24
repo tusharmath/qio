@@ -5,7 +5,7 @@
 import {FIO} from '../../src/main/FIO'
 import {testRuntime, TestRuntimeOptions} from '../../src/runtimes/TestRuntime'
 
-import {Timeline} from './Timeline'
+import {Timeline} from '../../src/internals/Timeline'
 
 export const IOCollector = <A, E, R>(
   env: R,
