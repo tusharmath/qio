@@ -61,21 +61,27 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Never, undefined)
   }
 
-  public static next<A1, A2>(cb: (A: A1) => A2): FIO<unknown, never, A2> {
-    return new FIO(Tag.Resume, cb)
-  }
-
-  public static nextM<A1, A2>(
-    cb: (A: A1) => FIO<unknown, never, A2>
-  ): FIO<unknown, never, A2> {
-    return new FIO(Tag.ResumeM, cb)
-  }
-
   public static of<A1>(value: A1): FIO<unknown, never, A1> {
     return new FIO(Tag.Constant, value)
   }
   public static reject<E1>(error: E1): FIO<unknown, E1, never> {
     return new FIO(Tag.Reject, error)
+  }
+
+  /**
+   * @ignore
+   */
+  public static resume<A1, A2>(cb: (A: A1) => A2): FIO<unknown, never, A2> {
+    return new FIO(Tag.Resume, cb)
+  }
+
+  /**
+   * @ignore
+   */
+  public static resumeM<A1, A2>(
+    cb: (A: A1) => FIO<unknown, never, A2>
+  ): FIO<unknown, never, A2> {
+    return new FIO(Tag.ResumeM, cb)
   }
 
   public static timeout<A>(value: A, duration: number): FIO<unknown, never, A> {
@@ -86,7 +92,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Resume, cb)
   }
 
-  public constructor(
+  private constructor(
     public readonly tag: Tag,
     public readonly props: unknown
   ) {}

@@ -82,14 +82,14 @@ export class Interpreter<R> {
       // Map
       else if (Tag.Map === j.tag) {
         const i = j.props as Map
-        stack.push(FIO.next(i[1]))
+        stack.push(FIO.resume(i[1]))
         stack.push(i[0])
       }
 
       // Chain
       else if (Tag.Chain === j.tag) {
         const i = j.props as Chain
-        stack.push(FIO.nextM(i[1]))
+        stack.push(FIO.resumeM(i[1]))
         stack.push(i[0])
       }
 
