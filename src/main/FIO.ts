@@ -7,6 +7,8 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 import {Tag} from '../internals/Tag'
 
+const Id = <A>(_: A): A => _
+
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
     return new FIO(Tag.Access, cb)
@@ -21,11 +23,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static accessP<R1 = unknown, E1 = Error, A1 = unknown>(
     cb: (env: R1) => Promise<A1>
   ): FIO<R1, E1, A1> {
-    return FIO.from<R1, E1, A1>((env, rej, res) => {
-      cb(env)
-        .then(res)
-        .catch(rej)
-    })
+    return FIO.from<R1, E1, A1>((env, rej, res, sh) =>
+      sh.asap(() => {
+        cb(env)
+          .then(res)
+          .catch(rej)
+      })
+    )
   }
 
   public static encase<E, A, T extends unknown[]>(
@@ -38,21 +42,17 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     cb: (...t: T) => Promise<A>
   ): (...t: T) => FIO<unknown, E, A> {
     return (...t) =>
-      FIO.from(
-        (env, rej, res) =>
+      FIO.from((env, rej, res, sh) =>
+        sh.asap(() => {
           void cb(...t)
             .then(res)
             .catch(rej)
+        })
       )
   }
 
   public static from<R1 = unknown, E1 = unknown, A1 = unknown>(
-    cb: (
-      env: R1,
-      rej: CB<E1>,
-      res: CB<A1>,
-      sh: IScheduler
-    ) => void | (() => void) | ICancellable
+    cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): FIO<unknown, E1, A1> {
     return new FIO(Tag.Async, cb)
   }
@@ -102,7 +102,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public delay(duration: number): FIO<R1, E1, A1> {
-    return FIO.timeout(this, duration).chain(_ => _)
+    return FIO.timeout(this, duration).chain(Id)
   }
 
   public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {

@@ -1,28 +1,11 @@
-import {ICancellable, scheduler} from 'ts-scheduler/index'
-import {interpret} from '../internals/Interpret'
-import {noop} from '../internals/Noop'
-import {onError} from '../internals/OnError'
+import {scheduler} from 'ts-scheduler'
 import {FIO} from '../main/FIO'
-import {IRuntime} from './IRuntime'
+import {BaseRuntime} from './BaseRuntime'
 
-export class DefaultRuntime<R> implements IRuntime<R> {
+export class DefaultRuntime<R> extends BaseRuntime<R> {
   public scheduler = scheduler
-  public constructor(public readonly env: R) {}
-
-  public execute<E, A>(
-    io: FIO<unknown, E, A>,
-    res: (e: A) => void = noop,
-    rej: (e: E) => void = onError
-  ): ICancellable {
-    return this.scheduler.asap(
-      interpret,
-      io,
-      [],
-      this.env,
-      rej,
-      res,
-      this.scheduler
-    )
+  public constructor(env: R) {
+    super(env)
   }
 
   public async executePromise<E, A>(io: FIO<R, E, A>): Promise<A> {

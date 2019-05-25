@@ -11,6 +11,9 @@
     "no-parameter-properties": false,
     "no-submodule-imports": false,
     "prefer-template": false,
+    "no-unbound-method": {
+      "options": "ignore-static"
+    },
     "no-void-expression": false,
     "variable-name": [true, "allow-pascal-case"],
     // TEMPORARY SETTINGS

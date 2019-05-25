@@ -67,11 +67,24 @@ describe('FIO', () => {
     it('should evaluate asynchronously', async () => {
       const actual = await defaultRuntime({count: 1000}).executePromise(
         FIO.from((env, rej, res) => {
-          setTimeout(res, 100, 1000)
+          const id = setTimeout(res, 100, 1000)
+
+          return {cancel: () => clearTimeout(id)}
         })
       )
       const expected = 1000
       assert.strictEqual(actual, expected)
+    })
+
+    it('should be cancellable', () => {
+      let cancelled = false
+      const runtime = testRuntime({count: 1000})
+      const cancellable = runtime.execute(
+        FIO.from(() => ({cancel: () => (cancelled = true)}))
+      )
+      runtime.scheduler.runTo(50)
+      cancellable.cancel()
+      assert.ok(cancelled, 'Cancelled should be true')
     })
   })
 
@@ -90,6 +103,15 @@ describe('FIO', () => {
       let i = 1000
       const actual = testRuntime({count: 1000}).executeSync(FIO.try(() => ++i))
       const expected = 1001
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should be cancellable', () => {
+      let actual = 1000
+      const runtime = testRuntime({count: 1000})
+      runtime.execute(FIO.try(() => ++actual)).cancel()
+      runtime.scheduler.run()
+      const expected = 1000
       assert.strictEqual(actual, expected)
     })
   })
@@ -141,6 +163,19 @@ describe('FIO', () => {
       const actual = runtime.scheduler.now()
       const expected = 101
       assert.strictEqual(actual, expected)
+    })
+
+    it('should be cancellable', () => {
+      let executed = false
+      const runtime = testRuntime({count: 1000})
+      const cancellable = runtime.execute(
+        FIO.try(() => (executed = true)).delay(100)
+      )
+      runtime.scheduler.runTo(50)
+      assert.notOk(executed)
+      cancellable.cancel()
+      runtime.scheduler.run()
+      assert.notOk(executed)
     })
   })
 

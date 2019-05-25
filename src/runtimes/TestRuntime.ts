@@ -2,31 +2,15 @@
  * Created by tushar on 2019-05-24
  */
 
-import {ICancellable} from 'ts-scheduler'
 import {testScheduler} from 'ts-scheduler/test'
-import {interpret} from '../internals/Interpret'
-import {noop} from '../internals/Noop'
 import {FIO} from '../main/FIO'
-import {IRuntime} from './IRuntime'
+import {BaseRuntime} from './BaseRuntime'
 
-class TestRuntime<R> implements IRuntime<R> {
+class TestRuntime<R> extends BaseRuntime<R> {
   public readonly scheduler = testScheduler()
-  public constructor(private readonly env: R) {}
 
-  public execute<E, A>(
-    io: FIO<R, E, A>,
-    res: (e: A) => void = noop,
-    rej: (e: E) => void = noop
-  ): ICancellable {
-    return this.scheduler.asap(
-      interpret,
-      io,
-      [],
-      this.env,
-      rej,
-      res,
-      this.scheduler
-    )
+  public constructor(env: R) {
+    super(env)
   }
 
   public executeSync<E, A>(io: FIO<R, E, A>): A | undefined {
