@@ -10,8 +10,8 @@ import {Tag} from './Tag'
 
 export type AccessM = (value: unknown) => FIO
 export type Access = (value: unknown) => unknown
-export type Next = (value: unknown) => unknown
-export type NextM = (value: unknown) => FIO
+export type Resume = (value: unknown) => unknown
+export type ResumeM = (value: unknown) => FIO
 export type Map = [FIO, (a: unknown) => unknown]
 export type Chain = [FIO, (a: unknown) => FIO]
 export type Async<R = unknown, E = unknown, A = unknown> = (
@@ -67,15 +67,15 @@ export class Interpreter<R> {
         data = i(env)
       }
 
-      //Next
-      else if (Tag.Next === j.tag) {
-        const i = j.props as Next
+      //Resume
+      else if (Tag.Resume === j.tag) {
+        const i = j.props as Resume
         data = i(data)
       }
 
-      //NextM
-      else if (Tag.NextM === j.tag) {
-        const i = j.props as NextM
+      //ResumeM
+      else if (Tag.ResumeM === j.tag) {
+        const i = j.props as ResumeM
         stack.push(i(data))
       }
 

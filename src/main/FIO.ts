@@ -62,13 +62,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public static next<A1, A2>(cb: (A: A1) => A2): FIO<unknown, never, A2> {
-    return new FIO(Tag.Next, cb)
+    return new FIO(Tag.Resume, cb)
   }
 
   public static nextM<A1, A2>(
     cb: (A: A1) => FIO<unknown, never, A2>
   ): FIO<unknown, never, A2> {
-    return new FIO(Tag.NextM, cb)
+    return new FIO(Tag.ResumeM, cb)
   }
 
   public static of<A1>(value: A1): FIO<unknown, never, A1> {
@@ -83,7 +83,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public static try<E, A>(cb: () => A): FIO<unknown, E, A> {
-    return new FIO(Tag.Next, cb)
+    return new FIO(Tag.Resume, cb)
   }
 
   public constructor(
