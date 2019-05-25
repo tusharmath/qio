@@ -9,6 +9,9 @@ import {Tag} from '../internals/Tag'
 
 const Id = <A>(_: A): A => _
 
+export type IO<E, A> = FIO<unknown, E, A>
+export type Task<A> = IO<never, A>
+
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
     return new FIO(Tag.Access, cb)
@@ -57,11 +60,11 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Async, cb)
   }
 
-  public static never(): FIO<unknown, never, never> {
+  public static never(): Task<never> {
     return new FIO(Tag.Never, undefined)
   }
 
-  public static of<A1>(value: A1): FIO<unknown, never, A1> {
+  public static of<A1>(value: A1): Task<A1> {
     return new FIO(Tag.Constant, value)
   }
   public static reject<E1>(error: E1): FIO<unknown, E1, never> {
@@ -71,20 +74,18 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   /**
    * @ignore
    */
-  public static resume<A1, A2>(cb: (A: A1) => A2): FIO<unknown, never, A2> {
+  public static resume<A1, A2>(cb: (A: A1) => A2): Task<A2> {
     return new FIO(Tag.Resume, cb)
   }
 
   /**
    * @ignore
    */
-  public static resumeM<A1, A2>(
-    cb: (A: A1) => FIO<unknown, never, A2>
-  ): FIO<unknown, never, A2> {
+  public static resumeM<A1, A2>(cb: (A: A1) => Task<A2>): Task<A2> {
     return new FIO(Tag.ResumeM, cb)
   }
 
-  public static timeout<A>(value: A, duration: number): FIO<unknown, never, A> {
+  public static timeout<A>(value: A, duration: number): Task<A> {
     return FIO.from((env, rej, res, sh) => sh.delay(res, duration, value))
   }
 
