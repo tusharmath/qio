@@ -1,6 +1,7 @@
 /**
  * Created by tushar on 2019-05-25
  */
+import {DeepReadonly} from 'utility-types'
 import {FIO, Task} from './FIO'
 
 export class Ref<A> {
@@ -9,10 +10,10 @@ export class Ref<A> {
   }
   private constructor(private value: A) {}
 
-  public read(): Task<A> {
-    return FIO.try(() => this.value)
+  public read(): Task<DeepReadonly<A>> {
+    return FIO.try(() => this.value as DeepReadonly<A>)
   }
-  public update(ab: (a: A) => A): Task<A> {
-    return FIO.try(() => (this.value = ab(this.value)))
+  public update(ab: (a: DeepReadonly<A>) => A): Task<A> {
+    return FIO.try(() => (this.value = ab(this.value as DeepReadonly<A>)))
   }
 }

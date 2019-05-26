@@ -60,6 +60,7 @@
   "dependencies": {
     "dbl-linked-list-ds": "^2.0.0",
     "in-node": "^1.0.0",
-    "ts-scheduler": "^8.0.0"
+    "ts-scheduler": "^8.0.0",
+    "utility-types": "^3.7.0"
   }
 }
