@@ -10,8 +10,11 @@ export class Ref<A> {
   }
   private constructor(private value: A) {}
 
-  public read(): Task<DeepReadonly<A>> {
-    return FIO.try(() => this.value as DeepReadonly<A>)
+  public read(): Task<A> {
+    return FIO.try(() => this.value)
+  }
+  public set(a: A): Task<A> {
+    return FIO.try(() => (this.value = a))
   }
   public update(ab: (a: DeepReadonly<A>) => A): Task<A> {
     return FIO.try(() => (this.value = ab(this.value as DeepReadonly<A>)))
