@@ -26,13 +26,19 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static accessP<R1 = unknown, E1 = Error, A1 = unknown>(
     cb: (env: R1) => Promise<A1>
   ): FIO<R1, E1, A1> {
-    return FIO.from<R1, E1, A1>((env, rej, res, sh) =>
+    return FIO.async<R1, E1, A1>((env, rej, res, sh) =>
       sh.asap(() => {
         cb(env)
           .then(res)
           .catch(rej)
       })
     )
+  }
+
+  public static async<R1 = unknown, E1 = unknown, A1 = unknown>(
+    cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
+  ): FIO<unknown, E1, A1> {
+    return new FIO(Tag.Async, cb)
   }
 
   public static encase<E, A, T extends unknown[]>(
@@ -45,19 +51,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     cb: (...t: T) => Promise<A>
   ): (...t: T) => FIO<unknown, E, A> {
     return (...t) =>
-      FIO.from((env, rej, res, sh) =>
+      FIO.async((env, rej, res, sh) =>
         sh.asap(() => {
           void cb(...t)
             .then(res)
             .catch(rej)
         })
       )
-  }
-
-  public static from<R1 = unknown, E1 = unknown, A1 = unknown>(
-    cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): FIO<unknown, E1, A1> {
-    return new FIO(Tag.Async, cb)
   }
 
   public static never(): Task<never> {
@@ -86,7 +86,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public static timeout<A>(value: A, duration: number): Task<A> {
-    return FIO.from((env, rej, res, sh) => sh.delay(res, duration, value))
+    return FIO.async((env, rej, res, sh) => sh.delay(res, duration, value))
   }
 
   public static try<E, A>(cb: () => A): FIO<unknown, E, A> {

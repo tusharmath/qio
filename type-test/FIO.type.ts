@@ -5,20 +5,20 @@
 import {FIO} from '../'
 
 // $ExpectType FIO<unknown, never, never>
-FIO.from((env1, rej, res) => res(10))
+FIO.async((env1, rej, res) => res(10))
 
 // $ExpectType FIO<{ a: number; }, never, never>
-FIO.from((env: {a: number}, rej, res, runtime) => {
+FIO.async((env: {a: number}, rej, res, runtime) => {
   const cancel = runtime.scheduler.delay({execute: () => {}}, 10)
 
   return () => cancel.cancel()
 })
 
 // $ExpectType FIO<unknown, never, never>
-FIO.from((env, rej, res) => res(10))
+FIO.async((env, rej, res) => res(10))
 
 // $ExpectType FIO<{ a: number; }, never, string>
-FIO.from<{a: number}, never, string>((env, rej, res) => res(10))
+FIO.async<{a: number}, never, string>((env, rej, res) => res(10))
 
 // $ExpectType FIO<unknown, never, number>
 FIO.of(1000)

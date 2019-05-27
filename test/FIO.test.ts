@@ -66,7 +66,7 @@ describe('FIO', () => {
   describe('async', () => {
     it('should evaluate asynchronously', async () => {
       const actual = await defaultRuntime({count: 1000}).executePromise(
-        FIO.from((env, rej, res) => {
+        FIO.async((env, rej, res) => {
           const id = setTimeout(res, 100, 1000)
 
           return {cancel: () => clearTimeout(id)}
@@ -80,7 +80,7 @@ describe('FIO', () => {
       let cancelled = false
       const runtime = testRuntime({count: 1000})
       const cancellable = runtime.execute(
-        FIO.from(() => ({cancel: () => (cancelled = true)}))
+        FIO.async(() => ({cancel: () => (cancelled = true)}))
       )
       runtime.scheduler.runTo(50)
       cancellable.cancel()
