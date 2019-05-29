@@ -1,4 +1,3 @@
-/* tslint:disable: no-use-before-declare prefer-function-over-method no-unbound-method */
 /**
  * Created by tushar on 2019-05-20
  */
@@ -10,9 +9,14 @@ import {Tag} from '../internals/Tag'
 const Id = <A>(_: A): A => _
 
 export type IO<E, A> = FIO<unknown, E, A>
-export type Task<A> = IO<never, A>
+export type Task<A> = IO<Error, A>
+export type UIO<A> = IO<never, A>
 
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
+  private constructor(
+    public readonly tag: Tag,
+    public readonly props: unknown
+  ) {}
   public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
     return new FIO(Tag.Access, cb)
   }
@@ -40,6 +44,23 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   ): FIO<unknown, E1, A1> {
     return new FIO(Tag.Async, cb)
   }
+  public static asyncIO<E1 = unknown, A1 = unknown>(
+    cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
+  ): IO<E1, A1> {
+    return FIO.async((env, rej, res, sh) => cb(rej, res, sh))
+  }
+
+  public static asyncTask<A1 = unknown>(
+    cb: (res: CB<A1>, sh: IScheduler) => ICancellable
+  ): Task<A1> {
+    return FIO.async((env, rej, res, sh) => cb(res, sh))
+  }
+
+  public static asyncUIO<A1 = unknown>(
+    cb: (res: CB<A1>, sh: IScheduler) => ICancellable
+  ): UIO<A1> {
+    return FIO.async((env, rej, res, sh) => cb(res, sh))
+  }
 
   public static encase<E, A, T extends unknown[]>(
     cb: (...t: T) => A
@@ -60,11 +81,11 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
       )
   }
 
-  public static never(): Task<never> {
+  public static never(): UIO<never> {
     return new FIO(Tag.Never, undefined)
   }
 
-  public static of<A1>(value: A1): Task<A1> {
+  public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
   }
   public static reject<E1>(error: E1): FIO<unknown, E1, never> {
@@ -74,29 +95,32 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   /**
    * @ignore
    */
-  public static resume<A1, A2>(cb: (A: A1) => A2): Task<A2> {
+  public static resume<A1, A2>(cb: (A: A1) => A2): UIO<A2> {
     return new FIO(Tag.Resume, cb)
   }
 
   /**
    * @ignore
    */
-  public static resumeM<A1, A2>(cb: (A: A1) => Task<A2>): Task<A2> {
+  public static resumeM<A1, A2>(cb: (A: A1) => UIO<A2>): UIO<A2> {
     return new FIO(Tag.ResumeM, cb)
   }
 
-  public static timeout<A>(value: A, duration: number): Task<A> {
+  public static timeout<A>(value: A, duration: number): UIO<A> {
     return FIO.async((env, rej, res, sh) => sh.delay(res, duration, value))
   }
 
-  public static try<E, A>(cb: () => A): FIO<unknown, E, A> {
+  public static try<A>(cb: () => A): Task<A> {
     return new FIO(Tag.Resume, cb)
   }
 
-  private constructor(
-    public readonly tag: Tag,
-    public readonly props: unknown
-  ) {}
+  public static uio<A>(cb: () => A): UIO<A> {
+    return FIO.try(cb)
+  }
+
+  public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
+    return FIO.try(cb)
+  }
 
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
     return new FIO(Tag.Chain, [this, () => aFb])
@@ -106,6 +130,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     aFb: (a: A1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E1 | E2, A2> {
     return new FIO(Tag.Chain, [this, aFb])
+  }
+
+  public const<A2>(a: A2): UIO<A2> {
+    return this.and(FIO.of(a))
   }
 
   public delay(duration: number): FIO<R1, E1, A1> {

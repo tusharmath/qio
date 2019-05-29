@@ -28,7 +28,12 @@
       {
         "grouped-imports": false
       }
-    ]
+    ],
+    "member-ordering": {
+      "options": {
+        "order": "fields-first"
+      }
+    }
   },
   "rulesDirectory": []
 }
