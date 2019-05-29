@@ -4,11 +4,18 @@ import {CB} from '../internals/CB'
 
 import {FIO, IO, UIO} from './FIO'
 
+enum Status {
+  Failure = 0,
+  Success = 1,
+  Pending = 2
+}
+
+type Result<E, A> = [Status.Success, A] | [Status.Failure, E] | [Status.Pending]
+
 export class Await<E, A> {
   private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
-  private result: A | undefined
+  private result: Result<E, A> = [Status.Pending]
   private flag = false
-  private resolved = false
 
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
     return FIO.uio(() => new Await())
@@ -19,7 +26,11 @@ export class Await<E, A> {
       flag
         ? FIO.of(false)
         : this.setFlag(true)
-            .and(io.chain(result => this.update(result)))
+            .and(
+              io
+                .chain(result => this.update([Status.Success, result]))
+                .catch(err => this.update([Status.Failure, err]))
+            )
             .const(true)
     )
   }
@@ -28,13 +39,21 @@ export class Await<E, A> {
     return FIO.uio(() => this.flag)
   }
 
-  public get(): IO<E, A | undefined> {
-    return this.isResolved().chain(resolved =>
-      resolved ? FIO.of(this.result) : this.addListener()
-    )
+  public get(): IO<E, A> {
+    return this.getResult().chain(([status, result]) =>
+      status === Status.Success
+        ? FIO.of(result)
+        : status === Status.Failure
+        ? FIO.reject(result)
+        : this.wait()
+    ) as IO<E, A>
   }
 
-  private addListener(): FIO<unknown, E, A> {
+  private getResult(): UIO<Result<E, A>> {
+    return FIO.uio(() => this.result)
+  }
+
+  private wait(): IO<E, A> {
     return FIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 
@@ -46,18 +65,16 @@ export class Await<E, A> {
     return FIO.uio(() => void (this.flag = value))
   }
 
-  private isResolved(): UIO<boolean> {
-    return FIO.uio(() => this.resolved)
-  }
-
-  private update(result: A): UIO<void> {
+  private update(result: Result<E, A>): UIO<void> {
     return FIO.uio(() => {
       this.result = result
-      this.resolved = true
-      if (this.result !== undefined) {
-        while (this.Q.length > 0) {
-          const cb = this.Q.shift() as [CB<E>, CB<A>]
-          cb[1](this.result)
+
+      while (this.Q.length > 0) {
+        const cb = this.Q.shift() as [CB<E>, CB<A>]
+        if (result[0] === Status.Success) {
+          cb[1](result[1])
+        } else if (result[0] === Status.Failure) {
+          cb[0](result[1])
         }
       }
     })

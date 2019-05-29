@@ -207,4 +207,37 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
   })
+
+  describe('catch', () => {
+    it('should capture exceptions', () => {
+      const actual = testRuntime({count: 1000}).executeSync(
+        FIO.reject(new Error('Bye')).catch(err => FIO.of(err.message))
+      )
+      const expected = 'Bye'
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should capture async exceptions', () => {
+      const actual = testRuntime({count: 1000}).executeSync(
+        FIO.asyncTask((rej, res, sh) => sh.asap(rej, new Error('Bye'))).catch(
+          err => FIO.of(err.message)
+        )
+      )
+      const expected = 'Bye'
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should capture nested async exceptions', () => {
+      const actual = testRuntime({count: 1000}).executeSync(
+        FIO.asyncTask((rej, res, sh) => sh.asap(rej, new Error('A')))
+          .catch(err => FIO.reject(new Error(err.message + 'B')))
+          .catch(err => FIO.reject(new Error(err.message + 'C')))
+          .catch(err => FIO.reject(new Error(err.message + 'D')))
+          .catch(err => FIO.of(err.message + 'E'))
+      )
+
+      const expected = 'ABCDE'
+      assert.strictEqual(actual, expected)
+    })
+  })
 })

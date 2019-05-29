@@ -28,10 +28,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.AccessM, cb)
   }
 
-  public static accessP<R1 = unknown, E1 = Error, A1 = unknown>(
+  public static accessP<R1 = unknown, E1 = never, A1 = unknown>(
     cb: (env: R1) => Promise<A1>
   ): FIO<R1, E1, A1> {
-    return FIO.async<R1, E1, A1>((env, rej, res, sh) =>
+    return FIO.async((env, rej, res, sh) =>
       sh.asap(() => {
         cb(env)
           .then(res)
@@ -46,9 +46,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
    */
   public static async<R1 = never, E1 = never, A1 = never>(
     cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): IO<E1, A1> {
+  ): FIO<R1, E1, A1> {
     return new FIO(Tag.Async, cb)
   }
+
   public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): IO<E1, A1> {
@@ -56,9 +57,9 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public static asyncTask<A1 = never>(
-    cb: (res: CB<A1>, sh: IScheduler) => ICancellable
+    cb: (rej: CB<Error>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): Task<A1> {
-    return FIO.async((env, rej, res, sh) => cb(res, sh))
+    return FIO.async((env, rej, res, sh) => cb(rej, res, sh))
   }
 
   public static asyncUIO<A1 = never>(
@@ -107,7 +108,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   /**
    * @ignore
    */
-  public static resumeM<A1, A2>(cb: (A: A1) => UIO<A2>): UIO<A2> {
+  public static resumeM<E1, A1, A2>(cb: (A: A1) => IO<E1, A2>): IO<E1, A2> {
     return new FIO(Tag.ResumeM, cb)
   }
 
@@ -137,7 +138,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Chain, [this, aFb])
   }
 
-  public const<A2>(a: A2): UIO<A2> {
+  public const<A2>(a: A2): FIO<R1, E1, A2> {
     return this.and(FIO.of(a))
   }
 
@@ -147,5 +148,11 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
     return new FIO(Tag.Map, [this, ab])
+  }
+
+  public catch<R2, E2, A2>(
+    aFb: (e: E1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E2, A2> {
+    return new FIO(Tag.Catch, [this, aFb])
   }
 }
