@@ -1,5 +1,7 @@
 import {LinkedList} from 'dbl-linked-list-ds'
+
 import {CB} from '../internals/CB'
+
 import {FIO, IO, UIO} from './FIO'
 
 export class Await<E, A> {

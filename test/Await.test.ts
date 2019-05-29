@@ -1,4 +1,5 @@
 import {assert} from 'chai'
+
 import {Await} from '../src/main/Await'
 import {FIO} from '../src/main/FIO'
 import {testRuntime} from '../src/runtimes/TestRuntime'

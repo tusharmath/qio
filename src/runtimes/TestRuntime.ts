@@ -3,7 +3,9 @@
  */
 
 import {testScheduler} from 'ts-scheduler/test'
+
 import {FIO} from '../main/FIO'
+
 import {BaseRuntime} from './BaseRuntime'
 
 class TestRuntime<R> extends BaseRuntime<R> {

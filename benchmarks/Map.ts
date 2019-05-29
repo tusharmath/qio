@@ -3,6 +3,7 @@
  */
 import {Suite} from 'benchmark'
 import * as Fluture from 'fluture'
+
 import {noop} from '../src/internals/Noop'
 import {FIO} from '../src/main/FIO'
 import {DefaultRuntime} from '../src/runtimes/DefaultRuntime'

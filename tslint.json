@@ -23,12 +23,6 @@
     "increment-decrement": false,
     "max-classes-per-file": false,
     "restrict-plus-operands": false,
-    "ordered-imports": [
-      true,
-      {
-        "grouped-imports": false
-      }
-    ],
     "member-ordering": {
       "options": {
         "order": "fields-first"
