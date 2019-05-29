@@ -40,24 +40,28 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     )
   }
 
-  public static async<R1 = unknown, E1 = unknown, A1 = unknown>(
+  /**
+   * The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
+   * Using `never` will give devs compile time error always unless they are explicit about the types.
+   */
+  public static async<R1 = never, E1 = never, A1 = never>(
     cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): FIO<unknown, E1, A1> {
+  ): IO<E1, A1> {
     return new FIO(Tag.Async, cb)
   }
-  public static asyncIO<E1 = unknown, A1 = unknown>(
+  public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): IO<E1, A1> {
     return FIO.async((env, rej, res, sh) => cb(rej, res, sh))
   }
 
-  public static asyncTask<A1 = unknown>(
+  public static asyncTask<A1 = never>(
     cb: (res: CB<A1>, sh: IScheduler) => ICancellable
   ): Task<A1> {
     return FIO.async((env, rej, res, sh) => cb(res, sh))
   }
 
-  public static asyncUIO<A1 = unknown>(
+  public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>, sh: IScheduler) => ICancellable
   ): UIO<A1> {
     return FIO.async((env, rej, res, sh) => cb(res, sh))
@@ -65,13 +69,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public static encase<E, A, T extends unknown[]>(
     cb: (...t: T) => A
-  ): (...t: T) => FIO<unknown, E, A> {
-    return (...t) => FIO.try(() => cb(...t))
+  ): (...t: T) => IO<E, A> {
+    return (...t) => FIO.io(() => cb(...t))
   }
 
   public static encaseP<E, A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
-  ): (...t: T) => FIO<unknown, E, A> {
+  ): (...t: T) => IO<E, A> {
     return (...t) =>
       FIO.async((env, rej, res, sh) =>
         sh.asap(() => {
@@ -89,7 +93,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
   }
-  public static reject<E1>(error: E1): FIO<unknown, E1, never> {
+  public static reject<E1>(error: E1): IO<E1, never> {
     return new FIO(Tag.Reject, error)
   }
 
