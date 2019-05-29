@@ -112,15 +112,15 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public static try<A>(cb: () => A): Task<A> {
-    return new FIO(Tag.Resume, cb)
+    return FIO.io(cb)
   }
 
   public static uio<A>(cb: () => A): UIO<A> {
-    return FIO.try(cb)
+    return FIO.io(cb)
   }
 
   public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
-    return FIO.try(cb)
+    return new FIO(Tag.Resume, cb)
   }
 
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
