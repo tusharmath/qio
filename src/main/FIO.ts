@@ -41,8 +41,8 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   /**
-   * The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
-   * Using `never` will give devs compile time error always unless they are explicit about the types.
+   * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
+   * Using `never` will give devs compile time error always while using.
    */
   public static async<R1 = never, E1 = never, A1 = never>(
     cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
