@@ -42,6 +42,31 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     )
   }
 
+  public static constant<A1>(value: A1): UIO<A1> {
+    return new FIO(Tag.Constant, value)
+  }
+
+  public static chain<R1, E1, A1, R2, E2, A2>(
+    fa: FIO<R1, E1, A1>,
+    aFb: (a: A1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E1 | E2, A2> {
+    return new FIO(Tag.Chain, [fa, aFb])
+  }
+
+  public static map<R1, E1, A1, A2>(
+    fa: FIO<R1, E1, A1>,
+    ab: (a: A1) => A2
+  ): FIO<R1, E1, A2> {
+    return new FIO(Tag.Map, [fa, ab])
+  }
+
+  public static catch<R1, E1, A1, R2, E2, A2>(
+    fa: FIO<R1, E1, A1>,
+    aFe: (e: E1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E2, A2> {
+    return new FIO(Tag.Catch, [fa, aFe])
+  }
+
   /**
    * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give devs compile time error always while using.
@@ -131,13 +156,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
-    return new FIO(Tag.Chain, [this, () => aFb])
+    return this.chain(() => aFb)
   }
 
   public chain<R2, E2, A2>(
     aFb: (a: A1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E1 | E2, A2> {
-    return new FIO(Tag.Chain, [this, aFb])
+    return FIO.chain(this, aFb)
   }
 
   public const<A2>(a: A2): FIO<R1, E1, A2> {
@@ -149,13 +174,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
-    return new FIO(Tag.Map, [this, ab])
+    return FIO.map(this, ab)
   }
 
   public catch<R2, E2, A2>(
     aFb: (e: E1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E2, A2> {
-    return new FIO(Tag.Catch, [this, aFb])
+    return FIO.catch(this, aFb)
   }
 
   public environment<R2>(): FIO<R2 & R1, E1, A1> {
