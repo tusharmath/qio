@@ -7,6 +7,8 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 import {Tag} from '../internals/Tag'
 
+import {Await} from './Await'
+
 const Id = <A>(_: A): A => _
 
 export type IO<E, A> = FIO<unknown, E, A>
@@ -158,5 +160,14 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public environment<R2>(): FIO<R2 & R1, E1, A1> {
     return FIO.access<R2, R2>(Id).and(this)
+  }
+
+  public once(): UIO<FIO<R1, E1, A1>> {
+    return Await.of<E1, A1>().map(await =>
+      await
+        .set(this)
+        .and(await.get())
+        .environment<R1>()
+    )
   }
 }

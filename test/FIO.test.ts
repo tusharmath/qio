@@ -240,4 +240,50 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
   })
+
+  describe('once', () => {
+    class Counter {
+      public count = 0
+      public inc = () => FIO.uio(() => ++this.count)
+    }
+    it('should return a memoized IO', () => {
+      const counter = new Counter()
+      const runtime = testRuntime({color: 'Green'})
+      runtime.executeSync(
+        counter
+          .inc()
+          .once()
+          .chain(_ => _.and(_))
+      )
+
+      const actual = counter.count
+      const expected = 1
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should run only once for async io', () => {
+      const counter = new Counter()
+      const runtime = testRuntime({color: 'Green'})
+      const memoized = runtime.executeSync(
+        counter
+          .inc()
+          .delay(100)
+          .once()
+      )
+
+      // Schedule first run at 10ms
+      runtime.scheduler.runTo(10)
+      runtime.execute(memoized as FIO)
+
+      // Schedule second run at 50ms
+      runtime.scheduler.runTo(50)
+      runtime.execute(memoized as FIO)
+
+      runtime.scheduler.run()
+
+      const actual = counter.count
+      const expected = 1
+      assert.strictEqual(actual, expected)
+    })
+  })
 })
