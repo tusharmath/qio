@@ -155,4 +155,8 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   ): FIO<R1 & R2, E2, A2> {
     return new FIO(Tag.Catch, [this, aFb])
   }
+
+  public environment<R2>(): FIO<R2 & R1, E1, A1> {
+    return FIO.access<R2, R2>(Id).and(this)
+  }
 }
