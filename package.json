@@ -28,6 +28,7 @@
     "test": "mocha --require=ts-node/register --watch-extensions ts test/*.ts",
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "typedoc",
+    "update-benchmarks": "benchmarks/run.sh",
     "check-types": "typings-checker --allow-expect-error type-test/*",
     "typings-checker": "typings-checker",
     "example": "node example/src/Run"

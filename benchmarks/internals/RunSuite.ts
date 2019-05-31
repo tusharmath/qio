@@ -16,7 +16,7 @@ export const RunSuite = (
     fluture: FutureInstance<unknown, unknown>
   }
 ) => {
-  PrintLn('#', name)
+  PrintLn('##', name)
   PrintLn('```')
   const suite = new Suite(name)
   suite
@@ -44,7 +44,7 @@ export const RunSuite = (
           this.filter('fastest')
             .map((i: {name: string}) => i.name)
             .join('') +
-          '```\n'
+          '\n```'
       )
     })
     .run()
