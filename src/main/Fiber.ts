@@ -4,11 +4,11 @@
 
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {FIO} from '../main/FIO'
+import {CancellationList} from '../internals/CancellationList'
+import {CB} from '../internals/CB'
+import {Tag} from '../internals/Tag'
 
-import {CancellationList} from './CancellationList'
-import {CB} from './CB'
-import {Tag} from './Tag'
+import {FIO} from './FIO'
 
 export type AccessM = (value: unknown) => FIO
 export type Access = (value: unknown) => unknown
@@ -37,7 +37,7 @@ export const Fiber = <R, E, A>(
   stackE: Array<(e: unknown) => FIO>,
   cancellationList: CancellationList,
   sh: IScheduler
-) => {
+): void => {
   let data: unknown
   stackA.push(io)
   while (stackA.length > 0) {

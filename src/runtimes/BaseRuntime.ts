@@ -4,8 +4,8 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CancellationList} from '../internals/CancellationList'
-import {Fiber} from '../internals/Fiber'
 import {noop} from '../internals/Noop'
+import {Fiber} from '../main/Fiber'
 import {FIO} from '../main/FIO'
 
 import {IRuntime} from './IRuntime'
