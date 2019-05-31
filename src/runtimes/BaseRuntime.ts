@@ -3,7 +3,8 @@
  */
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {Interpreter} from '../internals/Interpreter'
+import {CancellationList} from '../internals/CancellationList'
+import {Fiber} from '../internals/Fiber'
 import {noop} from '../internals/Noop'
 import {FIO} from '../main/FIO'
 
@@ -19,10 +20,19 @@ export abstract class BaseRuntime<R> implements IRuntime<R> {
     res: (e: A) => void = noop,
     rej: (e: E) => void = noop
   ): ICancellable {
-    const interpreter = new Interpreter(this.env, this.scheduler)
-    const cancellationList = interpreter.cancellationList
+    const cancellationList = new CancellationList()
     cancellationList.push(
-      this.scheduler.asap(interpreter.interpret, io, rej, res)
+      this.scheduler.asap(
+        Fiber,
+        io,
+        this.env,
+        rej,
+        res,
+        [],
+        [],
+        cancellationList,
+        this.scheduler
+      )
     )
 
     return cancellationList

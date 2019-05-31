@@ -1,7 +1,5 @@
 export enum Tag {
   Constant = 0,
-  AccessM = 1,
-  Access = 2,
   Resume = 3,
   ResumeM = 4,
   Map = 5,

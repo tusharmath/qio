@@ -14,20 +14,23 @@ const Id = <A>(_: A): A => _
 export type IO<E, A> = FIO<unknown, E, A>
 export type Task<A> = IO<Error, A>
 export type UIO<A> = IO<never, A>
+const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
+  res(cb(env))
 
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   private constructor(
     public readonly tag: Tag,
     public readonly props: unknown
   ) {}
+
   public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
-    return new FIO(Tag.Access, cb)
+    return FIO.async((env, _, res, sh) => sh.asap(asapCB, res, cb, env))
   }
 
   public static accessM<R1, E1, A1>(
     cb: (env: R1) => FIO<R1, E1, A1>
   ): FIO<R1, E1, A1> {
-    return new FIO(Tag.AccessM, cb)
+    return FIO.access(cb).chain(Id)
   }
 
   public static accessP<R1 = unknown, E1 = never, A1 = unknown>(
