@@ -2,19 +2,12 @@ import {LinkedList} from 'dbl-linked-list-ds'
 
 import {CB} from '../internals/CB'
 
+import {Exit} from './Exit'
 import {FIO, IO, UIO} from './FIO'
-
-enum Status {
-  Failure = 0,
-  Success = 1,
-  Pending = 2
-}
-
-type Result<E, A> = [Status.Success, A] | [Status.Failure, E] | [Status.Pending]
 
 export class Await<E, A> {
   private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
-  private result: Result<E, A> = [Status.Pending]
+  private result: Exit<E, A> = Exit.pending()
   private flag = false
 
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
@@ -28,8 +21,8 @@ export class Await<E, A> {
         : this.setFlag(true)
             .and(
               io
-                .chain(result => this.update([Status.Success, result]))
-                .catch(err => this.update([Status.Failure, err]))
+                .chain(result => this.update(Exit.success(result)))
+                .catch(err => this.update(Exit.failure(err)))
             )
             .const(true)
     )
@@ -41,15 +34,15 @@ export class Await<E, A> {
 
   public get(): IO<E, A> {
     return this.getResult().chain(([status, result]) =>
-      status === Status.Success
+      status === Exit.Success
         ? FIO.of(result)
-        : status === Status.Failure
+        : status === Exit.Failure
         ? FIO.reject(result)
         : this.wait()
     ) as IO<E, A>
   }
 
-  private getResult(): UIO<Result<E, A>> {
+  private getResult(): UIO<Exit<E, A>> {
     return FIO.uio(() => this.result)
   }
 
@@ -65,15 +58,15 @@ export class Await<E, A> {
     return FIO.uio(() => void (this.flag = value))
   }
 
-  private update(result: Result<E, A>): UIO<void> {
+  private update(result: Exit<E, A>): UIO<void> {
     return FIO.uio(() => {
       this.result = result
 
       while (this.Q.length > 0) {
         const cb = this.Q.shift() as [CB<E>, CB<A>]
-        if (result[0] === Status.Success) {
+        if (result[0] === Exit.Success) {
           cb[1](result[1])
-        } else if (result[0] === Status.Failure) {
+        } else if (result[0] === Exit.Failure) {
           cb[0](result[1])
         }
       }
