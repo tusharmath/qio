@@ -29,8 +29,11 @@ export const Fork = <R, E, A>(
 ): void => {
   let data: unknown
   stackA.push(fib)
-  while (stackA.length > 0) {
-    const j = stackA.pop() as Fiber
+  while (true) {
+    const j = stackA.pop()
+    if (j === undefined) {
+      return res(data as A)
+    }
 
     // Constant
     if (Tag.Constant === j.tag) {
@@ -96,7 +99,8 @@ export const Fork = <R, E, A>(
           },
           val => {
             cancellationList.remove(id)
-            Fork(
+            sh.asap(
+              Fork,
               FIO.of(val).toFiber(),
               env,
               rej,
@@ -114,5 +118,4 @@ export const Fork = <R, E, A>(
       return
     }
   }
-  res(data as A)
 }
