@@ -1,3 +1,5 @@
+/* tslint:disable: no-unbound-method */
+
 /**
  * Created by tushar on 2019-05-24
  */
@@ -10,99 +12,139 @@ import {Tag} from '../internals/Tag'
 
 import {FIO} from './FIO'
 
-export type AccessM = (value: unknown) => FIO
-export type Access = (value: unknown) => unknown
-export type Resume = (value: unknown) => unknown
-export type ResumeM = (value: unknown) => FIO
-export type Map = [FIO, (a: unknown) => unknown]
-export type Chain = [FIO, (a: unknown) => FIO]
-export type Catch = [FIO, (a: unknown) => FIO]
-export type Async<R = unknown, E = unknown, A = unknown> = (
+/**
+ * Callback function used by async instruction
+ */
+type AsyncCB<R = unknown, E = unknown, A = unknown> = (
   env: R,
   rej: CB<E>,
   res: CB<A>,
   sh: IScheduler
 ) => ICancellable
 
+interface IConstant {
+  tag: Tag.Constant
+  i0: unknown
+}
+interface IReject {
+  tag: Tag.Reject
+  i0: unknown
+}
+interface IResume {
+  tag: Tag.Resume
+  i0(a: unknown): unknown
+}
+interface IResumeM {
+  tag: Tag.ResumeM
+  i0(a: unknown): Fiber
+}
+interface IMap {
+  tag: Tag.Map
+  i0: Fiber
+  i1(a: unknown): unknown
+}
+interface IChain {
+  tag: Tag.Chain
+  i0: Fiber
+  i1(a: unknown): Fiber
+}
+interface ICatch {
+  tag: Tag.Catch
+  i0: Fiber
+  i1(a: unknown): Fiber
+}
+interface IAsync {
+  tag: Tag.Async
+  i0: AsyncCB
+}
+interface INever {
+  tag: Tag.Never
+}
+
+export type Fiber =
+  | ICatch
+  | IChain
+  | IConstant
+  | IReject
+  | IResume
+  | IResumeM
+  | IMap
+  | IAsync
+  | INever
+
 /**
  * Fiber is internal to the library.
- * Because its a function only, it has minimum property accesses which improves runtime performance.
+ * Because its a function only implementation,
+ * it has minimum property access which improves runtime performance.
  */
 export const Fiber = <R, E, A>(
-  io: FIO<R, E, A>,
+  io: Fiber,
   env: R,
   rej: CB<E>,
   res: CB<A>,
-  stackA: FIO[],
-  stackE: Array<(e: unknown) => FIO>,
+  stackA: Fiber[],
+  stackE: Array<(e: unknown) => Fiber>,
   cancellationList: CancellationList,
   sh: IScheduler
 ): void => {
   let data: unknown
   stackA.push(io)
   while (stackA.length > 0) {
-    const j = stackA.pop() as FIO
+    const j = stackA.pop() as Fiber
 
     // Constant
     if (Tag.Constant === j.tag) {
-      const i = j.props
-      data = i
+      data = j.i0
     }
 
     // Reject
     else if (Tag.Reject === j.tag) {
-      const i = j.props as E
+      const cause = j.i0 as E
       const handler = stackE.pop()
       if (handler !== undefined) {
-        stackA.push(handler(i))
+        stackA.push(handler(cause))
       } else {
-        return rej(i)
+        return rej(cause)
       }
     }
 
     //Resume
     else if (Tag.Resume === j.tag) {
-      const i = j.props as Resume
-      data = i(data)
+      data = j.i0(data)
     }
 
     //ResumeM
     else if (Tag.ResumeM === j.tag) {
-      const i = j.props as ResumeM
-      stackA.push(i(data))
+      stackA.push(j.i0(data))
     }
 
     // Map
     else if (Tag.Map === j.tag) {
-      const i = j.props as Map
-      stackA.push(FIO.resume(i[1]))
-      stackA.push(i[0])
+      stackA.push(FIO.resume(j.i1).toFiber())
+      stackA.push(j.i0)
     }
 
     // Chain
     else if (Tag.Chain === j.tag) {
-      const i = j.props as Chain
-      stackA.push(FIO.resumeM(i[1]))
-      stackA.push(i[0])
+      stackA.push(FIO.resumeM(j.i1).toFiber())
+      stackA.push(j.i0)
     }
 
     // Catch
     else if (Tag.Catch === j.tag) {
-      const i = j.props as Catch
-      stackE.push(i[1])
-      stackA.push(i[0])
+      stackE.push(j.i1)
+      stackA.push(j.i0)
     }
 
     // Async
     else if (Tag.Async === j.tag) {
-      const i = j.props as Async<R, E, A>
       const id = cancellationList.push(
-        i(
+        j.i0(
           env,
-          err => {
+          cause => {
             cancellationList.remove(id)
             Fiber(
-              FIO.reject(err),
+              FIO.reject(cause).toFiber(),
               env,
               rej,
               res,
@@ -115,7 +157,7 @@ export const Fiber = <R, E, A>(
           val => {
             cancellationList.remove(id)
             Fiber(
-              FIO.of(val),
+              FIO.of(val).toFiber(),
               env,
               rej,
               res,

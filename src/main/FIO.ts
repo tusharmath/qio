@@ -8,6 +8,7 @@ import {CB} from '../internals/CB'
 import {Tag} from '../internals/Tag'
 
 import {Await} from './Await'
+import {Fiber} from './Fiber'
 
 const Id = <A>(_: A): A => _
 
@@ -18,9 +19,12 @@ const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
   res(cb(env))
 
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
-  private constructor(
+  public constructor(
     public readonly tag: Tag,
-    public readonly props: unknown
+    // tslint:disable-next-line: no-unnecessary-initializer
+    public readonly i0: unknown = undefined,
+    // tslint:disable-next-line: no-unnecessary-initializer
+    public readonly i1: unknown = undefined
   ) {}
 
   public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
@@ -53,21 +57,21 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     fa: FIO<R1, E1, A1>,
     aFb: (a: A1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E1 | E2, A2> {
-    return new FIO(Tag.Chain, [fa, aFb])
+    return new FIO(Tag.Chain, fa, aFb)
   }
 
   public static map<R1, E1, A1, A2>(
     fa: FIO<R1, E1, A1>,
     ab: (a: A1) => A2
   ): FIO<R1, E1, A2> {
-    return new FIO(Tag.Map, [fa, ab])
+    return new FIO(Tag.Map, fa, ab)
   }
 
   public static catch<R1, E1, A1, R2, E2, A2>(
     fa: FIO<R1, E1, A1>,
     aFe: (e: E1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E2, A2> {
-    return new FIO(Tag.Catch, [fa, aFe])
+    return new FIO(Tag.Catch, fa, aFe)
   }
 
   /**
@@ -138,7 +142,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   /**
    * @ignore
    */
-  public static resumeM<E1, A1, A2>(cb: (A: A1) => IO<E1, A2>): IO<E1, A2> {
+  public static resumeM<E1, A1, A2>(cb: (A: A1) => Fiber): IO<E1, A2> {
     return new FIO(Tag.ResumeM, cb)
   }
 
@@ -184,6 +188,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     aFb: (e: E1) => FIO<R2, E2, A2>
   ): FIO<R1 & R2, E2, A2> {
     return FIO.catch(this, aFb)
+  }
+
+  public toFiber(): Fiber {
+    return this as Fiber
   }
 
   public environment<R2>(): FIO<R2 & R1, E1, A1> {

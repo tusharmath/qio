@@ -24,7 +24,7 @@ export abstract class BaseRuntime<R> implements IRuntime<R> {
     cancellationList.push(
       this.scheduler.asap(
         Fiber,
-        io,
+        io.toFiber(),
         this.env,
         rej,
         res,
