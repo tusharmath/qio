@@ -4,81 +4,21 @@
  * Created by tushar on 2019-05-24
  */
 
-import {ICancellable, IScheduler} from 'ts-scheduler'
+import {IScheduler} from 'ts-scheduler'
 
 import {CancellationList} from '../internals/CancellationList'
 import {CB} from '../internals/CB'
-import {Tag} from '../internals/Tag'
 
 import {FIO} from './FIO'
-
-/**
- * Callback function used by async instruction
- */
-type AsyncCB<R = unknown, E = unknown, A = unknown> = (
-  env: R,
-  rej: CB<E>,
-  res: CB<A>,
-  sh: IScheduler
-) => ICancellable
-
-interface IConstant {
-  tag: Tag.Constant
-  i0: unknown
-}
-interface IReject {
-  tag: Tag.Reject
-  i0: unknown
-}
-interface IResume {
-  tag: Tag.Resume
-  i0(a: unknown): unknown
-}
-interface IResumeM {
-  tag: Tag.ResumeM
-  i0(a: unknown): Fiber
-}
-interface IMap {
-  tag: Tag.Map
-  i0: Fiber
-  i1(a: unknown): unknown
-}
-interface IChain {
-  tag: Tag.Chain
-  i0: Fiber
-  i1(a: unknown): Fiber
-}
-interface ICatch {
-  tag: Tag.Catch
-  i0: Fiber
-  i1(a: unknown): Fiber
-}
-interface IAsync {
-  tag: Tag.Async
-  i0: AsyncCB
-}
-interface INever {
-  tag: Tag.Never
-}
-
-export type Fiber =
-  | ICatch
-  | IChain
-  | IConstant
-  | IReject
-  | IResume
-  | IResumeM
-  | IMap
-  | IAsync
-  | INever
+import {Fiber, Tag} from './Tag'
 
 /**
  * Fiber is internal to the library.
  * Because its a function only implementation,
  * it has minimum property access which improves runtime performance.
  */
-export const Fiber = <R, E, A>(
-  io: Fiber,
+export const Fork = <R, E, A>(
+  fib: Fiber,
   env: R,
   rej: CB<E>,
   res: CB<A>,
@@ -88,7 +28,7 @@ export const Fiber = <R, E, A>(
   sh: IScheduler
 ): void => {
   let data: unknown
-  stackA.push(io)
+  stackA.push(fib)
   while (stackA.length > 0) {
     const j = stackA.pop() as Fiber
 
@@ -143,7 +83,7 @@ export const Fiber = <R, E, A>(
           env,
           cause => {
             cancellationList.remove(id)
-            Fiber(
+            Fork(
               FIO.reject(cause).toFiber(),
               env,
               rej,
@@ -156,7 +96,7 @@ export const Fiber = <R, E, A>(
           },
           val => {
             cancellationList.remove(id)
-            Fiber(
+            Fork(
               FIO.of(val).toFiber(),
               env,
               rej,

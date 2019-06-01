@@ -5,10 +5,9 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {Tag} from '../internals/Tag'
 
 import {Await} from './Await'
-import {Fiber} from './Fiber'
+import {Fiber, Tag} from './Tag'
 
 const Id = <A>(_: A): A => _
 
