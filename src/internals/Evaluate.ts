@@ -1,20 +1,17 @@
 /* tslint:disable: no-unbound-method */
 
 import {FIO} from '../main/FIO'
-import {Instruction, Tag} from '../main/Instructions'
+import {Tag} from '../main/Instructions'
 
 import {FiberContext} from './FiberContext'
 
 /**
  * Evaluates the complete instruction tree
  */
-export const Evaluate = <R, E, A>(
-  instruction: Instruction,
-  context: FiberContext<R, E, A>
-): void => {
+export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
   const {env, rej, res, stackA, stackE, cancellationList, sh} = context
   let data: unknown
-  stackA.push(instruction)
+
   while (true) {
     const j = stackA.pop()
     if (j === undefined) {
@@ -77,11 +74,13 @@ export const Evaluate = <R, E, A>(
           env,
           cause => {
             cancellationList.remove(id)
-            sh.asap(Evaluate, FIO.reject(cause).toInstruction(), context)
+            stackA.push(FIO.reject(cause).toInstruction())
+            sh.asap(Evaluate, context)
           },
           val => {
             cancellationList.remove(id)
-            sh.asap(Evaluate, FIO.of(val).toInstruction(), context)
+            stackA.push(FIO.of(val).toInstruction())
+            sh.asap(Evaluate, context)
           },
           sh
         )

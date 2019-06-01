@@ -9,12 +9,12 @@ import {Instruction} from '../main/Instructions'
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 
-export class FiberContext<R, E, A> {
+export class FiberContext<E, A> {
   public readonly cancellationList = new CancellationList()
   public readonly stackA: Instruction[] = []
   public readonly stackE: Array<(e: unknown) => Instruction> = []
   public constructor(
-    public readonly env: R,
+    public readonly env: unknown,
     public readonly rej: CB<E>,
     public readonly res: CB<A>,
     public readonly sh: IScheduler

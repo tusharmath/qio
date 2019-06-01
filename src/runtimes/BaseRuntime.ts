@@ -21,11 +21,9 @@ export abstract class BaseRuntime<R> implements IRuntime<R> {
     rej: (e: E) => void = noop
   ): ICancellable {
     const context = new FiberContext(this.env, rej, res, this.scheduler)
-    const cancellationList = context.cancellationList
-    cancellationList.push(
-      this.scheduler.asap(Evaluate, io.toInstruction(), context)
-    )
+    context.stackA.push(io.toInstruction())
+    context.cancellationList.push(this.scheduler.asap(Evaluate, context))
 
-    return cancellationList
+    return context.cancellationList
   }
 }
