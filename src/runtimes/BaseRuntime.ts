@@ -6,7 +6,7 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 import {CancellationList} from '../internals/CancellationList'
 import {noop} from '../internals/Noop'
 import {FIO} from '../main/FIO'
-import {Fork} from '../main/Fork'
+import {Interpret} from '../main/Fork'
 
 import {IRuntime} from './IRuntime'
 
@@ -23,8 +23,8 @@ export abstract class BaseRuntime<R> implements IRuntime<R> {
     const cancellationList = new CancellationList()
     cancellationList.push(
       this.scheduler.asap(
-        Fork,
-        io.toFiber(),
+        Interpret,
+        io.toInstruction(),
         this.env,
         rej,
         res,

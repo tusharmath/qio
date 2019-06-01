@@ -38,22 +38,22 @@ interface IResume {
 }
 interface IResumeM {
   tag: Tag.ResumeM
-  i0(a: unknown): Fiber
+  i0(a: unknown): Instruction
 }
 interface IMap {
   tag: Tag.Map
-  i0: Fiber
+  i0: Instruction
   i1(a: unknown): unknown
 }
 interface IChain {
   tag: Tag.Chain
-  i0: Fiber
-  i1(a: unknown): Fiber
+  i0: Instruction
+  i1(a: unknown): Instruction
 }
 interface ICatch {
   tag: Tag.Catch
-  i0: Fiber
-  i1(a: unknown): Fiber
+  i0: Instruction
+  i1(a: unknown): Instruction
 }
 interface IAsync {
   tag: Tag.Async
@@ -63,7 +63,7 @@ interface INever {
   tag: Tag.Never
 }
 
-export type Fiber =
+export type Instruction =
   | ICatch
   | IChain
   | IConstant

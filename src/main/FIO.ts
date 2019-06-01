@@ -7,7 +7,7 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 
 import {Await} from './Await'
-import {Fiber, Tag} from './Fiber'
+import {Instruction, Tag} from './Instructions'
 
 const Id = <A>(_: A): A => _
 
@@ -141,7 +141,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   /**
    * @ignore
    */
-  public static resumeM<E1, A1, A2>(cb: (A: A1) => Fiber): IO<E1, A2> {
+  public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): IO<E1, A2> {
     return new FIO(Tag.ResumeM, cb)
   }
 
@@ -189,8 +189,8 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.catch(this, aFb)
   }
 
-  public toFiber(): Fiber {
-    return this as Fiber
+  public toInstruction(): Instruction {
+    return this as Instruction
   }
 
   public environment<R2>(): FIO<R2 & R1, E1, A1> {

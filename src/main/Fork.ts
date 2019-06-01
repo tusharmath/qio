@@ -9,21 +9,19 @@ import {IScheduler} from 'ts-scheduler'
 import {CancellationList} from '../internals/CancellationList'
 import {CB} from '../internals/CB'
 
-import {Fiber, Tag} from './Fiber'
 import {FIO} from './FIO'
+import {Instruction, Tag} from './Instructions'
 
 /**
- * Fiber is internal to the library.
- * Because its a function only implementation,
- * it has minimum property access which improves runtime performance.
+ * Interpret evaluates the complete instruction tree
  */
-export const Fork = <R, E, A>(
-  fib: Fiber,
+export const Interpret = <R, E, A>(
+  fib: Instruction,
   env: R,
   rej: CB<E>,
   res: CB<A>,
-  stackA: Fiber[],
-  stackE: Array<(e: unknown) => Fiber>,
+  stackA: Instruction[],
+  stackE: Array<(e: unknown) => Instruction>,
   cancellationList: CancellationList,
   sh: IScheduler
 ): void => {
@@ -63,13 +61,13 @@ export const Fork = <R, E, A>(
 
     // Map
     else if (Tag.Map === j.tag) {
-      stackA.push(FIO.resume(j.i1).toFiber())
+      stackA.push(FIO.resume(j.i1).toInstruction())
       stackA.push(j.i0)
     }
 
     // Chain
     else if (Tag.Chain === j.tag) {
-      stackA.push(FIO.resumeM(j.i1).toFiber())
+      stackA.push(FIO.resumeM(j.i1).toInstruction())
       stackA.push(j.i0)
     }
 
@@ -86,8 +84,8 @@ export const Fork = <R, E, A>(
           env,
           cause => {
             cancellationList.remove(id)
-            Fork(
-              FIO.reject(cause).toFiber(),
+            Interpret(
+              FIO.reject(cause).toInstruction(),
               env,
               rej,
               res,
@@ -100,8 +98,8 @@ export const Fork = <R, E, A>(
           val => {
             cancellationList.remove(id)
             sh.asap(
-              Fork,
-              FIO.of(val).toFiber(),
+              Interpret,
+              FIO.of(val).toInstruction(),
               env,
               rej,
               res,
