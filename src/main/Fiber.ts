@@ -1,6 +1,6 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {CB} from './CB'
+import {CB} from '../internals/CB'
 
 export enum Tag {
   Constant = 0,

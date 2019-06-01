@@ -9,8 +9,8 @@ import {IScheduler} from 'ts-scheduler'
 import {CancellationList} from '../internals/CancellationList'
 import {CB} from '../internals/CB'
 
+import {Fiber, Tag} from './Fiber'
 import {FIO} from './FIO'
-import {Fiber, Tag} from './Tag'
 
 /**
  * Fiber is internal to the library.
