@@ -1,32 +1,20 @@
 /* tslint:disable: no-unbound-method */
 
-/**
- * Created by tushar on 2019-05-24
- */
+import {FIO} from '../main/FIO'
+import {Instruction, Tag} from '../main/Instructions'
 
-import {IScheduler} from 'ts-scheduler'
-
-import {CancellationList} from '../internals/CancellationList'
-import {CB} from '../internals/CB'
-
-import {FIO} from './FIO'
-import {Instruction, Tag} from './Instructions'
+import {FiberContext} from './FiberContext'
 
 /**
- * Interpret evaluates the complete instruction tree
+ * Evaluates the complete instruction tree
  */
-export const Interpret = <R, E, A>(
-  fib: Instruction,
-  env: R,
-  rej: CB<E>,
-  res: CB<A>,
-  stackA: Instruction[],
-  stackE: Array<(e: unknown) => Instruction>,
-  cancellationList: CancellationList,
-  sh: IScheduler
+export const Evaluate = <R, E, A>(
+  instruction: Instruction,
+  context: FiberContext<R, E, A>
 ): void => {
+  const {env, rej, res, stackA, stackE, cancellationList, sh} = context
   let data: unknown
-  stackA.push(fib)
+  stackA.push(instruction)
   while (true) {
     const j = stackA.pop()
     if (j === undefined) {
@@ -77,6 +65,11 @@ export const Interpret = <R, E, A>(
       stackA.push(j.i0)
     }
 
+    // Never
+    else if (Tag.Never === j.tag) {
+      return
+    }
+
     // Async
     else if (Tag.Async === j.tag) {
       const id = cancellationList.push(
@@ -84,36 +77,19 @@ export const Interpret = <R, E, A>(
           env,
           cause => {
             cancellationList.remove(id)
-            Interpret(
-              FIO.reject(cause).toInstruction(),
-              env,
-              rej,
-              res,
-              stackA,
-              stackE,
-              cancellationList,
-              sh
-            )
+            sh.asap(Evaluate, FIO.reject(cause).toInstruction(), context)
           },
           val => {
             cancellationList.remove(id)
-            sh.asap(
-              Interpret,
-              FIO.of(val).toInstruction(),
-              env,
-              rej,
-              res,
-              stackA,
-              stackE,
-              cancellationList,
-              sh
-            )
+            sh.asap(Evaluate, FIO.of(val).toInstruction(), context)
           },
           sh
         )
       )
 
       return
+    } else {
+      throw new Error('Invalid Instruction')
     }
   }
 }
