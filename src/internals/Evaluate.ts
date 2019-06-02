@@ -67,6 +67,16 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
       return
     }
 
+    // Fork
+    else if (Tag.Fork === j.tag) {
+      const head = stackA.pop()
+      if (head !== undefined) {
+        stackA.push(j.i0)
+        stackA.push(head)
+      }
+      data = context
+    }
+
     // Async
     else if (Tag.Async === j.tag) {
       const id = cancellationList.push(

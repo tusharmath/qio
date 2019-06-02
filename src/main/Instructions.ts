@@ -11,7 +11,8 @@ export enum Tag {
   Async = 7,
   Reject = 8,
   Never = 9,
-  Catch = 10
+  Catch = 10,
+  Fork = 11
 }
 
 /**
@@ -62,14 +63,19 @@ interface IAsync {
 interface INever {
   tag: Tag.Never
 }
+interface IFork {
+  tag: Tag.Fork
+  i0: Instruction
+}
 
 export type Instruction =
+  | IAsync
   | ICatch
   | IChain
   | IConstant
+  | IFork
+  | IMap
+  | INever
   | IReject
   | IResume
   | IResumeM
-  | IMap
-  | IAsync
-  | INever

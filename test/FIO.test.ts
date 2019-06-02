@@ -3,9 +3,12 @@
  */
 import {assert} from 'chai'
 
+import {Fiber} from '../src/internals/Fiber'
 import {FIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'
+
+import {Counter} from './internals/Counter'
 
 describe('FIO', () => {
   describe('of', () => {
@@ -242,10 +245,6 @@ describe('FIO', () => {
   })
 
   describe('once', () => {
-    class Counter {
-      public count = 0
-      public inc = () => FIO.uio(() => ++this.count)
-    }
     it('should return a memoized IO', () => {
       const counter = new Counter()
       const runtime = testRuntime({color: 'Green'})
@@ -284,6 +283,52 @@ describe('FIO', () => {
       const actual = counter.count
       const expected = 1
       assert.strictEqual(actual, expected)
+    })
+  })
+
+  describe('fork', () => {
+    it('should return an instance of Fiber', () => {
+      const actual = testRuntime({}).executeSync(FIO.of(10).fork())
+      assert.instanceOf(actual, Fiber)
+    })
+
+    describe('fiber.resume', () => {
+      it('should resume with the io', () => {
+        const actual = testRuntime({}).executeSync(
+          FIO.of(10)
+            .fork()
+            .chain(fiber => fiber.resume())
+        )
+
+        const expected = 10
+        assert.strictEqual(actual, expected)
+      })
+    })
+
+    describe('fiber.abort', () => {
+      it('should abort the fiber', () => {
+        const counter = new Counter()
+        testRuntime({}).executeSync(
+          counter
+            .inc()
+            .fork()
+            .chain(fiber => fiber.abort())
+        )
+
+        assert.strictEqual(counter.count, 0)
+      })
+
+      it('should abort a throwing fiber', () => {
+        const counter = new Counter()
+        testRuntime({}).executeSync(
+          FIO.reject(new Error('Fail'))
+            .catch(() => counter.inc())
+            .fork()
+            .chain(fiber => fiber.abort())
+        )
+
+        assert.strictEqual(counter.count, 0)
+      })
     })
   })
 })

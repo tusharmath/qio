@@ -5,6 +5,7 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
+import {Fiber} from '../internals/Fiber'
 
 import {Await} from './Await'
 import {Instruction, Tag} from './Instructions'
@@ -204,5 +205,9 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
         .and(await.get())
         .environment<R1>()
     )
+  }
+
+  public fork(): UIO<Fiber<E1, A1>> {
+    return new FIO(Tag.Fork, this)
   }
 }
