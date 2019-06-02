@@ -3,7 +3,7 @@
  */
 import {assert} from 'chai'
 
-import {Fiber} from '../src/internals/Fiber'
+import {Fiber} from '../src/main/Fiber'
 import {FIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'

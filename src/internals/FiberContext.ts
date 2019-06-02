@@ -4,13 +4,13 @@
 
 import {IScheduler} from 'ts-scheduler'
 
+import {Fiber} from '../main/Fiber'
 import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 import {Evaluate} from './Evaluate'
-import {Fiber} from './Fiber'
 
 export class FiberContext<E, A> extends Fiber<E, A> {
   public constructor(
