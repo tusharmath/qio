@@ -25,7 +25,8 @@
     "restrict-plus-operands": false,
     "member-ordering": {
       "options": {
-        "order": "fields-first"
+        "order": "fields-first",
+        "alphabetize": true
       }
     }
   },

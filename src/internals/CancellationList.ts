@@ -18,15 +18,15 @@ export class CancellationList implements ICancellable {
     }
   }
 
+  public isCancelled(): boolean {
+    return this.cancelled
+  }
+
   public push(cancellable: ICancellable): CancelId {
     return this.Q.add(cancellable)
   }
 
   public remove(id: CancelId): void {
     this.Q.remove(id)
-  }
-
-  public isCancelled(): boolean {
-    return this.cancelled
   }
 }

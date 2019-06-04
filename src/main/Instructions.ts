@@ -27,12 +27,12 @@ type AsyncCB<R = unknown, E = unknown, A = unknown> = (
 ) => ICancellable
 
 interface IConstant {
-  tag: Tag.Constant
   i0: unknown
+  tag: Tag.Constant
 }
 interface IReject {
-  tag: Tag.Reject
   i0: unknown
+  tag: Tag.Reject
 }
 interface IResume {
   tag: Tag.Resume
@@ -43,35 +43,35 @@ interface IResumeM {
   i0(a: unknown): Instruction
 }
 interface IMap {
-  tag: Tag.Map
   i0: Instruction
+  tag: Tag.Map
   i1(a: unknown): unknown
 }
 interface IChain {
-  tag: Tag.Chain
   i0: Instruction
+  tag: Tag.Chain
   i1(a: unknown): Instruction
 }
 interface ICatch {
-  tag: Tag.Catch
   i0: Instruction
+  tag: Tag.Catch
   i1(a: unknown): Instruction
 }
 interface IAsync {
-  tag: Tag.Async
   i0: AsyncCB
+  tag: Tag.Async
 }
 interface INever {
   tag: Tag.Never
 }
 interface IFork {
-  tag: Tag.Suspend
   i0: Instruction
+  tag: Tag.Suspend
 }
 interface IProvide {
-  tag: Tag.Provide
   i0: Instruction
   i1: unknown
+  tag: Tag.Provide
 }
 
 export type Instruction =

@@ -6,12 +6,26 @@ import {Exit} from './Exit'
 import {FIO, IO, UIO} from './FIO'
 
 export class Await<E, A> {
+  private flag = false
   private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
   private result: Exit<E, A> = Exit.pending()
-  private flag = false
 
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
     return FIO.uio(() => new Await())
+  }
+
+  public get(): IO<E, A> {
+    return this.getResult().chain(([status, result]) =>
+      status === Exit.Success
+        ? FIO.of(result)
+        : status === Exit.Failure
+        ? FIO.reject(result)
+        : this.wait()
+    ) as IO<E, A>
+  }
+
+  public isSet(): UIO<boolean> {
+    return FIO.uio(() => this.flag)
   }
 
   public set(io: IO<E, A>): UIO<boolean> {
@@ -28,30 +42,8 @@ export class Await<E, A> {
     )
   }
 
-  public isSet(): UIO<boolean> {
-    return FIO.uio(() => this.flag)
-  }
-
-  public get(): IO<E, A> {
-    return this.getResult().chain(([status, result]) =>
-      status === Exit.Success
-        ? FIO.of(result)
-        : status === Exit.Failure
-        ? FIO.reject(result)
-        : this.wait()
-    ) as IO<E, A>
-  }
-
   private getResult(): UIO<Exit<E, A>> {
     return FIO.uio(() => this.result)
-  }
-
-  private wait(): IO<E, A> {
-    return FIO.asyncIO((rej, res) => {
-      const id = this.Q.add([rej, res])
-
-      return {cancel: () => this.Q.remove(id)}
-    })
   }
 
   private setFlag(value: boolean): UIO<void> {
@@ -70,6 +62,14 @@ export class Await<E, A> {
           cb[0](result[1])
         }
       }
+    })
+  }
+
+  private wait(): IO<E, A> {
+    return FIO.asyncIO((rej, res) => {
+      const id = this.Q.add([rej, res])
+
+      return {cancel: () => this.Q.remove(id)}
     })
   }
 }

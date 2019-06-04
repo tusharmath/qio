@@ -49,31 +49,6 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     )
   }
 
-  public static constant<A1>(value: A1): UIO<A1> {
-    return new FIO(Tag.Constant, value)
-  }
-
-  public static chain<R1, E1, A1, R2, E2, A2>(
-    fa: FIO<R1, E1, A1>,
-    aFb: (a: A1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E1 | E2, A2> {
-    return new FIO(Tag.Chain, fa, aFb)
-  }
-
-  public static map<R1, E1, A1, A2>(
-    fa: FIO<R1, E1, A1>,
-    ab: (a: A1) => A2
-  ): FIO<R1, E1, A2> {
-    return new FIO(Tag.Map, fa, ab)
-  }
-
-  public static catch<R1, E1, A1, R2, E2, A2>(
-    fa: FIO<R1, E1, A1>,
-    aFe: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E2, A2> {
-    return new FIO(Tag.Catch, fa, aFe)
-  }
-
   /**
    * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give devs compile time error always while using.
@@ -102,6 +77,24 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.async((env, rej, res, sh) => cb(res, sh))
   }
 
+  public static catch<R1, E1, A1, R2, E2, A2>(
+    fa: FIO<R1, E1, A1>,
+    aFe: (e: E1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E2, A2> {
+    return new FIO(Tag.Catch, fa, aFe)
+  }
+
+  public static chain<R1, E1, A1, R2, E2, A2>(
+    fa: FIO<R1, E1, A1>,
+    aFb: (a: A1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E1 | E2, A2> {
+    return new FIO(Tag.Chain, fa, aFb)
+  }
+
+  public static constant<A1>(value: A1): UIO<A1> {
+    return new FIO(Tag.Constant, value)
+  }
+
   public static encase<E, A, T extends unknown[]>(
     cb: (...t: T) => A
   ): (...t: T) => IO<E, A> {
@@ -119,6 +112,17 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
             .catch(rej)
         })
       )
+  }
+
+  public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
+    return new FIO(Tag.Resume, cb)
+  }
+
+  public static map<R1, E1, A1, A2>(
+    fa: FIO<R1, E1, A1>,
+    ab: (a: A1) => A2
+  ): FIO<R1, E1, A2> {
+    return new FIO(Tag.Map, fa, ab)
   }
 
   public static never(): UIO<never> {
@@ -158,12 +162,14 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.io(cb)
   }
 
-  public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
-    return new FIO(Tag.Resume, cb)
-  }
-
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
     return this.chain(() => aFb)
+  }
+
+  public catch<R2, E2, A2>(
+    aFb: (e: E1) => FIO<R2, E2, A2>
+  ): FIO<R1 & R2, E2, A2> {
+    return FIO.catch(this, aFb)
   }
 
   public chain<R2, E2, A2>(
@@ -180,22 +186,12 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
-  public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
-    return FIO.map(this, ab)
-  }
-
-  public catch<R2, E2, A2>(
-    aFb: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E2, A2> {
-    return FIO.catch(this, aFb)
-  }
-
-  public toInstruction(): Instruction {
-    return this as Instruction
-  }
-
   public environment<R2>(): FIO<R2 & R1, E1, A1> {
     return FIO.access<R2, R2>(Id).and(this)
+  }
+
+  public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
+    return FIO.map(this, ab)
   }
 
   public once(): UIO<FIO<R1, E1, A1>> {
@@ -207,11 +203,15 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     )
   }
 
+  public provide(env: R1): IO<E1, A1> {
+    return new FIO(Tag.Provide, this, env)
+  }
+
   public suspend(): UIO<Fiber<E1, A1>> {
     return new FIO(Tag.Suspend, this)
   }
 
-  public provide(env: R1): IO<E1, A1> {
-    return new FIO(Tag.Provide, this, env)
+  public toInstruction(): Instruction {
+    return this as Instruction
   }
 }

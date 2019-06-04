@@ -25,6 +25,13 @@ export class FiberContext<E, A> extends Fiber<E, A> {
     super()
   }
 
+  public abort(): UIO<void> {
+    return FIO.uio(() => {
+      this.stackA.splice(0, this.stackA.length)
+      this.cancellationList.cancel()
+    })
+  }
+
   public resume(): IO<E, A> {
     return FIO.asyncIO((rej, res, sh) =>
       sh.asap(
@@ -40,12 +47,5 @@ export class FiberContext<E, A> extends Fiber<E, A> {
         )
       )
     )
-  }
-
-  public abort(): UIO<void> {
-    return FIO.uio(() => {
-      this.stackA.splice(0, this.stackA.length)
-      this.cancellationList.cancel()
-    })
   }
 }
