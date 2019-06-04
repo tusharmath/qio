@@ -331,4 +331,14 @@ describe('FIO', () => {
       })
     })
   })
+
+  describe('provide', () => {
+    it('should provide the env to FIO', () => {
+      const actual = testRuntime({color: 'Green'}).executeSync(
+        FIO.access((_: {color: string}) => _.color).provide({color: 'Red'})
+      )
+      const expected = 'Red'
+      assert.strictEqual(actual, expected)
+    })
+  })
 })

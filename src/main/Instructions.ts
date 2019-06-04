@@ -12,7 +12,8 @@ export enum Tag {
   Reject = 8,
   Never = 9,
   Catch = 10,
-  Suspend = 11
+  Suspend = 11,
+  Provide = 12
 }
 
 /**
@@ -67,6 +68,11 @@ interface IFork {
   tag: Tag.Suspend
   i0: Instruction
 }
+interface IProvide {
+  tag: Tag.Provide
+  i0: Instruction
+  i1: unknown
+}
 
 export type Instruction =
   | IAsync
@@ -76,6 +82,7 @@ export type Instruction =
   | IFork
   | IMap
   | INever
+  | IProvide
   | IReject
   | IResume
   | IResumeM

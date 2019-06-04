@@ -210,4 +210,8 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public suspend(): UIO<Fiber<E1, A1>> {
     return new FIO(Tag.Suspend, this)
   }
+
+  public provide(env: R1): IO<E1, A1> {
+    return new FIO(Tag.Provide, this, env)
+  }
 }

@@ -9,7 +9,8 @@ import {FiberContext} from './FiberContext'
  * Evaluates the complete instruction tree
  */
 export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
-  const {env, rej, res, stackA, stackE, cancellationList, sh} = context
+  const {rej, res, stackA, stackE, cancellationList, sh} = context
+  let env = context.env
   let data: unknown
 
   while (true) {
@@ -77,6 +78,11 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
       data = context
     }
 
+    // Provide
+    else if (Tag.Provide === j.tag) {
+      env = j.i1
+      stackA.push(j.i0)
+    }
     // Async
     else if (Tag.Async === j.tag) {
       const id = cancellationList.push(
