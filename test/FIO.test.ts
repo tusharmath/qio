@@ -286,9 +286,9 @@ describe('FIO', () => {
     })
   })
 
-  describe('fork', () => {
+  describe('suspend', () => {
     it('should return an instance of Fiber', () => {
-      const actual = testRuntime({}).executeSync(FIO.of(10).fork())
+      const actual = testRuntime({}).executeSync(FIO.of(10).suspend())
       assert.instanceOf(actual, Fiber)
     })
 
@@ -296,7 +296,7 @@ describe('FIO', () => {
       it('should resume with the io', () => {
         const actual = testRuntime({}).executeSync(
           FIO.of(10)
-            .fork()
+            .suspend()
             .chain(fiber => fiber.resume())
         )
 
@@ -311,7 +311,7 @@ describe('FIO', () => {
         testRuntime({}).executeSync(
           counter
             .inc()
-            .fork()
+            .suspend()
             .chain(fiber => fiber.abort())
         )
 
@@ -323,7 +323,7 @@ describe('FIO', () => {
         testRuntime({}).executeSync(
           FIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
-            .fork()
+            .suspend()
             .chain(fiber => fiber.abort())
         )
 

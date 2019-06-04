@@ -12,7 +12,7 @@ export enum Tag {
   Reject = 8,
   Never = 9,
   Catch = 10,
-  Fork = 11
+  Suspend = 11
 }
 
 /**
@@ -64,7 +64,7 @@ interface INever {
   tag: Tag.Never
 }
 interface IFork {
-  tag: Tag.Fork
+  tag: Tag.Suspend
   i0: Instruction
 }
 

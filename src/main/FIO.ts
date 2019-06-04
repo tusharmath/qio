@@ -207,7 +207,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     )
   }
 
-  public fork(): UIO<Fiber<E1, A1>> {
-    return new FIO(Tag.Fork, this)
+  public suspend(): UIO<Fiber<E1, A1>> {
+    return new FIO(Tag.Suspend, this)
   }
 }

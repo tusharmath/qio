@@ -67,8 +67,8 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
       return
     }
 
-    // Fork
-    else if (Tag.Fork === j.tag) {
+    // Suspend
+    else if (Tag.Suspend === j.tag) {
       const head = stackA.pop()
       if (head !== undefined) {
         stackA.push(j.i0)
