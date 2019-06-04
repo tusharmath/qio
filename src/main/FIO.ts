@@ -216,11 +216,18 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return this as Instruction
   }
 
+  public zipWith<R2, E2, A2, C>(
+    that: FIO<R2, E2, A2>,
+    c: (a1: A1, a2: A2) => C
+  ): FIO<RR<R1, R2>, E1 | E2, C> {
+    return this.chain(a1 => that.map(a2 => c(a1, a2)))
+  }
+
   // tslint:disable-next-line: prefer-function-over-method
   public zipWithPar<R2, E2, A2, C>(
     that: FIO<R2, E2, A2>,
     a1a2: (a1: A1, a2: A2) => C
-  ): FIO<R1 & R2, E1 | E2, C> {
+  ): FIO<RR<R1, R2>, E1 | E2, C> {
     throw new Error('TODO: Not Implemented')
   }
 }

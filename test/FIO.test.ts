@@ -353,6 +353,16 @@ describe('FIO', () => {
     })
   })
 
+  describe('zipWith', () => {
+    it('should sequentially combine two FIO', () => {
+      const actual = testRuntime().executeSync(
+        FIO.of(10).zipWith(FIO.of(20), (a, b) => a + b)
+      )
+      const expected = 30
+      assert.strictEqual(actual, expected)
+    })
+  })
+
   describe.skip('zipWithPar', () => {
     it('should combine two IO', () => {
       const actual = testRuntime().executeSync(
