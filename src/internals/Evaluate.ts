@@ -15,96 +15,89 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
 
   while (true) {
     const j = stackA.pop()
+
     if (j === undefined) {
       return res(data as A)
     }
 
-    // Constant
-    if (Tag.Constant === j.tag) {
-      data = j.i0
-    }
+    switch (j.tag) {
+      case Tag.Constant:
+        data = j.i0
+        break
 
-    // Reject
-    else if (Tag.Reject === j.tag) {
-      const cause = j.i0 as E
-      const handler = stackE.pop()
-      if (handler !== undefined) {
-        stackA.push(handler(cause))
-      } else {
-        return rej(cause)
-      }
-    }
+      case Tag.Reject:
+        const cause = j.i0 as E
+        const handler = stackE.pop()
+        if (handler !== undefined) {
+          stackA.push(handler(cause))
+        } else {
+          return rej(cause)
+        }
 
-    //Resume
-    else if (Tag.Resume === j.tag) {
-      data = j.i0(data)
-    }
+        break
 
-    //ResumeM
-    else if (Tag.ResumeM === j.tag) {
-      stackA.push(j.i0(data))
-    }
+      case Tag.Resume:
+        data = j.i0(data)
+        break
 
-    // Map
-    else if (Tag.Map === j.tag) {
-      stackA.push(FIO.resume(j.i1).toInstruction())
-      stackA.push(j.i0)
-    }
+      case Tag.ResumeM:
+        stackA.push(j.i0(data))
+        break
 
-    // Chain
-    else if (Tag.Chain === j.tag) {
-      stackA.push(FIO.resumeM(j.i1).toInstruction())
-      stackA.push(j.i0)
-    }
-
-    // Catch
-    else if (Tag.Catch === j.tag) {
-      stackE.push(j.i1)
-      stackA.push(j.i0)
-    }
-
-    // Never
-    else if (Tag.Never === j.tag) {
-      return
-    }
-
-    // Suspend
-    else if (Tag.Suspend === j.tag) {
-      const head = stackA.pop()
-      if (head !== undefined) {
+      case Tag.Map:
+        stackA.push(FIO.resume(j.i1).toInstruction())
         stackA.push(j.i0)
-        stackA.push(head)
-      }
-      data = context
-    }
+        break
 
-    // Provide
-    else if (Tag.Provide === j.tag) {
-      env = j.i1
-      stackA.push(j.i0)
-    }
-    // Async
-    else if (Tag.Async === j.tag) {
-      const id = cancellationList.push(
-        j.i0(
-          env,
-          cause => {
-            cancellationList.remove(id)
-            stackA.push(FIO.reject(cause).toInstruction())
-            sh.asap(Evaluate, context)
-          },
-          val => {
-            cancellationList.remove(id)
-            stackA.push(FIO.of(val).toInstruction())
-            sh.asap(Evaluate, context)
-          },
-          sh
+      case Tag.Chain:
+        stackA.push(FIO.resumeM(j.i1).toInstruction())
+        stackA.push(j.i0)
+        break
+
+      case Tag.Catch:
+        stackE.push(j.i1)
+        stackA.push(j.i0)
+        break
+
+      case Tag.Never:
+        return
+
+      case Tag.Suspend:
+        const head = stackA.pop()
+        if (head !== undefined) {
+          stackA.push(j.i0)
+          stackA.push(head)
+        }
+        data = context
+        break
+
+      case Tag.Provide:
+        env = j.i1
+        stackA.push(j.i0)
+        break
+
+      case Tag.Async:
+        const id = cancellationList.push(
+          j.i0(
+            env,
+            err => {
+              cancellationList.remove(id)
+              stackA.push(FIO.reject(err).toInstruction())
+              sh.asap(Evaluate, context)
+            },
+            val => {
+              cancellationList.remove(id)
+              stackA.push(FIO.of(val).toInstruction())
+              sh.asap(Evaluate, context)
+            },
+            sh
+          )
         )
-      )
 
-      return
-    } else {
-      throw new Error('Invalid Instruction')
+        return
+
+      default:
+        throw new Error('Invalid Instruction')
     }
   }
 }
