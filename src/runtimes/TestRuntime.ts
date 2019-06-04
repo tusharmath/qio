@@ -4,18 +4,14 @@
 
 import {testScheduler} from 'ts-scheduler/test'
 
-import {FIO} from '../main/FIO'
+import {IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
-class TestRuntime<R> extends BaseRuntime<R> {
+class TestRuntime extends BaseRuntime {
   public readonly scheduler = testScheduler()
 
-  public constructor(env: R) {
-    super(env)
-  }
-
-  public executeSync<E, A>(io: FIO<R, E, A>): A | undefined {
+  public executeSync<E, A>(io: IO<E, A>): A | undefined {
     let result: A | undefined
     this.execute(
       io,
@@ -32,4 +28,4 @@ class TestRuntime<R> extends BaseRuntime<R> {
   }
 }
 
-export const testRuntime = <R>(env: R) => new TestRuntime(env)
+export const testRuntime = () => new TestRuntime()

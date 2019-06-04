@@ -7,7 +7,7 @@ import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 import {PrintLn} from './PrintLn'
 
-const runtime = defaultRuntime(undefined)
+const runtime = defaultRuntime()
 
 export const RunSuite = (
   name: string,

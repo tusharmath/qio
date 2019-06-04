@@ -12,7 +12,9 @@ import {Instruction, Tag} from './Instructions'
 
 const Id = <A>(_: A): A => _
 
-export type IO<E, A> = FIO<unknown, E, A>
+type RR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
+
+export type IO<E, A> = FIO<never, E, A>
 export type Task<A> = IO<Error, A>
 export type UIO<A> = IO<never, A>
 const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
@@ -80,14 +82,14 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static catch<R1, E1, A1, R2, E2, A2>(
     fa: FIO<R1, E1, A1>,
     aFe: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E2, A2> {
+  ): FIO<RR<R1, R2>, E2, A2> {
     return new FIO(Tag.Catch, fa, aFe)
   }
 
   public static chain<R1, E1, A1, R2, E2, A2>(
     fa: FIO<R1, E1, A1>,
     aFb: (a: A1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E1 | E2, A2> {
+  ): FIO<RR<R1, R2>, E1 | E2, A2> {
     return new FIO(Tag.Chain, fa, aFb)
   }
 
@@ -112,6 +114,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
             .catch(rej)
         })
       )
+  }
+
+  public static environment<R1 = never>(): FIO<R1, never, R1> {
+    return FIO.access(Id)
   }
 
   public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
@@ -162,19 +168,19 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.io(cb)
   }
 
-  public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
+  public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<RR<R1, R2>, E1 | E2, A2> {
     return this.chain(() => aFb)
   }
 
   public catch<R2, E2, A2>(
     aFb: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E2, A2> {
+  ): FIO<RR<R1, R2>, E2, A2> {
     return FIO.catch(this, aFb)
   }
 
   public chain<R2, E2, A2>(
     aFb: (a: A1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E1 | E2, A2> {
+  ): FIO<RR<R1, R2>, E1 | E2, A2> {
     return FIO.chain(this, aFb)
   }
 
@@ -186,20 +192,15 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
-  public environment<R2>(): FIO<R2 & R1, E1, A1> {
-    return FIO.access<R2, R2>(Id).and(this)
-  }
-
   public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
     return FIO.map(this, ab)
   }
 
-  public once(): UIO<FIO<R1, E1, A1>> {
-    return Await.of<E1, A1>().map(await =>
-      await
-        .set(this)
-        .and(await.get())
-        .environment<R1>()
+  public once(): FIO<R1, never, IO<E1, A1>> {
+    return FIO.environment<R1>().chain(env =>
+      Await.of<E1, A1>().map(await =>
+        await.set(this.provide(env)).and(await.get())
+      )
     )
   }
 
@@ -207,7 +208,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Provide, this, env)
   }
 
-  public suspend(): UIO<Fiber<E1, A1>> {
+  public suspend(): FIO<R1, never, Fiber<E1, A1>> {
     return new FIO(Tag.Suspend, this)
   }
 

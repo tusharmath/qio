@@ -14,13 +14,13 @@ import {Evaluate} from './Evaluate'
 
 export class FiberContext<E, A> extends Fiber<E, A> {
   public constructor(
-    public env: unknown,
     public readonly rej: CB<E>,
     public readonly res: CB<A>,
     public readonly sh: IScheduler,
     public readonly cancellationList: CancellationList = new CancellationList(),
     public readonly stackA: Instruction[] = [],
-    public readonly stackE: Array<(e: unknown) => Instruction> = []
+    public readonly stackE: Array<(e: unknown) => Instruction> = [],
+    public env?: unknown
   ) {
     super()
   }
@@ -37,13 +37,13 @@ export class FiberContext<E, A> extends Fiber<E, A> {
       sh.asap(
         Evaluate,
         new FiberContext(
-          this.env,
           rej,
           res,
           sh,
           this.cancellationList,
           this.stackA,
-          this.stackE
+          this.stackE,
+          this.env
         )
       )
     )

@@ -7,14 +7,14 @@ import {testRuntime} from '../src/runtimes/TestRuntime'
 describe('Await', () => {
   describe('of', () => {
     it('should create an instance of Await', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(Await.of())
+      const actual = testRuntime().executeSync(Await.of())
       assert.instanceOf(actual, Await)
     })
   })
 
   describe('set', () => {
     it('should return true', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(
+      const actual = testRuntime().executeSync(
         Await.of<never, string>().chain(await => await.set(FIO.of('Hi')))
       )
       assert.ok(actual)
@@ -23,13 +23,13 @@ describe('Await', () => {
 
   describe('set', () => {
     it('should return true', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(
+      const actual = testRuntime().executeSync(
         Await.of<never, string>().chain(await => await.set(FIO.of('Hi')))
       )
       assert.ok(actual)
     })
     it('should set only once', () => {
-      const runtime = testRuntime({color: 'red'})
+      const runtime = testRuntime()
       const actual = runtime.executeSync(
         Await.of<never, string>().chain(await =>
           await
@@ -42,7 +42,7 @@ describe('Await', () => {
     })
 
     it('should return false if its not set', () => {
-      const runtime = testRuntime({color: 'red'})
+      const runtime = testRuntime()
       const actual = runtime.executeSync(
         Await.of<never, string>().chain(await =>
           await.set(FIO.of('Hi')).and(await.set(FIO.of('Bye')))
@@ -54,7 +54,7 @@ describe('Await', () => {
 
   describe('get', () => {
     it('should return the IO value', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(
+      const actual = testRuntime().executeSync(
         Await.of<never, string>().chain(await =>
           await.set(FIO.of('Hi')).and(await.get())
         )
@@ -63,14 +63,14 @@ describe('Await', () => {
     })
 
     it('should not resolve unless set', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(
+      const actual = testRuntime().executeSync(
         Await.of<never, string>().chain(await => await.get())
       )
       assert.isUndefined(actual)
     })
 
     it('should not return', () => {
-      const runtime = testRuntime({color: 'red'})
+      const runtime = testRuntime()
       const await = runtime.executeSync(Await.of<never, string>()) as Await<
         never,
         string
@@ -87,7 +87,7 @@ describe('Await', () => {
 
   describe('isSet()', () => {
     it('should return false initially', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(
+      const actual = testRuntime().executeSync(
         Await.of<never, string>().chain(await => await.isSet())
       )
 
@@ -95,7 +95,7 @@ describe('Await', () => {
     })
 
     it('should return true after setting', () => {
-      const actual = testRuntime({color: 'red'}).executeSync(
+      const actual = testRuntime().executeSync(
         Await.of<never, number>().chain(await =>
           await.set(FIO.of(100)).and(await.isSet())
         )

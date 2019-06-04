@@ -4,7 +4,7 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {FIO} from '../main/FIO'
+import {IO} from '../main/FIO'
 
 /**
  * Base runtime that is used to execute any [[FIO]].
@@ -14,7 +14,7 @@ import {FIO} from '../main/FIO'
  * [scheduler]: https://github.com/tusharmath/ts-scheduler
  * Actual implementation is available at [[DefaultRuntime]] & [[TestRuntime]].
  */
-export interface IRuntime<R> {
+export interface IRuntime {
   scheduler: IScheduler
-  execute<E, A>(io: FIO<R, E, A>, res?: CB<A>, rej?: CB<E>): ICancellable
+  execute<E, A>(io: IO<E, A>, res?: CB<A>, rej?: CB<E>): ICancellable
 }

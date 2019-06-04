@@ -13,7 +13,7 @@ import {Counter} from './internals/Counter'
 describe('FIO', () => {
   describe('of', () => {
     it('should evaluate to a constant value', () => {
-      const actual = testRuntime({count: 1000}).executeSync(FIO.of(1000))
+      const actual = testRuntime().executeSync(FIO.of(1000))
       const expected = 1000
       assert.strictEqual(actual, expected)
     })
@@ -21,9 +21,7 @@ describe('FIO', () => {
 
   describe('map', () => {
     it('should map over the value', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
-        FIO.of(1000).map(i => i + 1)
-      )
+      const actual = testRuntime().executeSync(FIO.of(1000).map(i => i + 1))
       const expected = 1001
       assert.strictEqual(actual, expected)
     })
@@ -31,8 +29,8 @@ describe('FIO', () => {
 
   describe('access', () => {
     it('should access a value and transform', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
-        FIO.access(env => env.count)
+      const actual = testRuntime().executeSync(
+        FIO.access((env: {count: number}) => env.count).provide({count: 1000})
       )
       const expected = 1000
       assert.strictEqual(actual, expected)
@@ -41,8 +39,10 @@ describe('FIO', () => {
 
   describe('accessM', () => {
     it('should purely access the env', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
-        FIO.accessM(env => FIO.of(env.count))
+      const actual = testRuntime().executeSync(
+        FIO.accessM((env: {count: number}) => FIO.of(env.count)).provide({
+          count: 1000
+        })
       )
       const expected = 1000
       assert.strictEqual(actual, expected)
@@ -51,9 +51,7 @@ describe('FIO', () => {
 
   describe('chain', () => {
     it('should sequence the operations', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
-        FIO.of(1000).chain(FIO.of)
-      )
+      const actual = testRuntime().executeSync(FIO.of(1000).chain(FIO.of))
       const expected = 1000
       assert.strictEqual(actual, expected)
     })
@@ -62,14 +60,14 @@ describe('FIO', () => {
   describe('reject', () => {
     it('should sequence the operations', () => {
       assert.throws(() => {
-        testRuntime({count: 1000}).executeSync(FIO.reject(new Error('WTF')))
+        testRuntime().executeSync(FIO.reject(new Error('WTF')))
       }, /WTF/)
     })
   })
 
   describe('async', () => {
     it('should evaluate asynchronously', async () => {
-      const actual = await defaultRuntime({count: 1000}).executePromise(
+      const actual = await defaultRuntime().executePromise(
         FIO.async((env, rej, res) => {
           const id = setTimeout(res, 100, 1000)
 
@@ -82,7 +80,7 @@ describe('FIO', () => {
 
     it('should be cancellable', () => {
       let cancelled = false
-      const runtime = testRuntime({count: 1000})
+      const runtime = testRuntime()
       const cancellable = runtime.execute(
         FIO.async(() => ({cancel: () => (cancelled = true)}))
       )
@@ -94,8 +92,10 @@ describe('FIO', () => {
 
   describe('accessP', () => {
     it('should access promise based envs', async () => {
-      const actual = await defaultRuntime({count: 1000}).executePromise(
-        FIO.accessP(env => Promise.resolve(env.count))
+      const actual = await defaultRuntime().executePromise(
+        FIO.accessP((env: {count: number}) =>
+          Promise.resolve(env.count)
+        ).provide({count: 1000})
       )
       const expected = 1000
       assert.strictEqual(actual, expected)
@@ -105,14 +105,14 @@ describe('FIO', () => {
   describe('try', () => {
     it('should call the cb function', () => {
       let i = 1000
-      const actual = testRuntime({count: 1000}).executeSync(FIO.try(() => ++i))
+      const actual = testRuntime().executeSync(FIO.try(() => ++i))
       const expected = 1001
       assert.strictEqual(actual, expected)
     })
 
     it('should be cancellable', () => {
       let actual = 1000
-      const runtime = testRuntime({count: 1000})
+      const runtime = testRuntime()
       runtime.execute(FIO.try(() => ++actual)).cancel()
       runtime.scheduler.run()
       const expected = 1000
@@ -123,7 +123,7 @@ describe('FIO', () => {
   describe('and', () => {
     it('should chain two IOs', () => {
       const M = new Array<string>()
-      testRuntime({count: 1000}).executeSync(
+      testRuntime().executeSync(
         FIO.try(() => M.push('A')).and(FIO.try(() => M.push('B')))
       )
       const actual = M
@@ -134,15 +134,13 @@ describe('FIO', () => {
 
   describe('timeout', () => {
     it('should emit the provided value', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
-        FIO.timeout('Happy', 100)
-      )
+      const actual = testRuntime().executeSync(FIO.timeout('Happy', 100))
 
       const expected = 'Happy'
       assert.strictEqual(actual, expected)
     })
     it('should emit after the provided duration', () => {
-      const runtime = testRuntime({count: 1000})
+      const runtime = testRuntime()
       runtime.executeSync(FIO.timeout('Happy', 100))
       const actual = runtime.scheduler.now()
       const expected = 101
@@ -153,7 +151,7 @@ describe('FIO', () => {
   describe('delay', () => {
     it('should delay the io execution', () => {
       let executedAt = -1
-      const runtime = testRuntime({count: 1000})
+      const runtime = testRuntime()
       runtime.executeSync(
         FIO.try(() => (executedAt = runtime.scheduler.now())).delay(1000)
       )
@@ -162,7 +160,7 @@ describe('FIO', () => {
       assert.strictEqual(executedAt, expected)
     })
     it('should emit after the provided duration', () => {
-      const runtime = testRuntime({count: 1000})
+      const runtime = testRuntime()
       runtime.executeSync(FIO.timeout('Happy', 100))
       const actual = runtime.scheduler.now()
       const expected = 101
@@ -171,7 +169,7 @@ describe('FIO', () => {
 
     it('should be cancellable', () => {
       let executed = false
-      const runtime = testRuntime({count: 1000})
+      const runtime = testRuntime()
       const cancellable = runtime.execute(
         FIO.try(() => (executed = true)).delay(100)
       )
@@ -185,7 +183,7 @@ describe('FIO', () => {
 
   describe('encase', () => {
     it('should call the encased function', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
+      const actual = testRuntime().executeSync(
         FIO.encase((a: number, b: number) => a + b)(1, 1000)
       )
       const expected = 1001
@@ -195,7 +193,7 @@ describe('FIO', () => {
 
   describe('encaseP', () => {
     it('should resolve the encased function', async () => {
-      const actual = await defaultRuntime({count: 1000}).executePromise(
+      const actual = await defaultRuntime().executePromise(
         FIO.encaseP((a: number, b: number) => Promise.resolve(a + b))(1, 1000)
       )
       const expected = 1001
@@ -205,7 +203,7 @@ describe('FIO', () => {
 
   describe('never', () => {
     it('should never resolve/reject', () => {
-      const actual = testRuntime({count: 1000}).executeSync(FIO.never())
+      const actual = testRuntime().executeSync(FIO.never())
       const expected = undefined
       assert.strictEqual(actual, expected)
     })
@@ -213,7 +211,7 @@ describe('FIO', () => {
 
   describe('catch', () => {
     it('should capture exceptions', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
+      const actual = testRuntime().executeSync(
         FIO.reject(new Error('Bye')).catch(err => FIO.of(err.message))
       )
       const expected = 'Bye'
@@ -221,7 +219,7 @@ describe('FIO', () => {
     })
 
     it('should capture async exceptions', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
+      const actual = testRuntime().executeSync(
         FIO.asyncTask((rej, res, sh) => sh.asap(rej, new Error('Bye'))).catch(
           err => FIO.of(err.message)
         )
@@ -231,7 +229,7 @@ describe('FIO', () => {
     })
 
     it('should capture nested async exceptions', () => {
-      const actual = testRuntime({count: 1000}).executeSync(
+      const actual = testRuntime().executeSync(
         FIO.asyncTask((rej, res, sh) => sh.asap(rej, new Error('A')))
           .catch(err => FIO.reject(new Error(err.message + 'B')))
           .catch(err => FIO.reject(new Error(err.message + 'C')))
@@ -247,7 +245,7 @@ describe('FIO', () => {
   describe('once', () => {
     it('should return a memoized IO', () => {
       const counter = new Counter()
-      const runtime = testRuntime({color: 'Green'})
+      const runtime = testRuntime()
       runtime.executeSync(
         counter
           .inc()
@@ -262,7 +260,7 @@ describe('FIO', () => {
 
     it('should run only once for async io', () => {
       const counter = new Counter()
-      const runtime = testRuntime({color: 'Green'})
+      const runtime = testRuntime()
       const memoized = runtime.executeSync(
         counter
           .inc()
@@ -288,13 +286,13 @@ describe('FIO', () => {
 
   describe('suspend', () => {
     it('should return an instance of Fiber', () => {
-      const actual = testRuntime({}).executeSync(FIO.of(10).suspend())
+      const actual = testRuntime().executeSync(FIO.of(10).suspend())
       assert.instanceOf(actual, Fiber)
     })
 
     describe('fiber.resume', () => {
       it('should resume with the io', () => {
-        const actual = testRuntime({}).executeSync(
+        const actual = testRuntime().executeSync(
           FIO.of(10)
             .suspend()
             .chain(fiber => fiber.resume())
@@ -305,7 +303,7 @@ describe('FIO', () => {
       })
 
       it('should bubble the env', () => {
-        const actual = testRuntime({color: 'RED'}).executeSync(
+        const actual = testRuntime().executeSync(
           FIO.access((_: {color: string}) => _.color)
 
             .suspend()
@@ -321,7 +319,7 @@ describe('FIO', () => {
     describe('fiber.abort', () => {
       it('should abort the fiber', () => {
         const counter = new Counter()
-        testRuntime({}).executeSync(
+        testRuntime().executeSync(
           counter
             .inc()
             .suspend()
@@ -333,7 +331,7 @@ describe('FIO', () => {
 
       it('should abort a throwing fiber', () => {
         const counter = new Counter()
-        testRuntime({}).executeSync(
+        testRuntime().executeSync(
           FIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
             .suspend()
@@ -347,7 +345,7 @@ describe('FIO', () => {
 
   describe('provide', () => {
     it('should provide the env to FIO', () => {
-      const actual = testRuntime({color: 'Green'}).executeSync(
+      const actual = testRuntime().executeSync(
         FIO.access((_: {color: string}) => _.color).provide({color: 'Red'})
       )
       const expected = 'Red'
