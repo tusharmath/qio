@@ -352,4 +352,26 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
   })
+
+  describe.skip('zipWithPar', () => {
+    it('should combine two IO', () => {
+      const actual = testRuntime().executeSync(
+        FIO.of(10).zipWithPar(FIO.of(20), (a, b) => a + b)
+      )
+
+      const expected = 30
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should combine them in parallel', () => {
+      const left = FIO.of(10).delay(1000)
+      const right = FIO.of(20).delay(1000)
+      const runtime = testRuntime()
+      runtime.executeSync(left.zipWithPar(right, (a, b) => a + b))
+
+      const actual = runtime.scheduler.now()
+      assert.isAbove(actual, 1000)
+      assert.isBelow(actual, 2000)
+    })
+  })
 })
