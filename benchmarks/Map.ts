@@ -5,9 +5,10 @@ import * as Fluture from 'fluture'
 
 import {FIO} from '../src/main/FIO'
 
+import {inc} from './internals/Inc'
 import {RunSuite} from './internals/RunSuite'
 
-const fluture = Fluture.of(10)
-const fio = FIO.of(10)
+const fluture = Fluture.of(BigInt(10)).map(inc)
+const fio = FIO.of(BigInt(10)).map(inc)
 
 RunSuite('Map', {fio, fluture})
