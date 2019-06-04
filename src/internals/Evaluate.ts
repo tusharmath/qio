@@ -10,7 +10,6 @@ import {FiberContext} from './FiberContext'
  */
 export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
   const {rej, res, stackA, stackE, cancellationList, sh} = context
-  let env = context.env
   let data: unknown
 
   while (true) {
@@ -72,14 +71,14 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
         break
 
       case Tag.Provide:
-        env = j.i1
+        context.env = j.i1
         stackA.push(j.i0)
         break
 
       case Tag.Async:
         const id = cancellationList.push(
           j.i0(
-            env,
+            context.env,
             err => {
               cancellationList.remove(id)
               stackA.push(FIO.reject(err).toInstruction())

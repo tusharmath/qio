@@ -14,7 +14,7 @@ import {Evaluate} from './Evaluate'
 
 export class FiberContext<E, A> extends Fiber<E, A> {
   public constructor(
-    public readonly env: unknown,
+    public env: unknown,
     public readonly rej: CB<E>,
     public readonly res: CB<A>,
     public readonly sh: IScheduler,

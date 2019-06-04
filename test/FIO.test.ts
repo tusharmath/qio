@@ -303,6 +303,19 @@ describe('FIO', () => {
         const expected = 10
         assert.strictEqual(actual, expected)
       })
+
+      it('should bubble the env', () => {
+        const actual = testRuntime({color: 'RED'}).executeSync(
+          FIO.access((_: {color: string}) => _.color)
+
+            .suspend()
+            .chain(fiber => fiber.resume())
+            .provide({color: 'BLUE'})
+        )
+
+        const expected = 'BLUE'
+        assert.strictEqual(actual, expected)
+      })
     })
 
     describe('fiber.abort', () => {
