@@ -19,15 +19,6 @@ describe('Await', () => {
       )
       assert.ok(actual)
     })
-  })
-
-  describe('set', () => {
-    it('should return true', () => {
-      const actual = testRuntime().executeSync(
-        Await.of<never, string>().chain(await => await.set(FIO.of('Hi')))
-      )
-      assert.ok(actual)
-    })
     it('should set only once', () => {
       const runtime = testRuntime()
       const actual = runtime.executeSync(
