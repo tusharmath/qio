@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-24
  */
 
-import {IScheduler} from 'ts-scheduler'
+import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {Fiber} from '../main/Fiber'
 import {FIO, IO, UIO} from '../main/FIO'
@@ -30,6 +30,13 @@ export class FiberContext<E, A> extends Fiber<E, A> {
       this.stackA.splice(0, this.stackA.length)
       this.cancellationList.cancel()
     })
+  }
+
+  public evaluate(io: IO<E, A>): ICancellable {
+    this.stackA.push(io.toInstruction())
+    this.cancellationList.push(this.sh.asap(Evaluate, this))
+
+    return this.cancellationList
   }
 
   public resume(): IO<E, A> {
