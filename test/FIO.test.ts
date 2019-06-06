@@ -1,10 +1,11 @@
 /**
  * Created by tushar on 2019-05-24
  */
+
 import {assert} from 'chai'
 
 import {Fiber} from '../src/main/Fiber'
-import {FIO} from '../src/main/FIO'
+import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
@@ -270,11 +271,11 @@ describe('FIO', () => {
 
       // Schedule first run at 10ms
       runtime.scheduler.runTo(10)
-      runtime.execute(memoized as FIO)
+      runtime.execute(memoized as UIO<number>)
 
       // Schedule second run at 50ms
       runtime.scheduler.runTo(50)
-      runtime.execute(memoized as FIO)
+      runtime.execute(memoized as UIO<number>)
 
       runtime.scheduler.run()
 

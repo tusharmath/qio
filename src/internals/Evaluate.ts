@@ -3,13 +3,18 @@
 import {FIO} from '../main/FIO'
 import {Tag} from '../main/Instructions'
 
+import {CB} from './CB'
 import {FiberContext} from './FiberContext'
 
 /**
  * Evaluates the complete instruction tree
  */
-export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
-  const {rej, res, stackA, stackE, cancellationList, sh} = context
+export const Evaluate = <E, A>(
+  context: FiberContext<E, A>,
+  rej: CB<E>,
+  res: CB<A>
+): void => {
+  const {stackA, stackE, cancellationList, sh} = context
   let data: unknown
 
   while (true) {
@@ -82,12 +87,12 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
             err => {
               cancellationList.remove(id)
               stackA.push(FIO.reject(err).toInstruction())
-              sh.asap(Evaluate, context)
+              context.$resume(rej, res)
             },
             val => {
               cancellationList.remove(id)
               stackA.push(FIO.of(val).toInstruction())
-              sh.asap(Evaluate, context)
+              context.$resume(rej, res)
             },
             sh
           )
