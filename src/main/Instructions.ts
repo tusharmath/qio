@@ -3,17 +3,17 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 
 export enum Tag {
-  Constant = 0,
-  Resume = 3,
-  ResumeM = 4,
-  Map = 5,
-  Chain = 6,
-  Async = 7,
-  Reject = 8,
-  Never = 9,
-  Catch = 10,
-  Suspend = 11,
-  Provide = 12
+  Async,
+  Catch,
+  Chain,
+  Constant,
+  Map,
+  Never,
+  Provide,
+  Reject,
+  Suspend,
+  Try,
+  TryM
 }
 
 /**
@@ -34,12 +34,12 @@ interface IReject {
   i0: unknown
   tag: Tag.Reject
 }
-interface IResume {
-  tag: Tag.Resume
+interface ITry {
+  tag: Tag.Try
   i0(a: unknown): unknown
 }
-interface IResumeM {
-  tag: Tag.ResumeM
+interface ITryM {
+  tag: Tag.TryM
   i0(a: unknown): Instruction
 }
 interface IMap {
@@ -84,5 +84,5 @@ export type Instruction =
   | INever
   | IProvide
   | IReject
-  | IResume
-  | IResumeM
+  | ITry
+  | ITryM

@@ -35,11 +35,11 @@ export const Evaluate = <E, A>(context: FiberContext<E, A>): void => {
 
         break
 
-      case Tag.Resume:
+      case Tag.Try:
         data = j.i0(data)
         break
 
-      case Tag.ResumeM:
+      case Tag.TryM:
         stackA.push(j.i0(data))
         break
 

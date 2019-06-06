@@ -121,7 +121,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   }
 
   public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
-    return new FIO(Tag.Resume, cb)
+    return FIO.resume(cb)
   }
 
   public static map<R1, E1, A1, A2>(
@@ -146,14 +146,14 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
    * @ignore
    */
   public static resume<A1, A2>(cb: (A: A1) => A2): UIO<A2> {
-    return new FIO(Tag.Resume, cb)
+    return new FIO(Tag.Try, cb)
   }
 
   /**
    * @ignore
    */
   public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): IO<E1, A2> {
-    return new FIO(Tag.ResumeM, cb)
+    return new FIO(Tag.TryM, cb)
   }
 
   public static timeout<A>(value: A, duration: number): UIO<A> {
@@ -214,6 +214,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public toInstruction(): Instruction {
     return this as Instruction
+  }
+
+  public void(): FIO<R1, E1, void> {
+    return this.const(undefined)
   }
 
   public zipWith<R2, E2, A2, C>(
