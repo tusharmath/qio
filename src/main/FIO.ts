@@ -21,13 +21,33 @@ const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
   res(cb(env))
 
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
-  public constructor(
-    public readonly tag: Tag,
-    // tslint:disable-next-line: no-unnecessary-initializer
-    public readonly i0: unknown = undefined,
-    // tslint:disable-next-line: no-unnecessary-initializer
-    public readonly i1: unknown = undefined
-  ) {}
+  public get asInstruction(): Instruction {
+    return this as Instruction
+  }
+
+  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
+    return this.suspend(FIO.of)
+  }
+
+  public static get never(): UIO<never> {
+    return new FIO(Tag.Never, undefined)
+  }
+
+  public get once(): FIO<R1, never, IO<E1, A1>> {
+    return FIO.environment<R1>().chain(env =>
+      Await.of<E1, A1>().map(await =>
+        await.set(this.provide(env)).and(await.get())
+      )
+    )
+  }
+
+  public static get void(): UIO<void> {
+    return FIO.of(void 0)
+  }
+
+  public get void(): FIO<R1, E1, void> {
+    return this.const(undefined)
+  }
 
   public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
     return FIO.async((env, _, res, sh) => sh.asap(asapCB, res, cb, env))
@@ -131,10 +151,6 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Map, fa, ab)
   }
 
-  public static get never(): UIO<never> {
-    return new FIO(Tag.Never, undefined)
-  }
-
   public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
   }
@@ -167,10 +183,13 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static uio<A>(cb: () => A): UIO<A> {
     return FIO.io(cb)
   }
-
-  public static get void(): UIO<void> {
-    return FIO.of(void 0)
-  }
+  public constructor(
+    public readonly tag: Tag,
+    // tslint:disable-next-line: no-unnecessary-initializer
+    public readonly i0: unknown = undefined,
+    // tslint:disable-next-line: no-unnecessary-initializer
+    public readonly i1: unknown = undefined
+  ) {}
 
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<RR<R1, R2>, E1 | E2, A2> {
     return this.chain(() => aFb)
@@ -196,20 +215,8 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
-  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
-    return this.suspend(FIO.of)
-  }
-
   public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
     return FIO.map(this, ab)
-  }
-
-  public get once(): FIO<R1, never, IO<E1, A1>> {
-    return FIO.environment<R1>().chain(env =>
-      Await.of<E1, A1>().map(await =>
-        await.set(this.provide(env)).and(await.get())
-      )
-    )
   }
 
   public provide(env: R1): IO<E1, A1> {
@@ -222,12 +229,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Suspend, this, cb)
   }
 
-  public get asInstruction(): Instruction {
-    return this as Instruction
-  }
-
-  public get void(): FIO<R1, E1, void> {
-    return this.const(undefined)
+  public zip<R2, E2, A2>(
+    that: FIO<R2, E2, A2>
+  ): FIO<RR<R1, R2>, E1 | E2, [A1, A2]> {
+    return this.zipWith(that, (a, b) => [a, b])
   }
 
   public zipWith<R2, E2, A2, C>(
@@ -237,11 +242,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return this.chain(a1 => that.map(a2 => c(a1, a2)))
   }
 
-  // tslint:disable-next-line: prefer-function-over-method
   public zipWithPar<R2, E2, A2, C>(
     that: FIO<R2, E2, A2>,
     a1a2: (a1: A1, a2: A2) => C
   ): FIO<RR<R1, R2>, E1 | E2, C> {
-    throw new Error('TODO: Not Implemented')
+    return this.zipWith(that, a1a2)
   }
 }

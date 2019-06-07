@@ -6,13 +6,12 @@ import {Exit} from './Exit'
 import {FIO, IO, UIO} from './FIO'
 
 export class Await<E, A> {
-  private flag = false
-  private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
-  private result: Exit<E, A> = Exit.pending()
-
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
     return FIO.uio(() => new Await())
   }
+  private flag = false
+  private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
+  private result: Exit<E, A> = Exit.pending()
 
   public get(): IO<E, A> {
     return this.getResult().chain(([status, result]) =>

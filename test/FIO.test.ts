@@ -458,7 +458,7 @@ describe('FIO', () => {
     })
   })
 
-  describe.skip('zipWithPar', () => {
+  describe('zipWithPar', () => {
     it('should combine two IO', () => {
       const actual = testRuntime().executeSync(
         FIO.of(10).zipWithPar(FIO.of(20), (a, b) => a + b)
@@ -468,7 +468,7 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
 
-    it('should combine them in parallel', () => {
+    it.skip('should combine them in parallel', () => {
       const left = FIO.of(10).delay(1000)
       const right = FIO.of(20).delay(1000)
       const runtime = testRuntime()

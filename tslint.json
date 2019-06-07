@@ -22,13 +22,7 @@
     "prefer-for-of": false,
     "increment-decrement": false,
     "max-classes-per-file": false,
-    "restrict-plus-operands": false,
-    "member-ordering": {
-      "options": {
-        "order": "fields-first",
-        "alphabetize": true
-      }
-    }
+    "restrict-plus-operands": false
   },
   "rulesDirectory": []
 }

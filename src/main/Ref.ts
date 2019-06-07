@@ -1,15 +1,13 @@
 /**
  * Created by tushar on 2019-05-25
  */
-import {DeepReadonly} from 'utility-types'
-
 import {FIO, UIO} from './FIO'
 
 export class Ref<A> {
-  private constructor(private value: A) {}
   public static of<A>(a: A): UIO<Ref<A>> {
     return FIO.uio(() => new Ref(a))
   }
+  private constructor(private value: A) {}
 
   public read(): UIO<A> {
     return FIO.uio(() => this.value)
@@ -17,7 +15,7 @@ export class Ref<A> {
   public set(a: A): UIO<A> {
     return FIO.uio(() => (this.value = a))
   }
-  public update(ab: (a: DeepReadonly<A>) => A): UIO<A> {
-    return FIO.uio(() => (this.value = ab(this.value as DeepReadonly<A>)))
+  public update(ab: (a: A) => A): UIO<A> {
+    return FIO.uio(() => (this.value = ab(this.value)))
   }
 }
