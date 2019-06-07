@@ -66,6 +66,21 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   }
 
   /**
+   *  Creates a new FiberContext and evaluates the IO in that context
+   */
+  public fork$<E2, A2>(
+    ins: Instruction,
+    rej: CB<E2>,
+    res: CB<A2>
+  ): FiberContext<E2, A2> {
+    return new FiberContext<E2, A2>(
+      this.sh,
+      ins,
+      this.cancellationList
+    ).$resume(rej, res)
+  }
+
+  /**
    * Pure implementation of $resume().
    */
   public resume(): IO<E, A> {

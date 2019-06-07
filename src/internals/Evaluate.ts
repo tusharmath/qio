@@ -68,7 +68,7 @@ export const Evaluate = <E, A>(
 
       case Tag.Suspend:
         stackA.push(j.i0)
-        new FiberContext(sh, j.i1(context), cancellationList).$resume(rej, res)
+        context.fork$(j.i1(context), rej, res)
 
         return
 
