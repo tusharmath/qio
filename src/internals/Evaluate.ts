@@ -67,13 +67,10 @@ export const Evaluate = <E, A>(
         return
 
       case Tag.Suspend:
-        const head = stackA.pop()
-        if (head !== undefined) {
-          stackA.push(j.i0)
-          stackA.push(head)
-        }
-        data = context
-        break
+        stackA.push(j.i0)
+        new FiberContext(sh, j.i1(context), cancellationList).$resume(rej, res)
+
+        return
 
       case Tag.Provide:
         context.env = j.i1

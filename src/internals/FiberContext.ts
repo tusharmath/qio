@@ -14,14 +14,17 @@ import {Evaluate} from './Evaluate'
 
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
-  public readonly cancellationList: CancellationList = new CancellationList()
   public env?: unknown = undefined
   public readonly stackA: Instruction[] = []
   public readonly stackE: Array<(e: unknown) => Instruction> = []
 
-  public constructor(public readonly sh: IScheduler, io: IO<E, A>) {
+  public constructor(
+    public readonly sh: IScheduler,
+    io: Instruction,
+    public readonly cancellationList: CancellationList = new CancellationList()
+  ) {
     super()
-    this.stackA.push(io.toInstruction())
+    this.stackA.push(io)
   }
 
   /**
@@ -37,7 +40,20 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
    * Used after the fiber yielded.
    */
   public $resume(rej: CB<E>, res: CB<A>): FiberContext<E, A> {
-    this.cancellationList.push(this.sh.asap(Evaluate, this, rej, res))
+    const id = this.cancellationList.push(
+      this.sh.asap(
+        Evaluate,
+        this,
+        (cause: E) => {
+          this.cancellationList.remove(id)
+          rej(cause)
+        },
+        (value: A) => {
+          this.cancellationList.remove(id)
+          res(value)
+        }
+      )
+    )
 
     return this
   }
@@ -50,8 +66,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   }
 
   /**
-   * Continues the evaluation of the current stack.
-   * Used after the fiber has yielded
+   * Pure implementation of $resume().
    */
   public resume(): IO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) => this.$resume(rej, res))

@@ -192,6 +192,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
+  public fork(): FIO<R1, never, Fiber<E1, A1>> {
+    return this.suspend(FIO.of)
+  }
+
   public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
     return FIO.map(this, ab)
   }
@@ -208,8 +212,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Provide, this, env)
   }
 
-  public suspend(): FIO<R1, never, Fiber<E1, A1>> {
-    return new FIO(Tag.Suspend, this)
+  public suspend<E2, A2>(
+    cb: (f: Fiber<E1, A1>) => IO<E2, A2>
+  ): FIO<R1, E2, A2> {
+    return new FIO(Tag.Suspend, this, cb)
   }
 
   public toInstruction(): Instruction {

@@ -67,6 +67,7 @@ interface INever {
 interface IFork {
   i0: Instruction
   tag: Tag.Suspend
+  i1(a: unknown): Instruction
 }
 interface IProvide {
   i0: Instruction

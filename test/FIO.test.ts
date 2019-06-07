@@ -287,45 +287,79 @@ describe('FIO', () => {
 
   describe('suspend', () => {
     it('should return an instance of Fiber', () => {
-      const actual = testRuntime().executeSync(FIO.of(10).suspend())
+      const actual = testRuntime().executeSync(
+        FIO.of(10).suspend(_ => FIO.of(_))
+      )
       assert.instanceOf(actual, Fiber)
     })
 
     describe('fiber.resume', () => {
+      it('should not run suspended fibers', () => {
+        const runtime = testRuntime()
+        const counter = new Counter()
+        const actual = runtime.executeSync(
+          counter.inc().suspend(() => FIO.never())
+        )
+
+        assert.isUndefined(actual)
+        assert.strictEqual(counter.count, 0)
+      })
+
       it('should resume with the io', () => {
         const actual = testRuntime().executeSync(
-          FIO.of(10)
-            .suspend()
-            .chain(fiber => fiber.resume())
+          FIO.of(10).suspend(fiber => fiber.resume())
         )
 
         const expected = 10
         assert.strictEqual(actual, expected)
       })
 
+      it('should resume async io', () => {
+        const a = new Counter()
+        const runtime = testRuntime()
+        const actual = runtime.executeSync(
+          a
+            .inc()
+            .delay(1000)
+            .suspend(fiber => fiber.resume().delay(100))
+        )
+
+        const expected = 1
+        assert.strictEqual(actual, expected)
+        assert.strictEqual(runtime.scheduler.now(), 1101)
+      })
+
       it('should bubble the env', () => {
         const actual = testRuntime().executeSync(
           FIO.access((_: {color: string}) => _.color)
-
-            .suspend()
-            .chain(fiber => fiber.resume())
+            .suspend(fiber => fiber.resume())
             .provide({color: 'BLUE'})
         )
 
         const expected = 'BLUE'
         assert.strictEqual(actual, expected)
       })
+
+      it('should resolve after the IO is completed', () => {
+        const counter = new Counter()
+        const runtime = testRuntime()
+        runtime.execute(
+          FIO.of(10)
+            .delay(100)
+            .suspend(fib => fib.resume().and(counter.inc()))
+        )
+        runtime.scheduler.runTo(50)
+
+        const actual = counter.count
+        const expected = 0
+        assert.deepEqual(actual, expected)
+      })
     })
 
     describe('fiber.abort', () => {
       it('should abort the fiber', () => {
         const counter = new Counter()
-        testRuntime().executeSync(
-          counter
-            .inc()
-            .suspend()
-            .chain(fiber => fiber.abort())
-        )
+        testRuntime().executeSync(counter.inc().suspend(fiber => fiber.abort()))
 
         assert.strictEqual(counter.count, 0)
       })
@@ -335,13 +369,14 @@ describe('FIO', () => {
         testRuntime().executeSync(
           FIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
-            .suspend()
-            .chain(fiber => fiber.abort())
+            .suspend(fiber => fiber.abort())
         )
 
         assert.strictEqual(counter.count, 0)
       })
     })
+
+    describe.skip('fiber.resumeAsync', () => {})
   })
 
   describe('provide', () => {
