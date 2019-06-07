@@ -4,6 +4,7 @@
 
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
+import {Exit} from '../main/Exit'
 import {Fiber} from '../main/Fiber'
 import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction} from '../main/Instructions'
@@ -11,6 +12,7 @@ import {Instruction} from '../main/Instructions'
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 import {Evaluate} from './Evaluate'
+import {noop} from './Noop'
 
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
@@ -85,5 +87,18 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
    */
   public resume(): IO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) => this.$resume(rej, res))
+  }
+
+  public resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<Fiber<E, A>> {
+    return FIO.uio(() =>
+      this.$resume(
+        cause => {
+          this.fork$(cb(Exit.failure(cause)).asInstruction, noop, noop)
+        },
+        data => {
+          this.fork$(cb(Exit.success(data)).asInstruction, noop, noop)
+        }
+      )
+    )
   }
 }

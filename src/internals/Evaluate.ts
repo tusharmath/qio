@@ -49,12 +49,12 @@ export const Evaluate = <E, A>(
         break
 
       case Tag.Map:
-        stackA.push(FIO.resume(j.i1).toInstruction())
+        stackA.push(FIO.resume(j.i1).asInstruction)
         stackA.push(j.i0)
         break
 
       case Tag.Chain:
-        stackA.push(FIO.resumeM(j.i1).toInstruction())
+        stackA.push(FIO.resumeM(j.i1).asInstruction)
         stackA.push(j.i0)
         break
 
@@ -83,12 +83,12 @@ export const Evaluate = <E, A>(
             context.env,
             err => {
               cancellationList.remove(id)
-              stackA.push(FIO.reject(err).toInstruction())
+              stackA.push(FIO.reject(err).asInstruction)
               context.$resume(rej, res)
             },
             val => {
               cancellationList.remove(id)
-              stackA.push(FIO.of(val).toInstruction())
+              stackA.push(FIO.of(val).asInstruction)
               context.$resume(rej, res)
             },
             sh

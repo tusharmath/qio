@@ -4,6 +4,8 @@
 
 import {assert} from 'chai'
 
+import {Await} from '../src/main/Await'
+import {Exit} from '../src/main/Exit'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
@@ -204,7 +206,7 @@ describe('FIO', () => {
 
   describe('never', () => {
     it('should never resolve/reject', () => {
-      const actual = testRuntime().executeSync(FIO.never())
+      const actual = testRuntime().executeSync(FIO.never)
       const expected = undefined
       assert.strictEqual(actual, expected)
     })
@@ -247,12 +249,7 @@ describe('FIO', () => {
     it('should return a memoized IO', () => {
       const counter = new Counter()
       const runtime = testRuntime()
-      runtime.executeSync(
-        counter
-          .inc()
-          .once()
-          .chain(_ => _.and(_))
-      )
+      runtime.executeSync(counter.inc().once.chain(_ => _.and(_)))
 
       const actual = counter.count
       const expected = 1
@@ -262,12 +259,7 @@ describe('FIO', () => {
     it('should run only once for async io', () => {
       const counter = new Counter()
       const runtime = testRuntime()
-      const memoized = runtime.executeSync(
-        counter
-          .inc()
-          .delay(100)
-          .once()
-      )
+      const memoized = runtime.executeSync(counter.inc().delay(100).once)
 
       // Schedule first run at 10ms
       runtime.scheduler.runTo(10)
@@ -298,7 +290,7 @@ describe('FIO', () => {
         const runtime = testRuntime()
         const counter = new Counter()
         const actual = runtime.executeSync(
-          counter.inc().suspend(() => FIO.never())
+          counter.inc().suspend(() => FIO.never)
         )
 
         assert.isUndefined(actual)
@@ -376,7 +368,74 @@ describe('FIO', () => {
       })
     })
 
-    describe.skip('fiber.resumeAsync', () => {})
+    describe('fiber.resumeAsync', () => {
+      it('should asynchronously execute the IO', () => {
+        const a = new Counter()
+        const runtime = testRuntime()
+        runtime.execute(
+          a
+            .inc()
+            .delay(1000)
+            .suspend(fiber => fiber.resumeAsync(() => FIO.void))
+        )
+        runtime.scheduler.runTo(50)
+
+        assert.strictEqual(a.count, 0)
+      })
+
+      it('should complete without waiting', () => {
+        const a = new Counter()
+        const runtime = testRuntime()
+        runtime.execute(
+          FIO.timeout(0, 1000).suspend(fiber =>
+            fiber.resumeAsync(() => FIO.void).and(a.inc())
+          )
+        )
+        runtime.scheduler.runTo(10)
+
+        assert.strictEqual(a.count, 1)
+      })
+
+      it('should return the same fiber', () => {
+        const actual = testRuntime().executeSync(
+          FIO.void.suspend(fiber =>
+            fiber.resumeAsync(() => FIO.void).map(_ => _ === fiber)
+          )
+        )
+
+        assert.isTrue(actual)
+      })
+
+      it('should call with  Exit.success', () => {
+        const actual = testRuntime().executeSync(
+          Await.of<never, Exit<never, string>>().chain(await =>
+            FIO.of('Hi').suspend(fiber =>
+              fiber
+                .resumeAsync(status => await.set(FIO.of(status)).void)
+                .and(await.get())
+            )
+          )
+        )
+
+        const expected = Exit.success('Hi')
+        assert.deepEqual(actual, expected)
+      })
+
+      it('should call with  Exit.failure', () => {
+        const actual = testRuntime().executeSync(
+          Await.of<never, Exit<string, never>>().chain(await =>
+            FIO.reject('Hi').suspend(fiber =>
+              fiber
+                .resumeAsync(status => await.set(FIO.of(status)).void)
+                .and(await.get())
+            )
+          )
+        )
+
+        const expected = Exit.failure('Hi')
+        assert.deepEqual(actual, expected)
+      })
+    })
   })
 
   describe('provide', () => {

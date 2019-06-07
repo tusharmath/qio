@@ -131,7 +131,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Map, fa, ab)
   }
 
-  public static never(): UIO<never> {
+  public static get never(): UIO<never> {
     return new FIO(Tag.Never, undefined)
   }
 
@@ -168,6 +168,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.io(cb)
   }
 
+  public static get void(): UIO<void> {
+    return FIO.of(void 0)
+  }
+
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<RR<R1, R2>, E1 | E2, A2> {
     return this.chain(() => aFb)
   }
@@ -192,7 +196,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
-  public fork(): FIO<R1, never, Fiber<E1, A1>> {
+  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
     return this.suspend(FIO.of)
   }
 
@@ -200,7 +204,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.map(this, ab)
   }
 
-  public once(): FIO<R1, never, IO<E1, A1>> {
+  public get once(): FIO<R1, never, IO<E1, A1>> {
     return FIO.environment<R1>().chain(env =>
       Await.of<E1, A1>().map(await =>
         await.set(this.provide(env)).and(await.get())
@@ -218,11 +222,11 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Suspend, this, cb)
   }
 
-  public toInstruction(): Instruction {
+  public get asInstruction(): Instruction {
     return this as Instruction
   }
 
-  public void(): FIO<R1, E1, void> {
+  public get void(): FIO<R1, E1, void> {
     return this.const(undefined)
   }
 
