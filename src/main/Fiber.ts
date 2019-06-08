@@ -7,7 +7,13 @@ import {Exit} from './Exit'
 export abstract class Fiber<E, A> implements ICancellable {
   public abstract abort: UIO<void>
   public abstract resume: IO<E, A>
+  /**
+   * @ignore
+   */
   public abstract $abort(): void
+  /**
+   * @ignore
+   */
   public cancel(): void {
     this.$abort()
   }

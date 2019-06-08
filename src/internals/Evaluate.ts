@@ -8,6 +8,7 @@ import {FiberContext} from './FiberContext'
 
 /**
  * Evaluates the complete instruction tree
+ * @ignore
  */
 export const Evaluate = <E, A>(
   context: FiberContext<E, A>,

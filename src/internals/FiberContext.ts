@@ -13,6 +13,9 @@ import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 import {Evaluate} from './Evaluate'
 
+/**
+ * @ignore
+ */
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
   public readonly stackA: Instruction[] = []

@@ -8,7 +8,7 @@ import {IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
-class TestRuntime extends BaseRuntime {
+export class TestRuntime extends BaseRuntime {
   public readonly scheduler = testScheduler()
 
   public executeSync<E, A>(io: IO<E, A>): A | undefined {

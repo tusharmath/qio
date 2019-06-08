@@ -1,7 +1,7 @@
-enum Status {
-  Failure = 0,
-  Success = 1,
-  Pending = 2
+export enum Status {
+  Failure,
+  Success,
+  Pending
 }
 
 export type Exit<E, A> =

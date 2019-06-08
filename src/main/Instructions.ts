@@ -2,6 +2,9 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 
+/**
+ * @ignore
+ */
 export enum Tag {
   Async,
   Catch,
@@ -16,9 +19,6 @@ export enum Tag {
   TryM
 }
 
-/**
- * Callback function used by async instruction
- */
 type AsyncCB<R = unknown, E = unknown, A = unknown> = (
   env: R,
   rej: CB<E>,
@@ -74,6 +74,9 @@ interface IProvide {
   tag: Tag.Provide
 }
 
+/**
+ * @ignore
+ */
 export type Instruction =
   | IAsync
   | ICatch

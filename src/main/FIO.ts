@@ -198,14 +198,25 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.of(void 0)
   }
 
+  /**
+   * @ignore
+   */
   public readonly P?: (r: R1) => IO<E1, A1>
 
   public constructor(
+    /**
+     * @ignore
+     */
     public readonly tag: Tag,
-    // tslint:disable-next-line: no-unnecessary-initializer
-    public readonly i0: unknown = undefined,
-    // tslint:disable-next-line: no-unnecessary-initializer
-    public readonly i1: unknown = undefined
+    /**
+     * @ignore
+     */
+    public readonly i0?: unknown,
+
+    /**
+     * @ignore
+     */
+    public readonly i1?: unknown
   ) {}
 
   public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<RR<R1, R2>, E1 | E2, A2> {
