@@ -27,16 +27,16 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return this as Instruction
   }
 
+  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
+    return new FIO(Tag.Fork, this)
+  }
+
   public get once(): FIO<R1, never, IO<E1, A1>> {
     return FIO.environment<R1>().chain(env =>
       Await.of<E1, A1>().map(await =>
         await.set(this.provide(env)).and(await.get())
       )
     )
-  }
-
-  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
-    return new FIO(Tag.Fork, this)
   }
 
   public get void(): FIO<R1, E1, void> {
@@ -134,6 +134,14 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.access(Id)
   }
 
+  public static fromExit<E, A>(exit: Exit<E, A>): IO<E, A> {
+    return Exit.isSuccess(exit)
+      ? FIO.of(exit[1])
+      : Exit.isFailure(exit)
+      ? FIO.reject(exit[1])
+      : FIO.never()
+  }
+
   public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
     return FIO.resume(cb)
   }
@@ -229,7 +237,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     that: FIO<R2, E2, A2>,
     cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
     cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
-  ): FIO<RR<R1, R2>, void> {
+  ): FIO<RR<R1, R2>, never, void> {
     return FIO.environment<R1>()
       .zip(FIO.environment<R2>())
       .chain(([r1, r2]) =>
@@ -263,11 +271,11 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public zipWithPar<R2, E2, A2, C>(
     that: FIO<R2, E2, A2>,
-    a1a2: (a1: A1, a2: A2) => C
-  ) {
+    c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
+  ): FIO<RR<R1, R2>, void, C> {
     // Create Caches
-    const cache = Ref.of<A1 | undefined>(undefined).zip(
-      Ref.of<A2 | undefined>(undefined)
+    const cache = Ref.of<Exit<E1, A1>>(Exit.pending()).zip(
+      Ref.of<Exit<E2, A2>>(Exit.pending())
     )
 
     // Create a Counter
@@ -279,20 +287,22 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     // Updates the cache on success
     const setCache = <E, A>(
       exit: Exit<E, A>,
-      ref: Ref<A>,
+      ref: Ref<Exit<E, A>>,
       count: Ref<number>
     ): UIO<void> =>
       Exit.isSuccess(exit)
-        ? ref.set(exit[1]).and(count.update(_ => _ + 1)).void
+        ? ref.set(exit).and(count.update(_ => _ + 1)).void
         : FIO.void()
 
     // Sets the Await
     const setAwait = (count: Ref<number>, await: Await<never, boolean>) =>
-      count.read.chain(c => (c === 2 ? await.set(FIO.of(true)) : FIO.of(false)))
+      count.read.chain(value =>
+        value === 2 ? await.set(FIO.of(true)) : FIO.of(false)
+      )
 
     const setNUpdateCount = <E, A>(
       exit: Exit<E, A>,
-      ref: Ref<A>,
+      ref: Ref<Exit<E, A>>,
       count: Ref<number>,
       await: Await<never, boolean>
     ): UIO<void> => setCache(exit, ref, count).and(setAwait(count, await)).void
@@ -305,7 +315,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
           (exit, fiber) => setNUpdateCount(exit, c2, count, await)
         )
           .and(await.get())
-          .and(c1.read.zipWith(c2.read, (a1, a2) => a1a2(a1 as A1, a2 as A2)))
+          .and(c1.read.zipWith(c2.read, c))
       )
     )
   }
