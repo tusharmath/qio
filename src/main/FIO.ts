@@ -13,6 +13,7 @@ import {Instruction, Tag} from './Instructions'
 import {Ref} from './Ref'
 
 const Id = <A>(_: A): A => _
+const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending())
 
 type RR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
 
@@ -274,9 +275,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
   ): FIO<RR<R1, R2>, void, C> {
     // Create Caches
-    const cache = Ref.of<Exit<E1, A1>>(Exit.pending()).zip(
-      Ref.of<Exit<E2, A2>>(Exit.pending())
-    )
+    const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 
     // Create a Counter
     const counter = Ref.of(0)
@@ -284,35 +283,33 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     // Create an Await
     const done = Await.of<never, boolean>()
 
-    // Updates the cache on success
-    const setCache = <E, A>(
+    const coordinate = <E, A, EE, AA>(
       exit: Exit<E, A>,
-      ref: Ref<Exit<E, A>>,
-      count: Ref<number>
-    ): UIO<void> =>
-      Exit.isSuccess(exit)
-        ? ref.set(exit).and(count.update(_ => _ + 1)).void
-        : FIO.void()
-
-    // Sets the Await
-    const setAwait = (count: Ref<number>, await: Await<never, boolean>) =>
-      count.read.chain(value =>
-        value === 2 ? await.set(FIO.of(true)) : FIO.of(false)
-      )
-
-    const setNUpdateCount = <E, A>(
-      exit: Exit<E, A>,
+      fiber: Fiber<EE, AA>,
       ref: Ref<Exit<E, A>>,
       count: Ref<number>,
       await: Await<never, boolean>
-    ): UIO<void> => setCache(exit, ref, count).and(setAwait(count, await)).void
+    ) =>
+      ref
+        .set(exit)
+        .chain(e =>
+          Exit.isFailure(e)
+            ? fiber.abort().and(await.set(FIO.of(true)))
+            : count
+                .update(_ => _ + 1)
+                .and(
+                  count.read.chain(value =>
+                    value === 2 ? await.set(FIO.of(true)) : FIO.of(false)
+                  )
+                )
+        )
 
     return counter.zip(done).chain(([count, await]) =>
       cache.chain(([c1, c2]) =>
         this.raceWith(
           that,
-          (exit, fiber) => setNUpdateCount(exit, c1, count, await),
-          (exit, fiber) => setNUpdateCount(exit, c2, count, await)
+          (exit, fiber) => coordinate(exit, fiber, c1, count, await).void,
+          (exit, fiber) => coordinate(exit, fiber, c2, count, await).void
         )
           .and(await.get())
           .and(c1.read.zipWith(c2.read, c))

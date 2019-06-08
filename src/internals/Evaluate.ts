@@ -67,7 +67,9 @@ export const Evaluate = <E, A>(
         return
 
       case Tag.Fork:
-        data = new FiberContext(sh, j.i0, cancellationList, context.env)
+        const nContext = context.$fork(j.i0)
+        cancellationList.push(nContext)
+        data = nContext
         break
 
       case Tag.Provide:

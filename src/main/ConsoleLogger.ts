@@ -1,3 +1,4 @@
 import {FIO} from './FIO'
 
-export const putStrLn = (...t: unknown[]) => FIO.uio(() => console.log(...t))
+// tslint:disable-next-line: no-console
+export const log = (...t: unknown[]) => FIO.uio(() => console.log(...t))

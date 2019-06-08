@@ -12,7 +12,6 @@ import {Instruction} from '../main/Instructions'
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 import {Evaluate} from './Evaluate'
-import {noop} from './Noop'
 
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
@@ -22,9 +21,8 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   public constructor(
     public readonly sh: IScheduler,
     io: Instruction,
-    public readonly cancellationList: CancellationList = new CancellationList(),
-    // tslint:disable-next-line: no-unnecessary-initializer
-    public env: unknown = undefined
+    public env?: unknown,
+    public readonly cancellationList: CancellationList = new CancellationList()
   ) {
     super()
     this.stackA.push(io)
@@ -36,6 +34,13 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   public $abort(): void {
     this.stackA.splice(0, this.stackA.length)
     this.cancellationList.cancel()
+  }
+
+  /**
+   *  Creates a new FiberContext with the provided instruction
+   */
+  public $fork<E2, A2>(ins: Instruction): FiberContext<E2, A2> {
+    return new FiberContext<E2, A2>(this.sh, ins, this.env)
   }
 
   /**
@@ -69,21 +74,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   }
 
   /**
-   *  Creates a new FiberContext and evaluates the IO in that context
-   */
-  public fork$<E2, A2>(
-    ins: Instruction,
-    rej: CB<E2>,
-    res: CB<A2>
-  ): FiberContext<E2, A2> {
-    return new FiberContext<E2, A2>(
-      this.sh,
-      ins,
-      this.cancellationList
-    ).$resume(rej, res)
-  }
-
-  /**
    * Pure implementation of $resume().
    */
   public resume(): IO<E, A> {
@@ -91,15 +81,14 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   }
 
   public resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<Fiber<E, A>> {
-    return FIO.uio(() =>
-      this.$resume(
-        cause => {
-          this.fork$(cb(Exit.failure(cause)).asInstruction, noop, noop)
-        },
-        data => {
-          this.fork$(cb(Exit.success(data)).asInstruction, noop, noop)
-        }
+    const eee = <X>(con: (x: X) => Exit<E, A>) => (data: X) => {
+      // tslint:disable-next-line: no-use-before-declare
+      const cancel = () => this.cancellationList.remove(id)
+      const id = this.cancellationList.push(
+        this.$fork(cb(con(data)).asInstruction).$resume(cancel, cancel)
       )
-    )
+    }
+
+    return FIO.uio(() => this.$resume(eee(Exit.failure), eee(Exit.success)))
   }
 }

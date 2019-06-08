@@ -493,6 +493,17 @@ describe('FIO', () => {
       )
       assert.deepEqual(actual, [Exit.success(10), Exit.success(20)])
     })
+
+    it('should abort the pending one on error', () => {
+      const left = FIO.reject(10).delay(500)
+      const right = FIO.of(20).delay(1000)
+      const runtime = testRuntime()
+
+      const actual = runtime.executeSync(
+        left.zipWithPar(right, (a, b) => [a, b])
+      )
+      assert.deepEqual(actual, [Exit.failure(10), Exit.pending()])
+    })
   })
 
   describe('raceWith', () => {
