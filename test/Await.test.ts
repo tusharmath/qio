@@ -26,7 +26,7 @@ describe('Await', () => {
           await
             .set(FIO.of('Hi'))
             .and(await.set(FIO.of('Bye')))
-            .and(await.get())
+            .and(await.get)
         )
       )
       assert.strictEqual(actual, 'Hi')
@@ -47,7 +47,7 @@ describe('Await', () => {
     it('should return the IO value', () => {
       const actual = testRuntime().executeSync(
         Await.of<never, string>().chain(await =>
-          await.set(FIO.of('Hi')).and(await.get())
+          await.set(FIO.of('Hi')).and(await.get)
         )
       )
       assert.strictEqual(actual, 'Hi')
@@ -55,7 +55,7 @@ describe('Await', () => {
 
     it('should not resolve unless set', () => {
       const actual = testRuntime().executeSync(
-        Await.of<never, string>().chain(await => await.get())
+        Await.of<never, string>().chain(await => await.get)
       )
       assert.isUndefined(actual)
     })
@@ -67,7 +67,7 @@ describe('Await', () => {
         string
       >
       let actual: string | undefined
-      runtime.execute(await.get(), r => (actual = r))
+      runtime.execute(await.get, r => (actual = r))
       runtime.execute(await.set(FIO.timeout('Hey', 1000)))
 
       assert.isUndefined(actual)
@@ -76,10 +76,10 @@ describe('Await', () => {
     })
   })
 
-  describe('isSet()', () => {
+  describe('isSet', () => {
     it('should return false initially', () => {
       const actual = testRuntime().executeSync(
-        Await.of<never, string>().chain(await => await.isSet())
+        Await.of<never, string>().chain(await => await.isSet)
       )
 
       assert.notOk(actual)
@@ -88,7 +88,7 @@ describe('Await', () => {
     it('should return true after setting', () => {
       const actual = testRuntime().executeSync(
         Await.of<never, number>().chain(await =>
-          await.set(FIO.of(100)).and(await.isSet())
+          await.set(FIO.of(100)).and(await.isSet)
         )
       )
 

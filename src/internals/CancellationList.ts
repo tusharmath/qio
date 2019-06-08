@@ -18,7 +18,7 @@ export class CancellationList implements ICancellable {
     }
   }
 
-  public isCancelled(): boolean {
+  public get isCancelled(): boolean {
     return this.cancelled
   }
 

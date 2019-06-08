@@ -303,7 +303,7 @@ describe('FIO', () => {
 
       it('should resume with the io', () => {
         const actual = testRuntime().executeSync(
-          FIO.of(10).fork.chain(fiber => fiber.resume())
+          FIO.of(10).fork.chain(fiber => fiber.resume)
         )
 
         const expected = 10
@@ -317,7 +317,7 @@ describe('FIO', () => {
           a
             .inc()
             .delay(1000)
-            .fork.chain(fiber => fiber.resume().delay(100))
+            .fork.chain(fiber => fiber.resume.delay(100))
         )
 
         const expected = 1
@@ -328,7 +328,7 @@ describe('FIO', () => {
       it('should bubble the env', () => {
         const actual = testRuntime().executeSync(
           FIO.access((_: {color: string}) => _.color)
-            .fork.chain(fiber => fiber.resume())
+            .fork.chain(fiber => fiber.resume)
             .provide({color: 'BLUE'})
         )
 
@@ -342,7 +342,7 @@ describe('FIO', () => {
         runtime.execute(
           FIO.of(10)
             .delay(100)
-            .fork.chain(fib => fib.resume().and(counter.inc()))
+            .fork.chain(fib => fib.resume.and(counter.inc()))
         )
         runtime.scheduler.runTo(50)
 
@@ -356,7 +356,7 @@ describe('FIO', () => {
       it('should abort the fiber', () => {
         const counter = new Counter()
         testRuntime().executeSync(
-          counter.inc().fork.chain(fiber => fiber.abort())
+          counter.inc().fork.chain(fiber => fiber.abort)
         )
 
         assert.strictEqual(counter.count, 0)
@@ -367,7 +367,7 @@ describe('FIO', () => {
         testRuntime().executeSync(
           FIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
-            .fork.chain(fiber => fiber.abort())
+            .fork.chain(fiber => fiber.abort)
         )
 
         assert.strictEqual(counter.count, 0)
@@ -418,7 +418,7 @@ describe('FIO', () => {
             FIO.of('Hi').fork.chain(fiber =>
               fiber
                 .resumeAsync(status => await.set(FIO.of(status)).void)
-                .and(await.get())
+                .and(await.get)
             )
           )
         )
@@ -433,7 +433,7 @@ describe('FIO', () => {
             FIO.reject('Hi').fork.chain(fiber =>
               fiber
                 .resumeAsync(status => await.set(FIO.of(status)).void)
-                .and(await.get())
+                .and(await.get)
             )
           )
         )
@@ -502,7 +502,7 @@ describe('FIO', () => {
       const actual = runtime.executeSync(
         left.zipWithPar(right, (a, b) => [a, b])
       )
-      assert.deepEqual(actual, [Exit.failure(10), Exit.pending()])
+      assert.deepEqual(actual, [Exit.failure(10), Exit.pending])
     })
   })
 

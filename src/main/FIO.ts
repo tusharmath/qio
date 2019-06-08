@@ -12,8 +12,12 @@ import {Fiber} from './Fiber'
 import {Instruction, Tag} from './Instructions'
 import {Ref} from './Ref'
 
+//#region Helper Functions
 const Id = <A>(_: A): A => _
-const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending())
+const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
+const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
+  res(cb(env))
+//#endregion
 
 type RR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
 type AA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
@@ -21,8 +25,6 @@ type AA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 export type IO<E, A> = FIO<never, E, A>
 export type Task<A> = IO<Error, A>
 export type UIO<A> = IO<never, A>
-const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
-  res(cb(env))
 
 export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public get asInstruction(): Instruction {
@@ -36,7 +38,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public get once(): FIO<R1, never, IO<E1, A1>> {
     return FIO.environment<R1>().chain(env =>
       Await.of<E1, A1>().map(await =>
-        await.set(this.provide(env)).and(await.get())
+        await.set(this.provide(env)).and(await.get)
       )
     )
   }
@@ -302,7 +304,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
         .set(exit)
         .chain(e =>
           Exit.isFailure(e)
-            ? fiber.abort().and(await.set(FIO.of(true)))
+            ? fiber.abort.and(await.set(FIO.of(true)))
             : count
                 .update(_ => _ + 1)
                 .and(
@@ -319,7 +321,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
           (exit, fiber) => coordinate(exit, fiber, c1, count, await).void,
           (exit, fiber) => coordinate(exit, fiber, c2, count, await).void
         )
-          .and(await.get())
+          .and(await.get)
           .and(c1.read.zipWith(c2.read, c))
       )
     )

@@ -69,14 +69,14 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   /**
    * Pure implementation of cancel()
    */
-  public abort(): UIO<void> {
+  public get abort(): UIO<void> {
     return FIO.uio(() => this.$abort())
   }
 
   /**
    * Pure implementation of $resume().
    */
-  public resume(): IO<E, A> {
+  public get resume(): IO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) => this.$resume(rej, res))
   }
 

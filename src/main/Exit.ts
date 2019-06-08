@@ -18,6 +18,6 @@ export const Exit = {
     x[0] === Status.Pending,
   isSuccess: <E, A>(x: Exit<E, A>): x is [Status.Success, A] =>
     x[0] === Status.Success,
-  pending: (): Exit<never, never> => [Status.Pending],
+  pending: [Status.Pending] as Exit<never, never>,
   success: <A>(a: A): Exit<never, A> => [Status.Success, a]
 }

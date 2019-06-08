@@ -11,9 +11,9 @@ export class Await<E, A> {
   }
   private flag = false
   private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
-  private result: Exit<E, A> = Exit.pending()
+  private result: Exit<E, A> = Exit.pending
 
-  public get(): IO<E, A> {
+  public get get(): IO<E, A> {
     return this.getResult().chain(([status, result]) =>
       status === Exit.Success
         ? FIO.of(result)
@@ -23,12 +23,12 @@ export class Await<E, A> {
     ) as IO<E, A>
   }
 
-  public isSet(): UIO<boolean> {
+  public get isSet(): UIO<boolean> {
     return FIO.uio(() => this.flag)
   }
 
   public set(io: IO<E, A>): UIO<boolean> {
-    return this.isSet().chain(flag =>
+    return this.isSet.chain(flag =>
       flag
         ? FIO.of(false)
         : this.setFlag(true)
