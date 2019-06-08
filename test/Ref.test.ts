@@ -23,7 +23,7 @@ describe('Ref', () => {
       const runtime = testRuntime()
       const count = Ref.of(1000)
       const actual = runtime.executeSync(
-        count.chain(_ => _.update(i => i + 1).and(_.read()))
+        count.chain(_ => _.update(i => i + 1).and(_.read))
       )
       const expected = 1001
 

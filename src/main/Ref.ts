@@ -9,7 +9,7 @@ export class Ref<A> {
   }
   private constructor(private value: A) {}
 
-  public read(): UIO<A> {
+  public get read(): UIO<A> {
     return FIO.uio(() => this.value)
   }
   public set(a: A): UIO<A> {
