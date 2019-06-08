@@ -7,8 +7,10 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 import {CB} from '../internals/CB'
 
 import {Await} from './Await'
+import {Exit} from './Exit'
 import {Fiber} from './Fiber'
 import {Instruction, Tag} from './Instructions'
+import {Ref} from './Ref'
 
 const Id = <A>(_: A): A => _
 
@@ -223,10 +225,33 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Provide, this, env)
   }
 
+  public raceWith<R2, E2, A2>(
+    that: FIO<R2, E2, A2>,
+    cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
+    cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
+  ): FIO<RR<R1, R2>, void> {
+    return FIO.environment<R1>()
+      .zip(FIO.environment<R2>())
+      .chain(([r1, r2]) =>
+        this.provide(r1)
+          .fork.zip(that.provide(r2).fork)
+          .chain(([f1, f2]) => {
+            const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
+            const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
+
+            return resume2.and(resume1).void
+          })
+      )
+  }
+
   public suspend<E2, A2>(
     cb: (f: Fiber<E1, A1>) => IO<E2, A2>
   ): FIO<R1, E2, A2> {
     return new FIO(Tag.Suspend, this, cb)
+  }
+
+  public tap(io: UIO<void>): FIO<R1, E1, A1> {
+    return this.chain(_ => io.const(_))
   }
 
   public zip<R2, E2, A2>(
@@ -245,7 +270,49 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public zipWithPar<R2, E2, A2, C>(
     that: FIO<R2, E2, A2>,
     a1a2: (a1: A1, a2: A2) => C
-  ): FIO<RR<R1, R2>, E1 | E2, C> {
-    return this.zipWith(that, a1a2)
+  ) {
+    // Create Caches
+    const cache = Ref.of<A1 | undefined>(undefined).zip(
+      Ref.of<A2 | undefined>(undefined)
+    )
+
+    // Create a Counter
+    const counter = Ref.of(0)
+
+    // Create an Await
+    const done = Await.of<never, boolean>()
+
+    // Updates the cache on success
+    const setCache = <E, A>(
+      exit: Exit<E, A>,
+      ref: Ref<A>,
+      count: Ref<number>
+    ): UIO<void> =>
+      Exit.isSuccess(exit)
+        ? ref.set(exit[1]).and(count.update(_ => _ + 1)).void
+        : FIO.void
+
+    // Sets the Await
+    const setAwait = (count: Ref<number>, await: Await<never, boolean>) =>
+      count.read.chain(c => (c === 2 ? await.set(FIO.of(true)) : FIO.of(false)))
+
+    const setNUpdateCount = <E, A>(
+      exit: Exit<E, A>,
+      ref: Ref<A>,
+      count: Ref<number>,
+      await: Await<never, boolean>
+    ): UIO<void> => setCache(exit, ref, count).and(setAwait(count, await)).void
+
+    return counter.zip(done).chain(([count, await]) =>
+      cache.chain(([c1, c2]) =>
+        this.raceWith(
+          that,
+          (exit, fiber) => setNUpdateCount(exit, c1, count, await),
+          (exit, fiber) => setNUpdateCount(exit, c2, count, await)
+        )
+          .and(await.get())
+          .and(c1.read.zipWith(c2.read, (a1, a2) => a1a2(a1 as A1, a2 as A2)))
+      )
+    )
   }
 }

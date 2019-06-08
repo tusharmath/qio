@@ -5,6 +5,7 @@
 import {assert} from 'chai'
 
 import {Await} from '../src/main/Await'
+import {putStrLn} from '../src/main/ConsoleLogger'
 import {Exit} from '../src/main/Exit'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
@@ -458,17 +459,19 @@ describe('FIO', () => {
     })
   })
 
-  describe('zipWithPar', () => {
+  describe.skip('zipWithPar', () => {
     it('should combine two IO', () => {
       const actual = testRuntime().executeSync(
-        FIO.of(10).zipWithPar(FIO.of(20), (a, b) => a + b)
+        FIO.of(10)
+          .zipWithPar(FIO.of(20), (a, b) => a + b)
+          .chain(_ => putStrLn('Result', _).const(_))
       )
 
       const expected = 30
       assert.strictEqual(actual, expected)
     })
 
-    it.skip('should combine them in parallel', () => {
+    it('should combine them in parallel', () => {
       const left = FIO.of(10).delay(1000)
       const right = FIO.of(20).delay(1000)
       const runtime = testRuntime()
@@ -477,6 +480,23 @@ describe('FIO', () => {
       const actual = runtime.scheduler.now()
       assert.isAbove(actual, 1000)
       assert.isBelow(actual, 2000)
+    })
+  })
+
+  describe.skip('raceWith', () => {
+    it('should run in parallel', () => {
+      const counter = new Counter()
+
+      const a = FIO.timeout('A', 1000)
+      const b = FIO.timeout('B', 2000)
+
+      const runtime = testRuntime()
+      runtime.execute(
+        a.raceWith(b, () => FIO.void, () => FIO.void).and(counter.inc())
+      )
+      runtime.scheduler.runTo(10)
+
+      assert.strictEqual(counter.count, 1)
     })
   })
 })
