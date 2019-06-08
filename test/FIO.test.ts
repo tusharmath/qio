@@ -5,7 +5,6 @@
 import {assert} from 'chai'
 
 import {Await} from '../src/main/Await'
-import {putStrLn} from '../src/main/ConsoleLogger'
 import {Exit} from '../src/main/Exit'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
@@ -207,7 +206,7 @@ describe('FIO', () => {
 
   describe('never', () => {
     it('should never resolve/reject', () => {
-      const actual = testRuntime().executeSync(FIO.never)
+      const actual = testRuntime().executeSync(FIO.never())
       const expected = undefined
       assert.strictEqual(actual, expected)
     })
@@ -278,21 +277,25 @@ describe('FIO', () => {
     })
   })
 
-  describe('suspend', () => {
+  describe('fork', () => {
     it('should return an instance of Fiber', () => {
-      const actual = testRuntime().executeSync(
-        FIO.of(10).suspend(_ => FIO.of(_))
-      )
+      const actual = testRuntime().executeSync(FIO.of(10).fork)
       assert.instanceOf(actual, Fiber)
     })
 
+    it('should complete immediately', () => {
+      const runtime = testRuntime()
+      const counter = new Counter()
+      runtime.execute(FIO.timeout('A', 1000).fork.and(counter.inc()))
+      runtime.scheduler.runTo(10)
+      assert.isTrue(counter.increased)
+    })
+
     describe('fiber.resume', () => {
-      it('should not run suspended fibers', () => {
+      it('should not run forked fibers', () => {
         const runtime = testRuntime()
         const counter = new Counter()
-        const actual = runtime.executeSync(
-          counter.inc().suspend(() => FIO.never)
-        )
+        const actual = runtime.executeSync(counter.inc().fork.chain(FIO.never))
 
         assert.isUndefined(actual)
         assert.strictEqual(counter.count, 0)
@@ -300,7 +303,7 @@ describe('FIO', () => {
 
       it('should resume with the io', () => {
         const actual = testRuntime().executeSync(
-          FIO.of(10).suspend(fiber => fiber.resume())
+          FIO.of(10).fork.chain(fiber => fiber.resume())
         )
 
         const expected = 10
@@ -314,7 +317,7 @@ describe('FIO', () => {
           a
             .inc()
             .delay(1000)
-            .suspend(fiber => fiber.resume().delay(100))
+            .fork.chain(fiber => fiber.resume().delay(100))
         )
 
         const expected = 1
@@ -325,7 +328,7 @@ describe('FIO', () => {
       it('should bubble the env', () => {
         const actual = testRuntime().executeSync(
           FIO.access((_: {color: string}) => _.color)
-            .suspend(fiber => fiber.resume())
+            .fork.chain(fiber => fiber.resume())
             .provide({color: 'BLUE'})
         )
 
@@ -339,7 +342,7 @@ describe('FIO', () => {
         runtime.execute(
           FIO.of(10)
             .delay(100)
-            .suspend(fib => fib.resume().and(counter.inc()))
+            .fork.chain(fib => fib.resume().and(counter.inc()))
         )
         runtime.scheduler.runTo(50)
 
@@ -352,7 +355,9 @@ describe('FIO', () => {
     describe('fiber.abort', () => {
       it('should abort the fiber', () => {
         const counter = new Counter()
-        testRuntime().executeSync(counter.inc().suspend(fiber => fiber.abort()))
+        testRuntime().executeSync(
+          counter.inc().fork.chain(fiber => fiber.abort())
+        )
 
         assert.strictEqual(counter.count, 0)
       })
@@ -362,7 +367,7 @@ describe('FIO', () => {
         testRuntime().executeSync(
           FIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
-            .suspend(fiber => fiber.abort())
+            .fork.chain(fiber => fiber.abort())
         )
 
         assert.strictEqual(counter.count, 0)
@@ -377,7 +382,7 @@ describe('FIO', () => {
           a
             .inc()
             .delay(1000)
-            .suspend(fiber => fiber.resumeAsync(() => FIO.void))
+            .fork.chain(fiber => fiber.resumeAsync(FIO.void))
         )
         runtime.scheduler.runTo(50)
 
@@ -388,8 +393,8 @@ describe('FIO', () => {
         const a = new Counter()
         const runtime = testRuntime()
         runtime.execute(
-          FIO.timeout(0, 1000).suspend(fiber =>
-            fiber.resumeAsync(() => FIO.void).and(a.inc())
+          FIO.timeout(0, 1000).fork.chain(fiber =>
+            fiber.resumeAsync(FIO.void).and(a.inc())
           )
         )
         runtime.scheduler.runTo(10)
@@ -399,8 +404,8 @@ describe('FIO', () => {
 
       it('should return the same fiber', () => {
         const actual = testRuntime().executeSync(
-          FIO.void.suspend(fiber =>
-            fiber.resumeAsync(() => FIO.void).map(_ => _ === fiber)
+          FIO.void().fork.chain(fiber =>
+            fiber.resumeAsync(FIO.void).map(_ => _ === fiber)
           )
         )
 
@@ -410,7 +415,7 @@ describe('FIO', () => {
       it('should call with  Exit.success', () => {
         const actual = testRuntime().executeSync(
           Await.of<never, Exit<never, string>>().chain(await =>
-            FIO.of('Hi').suspend(fiber =>
+            FIO.of('Hi').fork.chain(fiber =>
               fiber
                 .resumeAsync(status => await.set(FIO.of(status)).void)
                 .and(await.get())
@@ -425,7 +430,7 @@ describe('FIO', () => {
       it('should call with  Exit.failure', () => {
         const actual = testRuntime().executeSync(
           Await.of<never, Exit<string, never>>().chain(await =>
-            FIO.reject('Hi').suspend(fiber =>
+            FIO.reject('Hi').fork.chain(fiber =>
               fiber
                 .resumeAsync(status => await.set(FIO.of(status)).void)
                 .and(await.get())
@@ -459,12 +464,10 @@ describe('FIO', () => {
     })
   })
 
-  describe.skip('zipWithPar', () => {
+  describe('zipWithPar', () => {
     it('should combine two IO', () => {
       const actual = testRuntime().executeSync(
-        FIO.of(10)
-          .zipWithPar(FIO.of(20), (a, b) => a + b)
-          .chain(_ => putStrLn('Result', _).const(_))
+        FIO.of(10).zipWithPar(FIO.of(20), (a, b) => a + b)
       )
 
       const expected = 30
@@ -472,18 +475,30 @@ describe('FIO', () => {
     })
 
     it('should combine them in parallel', () => {
-      const left = FIO.of(10).delay(1000)
+      const left = FIO.of(10).delay(1500)
       const right = FIO.of(20).delay(1000)
       const runtime = testRuntime()
       runtime.executeSync(left.zipWithPar(right, (a, b) => a + b))
 
       const actual = runtime.scheduler.now()
-      assert.isAbove(actual, 1000)
+      assert.isAbove(actual, 1500)
       assert.isBelow(actual, 2000)
+    })
+
+    it('should output the result', () => {
+      const left = FIO.of(10).delay(1500)
+      const right = FIO.of(20).delay(1000)
+      const runtime = testRuntime()
+
+      const actual = runtime.executeSync(
+        left.zipWithPar(right, (a, b) => a + b)
+      )
+      const expected = 30
+      assert.strictEqual(actual, expected)
     })
   })
 
-  describe.skip('raceWith', () => {
+  describe('raceWith', () => {
     it('should run in parallel', () => {
       const counter = new Counter()
 
@@ -491,9 +506,7 @@ describe('FIO', () => {
       const b = FIO.timeout('B', 2000)
 
       const runtime = testRuntime()
-      runtime.execute(
-        a.raceWith(b, () => FIO.void, () => FIO.void).and(counter.inc())
-      )
+      runtime.execute(a.raceWith(b, FIO.void, FIO.void).and(counter.inc()))
       runtime.scheduler.runTo(10)
 
       assert.strictEqual(counter.count, 1)

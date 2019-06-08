@@ -11,7 +11,7 @@ export enum Tag {
   Never,
   Provide,
   Reject,
-  Suspend,
+  Fork,
   Try,
   TryM
 }
@@ -66,8 +66,7 @@ interface INever {
 }
 interface IFork {
   i0: Instruction
-  tag: Tag.Suspend
-  i1(a: unknown): Instruction
+  tag: Tag.Fork
 }
 interface IProvide {
   i0: Instruction

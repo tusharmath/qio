@@ -66,11 +66,9 @@ export const Evaluate = <E, A>(
       case Tag.Never:
         return
 
-      case Tag.Suspend:
-        stackA.push(j.i0)
-        context.fork$(j.i1(context), rej, res)
-
-        return
+      case Tag.Fork:
+        data = new FiberContext(sh, j.i0, cancellationList, context.env)
+        break
 
       case Tag.Provide:
         context.env = j.i1

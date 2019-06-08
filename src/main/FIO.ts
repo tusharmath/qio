@@ -27,14 +27,6 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return this as Instruction
   }
 
-  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
-    return this.suspend(FIO.of)
-  }
-
-  public static get never(): UIO<never> {
-    return new FIO(Tag.Never, undefined)
-  }
-
   public get once(): FIO<R1, never, IO<E1, A1>> {
     return FIO.environment<R1>().chain(env =>
       Await.of<E1, A1>().map(await =>
@@ -43,8 +35,8 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     )
   }
 
-  public static get void(): UIO<void> {
-    return FIO.of(void 0)
+  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
+    return new FIO(Tag.Fork, this)
   }
 
   public get void(): FIO<R1, E1, void> {
@@ -153,6 +145,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Map, fa, ab)
   }
 
+  public static never(): UIO<never> {
+    return new FIO(Tag.Never, undefined)
+  }
+
   public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
   }
@@ -184,6 +180,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public static uio<A>(cb: () => A): UIO<A> {
     return FIO.io(cb)
+  }
+
+  public static void(): UIO<void> {
+    return FIO.of(void 0)
   }
   public constructor(
     public readonly tag: Tag,
@@ -244,12 +244,6 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
       )
   }
 
-  public suspend<E2, A2>(
-    cb: (f: Fiber<E1, A1>) => IO<E2, A2>
-  ): FIO<R1, E2, A2> {
-    return new FIO(Tag.Suspend, this, cb)
-  }
-
   public tap(io: UIO<void>): FIO<R1, E1, A1> {
     return this.chain(_ => io.const(_))
   }
@@ -290,7 +284,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     ): UIO<void> =>
       Exit.isSuccess(exit)
         ? ref.set(exit[1]).and(count.update(_ => _ + 1)).void
-        : FIO.void
+        : FIO.void()
 
     // Sets the Await
     const setAwait = (count: Ref<number>, await: Await<never, boolean>) =>

@@ -16,14 +16,15 @@ import {noop} from './Noop'
 
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
-  public env?: unknown = undefined
   public readonly stackA: Instruction[] = []
   public readonly stackE: Array<(e: unknown) => Instruction> = []
 
   public constructor(
     public readonly sh: IScheduler,
     io: Instruction,
-    public readonly cancellationList: CancellationList = new CancellationList()
+    public readonly cancellationList: CancellationList = new CancellationList(),
+    // tslint:disable-next-line: no-unnecessary-initializer
+    public env: unknown = undefined
   ) {
     super()
     this.stackA.push(io)
