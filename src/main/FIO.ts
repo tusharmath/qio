@@ -16,6 +16,7 @@ const Id = <A>(_: A): A => _
 const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending())
 
 type RR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
+type AA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
 export type IO<E, A> = FIO<never, E, A>
 export type Task<A> = IO<Error, A>
@@ -48,9 +49,9 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return FIO.async((env, _, res, sh) => sh.asap(asapCB, res, cb, env))
   }
 
-  public static accessM<R1, E1, A1>(
-    cb: (env: R1) => FIO<R1, E1, A1>
-  ): FIO<R1, E1, A1> {
+  public static accessM<R1, E1, A1, R2>(
+    cb: (env: R1) => FIO<R2, E1, A1>
+  ): FIO<RR<R1, R2>, E1, A1> {
     return FIO.access(cb).chain(Id)
   }
 
@@ -112,7 +113,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     return new FIO(Tag.Constant, value)
   }
 
-  public static encase<E, A, T extends unknown[]>(
+  public static encase<E = never, A = never, T extends unknown[] = unknown[]>(
     cb: (...t: T) => A
   ): (...t: T) => IO<E, A> {
     return (...t) => FIO.io(() => cb(...t))
@@ -194,6 +195,9 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static void(): UIO<void> {
     return FIO.of(void 0)
   }
+
+  public readonly P?: (r: R1) => IO<E1, A1>
+
   public constructor(
     public readonly tag: Tag,
     // tslint:disable-next-line: no-unnecessary-initializer
@@ -208,7 +212,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public catch<R2, E2, A2>(
     aFb: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E2, A2> {
+  ): FIO<RR<R1, R2>, E2, A1 | A2> {
     return FIO.catch(this, aFb)
   }
 
@@ -259,8 +263,12 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public zip<R2, E2, A2>(
     that: FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E1 | E2, [A1, A2]> {
-    return this.zipWith(that, (a, b) => [a, b])
+  ): FIO<RR<R1, R2>, E1 | E2, AA<A1, A2>> {
+    return this.zipWith(that, (a, b) => [a, b]) as FIO<
+      RR<R1, R2>,
+      E1 | E2,
+      AA<A1, A2>
+    >
   }
 
   public zipWith<R2, E2, A2, C>(
@@ -283,10 +291,10 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     // Create an Await
     const done = Await.of<never, boolean>()
 
-    const coordinate = <E, A, EE, AA>(
-      exit: Exit<E, A>,
-      fiber: Fiber<EE, AA>,
-      ref: Ref<Exit<E, A>>,
+    const coordinate = <E_1, A_1, E_2, A_2>(
+      exit: Exit<E_1, A_1>,
+      fiber: Fiber<E_2, A_2>,
+      ref: Ref<Exit<E_1, A_1>>,
       count: Ref<number>,
       await: Await<never, boolean>
     ) =>

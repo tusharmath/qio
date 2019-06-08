@@ -1,18 +1,18 @@
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
-import {FIO} from '../..'
 import {noop} from '../../src/internals/Noop'
+import {IO} from '../../src/main/FIO'
 import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 import {PrintLn} from './PrintLn'
 
 const runtime = defaultRuntime()
 
-export const RunSuite = (
+export const RunSuite = <E, A>(
   name: string,
   test: {
-    fio: FIO
+    fio: IO<E, A>
     fluture: FutureInstance<unknown, unknown>
   }
 ) => {
