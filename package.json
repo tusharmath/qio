@@ -54,6 +54,7 @@
     "tslint": "^5.17.0",
     "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.14.2",
+    "typedoc-default-themes": "tusharmath/typedoc-default-themes",
     "typescript": "^3.5.1",
     "typescript-tslint-plugin": "^0.4.0",
     "typings-checker": "^2.0.0"
