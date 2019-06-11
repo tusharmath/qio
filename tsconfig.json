@@ -10,5 +10,5 @@
     "incremental": true,
     "removeComments": true
   },
-  "exclude": ["type-test"]
+  "exclude": ["type-test", "example"]
 }
