@@ -452,6 +452,22 @@ describe('FIO', () => {
       const expected = 'Red'
       assert.strictEqual(actual, expected)
     })
+
+    it('should maintain order', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((_: {name: string}) => `Hi ${_.name}`)
+          .chain(greeting =>
+            FIO.access(
+              (_: {age: number}) => `${greeting}, your age is ${_.age} years`
+            ).provide({
+              age: 5
+            })
+          )
+          .provide({name: 'Github'})
+      )
+
+      assert.strictEqual(actual, 'Hi Github, your age is 5 years')
+    })
   })
 
   describe('zipWith', () => {
