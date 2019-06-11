@@ -1,28 +1,22 @@
 import {FIO} from '../../'
 
-export interface ConsoleService {
-  getStrLn(question: string): Promise<string>
-  putStrLn(message: string): void
-}
-
-export interface SystemService {
-  exit(code?: number): void
-}
-
-export interface RandomService {
-  random(): number
-}
-
 export interface ConsoleEnv {
-  console: ConsoleService
+  console: {
+    getStrLn(question: string): Promise<string>
+    putStrLn(message: string): void
+  }
 }
 
 export interface RandomEnv {
-  random: RandomService
+  random: {
+    random(): number
+  }
 }
 
 export interface SystemEnv {
-  system: SystemService
+  system: {
+    exit(code?: number): void
+  }
 }
 
 const MAX_NUMBER = 6
