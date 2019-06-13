@@ -2,18 +2,19 @@ import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
 import {noop} from '../../src/internals/Noop'
-import {IO} from '../../src/main/FIO'
+import {UIO} from '../../src/main/FIO'
 import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 import {PrintLn} from './PrintLn'
 
-const runtime = defaultRuntime()
+export const fioRuntime = defaultRuntime()
 
-export const RunSuite = <E, A>(
+export const RunSuite = (
   name: string,
   test: {
-    fio: IO<E, A>
-    fluture: FutureInstance<unknown, unknown>
+    bluebird(): PromiseLike<unknown>
+    fio(): UIO<unknown>
+    fluture(): FutureInstance<unknown, unknown>
   }
 ) => {
   PrintLn('##', name)
@@ -22,22 +23,22 @@ export const RunSuite = <E, A>(
   suite
     .add(
       'FIO',
-      (cb: IDefer) => {
-        runtime.execute(test.fio, () => cb.resolve())
-      },
+      (cb: IDefer) => fioRuntime.execute(test.fio(), () => cb.resolve()),
       {defer: true}
     )
     .add(
       'Fluture',
-      (cb: IDefer) => {
-        test.fluture.fork(noop, () => cb.resolve())
-      },
+      (cb: IDefer) => test.fluture().fork(noop, () => cb.resolve()),
       {defer: true}
     )
+    .add('bluebird', (cb: IDefer) => test.bluebird().then(() => cb.resolve()), {
+      defer: true
+    })
 
     .on('cycle', (event: Event) => {
       PrintLn(String(event.target))
     })
+
     .on('complete', function(this: Suite): void {
       PrintLn(
         'Fastest is ' +
