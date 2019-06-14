@@ -73,15 +73,9 @@ export const Evaluate = <E, A>(
         data = nContext
         break
 
-      case Tag.Provide:
-        context.env = j.i1
-        stackA.push(j.i0)
-        break
-
       case Tag.Async:
         const id = cancellationList.push(
           j.i0(
-            context.env,
             err => {
               cancellationList.remove(id)
               stackA.push(FIO.reject(err).asInstruction)

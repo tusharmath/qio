@@ -3,7 +3,7 @@ import {LinkedList} from 'dbl-linked-list-ds'
 import {CB} from '../internals/CB'
 
 import {Exit} from './Exit'
-import {FIO, IO, UIO} from './FIO'
+import {FIO, UIO} from './FIO'
 
 export class Await<E, A> {
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
@@ -13,21 +13,21 @@ export class Await<E, A> {
   private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
   private result: Exit<E, A> = Exit.pending
 
-  public get get(): IO<E, A> {
+  public get get(): FIO<E, A> {
     return this.getResult().chain(([status, result]) =>
       status === Exit.Success
         ? FIO.of(result)
         : status === Exit.Failure
         ? FIO.reject(result)
         : this.wait()
-    ) as IO<E, A>
+    ) as FIO<E, A>
   }
 
   public get isSet(): UIO<boolean> {
     return FIO.uio(() => this.flag)
   }
 
-  public set(io: IO<E, A>): UIO<boolean> {
+  public set(io: FIO<E, A>): UIO<boolean> {
     return this.isSet.chain(flag =>
       flag
         ? FIO.of(false)
@@ -64,7 +64,7 @@ export class Await<E, A> {
     })
   }
 
-  private wait(): IO<E, A> {
+  private wait(): FIO<E, A> {
     return FIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 

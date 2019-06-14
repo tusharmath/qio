@@ -31,33 +31,15 @@ describe('FIO', () => {
   })
 
   describe('access', () => {
-    it('should access a value and transform', () => {
-      const actual = testRuntime().executeSync(
-        FIO.access((env: {count: number}) => env.count).provide({count: 1000})
-      )
-      const expected = 1000
-      assert.strictEqual(actual, expected)
-    })
+    it.skip('should access a value and transform')
   })
 
   describe('accessM', () => {
-    it('should purely access the env', () => {
-      const actual = testRuntime().executeSync(
-        FIO.accessM((env: {count: number}) => FIO.of(env.count)).provide({
-          count: 1000
-        })
-      )
-      const expected = 1000
-      assert.strictEqual(actual, expected)
-    })
+    it.skip('should purely access the env')
   })
 
   describe('chain', () => {
-    it('should sequence the operations', () => {
-      const actual = testRuntime().executeSync(FIO.of(1000).chain(FIO.of))
-      const expected = 1000
-      assert.strictEqual(actual, expected)
-    })
+    it.skip('should sequence the operations')
   })
 
   describe('reject', () => {
@@ -71,7 +53,7 @@ describe('FIO', () => {
   describe('async', () => {
     it('should evaluate asynchronously', async () => {
       const actual = await defaultRuntime().executePromise(
-        FIO.async((env, rej, res) => {
+        FIO.async((rej, res) => {
           const id = setTimeout(res, 100, 1000)
 
           return {cancel: () => clearTimeout(id)}
@@ -94,15 +76,7 @@ describe('FIO', () => {
   })
 
   describe('accessP', () => {
-    it('should access promise based envs', async () => {
-      const actual = await defaultRuntime().executePromise(
-        FIO.accessP((env: {count: number}) =>
-          Promise.resolve(env.count)
-        ).provide({count: 1000})
-      )
-      const expected = 1000
-      assert.strictEqual(actual, expected)
-    })
+    it.skip('should access promise based envs')
   })
 
   describe('try', () => {
@@ -325,16 +299,7 @@ describe('FIO', () => {
         assert.strictEqual(runtime.scheduler.now(), 1101)
       })
 
-      it('should bubble the env', () => {
-        const actual = testRuntime().executeSync(
-          FIO.access((_: {color: string}) => _.color)
-            .fork.chain(fiber => fiber.resume)
-            .provide({color: 'BLUE'})
-        )
-
-        const expected = 'BLUE'
-        assert.strictEqual(actual, expected)
-      })
+      it.skip('should bubble the env')
 
       it('should resolve after the IO is completed', () => {
         const counter = new Counter()
@@ -445,29 +410,9 @@ describe('FIO', () => {
   })
 
   describe('provide', () => {
-    it('should provide the env to FIO', () => {
-      const actual = testRuntime().executeSync(
-        FIO.access((_: {color: string}) => _.color).provide({color: 'Red'})
-      )
-      const expected = 'Red'
-      assert.strictEqual(actual, expected)
-    })
+    it.skip('should provide the env to FIO')
 
-    it('should maintain order', () => {
-      const actual = testRuntime().executeSync(
-        FIO.access((_: {name: string}) => `Hi ${_.name}`)
-          .chain(greeting =>
-            FIO.access(
-              (_: {age: number}) => `${greeting}, your age is ${_.age} years`
-            ).provide({
-              age: 5
-            })
-          )
-          .provide({name: 'Github'})
-      )
-
-      assert.strictEqual(actual, 'Hi Github, your age is 5 years')
-    })
+    it.skip('should maintain order')
   })
 
   describe('zipWith', () => {

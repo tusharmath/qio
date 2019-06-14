@@ -15,99 +15,69 @@ import {Ref} from './Ref'
 //#region Helper Functions
 const Id = <A>(_: A): A => _
 const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
-const asapCB = <R1, A1>(res: CB<A1>, cb: (env: R1) => A1, env: R1) =>
-  res(cb(env))
 //#endregion
 
-type RR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
 type AA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
-export type IO<E, A> = FIO<never, E, A>
-export type Task<A> = IO<Error, A>
-export type UIO<A> = IO<never, A>
+export type Task<A> = FIO<Error, A>
+export type UIO<A> = FIO<never, A>
 
-export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
+export class FIO<E1 = unknown, A1 = unknown> {
   public get asInstruction(): Instruction {
     return this as Instruction
   }
 
-  public get fork(): FIO<R1, never, Fiber<E1, A1>> {
+  public get fork(): FIO<never, Fiber<E1, A1>> {
     return new FIO(Tag.Fork, this)
   }
 
-  public get once(): FIO<R1, never, IO<E1, A1>> {
-    return FIO.environment<R1>().chain(env =>
-      Await.of<E1, A1>().map(await =>
-        await.set(this.provide(env)).and(await.get)
-      )
-    )
+  public get once(): FIO<never, FIO<E1, A1>> {
+    return Await.of<E1, A1>().map(await => await.set(this).and(await.get))
   }
 
-  public get void(): FIO<R1, E1, void> {
+  public get void(): FIO<E1, void> {
     return this.const(undefined)
-  }
-
-  public static access<R1, A1>(cb: (env: R1) => A1): FIO<R1, never, A1> {
-    return FIO.async((env, _, res, sh) => sh.asap(asapCB, res, cb, env))
-  }
-
-  public static accessM<R1, E1, A1, R2>(
-    cb: (env: R1) => FIO<R2, E1, A1>
-  ): FIO<RR<R1, R2>, E1, A1> {
-    return FIO.access(cb).chain(Id)
-  }
-
-  public static accessP<R1 = unknown, E1 = never, A1 = unknown>(
-    cb: (env: R1) => Promise<A1>
-  ): FIO<R1, E1, A1> {
-    return FIO.async((env, rej, res, sh) =>
-      sh.asap(() => {
-        cb(env)
-          .then(res)
-          .catch(rej)
-      })
-    )
   }
 
   /**
    * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give users compile time error always while using.
    */
-  public static async<R1 = never, E1 = never, A1 = never>(
-    cb: (env: R1, rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): FIO<R1, E1, A1> {
+  public static async<E1 = never, A1 = never>(
+    cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
+  ): FIO<E1, A1> {
     return new FIO(Tag.Async, cb)
   }
 
   public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): IO<E1, A1> {
-    return FIO.async((env, rej, res, sh) => cb(rej, res, sh))
+  ): FIO<E1, A1> {
+    return FIO.async(cb)
   }
 
   public static asyncTask<A1 = never>(
     cb: (rej: CB<Error>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): Task<A1> {
-    return FIO.async((env, rej, res, sh) => cb(rej, res, sh))
+    return FIO.async(cb)
   }
 
   public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>, sh: IScheduler) => ICancellable
   ): UIO<A1> {
-    return FIO.async((env, rej, res, sh) => cb(res, sh))
+    return FIO.async((rej, res, sh) => cb(res, sh))
   }
 
-  public static catch<R1, E1, A1, R2, E2, A2>(
-    fa: FIO<R1, E1, A1>,
-    aFe: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E2, A2> {
+  public static catch<E1, A1, E2, A2>(
+    fa: FIO<E1, A1>,
+    aFe: (e: E1) => FIO<E2, A2>
+  ): FIO<E2, A2> {
     return new FIO(Tag.Catch, fa, aFe)
   }
 
-  public static chain<R1, E1, A1, R2, E2, A2>(
-    fa: FIO<R1, E1, A1>,
-    aFb: (a: A1) => FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E1 | E2, A2> {
+  public static chain<E1, A1, E2, A2>(
+    fa: FIO<E1, A1>,
+    aFb: (a: A1) => FIO<E2, A2>
+  ): FIO<E1 | E2, A2> {
     return new FIO(Tag.Chain, fa, aFb)
   }
 
@@ -117,15 +87,15 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
 
   public static encase<E = never, A = never, T extends unknown[] = unknown[]>(
     cb: (...t: T) => A
-  ): (...t: T) => IO<E, A> {
+  ): (...t: T) => FIO<E, A> {
     return (...t) => FIO.io(() => cb(...t))
   }
 
   public static encaseP<E, A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
-  ): (...t: T) => IO<E, A> {
+  ): (...t: T) => FIO<E, A> {
     return (...t) =>
-      FIO.async((env, rej, res, sh) =>
+      FIO.async((rej, res, sh) =>
         sh.asap(() => {
           void cb(...t)
             .then(res)
@@ -134,11 +104,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
       )
   }
 
-  public static environment<R1 = never>(): FIO<R1, never, R1> {
-    return FIO.access(Id)
-  }
-
-  public static fromExit<E, A>(exit: Exit<E, A>): IO<E, A> {
+  public static fromExit<E, A>(exit: Exit<E, A>): FIO<E, A> {
     return Exit.isSuccess(exit)
       ? FIO.of(exit[1])
       : Exit.isFailure(exit)
@@ -146,14 +112,14 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
       : FIO.never()
   }
 
-  public static io<E = never, A = unknown>(cb: () => A): IO<E, A> {
+  public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
     return FIO.resume(cb)
   }
 
-  public static map<R1, E1, A1, A2>(
-    fa: FIO<R1, E1, A1>,
+  public static map<E1, A1, A2>(
+    fa: FIO<E1, A1>,
     ab: (a: A1) => A2
-  ): FIO<R1, E1, A2> {
+  ): FIO<E1, A2> {
     return new FIO(Tag.Map, fa, ab)
   }
 
@@ -164,7 +130,7 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
   }
-  public static reject<E1>(error: E1): IO<E1, never> {
+  public static reject<E1>(error: E1): FIO<E1, never> {
     return new FIO(Tag.Reject, error)
   }
 
@@ -178,12 +144,12 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   /**
    * @ignore
    */
-  public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): IO<E1, A2> {
+  public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
     return new FIO(Tag.TryM, cb)
   }
 
   public static timeout<A>(value: A, duration: number): UIO<A> {
-    return FIO.async((env, rej, res, sh) => sh.delay(res, duration, value))
+    return FIO.async((rej, res, sh) => sh.delay(res, duration, value))
   }
 
   public static try<A>(cb: () => A): Task<A> {
@@ -197,11 +163,6 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
   public static void(): UIO<void> {
     return FIO.of(void 0)
   }
-
-  /**
-   * @ignore
-   */
-  public readonly P?: (r: R1) => IO<E1, A1>
 
   public constructor(
     /**
@@ -219,82 +180,62 @@ export class FIO<R1 = unknown, E1 = unknown, A1 = unknown> {
     public readonly i1?: unknown
   ) {}
 
-  public and<R2, E2, A2>(aFb: FIO<R2, E2, A2>): FIO<RR<R1, R2>, E1 | E2, A2> {
+  public and<E2, A2>(aFb: FIO<E2, A2>): FIO<E1 | E2, A2> {
     return this.chain(() => aFb)
   }
 
-  public catch<R2, E2, A2>(
-    aFb: (e: E1) => FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E2, A1 | A2> {
+  public catch<E2, A2>(aFb: (e: E1) => FIO<E2, A2>): FIO<E2, A1 | A2> {
     return FIO.catch(this, aFb)
   }
 
-  public chain<R2, E2, A2>(
-    aFb: (a: A1) => FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E1 | E2, A2> {
+  public chain<E2, A2>(aFb: (a: A1) => FIO<E2, A2>): FIO<E1 | E2, A2> {
     return FIO.chain(this, aFb)
   }
 
-  public const<A2>(a: A2): FIO<R1, E1, A2> {
+  public const<A2>(a: A2): FIO<E1, A2> {
     return this.and(FIO.of(a))
   }
 
-  public delay(duration: number): FIO<R1, E1, A1> {
+  public delay(duration: number): FIO<E1, A1> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
-  public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
+  public map<A2>(ab: (a: A1) => A2): FIO<E1, A2> {
     return FIO.map(this, ab)
   }
 
-  public provide(env: R1): IO<E1, A1> {
-    return new FIO(Tag.Provide, this, env)
-  }
-
-  public raceWith<R2, E2, A2>(
-    that: FIO<R2, E2, A2>,
+  public raceWith<E2, A2>(
+    that: FIO<E2, A2>,
     cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
     cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
-  ): FIO<RR<R1, R2>, never, void> {
-    return FIO.environment<R1>()
-      .zip(FIO.environment<R2>())
-      .chain(([r1, r2]) =>
-        this.provide(r1)
-          .fork.zip(that.provide(r2).fork)
-          .chain(([f1, f2]) => {
-            const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
-            const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
+  ): FIO<never, void> {
+    return this.fork.zip(that.fork).chain(([f1, f2]) => {
+      const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
+      const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
 
-            return resume2.and(resume1).void
-          })
-      )
+      return resume2.and(resume1).void
+    })
   }
 
-  public tap(io: UIO<void>): FIO<R1, E1, A1> {
+  public tap(io: UIO<void>): FIO<E1, A1> {
     return this.chain(_ => io.const(_))
   }
 
-  public zip<R2, E2, A2>(
-    that: FIO<R2, E2, A2>
-  ): FIO<RR<R1, R2>, E1 | E2, AA<A1, A2>> {
-    return this.zipWith(that, (a, b) => [a, b]) as FIO<
-      RR<R1, R2>,
-      E1 | E2,
-      AA<A1, A2>
-    >
+  public zip<E2, A2>(that: FIO<E2, A2>): FIO<E1 | E2, AA<A1, A2>> {
+    return this.zipWith(that, (a, b) => [a, b]) as FIO<E1 | E2, AA<A1, A2>>
   }
 
-  public zipWith<R2, E2, A2, C>(
-    that: FIO<R2, E2, A2>,
+  public zipWith<E2, A2, C>(
+    that: FIO<E2, A2>,
     c: (a1: A1, a2: A2) => C
-  ): FIO<RR<R1, R2>, E1 | E2, C> {
+  ): FIO<E1 | E2, C> {
     return this.chain(a1 => that.map(a2 => c(a1, a2)))
   }
 
-  public zipWithPar<R2, E2, A2, C>(
-    that: FIO<R2, E2, A2>,
+  public zipWithPar<E2, A2, C>(
+    that: FIO<E2, A2>,
     c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
-  ): FIO<RR<R1, R2>, void, C> {
+  ): FIO<void, C> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 

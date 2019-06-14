@@ -6,7 +6,7 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {Exit} from '../main/Exit'
 import {Fiber} from '../main/Fiber'
-import {FIO, IO, UIO} from '../main/FIO'
+import {FIO, UIO} from '../main/FIO'
 import {Instruction} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
@@ -24,7 +24,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   public constructor(
     public readonly sh: IScheduler,
     io: Instruction,
-    public env?: unknown,
     public readonly cancellationList: CancellationList = new CancellationList()
   ) {
     super()
@@ -43,7 +42,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
    *  Creates a new FiberContext with the provided instruction
    */
   public $fork<E2, A2>(ins: Instruction): FiberContext<E2, A2> {
-    return new FiberContext<E2, A2>(this.sh, ins, this.env)
+    return new FiberContext<E2, A2>(this.sh, ins)
   }
 
   /**
@@ -79,7 +78,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   /**
    * Pure implementation of $resume().
    */
-  public get resume(): IO<E, A> {
+  public get resume(): FIO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) => this.$resume(rej, res))
   }
 

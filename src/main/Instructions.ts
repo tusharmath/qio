@@ -12,15 +12,13 @@ export enum Tag {
   Constant,
   Map,
   Never,
-  Provide,
   Reject,
   Fork,
   Try,
   TryM
 }
 
-type AsyncCB<R = unknown, E = unknown, A = unknown> = (
-  env: R,
+type AsyncCB<E = unknown, A = unknown> = (
   rej: CB<E>,
   res: CB<A>,
   sh: IScheduler
@@ -68,11 +66,6 @@ interface IFork {
   i0: Instruction
   tag: Tag.Fork
 }
-interface IProvide {
-  i0: Instruction
-  i1: unknown
-  tag: Tag.Provide
-}
 
 /**
  * @ignore
@@ -85,7 +78,6 @@ export type Instruction =
   | IFork
   | IMap
   | INever
-  | IProvide
   | IReject
   | ITry
   | ITryM

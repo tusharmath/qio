@@ -4,14 +4,14 @@
 
 import {testScheduler} from 'ts-scheduler/test'
 
-import {IO} from '../main/FIO'
+import {FIO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler = testScheduler()
 
-  public executeSync<E, A>(io: IO<E, A>): A | undefined {
+  public executeSync<E, A>(io: FIO<E, A>): A | undefined {
     let result: A | undefined
     this.execute(
       io,
