@@ -6,6 +6,7 @@ import {CB} from '../internals/CB'
  * @ignore
  */
 export enum Tag {
+  Access,
   Async,
   Catch,
   Chain,
@@ -18,59 +19,58 @@ export enum Tag {
   TryM
 }
 
-type AsyncCB<E = unknown, A = unknown> = (
-  rej: CB<E>,
-  res: CB<A>,
-  sh: IScheduler
-) => ICancellable
-
-interface IConstant {
-  i0: unknown
+export interface IConstant<A = unknown> {
+  i0: A
   tag: Tag.Constant
 }
-interface IReject {
-  i0: unknown
+export interface IReject<A = unknown> {
+  i0: A
   tag: Tag.Reject
 }
-interface ITry {
+export interface ITry<A = unknown, B = unknown> {
   tag: Tag.Try
-  i0(a: unknown): unknown
+  i0(a: A): B
 }
-interface ITryM {
+export interface ITryM<A = unknown> {
   tag: Tag.TryM
-  i0(a: unknown): Instruction
+  i0(A: A): Instruction
 }
-interface IMap {
+export interface IMap<A = unknown, B = unknown> {
   i0: Instruction
   tag: Tag.Map
-  i1(a: unknown): unknown
+  i1(a: A): B
 }
-interface IChain {
+export interface IChain<A = unknown> {
   i0: Instruction
   tag: Tag.Chain
-  i1(a: unknown): Instruction
+  i1(a: A): Instruction
 }
-interface ICatch {
+export interface ICatch<E = unknown> {
   i0: Instruction
   tag: Tag.Catch
-  i1(a: unknown): Instruction
+  i1(E: E): Instruction
 }
-interface IAsync {
-  i0: AsyncCB
+export interface IAsync<E = unknown, A = unknown> {
   tag: Tag.Async
+  i0(rej: CB<E>, res: CB<A>, sh: IScheduler): ICancellable
 }
-interface INever {
+export interface INever {
   tag: Tag.Never
 }
-interface IFork {
+export interface IFork {
   i0: Instruction
   tag: Tag.Fork
+}
+export interface IAccess<X = unknown, Y = unknown> {
+  tag: Tag.Access
+  i0(X: X): Y
 }
 
 /**
  * @ignore
  */
 export type Instruction =
+  | IAccess
   | IAsync
   | ICatch
   | IChain
