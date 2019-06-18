@@ -1,10 +1,17 @@
 /* tslint:disable: no-unbound-method */
 
+import {check} from 'checked-exceptions'
+
 import {FIO} from '../main/FIO'
-import {Tag} from '../main/Instructions'
+import {Instruction, Tag} from '../main/Instructions'
 
 import {CB} from './CB'
 import {FiberContext} from './FiberContext'
+
+const InvalidInstruction = check(
+  'InvalidInstruction',
+  (ins: Instruction) => `${Tag[ins.tag]}`
+)
 
 /**
  * Evaluates the complete instruction tree
@@ -107,7 +114,7 @@ export const Evaluate = <E, A>(
         return
 
       default:
-        throw new Error('Invalid Instruction: ' + Tag[j.tag])
+        throw new InvalidInstruction(j)
     }
   }
 }

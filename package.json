@@ -62,6 +62,7 @@
     "typings-checker": "^2.0.0"
   },
   "dependencies": {
+    "checked-exceptions": "^1.1.0",
     "dbl-linked-list-ds": "^2.0.0",
     "in-node": "^1.0.0",
     "ts-scheduler": "^8.0.0",

@@ -245,8 +245,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     })
   }
 
-  public tap(io: UIO<void>): FIO<E1, A1, R1> {
-    return this.chain(_ => io.const(_))
+  public tap(io: (A1: A1) => UIO<unknown>): FIO<E1, A1, R1> {
+    return this.chain(_ => io(_).const(_))
   }
 
   public zip<E2, A2, R2>(
