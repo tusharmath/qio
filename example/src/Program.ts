@@ -1,19 +1,19 @@
 import {FIO} from '../../'
 
-export interface ConsoleEnv {
+export interface IConsole {
   console: {
     getStrLn(question: string): Promise<string>
     putStrLn(message: string): void
   }
 }
 
-export interface RandomEnv {
+export interface IRandom {
   random: {
     random(): number
   }
 }
 
-export interface SystemEnv {
+export interface ISystem {
   system: {
     exit(code?: number): void
   }
@@ -23,17 +23,19 @@ const MAX_NUMBER = 6
 const MIN_NUMBER = 1
 
 const putStrLn = (message: string) =>
-  FIO.access((env: ConsoleEnv) => env.console.putStrLn(message))
+  FIO.access((env: IConsole) => env.console.putStrLn(message))
 
 const getStrLn = (question: string) =>
-  FIO.accessP((env: ConsoleEnv) => env.console.getStrLn(question))
+  FIO.flatten(
+    FIO.access(FIO.encaseP((env: IConsole) => env.console.getStrLn(question)))
+  )
 
 const exit = (code?: number) =>
-  FIO.access((env: SystemEnv) => env.system.exit(code))
+  FIO.access((env: ISystem) => env.system.exit(code))
 
-const randomNumber = FIO.access((env: RandomEnv) => env.random.random())
+const randomNumber = FIO.access((env: IRandom) => env.random.random())
 
-const enterNumber: FIO<ConsoleEnv, Error, number> = getStrLn(
+const enterNumber: FIO<unknown, number, IConsole> = getStrLn(
   `Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}:`
 )
   .map(_ => parseInt(_, 10))
@@ -43,7 +45,7 @@ const enterNumber: FIO<ConsoleEnv, Error, number> = getStrLn(
       : enterNumber
   )
 
-const game: FIO<ConsoleEnv & SystemEnv & RandomEnv, Error, void> = enterNumber
+const game: FIO<unknown, void, IConsole & IRandom & ISystem> = enterNumber
   .zip(
     randomNumber.map(n =>
       Math.floor(MIN_NUMBER + n * (MAX_NUMBER - MIN_NUMBER))
