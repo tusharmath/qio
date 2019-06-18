@@ -12,31 +12,44 @@ import {Fiber} from './Fiber'
 import {Instruction, Tag} from './Instructions'
 import {Ref} from './Ref'
 
-//#region Helper Functions
 const Id = <A>(_: A): A => _
 const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
-//#endregion
 
-type AA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
+type iRR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
+export type NoEnv = never
+type iAA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
-export type Task<A> = FIO<Error, A>
-export type UIO<A> = FIO<never, A>
+export type IO<E, A> = FIO<E, A>
+export type Task<A> = IO<Error, A>
+export type UIO<A> = IO<never, A>
 
-export class FIO<E1 = unknown, A1 = unknown> {
+export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public get asInstruction(): Instruction {
     return this as Instruction
   }
 
-  public get fork(): FIO<never, Fiber<E1, A1>> {
+  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
     return new FIO(Tag.Fork, this)
   }
 
-  public get once(): FIO<never, FIO<E1, A1>> {
-    return Await.of<E1, A1>().map(await => await.set(this).and(await.get))
+  public get env(): FIO<never, R1, R1> {
+    return FIO.environment<R1>()
   }
 
-  public get void(): FIO<E1, void> {
+  public get once(): FIO<never, FIO<E1, A1>, R1> {
+    return this.env.chain(env =>
+      Await.of<E1, A1>().map(await =>
+        await.set(this.provide(env)).and(await.get)
+      )
+    )
+  }
+
+  public get void(): FIO<E1, void, R1> {
     return this.const(undefined)
+  }
+
+  public static access<R, A>(cb: (R: R) => A): FIO<never, A, R> {
+    return new FIO(Tag.Access, cb)
   }
 
   /**
@@ -67,17 +80,17 @@ export class FIO<E1 = unknown, A1 = unknown> {
     return FIO.async((rej, res, sh) => cb(res, sh))
   }
 
-  public static catch<E1, A1, E2, A2>(
-    fa: FIO<E1, A1>,
-    aFe: (e: E1) => FIO<E2, A2>
-  ): FIO<E2, A2> {
+  public static catch<E1, A1, R1, E2, A2, R2>(
+    fa: FIO<E1, A1, R1>,
+    aFe: (e: E1) => FIO<E2, A2, R2>
+  ): FIO<E2, A2, iRR<R1, R2>> {
     return new FIO(Tag.Catch, fa, aFe)
   }
 
-  public static chain<E1, A1, E2, A2>(
-    fa: FIO<E1, A1>,
-    aFb: (a: A1) => FIO<E2, A2>
-  ): FIO<E1 | E2, A2> {
+  public static chain<E1, A1, R1, E2, A2, R2>(
+    fa: FIO<E1, A1, R1>,
+    aFb: (a: A1) => FIO<E2, A2, R2>
+  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
     return new FIO(Tag.Chain, fa, aFb)
   }
 
@@ -104,6 +117,16 @@ export class FIO<E1 = unknown, A1 = unknown> {
       )
   }
 
+  public static environment<R1 = never>(): FIO<never, R1, R1> {
+    return new FIO(Tag.Environment)
+  }
+
+  public static flatten<E1, A1, R1, E2, A2, R2>(
+    fio: FIO<E1, FIO<E2, A2, R2>, R1>
+  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+    return fio.chain(Id)
+  }
+
   public static fromExit<E, A>(exit: Exit<E, A>): FIO<E, A> {
     return Exit.isSuccess(exit)
       ? FIO.of(exit[1])
@@ -116,10 +139,10 @@ export class FIO<E1 = unknown, A1 = unknown> {
     return FIO.resume(cb)
   }
 
-  public static map<E1, A1, A2>(
-    fa: FIO<E1, A1>,
+  public static map<E1, A1, R1, A2>(
+    fa: FIO<E1, A1, R1>,
     ab: (a: A1) => A2
-  ): FIO<E1, A2> {
+  ): FIO<E1, A2, R1> {
     return new FIO(Tag.Map, fa, ab)
   }
 
@@ -180,35 +203,40 @@ export class FIO<E1 = unknown, A1 = unknown> {
     public readonly i1?: unknown
   ) {}
 
-  public and<E2, A2>(aFb: FIO<E2, A2>): FIO<E1 | E2, A2> {
+  public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, iRR<R1, R2>> {
     return this.chain(() => aFb)
   }
 
-  public catch<E2, A2>(aFb: (e: E1) => FIO<E2, A2>): FIO<E2, A1 | A2> {
+  public catch<E2, A2, R2>(
+    aFb: (e: E1) => FIO<E2, A2, R2>
+  ): FIO<E2, A1 | A2, iRR<R1, R2>> {
     return FIO.catch(this, aFb)
   }
 
-  public chain<E2, A2>(aFb: (a: A1) => FIO<E2, A2>): FIO<E1 | E2, A2> {
+  public chain<E2, A2, R2>(
+    aFb: (a: A1) => FIO<E2, A2, R2>
+  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
     return FIO.chain(this, aFb)
   }
 
-  public const<A2>(a: A2): FIO<E1, A2> {
+  public const<A2>(a: A2): FIO<E1, A2, R1> {
     return this.and(FIO.of(a))
   }
 
-  public delay(duration: number): FIO<E1, A1> {
+  public delay(duration: number): FIO<E1, A1, R1> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
-  public map<A2>(ab: (a: A1) => A2): FIO<E1, A2> {
+  public map<A2>(ab: (a: A1) => A2): FIO<E1, A2, R1> {
     return FIO.map(this, ab)
   }
+  public provide = (r1: R1): FIO<E1, A1> => new FIO(Tag.Provide, this, r1)
 
-  public raceWith<E2, A2>(
-    that: FIO<E2, A2>,
+  public raceWith<E2, A2, R2>(
+    that: FIO<E2, A2, R2>,
     cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
     cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
-  ): FIO<never, void> {
+  ): FIO<never, void, iRR<R1, R2>> {
     return this.fork.zip(that.fork).chain(([f1, f2]) => {
       const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
       const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
@@ -217,25 +245,31 @@ export class FIO<E1 = unknown, A1 = unknown> {
     })
   }
 
-  public tap(io: UIO<void>): FIO<E1, A1> {
+  public tap(io: UIO<void>): FIO<E1, A1, R1> {
     return this.chain(_ => io.const(_))
   }
 
-  public zip<E2, A2>(that: FIO<E2, A2>): FIO<E1 | E2, AA<A1, A2>> {
-    return this.zipWith(that, (a, b) => [a, b]) as FIO<E1 | E2, AA<A1, A2>>
+  public zip<E2, A2, R2>(
+    that: FIO<E2, A2, R2>
+  ): FIO<E1 | E2, iAA<A1, A2>, iRR<R1, R2>> {
+    return this.zipWith(that, (a, b) => [a, b]) as FIO<
+      E1 | E2,
+      iAA<A1, A2>,
+      iRR<R1, R2>
+    >
   }
 
-  public zipWith<E2, A2, C>(
-    that: FIO<E2, A2>,
+  public zipWith<E2, A2, R2, C>(
+    that: FIO<E2, A2, R2>,
     c: (a1: A1, a2: A2) => C
-  ): FIO<E1 | E2, C> {
+  ): FIO<E1 | E2, C, iRR<R1, R2>> {
     return this.chain(a1 => that.map(a2 => c(a1, a2)))
   }
 
-  public zipWithPar<E2, A2, C>(
-    that: FIO<E2, A2>,
+  public zipWithPar<E2, A2, R2, C>(
+    that: FIO<E2, A2, R2>,
     c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
-  ): FIO<void, C> {
+  ): FIO<void, C, iRR<R1, R2>> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 

@@ -18,8 +18,22 @@ import {Evaluate} from './Evaluate'
  */
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
+  /**
+   * Pure implementation of cancel()
+   */
+  public get abort(): UIO<void> {
+    return FIO.uio(() => this.$abort())
+  }
+
+  /**
+   * Pure implementation of $resume().
+   */
+  public get resume(): FIO<E, A> {
+    return FIO.asyncIO<E, A>((rej, res) => this.$resume(rej, res))
+  }
   public readonly stackA: Instruction[] = []
   public readonly stackE: Array<(e: unknown) => Instruction> = []
+  public readonly stackEnv: unknown[] = []
 
   public constructor(
     public readonly sh: IScheduler,
@@ -66,20 +80,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
     )
 
     return this
-  }
-
-  /**
-   * Pure implementation of cancel()
-   */
-  public get abort(): UIO<void> {
-    return FIO.uio(() => this.$abort())
-  }
-
-  /**
-   * Pure implementation of $resume().
-   */
-  public get resume(): FIO<E, A> {
-    return FIO.asyncIO<E, A>((rej, res) => this.$resume(rej, res))
   }
 
   public resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<Fiber<E, A>> {

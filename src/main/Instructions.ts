@@ -11,10 +11,12 @@ export enum Tag {
   Catch,
   Chain,
   Constant,
+  Environment,
+  Fork,
   Map,
   Never,
+  Provide,
   Reject,
-  Fork,
   Try,
   TryM
 }
@@ -65,6 +67,15 @@ export interface IAccess<X = unknown, Y = unknown> {
   tag: Tag.Access
   i0(X: X): Y
 }
+export interface IProvide<R = unknown> {
+  i0: Instruction
+  i1: R
+  tag: Tag.Provide
+}
+
+export interface IEnvironment {
+  tag: Tag.Environment
+}
 
 /**
  * @ignore
@@ -75,9 +86,11 @@ export type Instruction =
   | ICatch
   | IChain
   | IConstant
+  | IEnvironment
   | IFork
   | IMap
   | INever
+  | IProvide
   | IReject
   | ITry
   | ITryM

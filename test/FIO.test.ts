@@ -31,15 +31,13 @@ describe('FIO', () => {
   })
 
   describe('access', () => {
-    it.skip('should access a value and transform')
-  })
-
-  describe('accessM', () => {
-    it.skip('should purely access the env')
-  })
-
-  describe('chain', () => {
-    it.skip('should sequence the operations')
+    it('should access a value and transform', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((name: string) => name.length).provide('FIO')
+      )
+      const expected = 3
+      assert.strictEqual(actual, expected)
+    })
   })
 
   describe('reject', () => {
@@ -73,10 +71,6 @@ describe('FIO', () => {
       cancellable.cancel()
       assert.ok(cancelled, 'Cancelled should be true')
     })
-  })
-
-  describe('accessP', () => {
-    it.skip('should access promise based envs')
   })
 
   describe('try', () => {
@@ -299,8 +293,6 @@ describe('FIO', () => {
         assert.strictEqual(runtime.scheduler.now(), 1101)
       })
 
-      it.skip('should bubble the env')
-
       it('should resolve after the IO is completed', () => {
         const counter = new Counter()
         const runtime = testRuntime()
@@ -407,12 +399,6 @@ describe('FIO', () => {
         assert.deepEqual(actual, expected)
       })
     })
-  })
-
-  describe('provide', () => {
-    it.skip('should provide the env to FIO')
-
-    it.skip('should maintain order')
   })
 
   describe('zipWith', () => {

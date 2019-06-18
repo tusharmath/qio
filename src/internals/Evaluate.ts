@@ -15,7 +15,7 @@ export const Evaluate = <E, A>(
   rej: CB<E>,
   res: CB<A>
 ): void => {
-  const {stackA, stackE, cancellationList, sh} = context
+  const {stackA, stackE, stackEnv, cancellationList, sh} = context
   let data: unknown
 
   while (true) {
@@ -71,6 +71,20 @@ export const Evaluate = <E, A>(
         const nContext = context.$fork(j.i0)
         cancellationList.push(nContext)
         data = nContext
+        break
+
+      case Tag.Provide:
+        stackA.push(j.i0)
+        stackEnv.push(j.i1)
+        break
+
+      case Tag.Environment:
+        data = stackEnv.pop()
+        break
+
+      case Tag.Access:
+        const env = stackEnv.pop()
+        data = j.i0(env)
         break
 
       case Tag.Async:
