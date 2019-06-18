@@ -1,3 +1,5 @@
+/* tslint:disable: no-console */
+
 const memoize = <A, B>(fn: (a: A) => B) => {
   const dict = new Map<A, B>()
 

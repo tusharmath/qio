@@ -1,4 +1,4 @@
-import {FIO} from '../../'
+import {FIO} from '../../..'
 
 export interface IConsole {
   console: {
