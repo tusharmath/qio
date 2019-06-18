@@ -8,7 +8,8 @@
       {"name": "typescript-tslint-plugin", "configFile": "./tslint.json"}
     ],
     "incremental": true,
-    "removeComments": true
+    "removeComments": true,
+    "tsBuildInfoFile": "tsconfig.tsbuildinfo"
   },
   "exclude": ["type-test", "example"]
 }
