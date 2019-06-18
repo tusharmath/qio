@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
     "strict": true,
     "noUnusedLocals": true,
@@ -11,5 +11,5 @@
     "removeComments": true,
     "tsBuildInfoFile": "tsconfig.tsbuildinfo"
   },
-  "exclude": ["type-test", "example"]
+  "exclude": ["type-test"]
 }

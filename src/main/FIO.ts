@@ -17,6 +17,8 @@ const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
 
 type iRR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
 export type NoEnv = never
+// type iRR<R1, R2> = R1 & R2
+// export type NoEnv = unknown
 type iAA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
 export type IO<E, A> = FIO<E, A>
@@ -28,12 +30,12 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return this as Instruction
   }
 
-  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
-    return new FIO(Tag.Fork, this)
-  }
-
   public get env(): FIO<never, R1, R1> {
     return FIO.environment<R1>()
+  }
+
+  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
+    return new FIO(Tag.Fork, this)
   }
 
   public get once(): FIO<never, FIO<E1, A1>, R1> {
@@ -231,6 +233,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return FIO.map(this, ab)
   }
   public provide = (r1: R1): FIO<E1, A1> => new FIO(Tag.Provide, this, r1)
+  // public provide  (r1: R1): FIO<E1, A1> {return new FIO(Tag.Provide, this, r1)}
 
   public raceWith<E2, A2, R2>(
     that: FIO<E2, A2, R2>,
@@ -247,6 +250,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
   public tap(io: (A1: A1) => UIO<unknown>): FIO<E1, A1, R1> {
     return this.chain(_ => io(_).const(_))
+  }
+
+  public when<E2, A2, R2, E3, A3, R3>(
+    cond: (a: A1) => boolean,
+    t: (a: A1) => FIO<E2, A2, R2>,
+    f: (a: A1) => FIO<E3, A3, R3>
+  ): FIO<E1 | E2 | E3, A2 | A3, iRR<iRR<R2, R3>, R1>> {
+    return new FIO(Tag.Chain, this, (a1: A1) => (cond(a1) ? t(a1) : f(a1)))
   }
 
   public zip<E2, A2, R2>(
