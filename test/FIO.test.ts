@@ -467,4 +467,17 @@ describe('FIO', () => {
       assert.strictEqual(counter.count, 1)
     })
   })
+
+  describe('provide', () => {
+    it('should maintain env for multiple access', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((_: string) => _)
+          .chain(s => FIO.access((_: string) => _ + '-' + s))
+          .provide('FIO')
+      )
+      const expected = 'FIO-FIO'
+
+      assert.strictEqual(actual, expected)
+    })
+  })
 })

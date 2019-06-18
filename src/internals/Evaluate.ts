@@ -85,12 +85,8 @@ export const Evaluate = <E, A>(
         stackEnv.push(j.i1)
         break
 
-      case Tag.Environment:
-        data = stackEnv.pop()
-        break
-
       case Tag.Access:
-        const env = stackEnv.pop()
+        const env = stackEnv[stackEnv.length - 1]
         data = j.i0(env)
         break
 

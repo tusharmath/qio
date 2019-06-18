@@ -31,7 +31,7 @@
     "update-benchmarks": "benchmarks/run.sh",
     "check-types": "typings-checker --allow-expect-error type-test/*",
     "typings-checker": "typings-checker",
-    "example": "node example/src/Run"
+    "example": "node example/game/src/Run"
   },
   "version": "0.0.0-development",
   "devDependencies": {

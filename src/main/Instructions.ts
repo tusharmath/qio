@@ -11,7 +11,6 @@ export enum Tag {
   Catch,
   Chain,
   Constant,
-  Environment,
   Fork,
   Map,
   Never,
@@ -73,10 +72,6 @@ export interface IProvide<R = unknown> {
   tag: Tag.Provide
 }
 
-export interface IEnvironment {
-  tag: Tag.Environment
-}
-
 /**
  * @ignore
  */
@@ -86,7 +81,6 @@ export type Instruction =
   | ICatch
   | IChain
   | IConstant
-  | IEnvironment
   | IFork
   | IMap
   | INever

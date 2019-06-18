@@ -31,7 +31,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   public get env(): FIO<never, R1, R1> {
-    return FIO.environment<R1>()
+    return FIO.access(Id)
   }
 
   public get fork(): FIO<never, Fiber<E1, A1>, R1> {
@@ -117,10 +117,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
             .catch(rej)
         })
       )
-  }
-
-  public static environment<R1 = never>(): FIO<never, R1, R1> {
-    return new FIO(Tag.Environment)
   }
 
   public static flatten<E1, A1, R1, E2, A2, R2>(
