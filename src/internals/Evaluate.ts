@@ -93,7 +93,7 @@ export const Evaluate = <E, A>(
         return
 
       default:
-        throw new Error('Invalid Instruction')
+        throw new Error('Invalid Instruction: ' + Tag[j.tag])
     }
   }
 }
