@@ -4,6 +4,7 @@
 
 import {assert} from 'chai'
 
+import {FiberContext} from '../src/internals/FiberContext'
 import {Await} from '../src/main/Await'
 import {Exit} from '../src/main/Exit'
 import {Fiber} from '../src/main/Fiber'
@@ -476,6 +477,30 @@ describe('FIO', () => {
           .provide('FIO')
       )
       const expected = 'FIO-FIO'
+
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should handle nested provides', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((_: string) => _.length)
+          .chain(a => FIO.access((b: number) => b + a).provide(100))
+          .provide('FIO')
+      )
+      const expected = 103
+
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should remove from env stack (memory leak)', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((_: string) => _.length)
+          .provide('FIO')
+          .fork.chain(f =>
+            f.resume.map(() => (f as FiberContext).stackEnv.length)
+          )
+      )
+      const expected = 0
 
       assert.strictEqual(actual, expected)
     })

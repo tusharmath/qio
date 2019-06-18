@@ -81,6 +81,13 @@ export const Evaluate = <E, A>(
         break
 
       case Tag.Provide:
+        stackA.push(
+          FIO.try(() => {
+            stackEnv.pop()
+
+            return data
+          }).asInstruction
+        )
         stackA.push(j.i0)
         stackEnv.push(j.i1)
         break
