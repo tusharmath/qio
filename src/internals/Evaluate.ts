@@ -26,98 +26,108 @@ export const Evaluate = <E, A>(
   let data: unknown
 
   while (true) {
-    const j = stackA.pop()
+    try {
+      const j = stackA.pop()
 
-    if (j === undefined) {
-      return res(data as A)
-    }
+      if (j === undefined) {
+        return res(data as A)
+      }
 
-    switch (j.tag) {
-      case Tag.Constant:
-        data = j.i0
-        break
+      switch (j.tag) {
+        case Tag.Constant:
+          data = j.i0
+          break
 
-      case Tag.Reject:
-        const cause = j.i0 as E
-        const handler = stackE.pop()
-        if (handler !== undefined) {
-          stackA.push(handler(cause))
-        } else {
-          return rej(cause)
-        }
+        case Tag.Reject:
+          const cause = j.i0 as E
+          const handler = stackE.pop()
+          if (handler !== undefined) {
+            stackA.push(handler(cause))
+          } else {
+            return rej(cause)
+          }
+          break
 
-        break
+        case Tag.Try:
+          data = j.i0(data)
+          break
 
-      case Tag.Try:
-        data = j.i0(data)
-        break
+        case Tag.TryM:
+          stackA.push(j.i0(data))
+          break
 
-      case Tag.TryM:
-        stackA.push(j.i0(data))
-        break
+        case Tag.Map:
+          stackA.push(FIO.resume(j.i1).asInstruction)
+          stackA.push(j.i0)
+          break
 
-      case Tag.Map:
-        stackA.push(FIO.resume(j.i1).asInstruction)
-        stackA.push(j.i0)
-        break
+        case Tag.Chain:
+          stackA.push(FIO.resumeM(j.i1).asInstruction)
+          stackA.push(j.i0)
+          break
 
-      case Tag.Chain:
-        stackA.push(FIO.resumeM(j.i1).asInstruction)
-        stackA.push(j.i0)
-        break
+        case Tag.Catch:
+          stackE.push(j.i1)
+          stackA.push(j.i0)
+          break
 
-      case Tag.Catch:
-        stackE.push(j.i1)
-        stackA.push(j.i0)
-        break
+        case Tag.Never:
+          return
 
-      case Tag.Never:
-        return
+        case Tag.Fork:
+          const nContext = context.$fork(j.i0)
+          cancellationList.push(nContext)
+          data = nContext
+          break
 
-      case Tag.Fork:
-        const nContext = context.$fork(j.i0)
-        cancellationList.push(nContext)
-        data = nContext
-        break
+        case Tag.Provide:
+          stackA.push(
+            FIO.try(() => {
+              stackEnv.pop()
 
-      case Tag.Provide:
-        stackA.push(
-          FIO.try(() => {
-            stackEnv.pop()
-
-            return data
-          }).asInstruction
-        )
-        stackA.push(j.i0)
-        stackEnv.push(j.i1)
-        break
-
-      case Tag.Access:
-        const env = stackEnv[stackEnv.length - 1]
-        data = j.i0(env)
-        break
-
-      case Tag.Async:
-        const id = cancellationList.push(
-          j.i0(
-            err => {
-              cancellationList.remove(id)
-              stackA.push(FIO.reject(err).asInstruction)
-              context.$resume(rej, res)
-            },
-            val => {
-              cancellationList.remove(id)
-              stackA.push(FIO.of(val).asInstruction)
-              context.$resume(rej, res)
-            },
-            sh
+              return data
+            }).asInstruction
           )
-        )
+          stackA.push(j.i0)
+          stackEnv.push(j.i1)
+          break
 
-        return
+        case Tag.Access:
+          const env = stackEnv[stackEnv.length - 1]
+          data = j.i0(env)
+          break
 
-      default:
-        throw new InvalidInstruction(j)
+        case Tag.Async:
+          const id = cancellationList.push(
+            j.i0(
+              err => {
+                cancellationList.remove(id)
+                stackA.push(FIO.reject(err).asInstruction)
+                context.$resume(rej, res)
+              },
+              val => {
+                cancellationList.remove(id)
+                stackA.push(FIO.of(val).asInstruction)
+                context.$resume(rej, res)
+              },
+              sh
+            )
+          )
+
+          return
+
+        default:
+          throw new InvalidInstruction(j)
+      }
+    } catch (e) {
+      if (stackE.length === 0) {
+        /**
+         * Exceptions handled here are either a bug in the library or,
+         * there is some user code that is throwing errors when its not supposed to.
+         */
+        throw e
+      }
+      stackA.push(FIO.reject(e).asInstruction)
     }
   }
 }

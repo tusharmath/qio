@@ -90,6 +90,26 @@ describe('FIO', () => {
       const expected = 1000
       assert.strictEqual(actual, expected)
     })
+
+    it('should capture exceptions', () => {
+      const actual = testRuntime().executeSync(
+        FIO.try(() => {
+          throw new Error('foo')
+        }).catch(err => FIO.of(err.message + '-bar'))
+      )
+      const expected = 'foo-bar'
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should throw', () => {
+      assert.throws(() => {
+        testRuntime().executeSync(
+          FIO.try(() => {
+            throw new Error('foo')
+          })
+        )
+      }, /foo/)
+    })
   })
 
   describe('and', () => {
