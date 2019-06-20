@@ -43,9 +43,11 @@ describe('FIO', () => {
 
   describe('reject', () => {
     it('should sequence the operations', () => {
-      assert.throws(() => {
-        testRuntime().executeSync(FIO.reject(new Error('WTF')))
-      }, /WTF/)
+      const actual = testRuntime().executeSync(
+        FIO.reject(new Error('foo'))
+      ) as Error
+      const expected = 'foo'
+      assert.deepEqual(actual.message, expected)
     })
   })
 
@@ -101,14 +103,14 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
 
-    it('should throw', () => {
-      assert.throws(() => {
-        testRuntime().executeSync(
-          FIO.try(() => {
-            throw new Error('foo')
-          })
-        )
-      }, /foo/)
+    it('should fail', () => {
+      const actual = testRuntime().executeSync(
+        FIO.try(() => {
+          throw new Error('foo')
+        })
+      ) as Error
+      const expected = new Error('foo')
+      assert.deepStrictEqual(actual.message, expected.message)
     })
   })
 

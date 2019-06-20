@@ -120,13 +120,6 @@ export const Evaluate = <E, A>(
           throw new InvalidInstruction(j)
       }
     } catch (e) {
-      if (stackE.length === 0) {
-        /**
-         * Exceptions handled here are either a bug in the library or,
-         * there is some user code that is throwing errors when its not supposed to.
-         */
-        throw e
-      }
       stackA.push(FIO.reject(e).asInstruction)
     }
   }
