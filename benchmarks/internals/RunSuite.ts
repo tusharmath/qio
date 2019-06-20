@@ -1,3 +1,4 @@
+/* tslint:disable: no-unbound-method */
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
@@ -15,11 +16,19 @@ export const RunSuite = (
     bluebird(): PromiseLike<unknown>
     fio(): UIO<unknown>
     fluture(): FutureInstance<unknown, unknown>
+    native?(): void
   }
 ) => {
   PrintLn('##', name)
   PrintLn('```')
   const suite = new Suite(name)
+
+  if (typeof test.native === 'function') {
+    suite.add('Native', () => {
+      ;(test as {native(): void}).native()
+    })
+  }
+
   suite
     .add(
       'FIO',
