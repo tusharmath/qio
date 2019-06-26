@@ -7,7 +7,6 @@
   "mode": "file",
   "out": "docs",
   "exclude": ["test/**", "example/**", "benchmarks/**"],
-  "theme": "node_modules/typedoc-default-themes/bin/default",
   "listInvalidSymbolLinks": true,
   "toc": ["FIO", "Ref", "Fiber"]
 }
