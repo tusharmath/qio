@@ -10,6 +10,7 @@
     "no-magic-numbers": false,
     "no-parameter-properties": false,
     "no-submodule-imports": false,
+    "no-use-before-declare": false,
     "prefer-template": false,
     "no-unbound-method": {
       "options": "ignore-static"
@@ -22,7 +23,13 @@
     "prefer-for-of": false,
     "increment-decrement": false,
     "max-classes-per-file": false,
-    "restrict-plus-operands": false
+    "restrict-plus-operands": false,
+    "strict-comparisons": [
+      true,
+      {
+        "allow-object-equal-comparison": true
+      }
+    ]
   },
   "rulesDirectory": []
 }

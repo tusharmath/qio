@@ -1,4 +1,4 @@
-/* tslint:disable: no-use-before-declare no-console no-unbound-method */
+/* tslint:disable: no-use-before-declare no-console no-unbound-method strict-comparisons */
 
 import {FIO} from '../..'
 import {UIO} from '../../src/main/FIO'

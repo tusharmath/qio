@@ -1,4 +1,4 @@
-/* tslint:disable: promise-function-async */
+/* tslint:disable: promise-function-async strict-comparisons */
 
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
@@ -11,7 +11,7 @@ import {RunSuite} from './internals/RunSuite'
  * Normal Fibonacci Implementation
  */
 export const fib = (n: bigint): bigint => {
-  if (n < 2) {
+  if (n < 2n) {
     return 1n
   }
 
@@ -24,7 +24,7 @@ export const fib = (n: bigint): bigint => {
 export const fibFluture = (
   n: bigint
 ): Fluture.FutureInstance<never, bigint> => {
-  if (n < 2) {
+  if (n < 2n) {
     return Fluture.of(1n)
   }
 
@@ -35,7 +35,7 @@ export const fibFluture = (
  * FIO based implementation
  */
 export const fibFIO = (n: bigint): UIO<bigint> => {
-  if (n < 2) {
+  if (n < 2n) {
     return FIO.of(1n)
   }
 
@@ -46,7 +46,7 @@ export const fibFIO = (n: bigint): UIO<bigint> => {
  * Bluebird based implementation
  */
 export const fibBird = (n: bigint): Promise<bigint> => {
-  if (n < 2) {
+  if (n < 2n) {
     return Promise.resolve(1n)
   }
 
