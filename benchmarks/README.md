@@ -13,6 +13,14 @@ Fluture x 5,205 ops/sec ±1.60% (81 runs sampled)
 bluebird x 6,669 ops/sec ±0.42% (89 runs sampled)
 Fastest is FIO
 ```
+## Fibonacci: 20
+```
+Native x 643 ops/sec ±0.98% (92 runs sampled)
+FIO x 296 ops/sec ±1.33% (81 runs sampled)
+Fluture x 246 ops/sec ±1.60% (80 runs sampled)
+bluebird x 193 ops/sec ±1.64% (81 runs sampled)
+Fastest is Native
+```
 ## Map
 ```
 FIO x 2,364,827 ops/sec ±0.79% (86 runs sampled)
