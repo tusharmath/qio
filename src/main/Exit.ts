@@ -6,6 +6,8 @@ export enum Status {
 
 /**
  * Represents a success or a failure value.
+ * @typeparam E Error
+ * @typeparam A Success
  */
 export type Exit<E, A> =
   | [Status.Success, A]

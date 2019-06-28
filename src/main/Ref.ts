@@ -5,6 +5,7 @@ import {FIO, UIO} from './FIO'
 
 /**
  * A pure implementation of a state.
+ * @typeparam A Type of state to be maintained
  */
 export class Ref<A> {
   public static of<A>(a: A): UIO<Ref<A>> {
