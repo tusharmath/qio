@@ -1,288 +1,449 @@
 /**
- * Created by tushar on 2019-03-10
+ * Created by tushar on 2019-05-20
  */
 
-/* tslint:disable:no-use-before-declare */
-import {ICancellable} from 'ts-scheduler'
-import {NoEnv} from '../envs/NoEnv'
+import {ICancellable, IScheduler} from 'ts-scheduler'
+
 import {CB} from '../internals/CB'
-import {Id} from '../internals/Id'
-import {noop} from '../internals/Noop'
 
-import {defaultRuntime, DefaultRuntime} from '../runtimes/DefaultRuntime'
-import {Runtime} from '../runtimes/Runtime'
+import {Await} from './Await'
+import {Exit} from './Exit'
+import {Fiber} from './Fiber'
+import {Instruction, Tag} from './Instructions'
+import {Ref} from './Ref'
 
-const rNoop = () => noop
+const Id = <A>(_: A): A => _
+const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
+
+type iRR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
+export type NoEnv = never
+// type iRR<R1, R2> = R1 & R2
+// export type NoEnv = unknown
+type iAA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
 /**
- * Base class for fearless IO.
- * It contains all the operators (`map`, `chain` etc.) that help in creating powerful compositions.
- *
- * @example
- *
- * ```typescript
- *
- * import {IO, defaultRuntime} from 'fearless-io'
- *
- * // Create a pure version of `console.log` called `putStrLn`
- * const putStrLn = IO.encase((str: string) => console.log(str))
- *
- * // Create FIO
- * const hello = putStrLn('Hello World!')
- *
- * // Create runtime
- * const runtime = defaultRuntime()
- *
- * // Execute the program
- * runtime.execute(hello)
- *
- * ```
- * @typeparam A The output of the side-effect.
- *
+ * IO represents a [[FIO]] that doesn't need any environment to execute
  */
-export abstract class FIO<R1, E1, A1> {
-  /**
-   * Accesses an environment for the effect
-   */
-  public static access<R = unknown, E = never, A = never>(
-    fn: (env: R) => A
-  ): FIO<R, E, A> {
-    return FIO.environment<R>().map(fn)
-  }
+export type IO<E, A> = FIO<E, A>
 
-  /**
-   * Effect-fully accesses the environment of the effect.
-   */
-  public static accessM<R1 = unknown, R2 = R1, E1 = never, A1 = never>(
-    fn: (env: R1) => FIO<R2, E1, A1>
-  ): FIO<R1 & R2, E1, A1> {
-    return FIO.environment<R1>().chain(fn)
-  }
+/**
+ * Task represents an [[IO]] that fails with a general failure.
+ */
+export type Task<A> = IO<Error, A>
 
-  /**
-   * Effect-fully accesses an environment using a promise
-   */
-  public static accessP<R = unknown, A = unknown>(
-    fn: (env: R) => Promise<A>
-  ): FIO<R, Error, A> {
-    return FIO.accessM(FIO.encaseP(fn))
-  }
+/**
+ * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
+ */
+export type UIO<A> = IO<never, A>
 
+/**
+ * @typeparam E1 Possible errors that could be thrown by the program.
+ * @typeparam A1 The output of the running the program successfully.
+ * @typeparam R1 Environment needed to execute this instance.
+ */
+export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
-   * Takes in an effect-full function zip returns a pure function,
-   * that takes in the same arguments zip wraps the result into an [[FIO]]
-   */
-  public static encase<E = never, A = never, G extends unknown[] = []>(
-    fn: (...t: G) => A
-  ): (...t: G) => FIO<NoEnv, E, A> {
-    return (...t) => FIO.from((env, rej, res) => res(fn(...t)))
-  }
-
-  /**
-   *
-   * Takes in a function that returns a `Promise` zip converts it to a function,
-   * that takes the same set of arguments zip returns an [[FIO]]
-   * TODO: remove dependency on SchedulerEnv
-   */
-  public static encaseP<A, G extends unknown[]>(
-    fn: (...t: G) => Promise<A>
-  ): (...t: G) => FIO<NoEnv, Error, A> {
-    return (...t) =>
-      FIO.from(
-        (env, rej, res) =>
-          void fn(...t)
-            .then(res)
-            .catch(rej)
-      )
-  }
-
-  /**
-   * Creates an IO that resolves with the provided env
-   */
-  public static environment<R1 = unknown>(): FIO<R1, never, R1> {
-    return FIO.from((env1, rej, res) => res(env1))
-  }
-
-  /**
-   * Constructor function to create an IO.
-   * In most cases you should use [encase] [encaseP] etc. to create new IOs.
-   * `from` is for more advanced usages and is intended to be used internally.
-   */
-  public static from<R = unknown, E = never, A = never>(
-    cmp: (
-      env: R,
-      rej: CB<E>,
-      res: CB<A>,
-      runTime: DefaultRuntime
-    ) => (() => void) | void
-  ): FIO<R, E, A> {
-    return new Computation(cmp)
-  }
-
-  /**
-   * Creates an [[FIO]] that never completes.
-   */
-  public static never(): FIO<NoEnv, never, never> {
-    return FIO.from(rNoop)
-  }
-
-  /**
-   * Creates an [[FIO]] that always resolves with the same value.
-   */
-  public static of<A>(value: A): FIO<NoEnv, never, A> {
-    return new Constant(value)
-  }
-
-  /**
-   * Creates an IO that always rejects with an error
-   */
-  public static reject<E>(error: E): FIO<NoEnv, E, never> {
-    return FIO.from((env, rej) => rej(error))
-  }
-
-  /**
-   * Creates an IO that resolves with the given value after a certain duration of time.
-   */
-  public static timeout<A>(value: A, duration: number): FIO<NoEnv, never, A> {
-    return new Timeout(duration, value)
-  }
-
-  /**
-   * Like [[encase]] takes in a function and returns a [[FIO]].
-   * On execution of the [[FIO]] calls the provided function and resolves the [[FIO]] with the return type of the
-   * function.
-   */
-  public static try<A, E = Error>(fn: () => A): FIO<unknown, E, A> {
-    return FIO.from((env1, rej, res) => res(fn()))
-  }
-
-  /**
-   * The property is added for contra-variant check
    * @ignore
    */
-  public fork$?: (
-    e: R1,
-    rej: CB<E1>,
-    res: CB<A1>,
-    runtime: Runtime
-  ) => FIO<R1, E1, A1>
-
-  /**
-   * Runs one IO after the other
-   */
-  public and<R2, E2, A2>(b: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A2> {
-    return this.chain(() => b)
+  public get asInstruction(): Instruction {
+    return this as Instruction
   }
 
   /**
-   * Catches a failing IO zip creates another IO
+   * Purely access the environment provided to the program.
    */
-  public catch<R2, E2, A2>(
-    ab: (a: E1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E2, A1 | A2> {
-    return new Catch(this, ab)
+  public get env(): FIO<never, R1, R1> {
+    return FIO.access(Id)
   }
 
   /**
-   * Chains two IOs such that one is executed after the other.
-   * The chain operator is stack safe, ie.
-   * you can recursively run a program like below without worrying about stack overflows.
-   *
-   * ```ts
-   * import {FIO, defaultRuntime} from 'fearless-io'
-   *
-   * const program = (count: number) => FIO.of(count)
-   *  .chain(_ => {
-   *    console.log(_)
-   *    return count === 0 ? FIO.of(0) : program(_ - 1)
-   *  })
-   *
-   *
-   * defaultRuntime().execute(program)
-   * ```
+   * Returns a [[Fiber]]. The returned fiber is always in a paused state.
    */
-  public chain<R2, E2, A2>(
-    ab: (a: A1) => FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E1 | E2, A2> {
-    return new Chain(this, ab)
+  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
+    return new FIO(Tag.Fork, this)
   }
 
   /**
-   * Delays an IO execution by the provided duration
+   * Memoizes the result and executes the IO only once
    */
-  public delay(duration: number): FIO<R1, E1, A1> {
-    return FIO.timeout(this, duration).chain(Id)
-  }
-
-  /**
-   * Actually executes the IO
-   */
-  public abstract fork(
-    env: R1,
-    rej: CB<E1>,
-    res: CB<A1>,
-    runtime: Runtime
-  ): ICancellable
-
-  /**
-   * Applies transformation on the resolve value of the IO
-   */
-  public map<A2>(ab: (a: A1) => A2): FIO<R1, E1, A2> {
-    return new Map(this, ab)
-  }
-
-  /**
-   * Creates a new IO<IO<A>> that executes only once
-   */
-  public once(): FIO<NoEnv, never, FIO<R1, E1, A1>> {
-    return FIO.try(() => new Once(this))
-  }
-
-  /**
-   * Eliminates the dependency on the IOs original environment.
-   * Creates an IO that can run without any env.
-   */
-  public provide(env: R1): FIO<NoEnv, E1, A1> {
-    return FIO.from((env1, rej, res, runtime) => {
-      const iCancellable = this.fork(env, rej, res, runtime)
-
-      return () => iCancellable.cancel()
-    })
-  }
-
-  /**
-   * Executes two IOs in parallel zip returns the value of the one that's completes first also cancelling the one pending.
-   */
-  public race<R2, E2, A2>(b: FIO<R2, E2, A2>): FIO<R1 & R2, E1 | E2, A1 | A2> {
-    return new Race(this, b)
-  }
-
-  /**
-   * Converts the IO into a Promise
-   */
-  public async toPromise(env: R1): Promise<A1> {
-    return new Promise<A1>((resolve, reject) =>
-      this.fork(env, reject, resolve, defaultRuntime())
+  public get once(): FIO<never, FIO<E1, A1>, R1> {
+    return this.env.chain(env =>
+      Await.of<E1, A1>().map(await =>
+        await.set(this.provide(env)).and(await.get)
+      )
     )
   }
 
   /**
-   * Combines two IO's into one zip then on fork executes them in parallel.
+   * Ignores the result of the FIO instance
    */
-  public zip<R2, E2, A2>(
-    b: FIO<R2, E2, A2>
-  ): FIO<R1 & R2, E1 | E2, OR<A1, A2>> {
-    return new Zip(this, b)
+  public get void(): FIO<E1, void, R1> {
+    return this.const(undefined)
+  }
+
+  /**
+   * Creates a new FIO instance with the provided environment
+   */
+  public static access<R, A>(cb: (R: R) => A): FIO<never, A, R> {
+    return new FIO(Tag.Access, cb)
+  }
+
+  /**
+   * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
+   * Using `never` will give users compile time error always while using.
+   */
+  public static async<E1 = never, A1 = never>(
+    cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
+  ): FIO<E1, A1> {
+    return new FIO(Tag.Async, cb)
+  }
+
+  /**
+   * Creates a new async [[IO]]
+   */
+  public static asyncIO<E1 = never, A1 = never>(
+    cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
+  ): FIO<E1, A1> {
+    return FIO.async(cb)
+  }
+
+  /**
+   * Creates a new async [[Task]]
+   */
+  public static asyncTask<A1 = never>(
+    cb: (rej: CB<Error>, res: CB<A1>, sh: IScheduler) => ICancellable
+  ): Task<A1> {
+    return FIO.async(cb)
+  }
+
+  /**
+   * Creates a [[UIO]] using a callback
+   */
+  public static asyncUIO<A1 = never>(
+    cb: (res: CB<A1>, sh: IScheduler) => ICancellable
+  ): UIO<A1> {
+    return FIO.async((rej, res, sh) => cb(res, sh))
+  }
+
+  /**
+   * @ignore
+   */
+  public static catch<E1, A1, R1, E2, A2, R2>(
+    fa: FIO<E1, A1, R1>,
+    aFe: (e: E1) => FIO<E2, A2, R2>
+  ): FIO<E2, A2, iRR<R1, R2>> {
+    return new FIO(Tag.Catch, fa, aFe)
+  }
+
+  /**
+   * Serially executes one FIO after another.
+   */
+  public static chain<E1, A1, R1, E2, A2, R2>(
+    fa: FIO<E1, A1, R1>,
+    aFb: (a: A1) => FIO<E2, A2, R2>
+  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+    return new FIO(Tag.Chain, fa, aFb)
+  }
+
+  /**
+   * Converts an effect-full function into a function that returns an [[IO]]
+   */
+  public static encase<E = never, A = never, T extends unknown[] = unknown[]>(
+    cb: (...t: T) => A
+  ): (...t: T) => IO<E, A> {
+    return (...t) => FIO.io(() => cb(...t))
+  }
+
+  /**
+   * Converts a function returning a Promise to a function that returns an [[IO]]
+   */
+  public static encaseP<E, A, T extends unknown[]>(
+    cb: (...t: T) => Promise<A>
+  ): (...t: T) => FIO<E, A> {
+    return (...t) =>
+      FIO.async((rej, res, sh) =>
+        sh.asap(() => {
+          void cb(...t)
+            .then(res)
+            .catch(rej)
+        })
+      )
+  }
+
+  /**
+   * Unwraps a FIO
+   */
+  public static flatten<E1, A1, R1, E2, A2, R2>(
+    fio: FIO<E1, FIO<E2, A2, R2>, R1>
+  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+    return fio.chain(Id)
+  }
+
+  /**
+   * Creates an IO from [[Exit]]
+   */
+  public static fromExit<E, A>(exit: Exit<E, A>): FIO<E, A> {
+    return Exit.isSuccess(exit)
+      ? FIO.of(exit[1])
+      : Exit.isFailure(exit)
+      ? FIO.reject(exit[1])
+      : FIO.never()
+  }
+
+  /**
+   * @ignore
+   */
+  public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
+    return FIO.resume(cb)
+  }
+
+  /**
+   * Transforms the success value using the specified function
+   */
+  public static map<E1, A1, R1, A2>(
+    fa: FIO<E1, A1, R1>,
+    ab: (a: A1) => A2
+  ): FIO<E1, A2, R1> {
+    return new FIO(Tag.Map, fa, ab)
+  }
+
+  /**
+   * Returns a [[UIO]] that never resolves.
+   */
+  public static never(): UIO<never> {
+    return new FIO(Tag.Never, undefined)
+  }
+
+  /**
+   * Represents a constant value
+   */
+  public static of<A1>(value: A1): UIO<A1> {
+    return new FIO(Tag.Constant, value)
+  }
+
+  /**
+   * Creates a FIO that rejects with the provided error
+   */
+  public static reject<E1>(error: E1): FIO<E1, never> {
+    return new FIO(Tag.Reject, error)
+  }
+
+  /**
+   * @ignore
+   */
+  public static resume<A1, A2>(cb: (A: A1) => A2): UIO<A2> {
+    return new FIO(Tag.Try, cb)
+  }
+
+  /**
+   * @ignore
+   */
+  public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
+    return new FIO(Tag.TryM, cb)
+  }
+
+  /**
+   * Resolves with the provided value after the given time
+   */
+  public static timeout<A>(value: A, duration: number): UIO<A> {
+    return FIO.async((rej, res, sh) => sh.delay(res, duration, value))
+  }
+
+  /**
+   * Tries to run an effect-full synchronous function and returns a [[Task]] that resolves with the return value of that function
+   */
+  public static try<A>(cb: () => A): Task<A> {
+    return FIO.io(cb)
+  }
+
+  /**
+   * Similar to [[try]] but returns a [[UIO]]
+   */
+  public static uio<A>(cb: () => A): UIO<A> {
+    return FIO.io(cb)
+  }
+
+  /**
+   * Returns a [[UIO]] of void.
+   */
+  public static void(): UIO<void> {
+    return FIO.of(void 0)
+  }
+
+  /**
+   * @ignore
+   */
+  public constructor(
+    /**
+     * @ignore
+     */
+    public readonly tag: Tag,
+    /**
+     * @ignore
+     */
+    public readonly i0?: unknown,
+
+    /**
+     * @ignore
+     */
+    public readonly i1?: unknown
+  ) {}
+
+  /**
+   * Runs the FIO instances one by one
+   */
+  public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, iRR<R1, R2>> {
+    return this.chain(() => aFb)
+  }
+
+  /**
+   * Captures the exception thrown by the IO and
+   */
+  public catch<E2, A2, R2>(
+    aFb: (e: E1) => FIO<E2, A2, R2>
+  ): FIO<E2, A1 | A2, iRR<R1, R2>> {
+    return FIO.catch(this, aFb)
+  }
+
+  /**
+   * Chains one [[FIO]] after another.
+   */
+  public chain<E2, A2, R2>(
+    aFb: (a: A1) => FIO<E2, A2, R2>
+  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+    return FIO.chain(this, aFb)
+  }
+
+  /**
+   * Ignores the original value of the FIO and resolves with the provided value
+   */
+  public const<A2>(a: A2): FIO<E1, A2, R1> {
+    return this.and(FIO.of(a))
+  }
+
+  /**
+   * Delays the execution of the [[FIO]] by the provided time.
+   */
+  public delay(duration: number): FIO<E1, A1, R1> {
+    return FIO.timeout(this, duration).chain(Id)
+  }
+
+  /**
+   * Applies transformation on the success value of the FIO.
+   */
+  public map<A2>(ab: (a: A1) => A2): FIO<E1, A2, R1> {
+    return FIO.map(this, ab)
+  }
+
+  /**
+   * Provides the current instance of FIO the required env.
+   */
+  public provide = (r1: R1): FIO<E1, A1> => new FIO(Tag.Provide, this, r1)
+
+  /**
+   * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
+   */
+  public raceWith<E2, A2, R2>(
+    that: FIO<E2, A2, R2>,
+    cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
+    cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
+  ): FIO<never, void, iRR<R1, R2>> {
+    return this.fork.zip(that.fork).chain(([f1, f2]) => {
+      const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
+      const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
+
+      return resume2.and(resume1).void
+    })
+  }
+
+  /**
+   * Used to perform side-effects but ignore their values
+   */
+  public tap(io: (A1: A1) => UIO<unknown>): FIO<E1, A1, R1> {
+    return this.chain(_ => io(_).const(_))
+  }
+
+  /**
+   * Used to evaluate different FIO instances based on a condition.
+   */
+  public when<E2, A2, R2, E3, A3, R3>(
+    cond: (a: A1) => boolean,
+    t: (a: A1) => FIO<E2, A2, R2>,
+    f: (a: A1) => FIO<E3, A3, R3>
+  ): FIO<E1 | E2 | E3, A2 | A3, iRR<iRR<R2, R3>, R1>> {
+    return new FIO(Tag.Chain, this, (a1: A1) => (cond(a1) ? t(a1) : f(a1)))
+  }
+
+  /**
+   * Combine the result of two FIOs sequentially and return a Tuple
+   */
+  public zip<E2, A2, R2>(
+    that: FIO<E2, A2, R2>
+  ): FIO<E1 | E2, iAA<A1, A2>, iRR<R1, R2>> {
+    return this.zipWith(that, (a, b) => [a, b]) as FIO<
+      E1 | E2,
+      iAA<A1, A2>,
+      iRR<R1, R2>
+    >
+  }
+
+  /**
+   * Combines the result of two FIOs and uses a combinatory function to combine their result
+   */
+  public zipWith<E2, A2, R2, C>(
+    that: FIO<E2, A2, R2>,
+    c: (a1: A1, a2: A2) => C
+  ): FIO<E1 | E2, C, iRR<R1, R2>> {
+    return this.chain(a1 => that.map(a2 => c(a1, a2)))
+  }
+
+  /**
+   * Combine two FIO instances in parallel and use the combinatory function to combine the result.
+   */
+  public zipWithPar<E2, A2, R2, C>(
+    that: FIO<E2, A2, R2>,
+    c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
+  ): FIO<void, C, iRR<R1, R2>> {
+    // Create Caches
+    const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
+
+    // Create a Counter
+    const counter = Ref.of(0)
+
+    // Create an Await
+    const done = Await.of<never, boolean>()
+
+    const coordinate = <E_1, A_1, E_2, A_2>(
+      exit: Exit<E_1, A_1>,
+      fiber: Fiber<E_2, A_2>,
+      ref: Ref<Exit<E_1, A_1>>,
+      count: Ref<number>,
+      await: Await<never, boolean>
+    ) =>
+      ref
+        .set(exit)
+        .chain(e =>
+          Exit.isFailure(e)
+            ? fiber.abort.and(await.set(FIO.of(true)))
+            : count
+                .update(_ => _ + 1)
+                .and(
+                  count.read.chain(value =>
+                    value === 2 ? await.set(FIO.of(true)) : FIO.of(false)
+                  )
+                )
+        )
+
+    return counter.zip(done).chain(([count, await]) =>
+      cache.chain(([c1, c2]) =>
+        this.raceWith(
+          that,
+          (exit, fiber) => coordinate(exit, fiber, c1, count, await).void,
+          (exit, fiber) => coordinate(exit, fiber, c2, count, await).void
+        )
+          .and(await.get)
+          .and(c1.read.zipWith(c2.read, c))
+      )
+    )
   }
 }
-
-import {Catch} from '../operators/Catch'
-import {Chain} from '../operators/Chain'
-import {Map} from '../operators/Map'
-import {Once} from '../operators/Once'
-import {Race} from '../operators/Race'
-import {OR, Zip} from '../operators/Zip'
-import {Computation} from '../sources/Computation'
-
-import {Constant} from '../sources/Constant'
-import {Timeout} from '../sources/Timeout'

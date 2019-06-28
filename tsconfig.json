@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
     "strict": true,
     "noUnusedLocals": true,
     "plugins": [
       {"name": "typescript-tslint-plugin", "configFile": "./tslint.json"}
     ],
-    "incremental": true
+    "incremental": true,
+    "removeComments": true,
+    "tsBuildInfoFile": "tsconfig.tsbuildinfo"
   },
   "exclude": ["type-test"]
 }

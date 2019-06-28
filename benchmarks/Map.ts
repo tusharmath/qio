@@ -1,48 +1,16 @@
 /**
  * Created by tushar on 2019-05-09
  */
-import {Suite} from 'benchmark'
+import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
 import {FIO} from '../src/main/FIO'
-import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 
-import {PrintLn} from './internals/PrintLn'
+import {inc} from './internals/Inc'
+import {RunSuite} from './internals/RunSuite'
 
-const suite = new Suite()
-
-const runtime = defaultRuntime()
-const fluture = Fluture.of(10)
-const fio = FIO.of(10)
-const nothing = () => {}
-interface Defer {
-  resolve(): void
-}
-suite
-  .add(
-    'FIO',
-    (cb: Defer) => {
-      runtime.execute(fio.map(i => i + 1), () => cb.resolve())
-    },
-    {defer: true}
-  )
-  .add(
-    'Fluture',
-    (cb: Defer) => {
-      fluture.map(i => i + 1).fork(nothing, () => cb.resolve())
-    },
-    {defer: true}
-  )
-
-  .on('cycle', (event: Event) => {
-    PrintLn(String(event.target))
-  })
-  .on('complete', function(this: Suite): void {
-    PrintLn(
-      'Fastest is ' +
-        this.filter('fastest')
-          .map((i: {name: string}) => i.name)
-          .join('')
-    )
-  })
-  .run()
+RunSuite('Map', {
+  bluebird: () => Promise.resolve(BigInt(10)).then(inc),
+  fio: () => FIO.of(BigInt(10)).map(inc),
+  fluture: () => Fluture.of(BigInt(10)).map(inc)
+})

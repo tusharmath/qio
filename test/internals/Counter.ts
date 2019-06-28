@@ -1,14 +1,9 @@
-/**
- * Created by tushar on 2019-04-15
- */
-
 import {FIO} from '../../src/main/FIO'
 
-export const Counter = (n: number = 0) => {
-  let count = n
-
-  return {
-    getCount: () => count,
-    inc: FIO.access(() => (count += 1))
+export class Counter {
+  public count = 0
+  public inc = () => FIO.uio(() => ++this.count)
+  public get increased(): boolean {
+    return this.count > 0
   }
 }

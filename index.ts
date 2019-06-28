@@ -1,5 +1,10 @@
 /* tslint:disable:file-name-casing */
 export {FIO} from './src/main/FIO'
-export {Runtime} from './src/runtimes/Runtime'
-export {DefaultRuntime, defaultRuntime} from './src/runtimes/DefaultRuntime'
-export {NoEnv} from './src/envs/NoEnv'
+export {Ref} from './src/main/Ref'
+export {Fiber} from './src/main/Fiber'
+export {Await} from './src/main/Await'
+export {Exit} from './src/main/Exit'
+
+export {IRuntime} from './src/runtimes/IRuntime'
+export {defaultRuntime} from './src/runtimes/DefaultRuntime'
+export {testRuntime} from './src/runtimes/TestRuntime'

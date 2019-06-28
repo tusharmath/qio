@@ -4,13 +4,16 @@
   "rules": {
     "comment-format": false,
     "completed-docs": false,
-    "interface-name": false,
+    "interface-name": true,
     "no-empty": false,
     "no-implicit-dependencies": [true, "dev"],
     "no-magic-numbers": false,
     "no-parameter-properties": false,
     "no-submodule-imports": false,
     "prefer-template": false,
+    "no-unbound-method": {
+      "options": "ignore-static"
+    },
     "no-void-expression": false,
     "variable-name": [true, "allow-pascal-case"],
     // TEMPORARY SETTINGS
@@ -19,11 +22,7 @@
     "prefer-for-of": false,
     "increment-decrement": false,
     "max-classes-per-file": false,
-    "restrict-plus-operands": false,
-    "ordered-imports": [true, {
-      "grouped-imports": false
-    }
-    ]
+    "restrict-plus-operands": false
   },
   "rulesDirectory": []
 }

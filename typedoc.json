@@ -7,6 +7,6 @@
   "mode": "file",
   "out": "docs",
   "exclude": ["test/**", "example/**", "benchmarks/**"],
-  "theme": "default",
-  "listInvalidSymbolLinks": true
+  "listInvalidSymbolLinks": true,
+  "toc": ["FIO", "Ref", "Fiber", "Await", "Exit"]
 }
