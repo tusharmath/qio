@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/tusharmath/fearless-io.svg?branch=master)](https://travis-ci.com/tusharmath/fearless-io)
 ![npm](https://img.shields.io/npm/v/fearless-io.svg)
 
-A type-safe functional module that solves practical IO problems on node and the browser.
+A type-safe, functional, performant, lawful, composable data structure that solves practical problems of effect-full code in node and browser.
 
 # Index
 
@@ -35,8 +35,6 @@ runtime.execute(hello)
 ```
 
 # Getting Started
-
-Fearless IO (FIO) encapsulates any side-effect causing code into a pure, functional, lawful, highly composable and type-safe data structure. This data structure can be used as a representation of the effect, without actually performing that effect. It makes code much easier to refactor and test.
 
 ## Type Signature
 

@@ -5,6 +5,11 @@ import {CB} from '../internals/CB'
 import {Exit} from './Exit'
 import {FIO, UIO} from './FIO'
 
+/**
+ * A special data structure that can be set only once.
+ * @typeparam E Errors thrown
+ * @typeparam A Success value
+ */
 export class Await<E, A> {
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
     return FIO.uio(() => new Await())

@@ -3,6 +3,9 @@
  */
 import {FIO, UIO} from './FIO'
 
+/**
+ * A pure implementation of a state.
+ */
 export class Ref<A> {
   public static of<A>(a: A): UIO<Ref<A>> {
     return FIO.uio(() => new Ref(a))

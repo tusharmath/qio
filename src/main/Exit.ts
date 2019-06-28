@@ -4,6 +4,9 @@ export enum Status {
   Pending
 }
 
+/**
+ * Represents a success or a failure value.
+ */
 export type Exit<E, A> =
   | [Status.Success, A]
   | [Status.Failure, E]

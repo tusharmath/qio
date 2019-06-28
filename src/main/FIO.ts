@@ -21,23 +21,51 @@ export type NoEnv = never
 // export type NoEnv = unknown
 type iAA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
+/**
+ * IO represents a [[FIO]] that doesn't need any environment to execute
+ */
 export type IO<E, A> = FIO<E, A>
+
+/**
+ * Task represents an [[IO]] that fails with a general failure.
+ */
 export type Task<A> = IO<Error, A>
+
+/**
+ * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
+ */
 export type UIO<A> = IO<never, A>
 
+/**
+ * @typeparam E1 Possible errors that could be thrown by the program.
+ * @typeparam A1 The output of the running the program successfully.
+ * @typeparam R1 Environment needed to execute this instance.
+ */
 export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
+  /**
+   * @ignore
+   */
   public get asInstruction(): Instruction {
     return this as Instruction
   }
 
+  /**
+   * Purely access the environment provided to the program.
+   */
   public get env(): FIO<never, R1, R1> {
     return FIO.access(Id)
   }
 
+  /**
+   * Returns a [[Fiber]]. The returned fiber is always in a paused state.
+   */
   public get fork(): FIO<never, Fiber<E1, A1>, R1> {
     return new FIO(Tag.Fork, this)
   }
 
+  /**
+   * Memoizes the result and executes the IO only once
+   */
   public get once(): FIO<never, FIO<E1, A1>, R1> {
     return this.env.chain(env =>
       Await.of<E1, A1>().map(await =>
@@ -46,10 +74,16 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     )
   }
 
+  /**
+   * Ignores the result of the FIO instance
+   */
   public get void(): FIO<E1, void, R1> {
     return this.const(undefined)
   }
 
+  /**
+   * Creates a new FIO instance with the provided environment
+   */
   public static access<R, A>(cb: (R: R) => A): FIO<never, A, R> {
     return new FIO(Tag.Access, cb)
   }
@@ -64,24 +98,36 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return new FIO(Tag.Async, cb)
   }
 
+  /**
+   * Creates a new async [[IO]]
+   */
   public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): FIO<E1, A1> {
     return FIO.async(cb)
   }
 
+  /**
+   * Creates a new async [[Task]]
+   */
   public static asyncTask<A1 = never>(
     cb: (rej: CB<Error>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): Task<A1> {
     return FIO.async(cb)
   }
 
+  /**
+   * Creates a [[UIO]] using a callback
+   */
   public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>, sh: IScheduler) => ICancellable
   ): UIO<A1> {
     return FIO.async((rej, res, sh) => cb(res, sh))
   }
 
+  /**
+   * @ignore
+   */
   public static catch<E1, A1, R1, E2, A2, R2>(
     fa: FIO<E1, A1, R1>,
     aFe: (e: E1) => FIO<E2, A2, R2>
@@ -89,6 +135,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return new FIO(Tag.Catch, fa, aFe)
   }
 
+  /**
+   * Serially executes one FIO after another.
+   */
   public static chain<E1, A1, R1, E2, A2, R2>(
     fa: FIO<E1, A1, R1>,
     aFb: (a: A1) => FIO<E2, A2, R2>
@@ -96,16 +145,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return new FIO(Tag.Chain, fa, aFb)
   }
 
-  public static constant<A1>(value: A1): UIO<A1> {
-    return new FIO(Tag.Constant, value)
-  }
-
+  /**
+   * Converts an effect-full function into a function that returns an [[IO]]
+   */
   public static encase<E = never, A = never, T extends unknown[] = unknown[]>(
     cb: (...t: T) => A
-  ): (...t: T) => FIO<E, A> {
+  ): (...t: T) => IO<E, A> {
     return (...t) => FIO.io(() => cb(...t))
   }
 
+  /**
+   * Converts a function returning a Promise to a function that returns an [[IO]]
+   */
   public static encaseP<E, A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
   ): (...t: T) => FIO<E, A> {
@@ -119,12 +170,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
       )
   }
 
+  /**
+   * Unwraps a FIO
+   */
   public static flatten<E1, A1, R1, E2, A2, R2>(
     fio: FIO<E1, FIO<E2, A2, R2>, R1>
   ): FIO<E1 | E2, A2, iRR<R1, R2>> {
     return fio.chain(Id)
   }
 
+  /**
+   * Creates an IO from [[Exit]]
+   */
   public static fromExit<E, A>(exit: Exit<E, A>): FIO<E, A> {
     return Exit.isSuccess(exit)
       ? FIO.of(exit[1])
@@ -133,10 +190,16 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
       : FIO.never()
   }
 
+  /**
+   * @ignore
+   */
   public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
     return FIO.resume(cb)
   }
 
+  /**
+   * Transforms the success value using the specified function
+   */
   public static map<E1, A1, R1, A2>(
     fa: FIO<E1, A1, R1>,
     ab: (a: A1) => A2
@@ -144,13 +207,23 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return new FIO(Tag.Map, fa, ab)
   }
 
+  /**
+   * Returns a [[UIO]] that never resolves.
+   */
   public static never(): UIO<never> {
     return new FIO(Tag.Never, undefined)
   }
 
+  /**
+   * Represents a constant value
+   */
   public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
   }
+
+  /**
+   * Creates a FIO that rejects with the provided error
+   */
   public static reject<E1>(error: E1): FIO<E1, never> {
     return new FIO(Tag.Reject, error)
   }
@@ -169,22 +242,37 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return new FIO(Tag.TryM, cb)
   }
 
+  /**
+   * Resolves with the provided value after the given time
+   */
   public static timeout<A>(value: A, duration: number): UIO<A> {
     return FIO.async((rej, res, sh) => sh.delay(res, duration, value))
   }
 
+  /**
+   * Tries to run an effect-full synchronous function and returns a [[Task]] that resolves with the return value of that function
+   */
   public static try<A>(cb: () => A): Task<A> {
     return FIO.io(cb)
   }
 
+  /**
+   * Similar to [[try]] but returns a [[UIO]]
+   */
   public static uio<A>(cb: () => A): UIO<A> {
     return FIO.io(cb)
   }
 
+  /**
+   * Returns a [[UIO]] of void.
+   */
   public static void(): UIO<void> {
     return FIO.of(void 0)
   }
 
+  /**
+   * @ignore
+   */
   public constructor(
     /**
      * @ignore
@@ -201,36 +289,60 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     public readonly i1?: unknown
   ) {}
 
+  /**
+   * Runs the FIO instances one by one
+   */
   public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, iRR<R1, R2>> {
     return this.chain(() => aFb)
   }
 
+  /**
+   * Captures the exception thrown by the IO and
+   */
   public catch<E2, A2, R2>(
     aFb: (e: E1) => FIO<E2, A2, R2>
   ): FIO<E2, A1 | A2, iRR<R1, R2>> {
     return FIO.catch(this, aFb)
   }
 
+  /**
+   * Chains one [[FIO]] after another.
+   */
   public chain<E2, A2, R2>(
     aFb: (a: A1) => FIO<E2, A2, R2>
   ): FIO<E1 | E2, A2, iRR<R1, R2>> {
     return FIO.chain(this, aFb)
   }
 
+  /**
+   * Ignores the original value of the FIO and resolves with the provided value
+   */
   public const<A2>(a: A2): FIO<E1, A2, R1> {
     return this.and(FIO.of(a))
   }
 
+  /**
+   * Delays the execution of the [[FIO]] by the provided time.
+   */
   public delay(duration: number): FIO<E1, A1, R1> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
+  /**
+   * Applies transformation on the success value of the FIO.
+   */
   public map<A2>(ab: (a: A1) => A2): FIO<E1, A2, R1> {
     return FIO.map(this, ab)
   }
-  public provide = (r1: R1): FIO<E1, A1> => new FIO(Tag.Provide, this, r1)
-  // public provide  (r1: R1): FIO<E1, A1> {return new FIO(Tag.Provide, this, r1)}
 
+  /**
+   * Provides the current instance of FIO the required env.
+   */
+  public provide = (r1: R1): FIO<E1, A1> => new FIO(Tag.Provide, this, r1)
+
+  /**
+   * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
+   */
   public raceWith<E2, A2, R2>(
     that: FIO<E2, A2, R2>,
     cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
@@ -244,10 +356,16 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     })
   }
 
+  /**
+   * Used to perform side-effects but ignore their values
+   */
   public tap(io: (A1: A1) => UIO<unknown>): FIO<E1, A1, R1> {
     return this.chain(_ => io(_).const(_))
   }
 
+  /**
+   * Used to evaluate different FIO instances based on a condition.
+   */
   public when<E2, A2, R2, E3, A3, R3>(
     cond: (a: A1) => boolean,
     t: (a: A1) => FIO<E2, A2, R2>,
@@ -256,6 +374,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return new FIO(Tag.Chain, this, (a1: A1) => (cond(a1) ? t(a1) : f(a1)))
   }
 
+  /**
+   * Combine the result of two FIOs sequentially and return a Tuple
+   */
   public zip<E2, A2, R2>(
     that: FIO<E2, A2, R2>
   ): FIO<E1 | E2, iAA<A1, A2>, iRR<R1, R2>> {
@@ -266,6 +387,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     >
   }
 
+  /**
+   * Combines the result of two FIOs and uses a combinatory function to combine their result
+   */
   public zipWith<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
     c: (a1: A1, a2: A2) => C
@@ -273,6 +397,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return this.chain(a1 => that.map(a2 => c(a1, a2)))
   }
 
+  /**
+   * Combine two FIO instances in parallel and use the combinatory function to combine the result.
+   */
   public zipWithPar<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
     c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
