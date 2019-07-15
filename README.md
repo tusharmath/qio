@@ -85,7 +85,7 @@ Once of the easiest ways to create a FIO is through [FIO.encase].
 
 Calling `GreetIO()` returns a pure data structure which represents a side-effect, that —
 
-1. Can execute in without any special needs.
+1. Can execute in any environment without any special needs.
 2. Never fails.
 3. Resolves with a `void`.
 

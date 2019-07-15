@@ -66,7 +66,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Memoizes the result and executes the IO only once
    */
-  public get once(): FIO<never, FIO<E1, A1>, R1> {
+  public get once(): FIO<never, IO<E1, A1>, R1> {
     return this.env.chain(env =>
       Await.of<E1, A1>().map(await =>
         await.set(this.provide(env)).and(await.get)
@@ -338,7 +338,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Provides the current instance of FIO the required env.
    */
-  public provide = (r1: R1): FIO<E1, A1> => new FIO(Tag.Provide, this, r1)
+  public provide = (r1: R1): IO<E1, A1> => new FIO(Tag.Provide, this, r1)
 
   /**
    * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
@@ -403,7 +403,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public zipWithPar<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
     c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
-  ): FIO<void, C, iRR<R1, R2>> {
+  ): FIO<never, C, iRR<R1, R2>> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 
