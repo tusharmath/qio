@@ -75,6 +75,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Runs the [[FIO]] instance asynchronously and ignores the result.
+   */
+
+  public get resume(): FIO<never, void, R1> {
+    return this.resumeAsync(FIO.void)
+  }
+
+  /**
    * Ignores the result of the FIO instance
    */
   public get void(): FIO<E1, void, R1> {
@@ -354,6 +362,15 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
       return resume2.and(resume1).void
     })
+  }
+
+  /**
+   * Runs the [[FIO]] instance asynchronously and calls the callback passed with an [[Exit]] object.
+   */
+  public resumeAsync(
+    cb: (exit: Exit<E1, A1>) => UIO<void>
+  ): FIO<never, void, R1> {
+    return this.fork.chain(_ => _.resumeAsync(cb))
   }
 
   /**

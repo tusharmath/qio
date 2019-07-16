@@ -24,7 +24,5 @@ export abstract class Fiber<E, A> implements ICancellable {
   public cancel(): void {
     this.$abort()
   }
-  public abstract resumeAsync(
-    cb: (exit: Exit<E, A>) => UIO<void>
-  ): UIO<void>
+  public abstract resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<void>
 }
