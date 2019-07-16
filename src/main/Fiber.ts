@@ -26,5 +26,5 @@ export abstract class Fiber<E, A> implements ICancellable {
   }
   public abstract resumeAsync(
     cb: (exit: Exit<E, A>) => UIO<void>
-  ): UIO<Fiber<E, A>>
+  ): UIO<void>
 }

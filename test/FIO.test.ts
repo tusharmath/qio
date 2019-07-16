@@ -382,14 +382,12 @@ describe('FIO', () => {
         assert.strictEqual(a.count, 1)
       })
 
-      it('should return the same fiber', () => {
+      it('should return void', () => {
         const actual = testRuntime().executeSync(
-          FIO.void().fork.chain(fiber =>
-            fiber.resumeAsync(FIO.void).map(_ => _ === fiber)
-          )
+          FIO.void().fork.chain(fiber => fiber.resumeAsync(FIO.void))
         )
 
-        assert.isTrue(actual)
+        assert.isUndefined(actual)
       })
 
       it('should call with  Exit.success', () => {

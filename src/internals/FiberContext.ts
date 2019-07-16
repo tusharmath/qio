@@ -82,7 +82,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
     return this
   }
 
-  public resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<Fiber<E, A>> {
+  public resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<void> {
     const eee = <X>(con: (x: X) => Exit<E, A>) => (data: X) => {
       // tslint:disable-next-line: no-use-before-declare
       const cancel = () => this.cancellationList.remove(id)
@@ -91,6 +91,8 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
       )
     }
 
-    return FIO.uio(() => this.$resume(eee(Exit.failure), eee(Exit.success)))
+    return FIO.uio(
+      () => void this.$resume(eee(Exit.failure), eee(Exit.success))
+    )
   }
 }
