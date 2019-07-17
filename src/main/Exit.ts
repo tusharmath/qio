@@ -1,4 +1,4 @@
-export enum Status {
+enum Status {
   Failure,
   Success,
   Pending

@@ -4,7 +4,7 @@
 
 import {testScheduler} from 'ts-scheduler/test'
 
-import {Exit, Status} from '../main/Exit'
+import {Exit} from '../main/Exit'
 import {FIO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
@@ -16,8 +16,8 @@ export class TestRuntime extends BaseRuntime {
     const result = this.exit(io)
     this.scheduler.run()
     switch (result[0]) {
-      case Status.Failure:
-      case Status.Success:
+      case Exit.Failure:
+      case Exit.Success:
         return result[1]
       default:
         return undefined
