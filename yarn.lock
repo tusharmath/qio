@@ -808,10 +808,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-11.11.0.tgz#070e9ce7c90e727aca0e0c14e470f9a93ffe9390"
   integrity sha512-D5Rt+HXgEywr3RQJcGlZUCTCx1qVbCZpVk3/tOOA6spLNZdGm8BU+zRgdRYDoF1pO3RuXLxADzMrF903JlQXqg==
 
-"@types/node@^12.0.10":
-  version "12.0.10"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.0.10.tgz#51babf9c7deadd5343620055fc8aff7995c8b031"
-  integrity sha512-LcsGbPomWsad6wmMNv7nBLw7YYYyfdYcz6xryKYQhx89c3XXan+8Q6AJ43G5XDIaklaVkK3mE4fCb0SBvMiPSQ==
+"@types/node@^12.6.8":
+  version "12.6.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.6.8.tgz#e469b4bf9d1c9832aee4907ba8a051494357c12c"
+  integrity sha512-aX+gFgA5GHcDi89KG5keey2zf0WfZk/HAQotEamsK2kbey+8yGKcson0hbK8E+v0NArlCJQCqMP161YhV6ZXLg==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -6112,19 +6112,24 @@ typedoc-default-themes@^0.6.0-0:
     lunr "^2.3.6"
     underscore "^1.9.1"
 
-typescript-tslint-plugin@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/typescript-tslint-plugin/-/typescript-tslint-plugin-0.5.2.tgz#8544e3387ed4256111751fe5caee5ba60f55d3ec"
-  integrity sha512-KzF0geUOAKMxDE9Z6CaFaWOPgoEgx2kpmUJVr3suMD2xs8zvTCE3lixbVqjU9Kn7zGB0B+OaB39hAFPAmg8slQ==
+typescript-tslint-plugin@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/typescript-tslint-plugin/-/typescript-tslint-plugin-0.5.4.tgz#febe0cca1fe65133f4f688841eba68262a1d55a5"
+  integrity sha512-CQEfGC+p0SoBARI4N2LrGsWJsp4/OE+uKZ68xsWYKHWqMFq4DFQHqOVlK0deEricSN01NmDTqjap63Pw/DHieg==
   dependencies:
     minimatch "^3.0.4"
     mock-require "^3.0.2"
     vscode-languageserver "^5.1.0"
 
-typescript@3.5.x, typescript@^3.5.2:
+typescript@3.5.x:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.2.tgz#a09e1dc69bc9551cadf17dba10ee42cf55e5d56c"
   integrity sha512-7KxJovlYhTX5RaRbUdkAXN1KUZ8PwWlTzQdHV6xNqvuFOs7+WBo10TQUqT19Q/Jz2hk5v9TQDIhyLhhJY4p5AA==
+
+typescript@^3.5.3:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
+  integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
 
 typings-checker@^2.0.0:
   version "2.0.0"
