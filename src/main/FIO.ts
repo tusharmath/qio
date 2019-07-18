@@ -17,8 +17,6 @@ const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
 
 type iRR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
 export type NoEnv = never
-// type iRR<R1, R2> = R1 & R2
-// export type NoEnv = unknown
 type iAA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
 
 /**
@@ -30,6 +28,11 @@ export type IO<E, A> = FIO<E, A>
  * Task represents an [[IO]] that fails with a general failure.
  */
 export type Task<A> = IO<Error, A>
+
+/**
+ * A [[Task]] that also requires an environment to run.
+ */
+export type TaskR<A, R> = FIO<Error, A, R>
 
 /**
  * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
@@ -165,9 +168,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Converts a function returning a Promise to a function that returns an [[IO]]
    */
-  public static encaseP<E, A, T extends unknown[]>(
+  public static encaseP<A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
-  ): (...t: T) => FIO<E, A> {
+  ): (...t: T) => IO<Error, A> {
     return (...t) =>
       FIO.async((rej, res, sh) =>
         sh.asap(() => {
@@ -376,7 +379,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Used to perform side-effects but ignore their values
    */
-  public tap(io: (A1: A1) => UIO<unknown>): FIO<E1, A1, R1> {
+  public tap<E2, R2>(
+    io: (A1: A1) => FIO<E2, unknown, R2>
+  ): FIO<E1 | E2, A1, iRR<R1, R2>> {
     return this.chain(_ => io(_).const(_))
   }
 
