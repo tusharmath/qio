@@ -524,5 +524,16 @@ describe('FIO', () => {
 
       assert.strictEqual(actual, expected)
     })
+
+    it('should provide env to async functions', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((_: number) => _ + 1)
+          .delay(1000)
+          .provide(10)
+      )
+      const expected = 11
+
+      assert.strictEqual(actual, expected)
+    })
   })
 })

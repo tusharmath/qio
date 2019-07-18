@@ -82,10 +82,10 @@ export const Evaluate = <E, A>(
 
         case Tag.Provide:
           stackA.push(
-            FIO.try(() => {
+            FIO.resume(i => {
               stackEnv.pop()
 
-              return data
+              return i
             }).asInstruction
           )
           stackA.push(j.i0)
