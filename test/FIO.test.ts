@@ -438,7 +438,7 @@ describe('FIO', () => {
         FIO.of(10).zipWithPar(FIO.of(20), (a, b) => [a, b])
       )
 
-      assert.deepEqual(actual, [Exit.success(10), Exit.success(20)])
+      assert.deepEqual(actual, [10, 20])
     })
 
     it('should combine them in parallel', () => {
@@ -459,18 +459,17 @@ describe('FIO', () => {
       const actual = runtime.executeSync(
         left.zipWithPar(right, (a, b) => [a, b])
       )
-      assert.deepEqual(actual, [Exit.success(10), Exit.success(20)])
+      assert.deepEqual(actual, [10, 20])
     })
 
     it('should abort the pending one on error', () => {
+      const counter = new Counter()
       const left = FIO.reject(10).delay(500)
-      const right = FIO.of(20).delay(1000)
+      const right = counter.inc().delay(1000)
       const runtime = testRuntime()
 
-      const actual = runtime.executeSync(
-        left.zipWithPar(right, (a, b) => [a, b])
-      )
-      assert.deepEqual(actual, [Exit.failure(10), Exit.pending])
+      runtime.executeSync(left.zipWithPar(right, (a, b) => [a, b]))
+      assert.deepEqual(counter.count, 0)
     })
   })
 

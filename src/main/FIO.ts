@@ -5,6 +5,7 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
+import {coordinate} from '../internals/Coordinate'
 
 import {Await} from './Await'
 import {Exit} from './Exit'
@@ -424,8 +425,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public zipWithPar<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
-    c: (e1: Exit<E1, A1>, e2: Exit<E2, A2>) => C
-  ): FIO<never, C, iRR<R1, R2>> {
+    c: (e1: A1, e2: A2) => C
+  ): FIO<E1 | E2, C, iRR<R1, R2>> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 
@@ -435,27 +436,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     // Create an Await
     const done = Await.of<never, boolean>()
 
-    const coordinate = <E_1, A_1, E_2, A_2>(
-      exit: Exit<E_1, A_1>,
-      fiber: Fiber<E_2, A_2>,
-      ref: Ref<Exit<E_1, A_1>>,
-      count: Ref<number>,
-      await: Await<never, boolean>
-    ) =>
-      ref
-        .set(exit)
-        .chain(e =>
-          Exit.isFailure(e)
-            ? fiber.abort.and(await.set(FIO.of(true)))
-            : count
-                .update(_ => _ + 1)
-                .and(
-                  count.read.chain(value =>
-                    value === 2 ? await.set(FIO.of(true)) : FIO.of(false)
-                  )
-                )
-        )
-
     return counter.zip(done).chain(([count, await]) =>
       cache.chain(([c1, c2]) =>
         this.raceWith(
@@ -464,7 +444,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
           (exit, fiber) => coordinate(exit, fiber, c2, count, await).void
         )
           .and(await.get)
-          .and(c1.read.zipWith(c2.read, c))
+          .and(
+            c1.read.chain(FIO.fromExit).zipWith(c2.read.chain(FIO.fromExit), c)
+          )
       )
     )
   }
