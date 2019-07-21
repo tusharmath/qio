@@ -52,7 +52,7 @@ const game: FIO<unknown, void, IConsole & IRandom & ISystem> = enterNumber
       Math.floor(MIN_NUMBER + n * (MAX_NUMBER - MIN_NUMBER))
     )
   )
-  .chain(([input, random]) =>
+  .chain(({0: input, 1: random}) =>
     input === random
       ? putStrLn(`You guessed it right!`)
       : putStrLn(`Sorry, the correct answer is ${random}`)

@@ -1,7 +1,7 @@
 import {Await} from '../main/Await'
 import {Exit} from '../main/Exit'
 import {Fiber} from '../main/Fiber'
-import {FIO} from '../main/FIO'
+import {FIO, UIO} from '../main/FIO'
 import {Ref} from '../main/Ref'
 
 /**
@@ -15,7 +15,7 @@ export const coordinate = <E1, A1, E2, A2>(
   ref: Ref<Exit<E1, A1>>,
   count: Ref<number>,
   await: Await<never, boolean>
-) =>
+): UIO<boolean> =>
   ref
     .set(exit)
     .chain(e =>

@@ -16,9 +16,7 @@ import {Ref} from './Ref'
 const Id = <A>(_: A): A => _
 const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
 
-type iRR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
-export type NoEnv = never
-type iChainA<A1, A2, C> = A1 & A2 extends never ? never : C
+export type NoEnv = unknown
 
 /**
  * IO represents a [[FIO]] that doesn't need any environment to execute
@@ -153,7 +151,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static catch<E1, A1, R1, E2, A2, R2>(
     fa: FIO<E1, A1, R1>,
     aFe: (e: E1) => FIO<E2, A2, R2>
-  ): FIO<E2, A2, iRR<R1, R2>> {
+  ): FIO<E2, A2, R1 & R2> {
     return new FIO(Tag.Catch, fa, aFe)
   }
 
@@ -163,7 +161,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static chain<E1, A1, R1, E2, A2, R2>(
     fa: FIO<E1, A1, R1>,
     aFb: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, iChainA<A1, A2, A2>, iRR<R1, R2>> {
+  ): FIO<E1 | E2, A2, R1 & R2> {
     return new FIO(Tag.Chain, fa, aFb)
   }
 
@@ -193,11 +191,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Creates a [[FIO]] that needs an environment and when resolved outputs the same environment
+   */
+  public static env<R1 = never>(): FIO<never, R1, R1> {
+    return FIO.access<R1, R1>(Id)
+  }
+
+  /**
    * Unwraps a FIO
    */
   public static flatten<E1, A1, R1, E2, A2, R2>(
     fio: FIO<E1, FIO<E2, A2, R2>, R1>
-  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+  ): FIO<E1 | E2, A2, R1 & R2> {
     return fio.chain(Id)
   }
 
@@ -241,6 +246,19 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static of<A1>(value: A1): UIO<A1> {
     return new FIO(Tag.Constant, value)
+  }
+
+  /**
+   * Parallel run multiple IOs
+   */
+  public static par<E1, A1, R1>(
+    ios: Array<FIO<E1, A1, R1>>
+  ): FIO<E1, A1[], R1> {
+    return ios.reduce(
+      // TODO: time complexity is O(n^2)
+      (a, b) => a.zipWithPar(b, (x, y) => [...x, y]),
+      FIO.env<R1>().and(FIO.io<E1, A1[]>(() => []))
+    )
   }
 
   /**
@@ -314,9 +332,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Runs the FIO instances one by one
    */
-  public and<E2, A2, R2>(
-    aFb: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, iChainA<A1, A2, A2>, iRR<R1, R2>> {
+  public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, R1 & R2> {
     return this.chain(() => aFb)
   }
 
@@ -325,7 +341,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public catch<E2, A2, R2>(
     aFb: (e: E1) => FIO<E2, A2, R2>
-  ): FIO<E2, A1 | A2, iRR<R1, R2>> {
+  ): FIO<E2, A1 | A2, R1 & R2> {
     return FIO.catch(this, aFb)
   }
 
@@ -334,7 +350,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public chain<E2, A2, R2>(
     aFb: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, iChainA<A1, A2, A2>, iRR<R1, R2>> {
+  ): FIO<E1 | E2, A2, R1 & R2> {
     return FIO.chain(this, aFb)
   }
 
@@ -371,8 +387,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     that: FIO<E2, A2, R2>,
     cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
     cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
-  ): FIO<never, void, iRR<R1, R2>> {
-    return this.fork.zip(that.fork).chain(([f1, f2]) => {
+  ): FIO<never, void, R1 & R2> {
+    return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
       const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
       const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
 
@@ -394,18 +410,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public tap<E2, R2>(
     io: (A1: A1) => FIO<E2, unknown, R2>
-  ): FIO<E1 | E2, A1, iRR<R1, R2>> {
+  ): FIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io(_).const(_))
   }
 
   /**
    * Used to evaluate different FIO instances based on a condition.
    */
-  public when<E2, A2, R2, E3, A3, R3>(
+  public when<E2, A2, R2, E3, R3>(
     cond: (a: A1) => boolean,
     t: (a: A1) => FIO<E2, A2, R2>,
-    f: (a: A1) => FIO<E3, A3, R3>
-  ): FIO<E1 | E2 | E3, A2 | A3, iRR<iRR<R2, R3>, R1>> {
+    f: (a: A1) => FIO<E3, A2, R3>
+  ): FIO<E1 | E2 | E3, A2, R1 & R2 & R3> {
     return new FIO(Tag.Chain, this, (a1: A1) => (cond(a1) ? t(a1) : f(a1)))
   }
 
@@ -414,12 +430,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public zip<E2, A2, R2>(
     that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, iChainA<A1, A2, [A1, A2]>, iRR<R1, R2>> {
-    return this.zipWith(that, (a, b) => [a, b]) as FIO<
-      E1 | E2,
-      iChainA<A1, A2, [A1, A2]>,
-      iRR<R1, R2>
-    >
+  ): FIO<E1 | E2, {0: A1; 1: A2}, R1 & R2> {
+    return this.zipWith(that, (a, b) => ({0: a, 1: b}))
   }
 
   /**
@@ -428,7 +440,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public zipWith<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
     c: (a1: A1, a2: A2) => C
-  ): FIO<E1 | E2, C, iRR<R1, R2>> {
+  ): FIO<E1 | E2, C, R1 & R2> {
     return this.chain(a1 => that.map(a2 => c(a1, a2)))
   }
 
@@ -438,7 +450,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public zipWithPar<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
     c: (e1: A1, e2: A2) => C
-  ): FIO<E1 | E2, iChainA<A1, A2, C>, iRR<R1, R2>> {
+  ): FIO<E1 | E2, C, R1 & R2> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 
@@ -448,8 +460,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     // Create an Await
     const done = Await.of<never, boolean>()
 
-    return counter.zip(done).chain(([count, await]) =>
-      cache.chain(([c1, c2]) =>
+    return counter.zip(done).chain(({0: count, 1: await}) =>
+      cache.chain(({0: c1, 1: c2}) =>
         this.raceWith(
           that,
           (exit, fiber) => coordinate(exit, fiber, c1, count, await).void,
