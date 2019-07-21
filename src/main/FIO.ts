@@ -18,7 +18,7 @@ const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
 
 type iRR<R1, R2> = R1 & R2 extends never ? R1 | R2 : R1 & R2
 export type NoEnv = never
-type iAA<A1, A2> = A1 & A2 extends never ? never : [A1, A2]
+type iChainA<A1, A2, C> = A1 & A2 extends never ? never : C
 
 /**
  * IO represents a [[FIO]] that doesn't need any environment to execute
@@ -163,7 +163,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static chain<E1, A1, R1, E2, A2, R2>(
     fa: FIO<E1, A1, R1>,
     aFb: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+  ): FIO<E1 | E2, iChainA<A1, A2, A2>, iRR<R1, R2>> {
     return new FIO(Tag.Chain, fa, aFb)
   }
 
@@ -314,7 +314,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Runs the FIO instances one by one
    */
-  public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, iRR<R1, R2>> {
+  public and<E2, A2, R2>(
+    aFb: FIO<E2, A2, R2>
+  ): FIO<E1 | E2, iChainA<A1, A2, A2>, iRR<R1, R2>> {
     return this.chain(() => aFb)
   }
 
@@ -332,7 +334,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public chain<E2, A2, R2>(
     aFb: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A2, iRR<R1, R2>> {
+  ): FIO<E1 | E2, iChainA<A1, A2, A2>, iRR<R1, R2>> {
     return FIO.chain(this, aFb)
   }
 
@@ -412,10 +414,10 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public zip<E2, A2, R2>(
     that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, iAA<A1, A2>, iRR<R1, R2>> {
+  ): FIO<E1 | E2, iChainA<A1, A2, [A1, A2]>, iRR<R1, R2>> {
     return this.zipWith(that, (a, b) => [a, b]) as FIO<
       E1 | E2,
-      iAA<A1, A2>,
+      iChainA<A1, A2, [A1, A2]>,
       iRR<R1, R2>
     >
   }
@@ -436,7 +438,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public zipWithPar<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
     c: (e1: A1, e2: A2) => C
-  ): FIO<E1 | E2, C, iRR<R1, R2>> {
+  ): FIO<E1 | E2, iChainA<A1, A2, C>, iRR<R1, R2>> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 
