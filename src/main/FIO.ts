@@ -101,6 +101,16 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Converts a [[FIO]] of a function into a [[FIO]] of a value.
+   */
+  public static ap<E1, A1, R1, A2>(
+    fio: FIO<E1, (a: A1) => A2, R1>,
+    input: A1
+  ): FIO<E1, A2, R1> {
+    return fio.map(ab => ab(input))
+  }
+
+  /**
    * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give users compile time error always while using.
    */
