@@ -45,9 +45,9 @@
     "benchmark": "^2.1.4",
     "bluebird": "^3.5.5",
     "chai": "^4.2.0",
-    "cz-conventional-changelog": "^2.1.0",
+    "cz-conventional-changelog": "^3.0.2",
     "fluture": "^11.0.2",
-    "mocha": "^6.1.4",
+    "mocha": "^6.2.0",
     "prettier": "^1.18.2",
     "promptly": "^3.0.3",
     "semantic-release": "^15.13.18",
@@ -61,7 +61,7 @@
     "typings-checker": "^2.0.0"
   },
   "dependencies": {
-    "checked-exceptions": "^1.1.0",
+    "checked-exceptions": "^1.2.0",
     "dbl-linked-list-ds": "^2.0.0",
     "in-node": "^1.0.0",
     "ts-scheduler": "^8.0.0",
