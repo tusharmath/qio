@@ -535,4 +535,19 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
   })
+
+  describe('par', () => {
+    it('should run the IO in parallel', () => {
+      const io = FIO.par([
+        FIO.of(10).delay(1000),
+        FIO.of(20).delay(1000),
+        FIO.of(30).delay(1000)
+      ])
+
+      const actual = testRuntime().executeSync(io)
+      const expected = [10, 20, 30]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
 })

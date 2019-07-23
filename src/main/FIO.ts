@@ -2,6 +2,8 @@
  * Created by tushar on 2019-05-20
  */
 
+import {immutable} from 'standard-data-structures'
+import {List} from 'standard-data-structures/src/immutable/list'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
@@ -254,11 +256,12 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static par<E1, A1, R1>(
     ios: Array<FIO<E1, A1, R1>>
   ): FIO<E1, A1[], R1> {
-    return ios.reduce(
-      // TODO: time complexity is O(n^2)
-      (a, b) => a.zipWithPar(b, (x, y) => [...x, y]),
-      FIO.env<R1>().and(FIO.io<E1, A1[]>(() => []))
-    )
+    return ios
+      .reduce(
+        (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
+        FIO.env<R1>().and(FIO.io<E1, List<A1>>(() => immutable.List.empty))
+      )
+      .map(_ => _.asArray)
   }
 
   /**
