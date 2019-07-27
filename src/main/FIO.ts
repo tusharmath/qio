@@ -251,7 +251,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Parallel run multiple IOs
+   * Runs multiple IOs in parallel. Checkout [[FIO.seq]] to run IOs in sequence.
    */
   public static par<E1, A1, R1>(
     ios: Array<FIO<E1, A1, R1>>
@@ -261,7 +261,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
         (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
         FIO.env<R1>().and(FIO.io<E1, List<A1>>(() => immutable.List.empty))
       )
-      .map(_ => _.asArray)
+      .map(_ => _.asArray.reverse())
   }
 
   /**
@@ -283,6 +283,21 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
     return new FIO(Tag.TryM, cb)
+  }
+
+  /**
+   * Executes the provided IOs in sequences and returns their intermediatory results as an Array.
+   * Checkout [[FIO.par]] to run multiple IOs in parallel.
+   */
+  public static seq<E1, A1, R1>(
+    ios: Array<FIO<E1, A1, R1>>
+  ): FIO<E1, A1[], R1> {
+    return ios
+      .reduce(
+        (fList, f) => fList.chain(list => f.map(value => list.prepend(value))),
+        FIO.env<R1>().and(FIO.io<E1, List<A1>>(() => immutable.List.empty))
+      )
+      .map(_ => _.asArray)
   }
 
   /**

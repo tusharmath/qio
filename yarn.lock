@@ -6068,10 +6068,10 @@ ssri@^6.0.0, ssri@^6.0.1:
   dependencies:
     figgy-pudding "^3.5.1"
 
-standard-data-structures@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-1.5.1.tgz#ecd3aa1d4c5722245eb9ffafdab4771347e5a116"
-  integrity sha512-0uE9VKFWBQs+ykyGQodNCTm2PGIIj3ICPdnUKL77PSngHwWrUVetKLLVceGyiaDdIEB8tori0HiLGJrXGN+lcg==
+standard-data-structures@^1.5.3:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-1.5.3.tgz#c61132a567f9bcadc3c2f51c36beb5f4cae586c8"
+  integrity sha512-jzeAokdN1tkS38VuQPhqPSFjxYpIw66emNvlSKankkLuul1riOcNa63FyHgxEFGFut0ude8BWZ/bCfRwxLew0g==
 
 static-extend@^0.1.1:
   version "0.1.2"

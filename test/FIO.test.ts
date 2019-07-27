@@ -549,5 +549,14 @@ describe('FIO', () => {
 
       assert.deepStrictEqual(actual, expected)
     })
+
+    it('should maintain order', () => {
+      const io = FIO.par([FIO.of(10), FIO.of(20), FIO.of(30)])
+
+      const actual = testRuntime().executeSync(io)
+      const expected = [10, 20, 30]
+
+      assert.deepStrictEqual(actual, expected)
+    })
   })
 })
