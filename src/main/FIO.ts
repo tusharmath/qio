@@ -394,6 +394,15 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Runs the current IO with the provided IO in parallel.
+   */
+  public par<E2, A2, R2>(
+    that: FIO<E2, A2, R2>
+  ): FIO<E1 | E2, {0: A1; 1: A2}, R1 & R2> {
+    return this.zipWithPar(that, (a, b) => ({0: a, 1: b}))
+  }
+
+  /**
    * Provides the current instance of FIO the required env.
    */
   public provide = (r1: R1): IO<E1, A1> => new FIO(Tag.Provide, this, r1)
