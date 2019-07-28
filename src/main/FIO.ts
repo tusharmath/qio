@@ -41,6 +41,15 @@ export type TaskR<A, R> = FIO<Error, A, R>
 export type UIO<A> = IO<never, A>
 
 /**
+ * Callback function used in node.js to handle async operations.
+ * @ignore
+ */
+export type NodeJSCallback<A> = (
+  err: NodeJS.ErrnoException | null,
+  result?: A
+) => void
+
+/**
  * @typeparam E1 Possible errors that could be thrown by the program.
  * @typeparam A1 The output of the running the program successfully.
  * @typeparam R1 Environment needed to execute this instance.
@@ -241,6 +250,29 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static never(): UIO<never> {
     return new FIO(Tag.Never, undefined)
+  }
+
+  /**
+   * Simple API to create IOs from a node.js based callback.
+   *
+   * **Example:**
+   * ```ts
+   * // FIO<NodeJS.ErrnoException, number, unknown>
+   * const fsOpen = FIO.node(cb => fs.open('./data.txt', cb))
+   * ```
+   */
+  public static node<A = never>(
+    fn: (cb: NodeJSCallback<A>, sh: IScheduler) => void
+  ): IO<NodeJS.ErrnoException, A | undefined> {
+    return FIO.asyncIO<NodeJS.ErrnoException, A>((rej, res, sh) =>
+      sh.asap(() => {
+        try {
+          fn((err, result) => (err === null ? res(result as A) : rej(err)), sh)
+        } catch (e) {
+          rej(e as NodeJS.ErrnoException)
+        }
+      })
+    )
   }
 
   /**

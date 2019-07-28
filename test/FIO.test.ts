@@ -559,4 +559,36 @@ describe('FIO', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
+
+  describe('node', () => {
+    it('should capture exceptions from Node API', () => {
+      const actual = testRuntime().executeSync(
+        FIO.node(cb => cb(new Error('Failed')))
+      )
+      const expected = new Error('Failed')
+
+      assert.deepStrictEqual('' + actual, '' + expected)
+    })
+
+    it('should capture sync exceptions', () => {
+      const actual = testRuntime().executeSync(
+        FIO.node(cb => {
+          throw new Error('Failed')
+        })
+      )
+      const expected = new Error('Failed')
+
+      assert.deepStrictEqual('' + actual, '' + expected)
+    })
+
+    it('should capture success results', () => {
+      const actual = testRuntime().executeSync(
+        // tslint:disable-next-line: no-null-keyword
+        FIO.node<number>(cb => cb(null, 1000))
+      )
+      const expected = 1000
+
+      assert.strictEqual(actual, expected)
+    })
+  })
 })
