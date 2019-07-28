@@ -419,6 +419,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Like [[FIO.tap]] but takes in an IO instead of a callback.
+   */
+  public do<E2, R2>(io: FIO<E2, unknown, R2>): FIO<E1 | E2, A1, R1 & R2> {
+    return this.chain(_ => io.const(_))
+  }
+
+  /**
    * Applies transformation on the success value of the FIO.
    */
   public map<A2>(ab: (a: A1) => A2): FIO<E1, A2, R1> {
