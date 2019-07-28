@@ -7,6 +7,7 @@ import {FIO, UIO} from './FIO'
 
 /**
  * A special data structure that can be set only once.
+ * Any get operation on Await will "wait" for a set to happen first.
  * @typeparam E Errors thrown
  * @typeparam A Success value
  */
