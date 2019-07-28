@@ -1,4 +1,4 @@
-import {LinkedList} from 'dbl-linked-list-ds'
+import {mutable} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
@@ -16,7 +16,7 @@ export class Await<E, A> {
     return FIO.uio(() => new Await())
   }
   private flag = false
-  private readonly Q = new LinkedList<[CB<E>, CB<A>]>()
+  private readonly Q = mutable.DoublyLinkedList.of<[CB<E>, CB<A>]>()
   private result: Exit<E, A> = Exit.pending
 
   public get get(): FIO<E, A> {
