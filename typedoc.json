@@ -8,5 +8,5 @@
   "out": "docs",
   "exclude": ["test/**", "example/**", "benchmarks/**"],
   "listInvalidSymbolLinks": true,
-  "toc": ["FIO", "Ref", "Fiber", "Await", "Exit"]
+  "toc": ["FIO", "Ref", "Fiber", "Await", "Exit", "Managed"]
 }
