@@ -11,6 +11,7 @@ A type-safe, functional, performant, lawful, composable data structure that solv
 - [Documentation](https://tusharmath.com/fearless-io)
 - [Example](https://github.com/tusharmath/fearless-io/blob/master/example/README.md)
 - [Benchmarks](https://github.com/tusharmath/fearless-io/blob/master/benchmarks/README.md)
+- [Credits](#credits)
 
 [getting started]: https://github.com/tusharmath/fearless-io/blob/master/GETTING_STARTED.md
 
@@ -362,3 +363,10 @@ Running the program can be done by using the runtime.
 ## Next Steps
 
 Checkout a fully functional example [here](https://github.com/tusharmath/fearless-io/tree/master/example).
+
+# Credits
+
+FIO is heavily inspired by the following libraries —
+
+- [Scala ZIO](https://github.com/zio/zio)
+- [Fluture](https://github.com/fluture-js/Fluture)
