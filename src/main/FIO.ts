@@ -77,7 +77,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Memoizes the result and executes the IO only once
+   * Memorizes the result and executes the IO only once
    */
   public get once(): FIO<never, IO<E1, A1>, R1> {
     return this.env.chain(env =>
@@ -501,7 +501,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Combines the result of two FIOs and uses a combinatory function to combine their result
+   * Combines the result of two FIOs and uses a combine function to combine their result
    */
   public zipWith<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
@@ -511,7 +511,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Combine two FIO instances in parallel and use the combinatory function to combine the result.
+   * Combine two FIO instances in parallel and use the combine function to combine the result.
    */
   public zipWithPar<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
