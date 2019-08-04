@@ -3,11 +3,21 @@ import {FIO, NoEnv, UIO} from './FIO'
 const T = () => true
 const Id = <A>(a: A) => a
 
+/**
+ * Represents a sequence of values that are emitted over time.
+ *
+ * **Example:**
+ * ```ts
+ * import {Stream} from 'fearless-io'
+ *
+ *
+ * const s = Stream.of(1, 2, 3).reduce(0, (a, b) => a + b)
+ *
+ * const runtime = defaultRuntime()
+ * runtime.execute(s.drain, console.log) // 6
+ * ```
+ */
 export abstract class Stream<E1, A1, R1> {
-  public get forEach(): FIO<E1, void, R1> {
-    return this.forEachWhile(() => FIO.of(true).addEnv<R1>())
-  }
-
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
   ): Stream<E1, A1, R1> {
@@ -66,6 +76,9 @@ export abstract class Stream<E1, A1, R1> {
   public foldLeft<S2>(seed: S2, fn: (s: S2, a: A1) => S2): FIO<E1, S2, R1> {
     return this.fold(seed, T, (s, a) => FIO.of(fn(s, a)).addEnv<R1>())
   }
+  public forEach(f: (a: A1) => FIO<E1, void, R1>): FIO<E1, void, R1> {
+    return this.forEachWhile(a => f(a).const(true))
+  }
 
   public forEachWhile(f: (a: A1) => FIO<E1, boolean, R1>): FIO<E1, void, R1> {
     return this.fold<boolean>(true, Id, (s, a) =>
@@ -87,6 +100,10 @@ export abstract class Stream<E1, A1, R1> {
         (s, a) => next(s._1, a).map(s2 => ({_0: s._0 + 1, _1: s2}))
       ).map(_ => _._1)
     )
+  }
+
+  public get drain(): FIO<E1, void, R1> {
+    return this.forEach(_ => FIO.void().addEnv<R1>())
   }
 }
 
