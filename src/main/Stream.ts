@@ -5,14 +5,14 @@ const Id = <A>(a: A) => a
 
 export abstract class FStream<E1, A1, R1> {
   public get forEach(): FIO<E1, void, R1> {
-    return this.forEachWhile(() => FIO.of(true))
+    return this.forEachWhile(() => FIO.of(true).addEnv<R1>())
   }
 
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
   ): FStream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
-      cont(state) ? io.chain(a => next(state, a)) : FIO.of(state)
+      cont(state) ? io.chain(a => next(state, a)) : FIO.of(state).addEnv<R1>()
     )
   }
 
@@ -51,9 +51,12 @@ export abstract class FStream<E1, A1, R1> {
 
   public filter(f: (a: A1) => boolean): FStream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
-      this.fold(state, cont, (s, a) => (f(a) ? next(s, a) : FIO.of(s)))
+      this.fold(state, cont, (s, a) =>
+        f(a) ? next(s, a) : FIO.of(s).addEnv<R1>()
+      )
     )
   }
+
   public abstract fold<S1>(
     s: S1,
     cont: (s: S1) => boolean,
@@ -61,11 +64,13 @@ export abstract class FStream<E1, A1, R1> {
   ): FIO<E1, S1, R1>
 
   public foldLeft<S2>(seed: S2, fn: (s: S2, a: A1) => S2): FIO<E1, S2, R1> {
-    return this.fold(seed, T, (s, a) => FIO.of(fn(s, a)))
+    return this.fold(seed, T, (s, a) => FIO.of(fn(s, a)).addEnv<R1>())
   }
 
   public forEachWhile(f: (a: A1) => FIO<E1, boolean, R1>): FIO<E1, void, R1> {
-    return this.fold<boolean>(true, Id, (s, a) => (s ? f(a) : FIO.of(s))).void
+    return this.fold<boolean>(true, Id, (s, a) =>
+      s ? f(a) : FIO.of(s).addEnv<R1>()
+    ).void
   }
 
   public map<A2>(ab: (a: A1) => A2): FStream<E1, A2, R1> {
