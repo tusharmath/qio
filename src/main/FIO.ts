@@ -8,6 +8,7 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {coordinate} from '../internals/Coordinate'
+import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
 import {Exit} from './Exit'
@@ -315,6 +316,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
     return new FIO(Tag.TryM, cb)
+  }
+
+  /**
+   * Returns the current runtime in a pure way.
+   */
+  public static runtime(): UIO<IRuntime> {
+    return new FIO(Tag.Runtime)
   }
 
   /**

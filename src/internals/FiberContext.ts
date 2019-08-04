@@ -8,6 +8,7 @@ import {Exit} from '../main/Exit'
 import {Fiber} from '../main/Fiber'
 import {FIO, UIO} from '../main/FIO'
 import {Instruction} from '../main/Instructions'
+import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
@@ -36,6 +37,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   public readonly stackEnv: unknown[] = []
 
   public constructor(
+    public readonly runtime: IRuntime,
     public readonly sh: IScheduler,
     io: Instruction,
     public readonly cancellationList: CancellationList = new CancellationList()
@@ -56,7 +58,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
    *  Creates a new FiberContext with the provided instruction
    */
   public $fork<E2, A2>(ins: Instruction): FiberContext<E2, A2> {
-    return new FiberContext<E2, A2>(this.sh, ins)
+    return new FiberContext<E2, A2>(this.runtime, this.sh, ins)
   }
 
   /**

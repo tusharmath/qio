@@ -22,7 +22,7 @@ export const Evaluate = <E, A>(
   rej: CB<E>,
   res: CB<A>
 ): void => {
-  const {stackA, stackE, stackEnv, cancellationList, sh} = context
+  const {stackA, stackE, stackEnv, cancellationList, sh, runtime} = context
   let data: unknown
 
   while (true) {
@@ -95,6 +95,10 @@ export const Evaluate = <E, A>(
         case Tag.Access:
           const env = stackEnv[stackEnv.length - 1]
           data = j.i0(env)
+          break
+
+        case Tag.Runtime:
+          data = runtime
           break
 
         case Tag.Async:

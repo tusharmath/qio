@@ -10,6 +10,7 @@ import {Exit} from '../src/main/Exit'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
+import {IRuntime} from '../src/runtimes/IRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
@@ -589,6 +590,16 @@ describe('FIO', () => {
       const expected = 1000
 
       assert.strictEqual(actual, expected)
+    })
+  })
+
+  describe('runtime', () => {
+    it('should give access to current runtime', () => {
+      const runtime = testRuntime()
+
+      const actual = runtime.executeSync(FIO.runtime())
+
+      assert.strictEqual(actual, runtime as IRuntime)
     })
   })
 })
