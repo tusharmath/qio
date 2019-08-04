@@ -3,20 +3,20 @@ import {FIO, NoEnv, UIO} from './FIO'
 const T = () => true
 const Id = <A>(a: A) => a
 
-export abstract class FStream<E1, A1, R1> {
+export abstract class Stream<E1, A1, R1> {
   public get forEach(): FIO<E1, void, R1> {
     return this.forEachWhile(() => FIO.of(true).addEnv<R1>())
   }
 
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
-  ): FStream<E1, A1, R1> {
+  ): Stream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
       cont(state) ? io.chain(a => next(state, a)) : FIO.of(state).addEnv<R1>()
     )
   }
 
-  public static interval(duration: number): FStream<never, number, NoEnv> {
+  public static interval(duration: number): Stream<never, number, NoEnv> {
     return new Fold((state, cont, next) => {
       const itar = (s: typeof state, a: number): UIO<typeof state> =>
         cont(s)
@@ -29,7 +29,7 @@ export abstract class FStream<E1, A1, R1> {
     })
   }
 
-  public static of<A1>(...t: A1[]): FStream<never, A1, NoEnv> {
+  public static of<A1>(...t: A1[]): Stream<never, A1, NoEnv> {
     return new Fold((state, cont, next) => {
       const itar = (s: typeof state, i: number): UIO<typeof state> =>
         cont(s) && i < t.length
@@ -40,7 +40,7 @@ export abstract class FStream<E1, A1, R1> {
     })
   }
 
-  public static range(min: number, max: number): FStream<never, number, NoEnv> {
+  public static range(min: number, max: number): Stream<never, number, NoEnv> {
     return new Fold((state, cont, next) => {
       const itar = (s: typeof state, i: number): UIO<typeof state> =>
         i === max ? FIO.of(s) : next(s, i).chain(ss => itar(ss, i + 1))
@@ -49,7 +49,7 @@ export abstract class FStream<E1, A1, R1> {
     })
   }
 
-  public filter(f: (a: A1) => boolean): FStream<E1, A1, R1> {
+  public filter(f: (a: A1) => boolean): Stream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
       this.fold(state, cont, (s, a) =>
         f(a) ? next(s, a) : FIO.of(s).addEnv<R1>()
@@ -73,13 +73,13 @@ export abstract class FStream<E1, A1, R1> {
     ).void
   }
 
-  public map<A2>(ab: (a: A1) => A2): FStream<E1, A2, R1> {
+  public map<A2>(ab: (a: A1) => A2): Stream<E1, A2, R1> {
     return new Fold((state, cont, next) =>
       this.fold(state, cont, (s, a) => next(s, ab(a)))
     )
   }
 
-  public take(count: number): FStream<E1, A1, R1> {
+  public take(count: number): Stream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
       this.fold(
         {_0: 0, _1: state},
@@ -90,7 +90,7 @@ export abstract class FStream<E1, A1, R1> {
   }
 }
 
-class Fold<E1, A1, R1> extends FStream<E1, A1, R1> {
+class Fold<E1, A1, R1> extends Stream<E1, A1, R1> {
   public constructor(
     public readonly fold: <S1>(
       s: S1,
