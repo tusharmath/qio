@@ -363,12 +363,12 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Conditionally calls the provided callbacks and returns an IO.
    */
-  public static when<T extends unknown[], E1, E2, A, R1, R2>(
-    cond: (...t: T) => boolean,
-    T: (...t: T) => FIO<E1, A, R1>,
-    F: (...t: T) => FIO<E2, A, R2>
-  ): (...t: T) => FIO<E1 | E2, A, R1 & R2> {
-    return (...t: T) =>
+  public static when<G extends unknown[], E1, E2, A, R1, R2>(
+    cond: (...g: G) => boolean,
+    T: (...g: G) => FIO<E1, A, R1>,
+    F: (...g: G) => FIO<E2, A, R2>
+  ): (...g: G) => FIO<E1 | E2, A, R1 & R2> {
+    return (...t: G) =>
       (cond(...t) ? T(...t) : F(...t)) as FIO<E1 | E2, A, R1 & R2>
   }
 
@@ -390,6 +390,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
      */
     public readonly i1?: unknown
   ) {}
+
+  /**
+   * Gives access to additional env
+   */
+  public addEnv<R2>(): FIO<E1, A1, R1 & R2> {
+    return FIO.env<R2>().and(this)
+  }
 
   /**
    * Runs the FIO instances one by one
@@ -456,7 +463,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Provides the current instance of FIO the required env.
    */
-  public provide = (r1: R1): IO<E1, A1> => new FIO(Tag.Provide, this, r1)
+  public provide(r1: R1): IO<E1, A1> {
+    return new FIO(Tag.Provide, this, r1)
+  }
 
   /**
    * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
