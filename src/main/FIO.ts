@@ -361,6 +361,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Conditionally calls the provided callbacks and returns an IO.
+   */
+  public static when<T extends unknown[], E1, E2, A, R1, R2>(
+    cond: (...t: T) => boolean,
+    T: (...t: T) => FIO<E1, A, R1>,
+    F: (...t: T) => FIO<E2, A, R2>
+  ): (...t: T) => FIO<E1 | E2, A, R1 & R2> {
+    return (...t: T) =>
+      (cond(...t) ? T(...t) : F(...t)) as FIO<E1 | E2, A, R1 & R2>
+  }
+
+  /**
    * @ignore
    */
   public constructor(
