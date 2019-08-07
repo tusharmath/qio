@@ -5,14 +5,14 @@
 import {testScheduler} from 'ts-scheduler/test'
 
 import {Exit} from '../main/Exit'
-import {FIO} from '../main/FIO'
+import {FIO, IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler = testScheduler()
 
-  public executeSync<E, A>(io: FIO<E, A>): A | E | undefined {
+  public executeSync<E, A>(io: IO<E, A>): A | E | undefined {
     const result = this.exit(io)
     this.scheduler.run()
     switch (result[0]) {
