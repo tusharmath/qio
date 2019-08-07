@@ -377,8 +377,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     F: (...g: G) => FIO<E2, A, R2>
   ): (...g: G) => FIO<E1 | E2, A, R1 & R2> {
     return (...t: G) =>
-      (cond(...t) ? T(...t) : F(...t)) as FIO<E1 | E2, A, R1 & R2>
+      ((cond(...t) ? T(...t) : F(...t)) as unknown) as FIO<E1 | E2, A, R1 & R2>
   }
+
+  /**
+   * Hack: The property $R1 is added to enable stricter checks.
+   * More specifically enable contravarient check on R1.
+   */
+  public readonly $R1?: (r: R1) => void
 
   /**
    * @ignore

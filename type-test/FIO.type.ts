@@ -2,7 +2,7 @@
  * Created by tushar on 2019-04-24
  */
 
-import {FIO} from '../'
+import {FIO, defaultRuntime} from '../'
 
 //#region ASYNC
 // $ExpectType FIO<never, never, unknown>
@@ -103,3 +103,6 @@ FIO.never().zipWithPar(FIO.of(10), (a, b) => 10)
 
 // $ExpectType FIO<never, void, unknown>
 FIO.never().raceWith(FIO.of(10), FIO.void, FIO.void)
+
+// $ExpectError Argument of type 'FIO<never, number, string>' is not assignable to parameter of type 'FIO<never, number, unknown>'.
+defaultRuntime().execute(FIO.access((_: string) => _.length))
