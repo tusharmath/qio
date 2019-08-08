@@ -64,5 +64,16 @@ describe('Queue', () => {
       const expected = 'A'
       assert.strictEqual(actual, expected)
     })
+
+    it('should empty the queue once resolved', () => {
+      const runtime = testRuntime()
+      const actual = runtime.executeSync(
+        Queue.unbounded<string>().chain(Q =>
+          Q.take.par(Q.offer('A').delay(1000)).and(Q.length)
+        )
+      )
+
+      assert.strictEqual(actual, 0)
+    })
   })
 })

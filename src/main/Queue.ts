@@ -17,6 +17,10 @@ export class Queue<A = never> {
     return this.Q.asArray
   }
 
+  public get length(): UIO<number> {
+    return this.Q.length
+  }
+
   /**
    * Returns the current size of the queue
    */
@@ -40,21 +44,20 @@ export class Queue<A = never> {
   }
 
   /**
-   * Creates a new bounded queue
+   * Creates a new bounded Queue
    */
   public static bounded<A>(capacity: number): UIO<Queue<A>> {
-    return Queue.of(capacity)
-  }
-
-  public static of<A>(capacity: number): UIO<Queue<A>> {
     return PureMutableList.of<A>().zipWith(
       PureMutableList.of<Await<never, A>>(),
       (Q, T) => new Queue(capacity, Q, T)
     )
   }
 
+  /**
+   * Creates a queue which is theoretically unbounded.
+   */
   public static unbounded<A>(): UIO<Queue<A>> {
-    return Queue.of(Number.MAX_SAFE_INTEGER)
+    return Queue.bounded(Number.MAX_SAFE_INTEGER)
   }
 
   private constructor(
@@ -67,14 +70,14 @@ export class Queue<A = never> {
    * Inserts an item into the queue
    */
   public offer(a: A): UIO<LinkedListNode<A>> {
-    return this.Q.add(a).tap(_ => this.$setAwaited(_.value))
+    return this.Q.add(a).tap(_ => this.setAwaited(_.value))
   }
 
   public offerAll(...a: A[]): UIO<Array<LinkedListNode<A>>> {
     return FIO.seq(a.map(_ => this.offer(_)))
   }
 
-  private $setAwaited(value: A): UIO<boolean[]> {
+  private setAwaited(value: A): UIO<boolean[]> {
     const itar = (list: List<UIO<boolean>>): UIO<List<UIO<boolean>>> =>
       this.T.shift.chain(_ =>
         _ === undefined
@@ -82,6 +85,8 @@ export class Queue<A = never> {
           : itar(list.prepend(_.set(FIO.of(value))))
       )
 
-    return itar(immutable.List.empty).chain(_ => FIO.seq(_.asArray))
+    return itar(immutable.List.empty).chain(_ =>
+      FIO.seq(_.asArray).tap(() => (!_.isEmpty ? this.Q.shift : FIO.void()))
+    )
   }
 }
