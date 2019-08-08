@@ -74,7 +74,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Returns a [[Fiber]]. The returned fiber is always in a paused state.
    */
   public get fork(): FIO<never, Fiber<E1, A1>, R1> {
-    return new FIO(Tag.Fork, this)
+    return FIO.env<R1>().chain(env => FIO.fork(this.provide(env)))
   }
 
   /**
@@ -216,6 +216,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     fio: FIO<E1, FIO<E2, A2, R2>, R1>
   ): FIO<E1 | E2, A2, R1 & R2> {
     return fio.chain(Id)
+  }
+
+  /**
+   * Creates a new [[Fiber]] to run the given [[IO]].
+   */
+  public static fork<E1, A1>(io: IO<E1, A1>): UIO<Fiber<E1, A1>> {
+    return new FIO(Tag.Fork, io)
   }
 
   /**
@@ -382,7 +389,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
   /**
    * Hack: The property $R1 is added to enable stricter checks.
-   * More specifically enable contravarient check on R1.
+   * More specifically enable contravariant check on R1.
    */
   public readonly $R1?: (r: R1) => void
 

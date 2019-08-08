@@ -512,6 +512,17 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
 
+    it('should handle multiple accesses', () => {
+      const actual = testRuntime().executeSync(
+        FIO.access((_: string) => _.length)
+          .fork.chain(_ => _.resume)
+          .provide('ABCD')
+      )
+
+      const expected = 4
+      assert.deepStrictEqual(actual, expected)
+    })
+
     it('should remove from env stack (memory leak)', () => {
       const actual = testRuntime().executeSync(
         FIO.access((_: string) => _.length)
