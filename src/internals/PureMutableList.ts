@@ -1,6 +1,6 @@
 import {LinkedListNode, mutable} from 'standard-data-structures'
 
-import {FIO, UIO} from '../main/FIO'
+import {FIO, IO, UIO} from '../main/FIO'
 
 /**
  * A pure version of a mutable doubly linked list
@@ -27,6 +27,12 @@ export class PureMutableList<A> {
   private constructor() {}
   public add(element: A): UIO<LinkedListNode<A>> {
     return FIO.uio(() => this.list.add(element))
+  }
+  public forEach<E1>(f: (a: A) => IO<E1, void>): IO<E1, void> {
+    const itar = (): IO<E1, void> =>
+      this.shift.chain(_ => (_ === undefined ? FIO.void() : f(_).chain(itar)))
+
+    return itar()
   }
   public remove(node: LinkedListNode<A>): UIO<void> {
     return FIO.uio(() => this.list.remove(node))
