@@ -2,7 +2,7 @@
 export {Await} from './src/main/Await'
 export {Exit} from './src/main/Exit'
 export {Fiber} from './src/main/Fiber'
-export {FIO, Task, TaskR, UIO} from './src/main/FIO'
+export {FIO, Task, TaskR, UIO, IO} from './src/main/FIO'
 export {Ref} from './src/main/Ref'
 export {defaultRuntime} from './src/runtimes/DefaultRuntime'
 export {IRuntime} from './src/runtimes/IRuntime'
