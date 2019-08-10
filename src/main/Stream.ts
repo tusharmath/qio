@@ -22,6 +22,21 @@ export abstract class Stream<E1, A1, R1> {
   public get drain(): FIO<E1, void, R1> {
     return this.forEach(_ => FIO.void().addEnv<R1>())
   }
+
+  /**
+   * Create a stream from an array
+   */
+  public static fromArray<A>(t: A[]): Stream<never, A, NoEnv> {
+    return new Fold((state, cont, next) => {
+      const itar = (s: typeof state, i: number): UIO<typeof state> =>
+        cont(s) && i < t.length
+          ? next(s, t[i]).chain(_ => itar(_, i + 1))
+          : FIO.of(s)
+
+      return itar(state, 0)
+    })
+  }
+
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
   ): Stream<E1, A1, R1> {
@@ -62,14 +77,7 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a stream from the provided values
    */
   public static of<A1>(...t: A1[]): Stream<never, A1, NoEnv> {
-    return new Fold((state, cont, next) => {
-      const itar = (s: typeof state, i: number): UIO<typeof state> =>
-        cont(s) && i < t.length
-          ? next(s, t[i]).chain(_ => itar(_, i + 1))
-          : FIO.of(s)
-
-      return itar(state, 0)
-    })
+    return Stream.fromArray(t)
   }
 
   /**
