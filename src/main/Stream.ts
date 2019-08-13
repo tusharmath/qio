@@ -27,21 +27,29 @@ export abstract class Stream<E1, A1, R1> {
    * Create a stream from an array
    */
   public static fromArray<A>(t: A[]): Stream<never, A, NoEnv> {
-    return new Fold((state, cont, next) => {
-      const itar = (s: typeof state, i: number): UIO<typeof state> =>
-        cont(s) && i < t.length
-          ? next(s, t[i]).chain(_ => itar(_, i + 1))
-          : FIO.of(s)
+    return new Fold(
+      <E, S, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: A) => FIO<E, S, R>
+      ) => {
+        const itar = (s: S, i: number): FIO<E, S, R> =>
+          FIO.if(
+            cont(s) && i < t.length,
+            next(s, t[i]).chain(_ => itar(_, i + 1)),
+            FIO.of(s)
+          )
 
-      return itar(state, 0)
-    })
+        return itar(state, 0)
+      }
+    )
   }
 
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
   ): Stream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
-      cont(state) ? io.chain(a => next(state, a)) : FIO.of(state).addEnv<R1>()
+      FIO.if(cont(state), io.chain(a => next(state, a)), FIO.of(state))
     )
   }
 
@@ -49,28 +57,42 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a stream from a [[Queue]]
    */
   public static fromQueue<A1>(Q: Queue<A1>): Stream<never, A1, NoEnv> {
-    return new Fold((state, cont, next) => {
-      const itar = (s: typeof state): UIO<typeof state> =>
-        cont(s) ? Q.take.chain(a => next(s, a).chain(itar)) : FIO.of(s)
+    return new Fold(
+      <E, S, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: A1) => FIO<E, S, R>
+      ) => {
+        const itar = (s: S): FIO<E, S, R> =>
+          FIO.if(cont(s), Q.take.chain(a => next(s, a).chain(itar)), FIO.of(s))
 
-      return itar(state)
-    })
+        return itar(state)
+      }
+    )
   }
 
   /**
    * Creates a stream that emits an number after every given duration of time.
    */
   public static interval(duration: number): Stream<never, number, NoEnv> {
-    return new Fold((state, cont, next) => {
-      const itar = (s: typeof state, a: number): UIO<typeof state> =>
-        cont(s)
-          ? next(s, a)
+    return new Fold(
+      <E, S, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: number) => FIO<E, S, R>
+      ) => {
+        const itar = (s: typeof state, a: number): FIO<E, S, R> =>
+          FIO.if(
+            cont(s),
+            next(s, a)
               .delay(duration)
-              .chain(_ => itar(_, a + 1))
-          : FIO.of(s)
+              .chain(_ => itar(_, a + 1)),
+            FIO.of(s)
+          )
 
-      return itar(state, 0)
-    })
+        return itar(state, 0)
+      }
+    )
   }
 
   /**
@@ -84,12 +106,33 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a stream that emits the given ranges of values
    */
   public static range(min: number, max: number): Stream<never, number, NoEnv> {
-    return new Fold((state, cont, next) => {
-      const itar = (s: typeof state, i: number): UIO<typeof state> =>
-        i === max ? FIO.of(s) : next(s, i).chain(ss => itar(ss, i + 1))
+    return new Fold(
+      <E, S, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: number) => FIO<E, S, R>
+      ) => {
+        const itar = (s: typeof state, i: number): FIO<E, S, R> =>
+          FIO.if(
+            i <= max && cont(s),
+            next(s, i).chain(ss => itar(ss, i + 1)),
+            FIO.of(s)
+          )
 
-      return itar(state, min)
-    })
+        return itar(state, min)
+      }
+    )
+  }
+
+  /**
+   * Flattens the inner stream produced by the each value of the provided stream
+   */
+  public chain<E2, A2, R2>(
+    aFb: (a: A1) => Stream<E2, A2, R2>
+  ): Stream<E1 | E2, A2, R1 & R2> {
+    return new Fold((state, cont, next) =>
+      this.fold(state, cont, (s1, a1) => aFb(a1).fold(s1, cont, next))
+    )
   }
 
   /**
@@ -97,9 +140,7 @@ export abstract class Stream<E1, A1, R1> {
    */
   public filter(f: (a: A1) => boolean): Stream<E1, A1, R1> {
     return new Fold((state, cont, next) =>
-      this.fold(state, cont, (s, a) =>
-        f(a) ? next(s, a) : FIO.of(s).addEnv<R1>()
-      )
+      this.fold(state, cont, FIO.when((s, a) => f(a), next, FIO.of))
     )
   }
 
@@ -121,9 +162,8 @@ export abstract class Stream<E1, A1, R1> {
    * Keeps consuming the stream until the effect-full function returns a false.
    */
   public forEachWhile(f: (a: A1) => FIO<E1, boolean, R1>): FIO<E1, void, R1> {
-    return this.fold<boolean>(true, Id, (s, a) =>
-      s ? f(a) : FIO.of(s).addEnv<R1>()
-    ).void
+    return this.fold(true, Id, (s, a) => (s ? f(a) : FIO.of(s).addEnv<R1>()))
+      .void
   }
 
   /**
@@ -132,6 +172,14 @@ export abstract class Stream<E1, A1, R1> {
   public map<A2>(ab: (a: A1) => A2): Stream<E1, A2, R1> {
     return new Fold((state, cont, next) =>
       this.fold(state, cont, (s, a) => next(s, ab(a)))
+    )
+  }
+
+  public scan<E2, A2, R2>(
+    f: (a: A1) => FIO<E1, A2, R2>
+  ): Stream<E1 | E2, A2, R1 & R2> {
+    return new Fold((state, cont, next) =>
+      this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
     )
   }
 
@@ -151,20 +199,20 @@ export abstract class Stream<E1, A1, R1> {
   /**
    * Base implementation for every stream
    */
-  protected abstract fold<S1>(
-    s: S1,
-    cont: (s: S1) => boolean,
-    fn: (s: S1, a: A1) => FIO<E1, S1, R1>
-  ): FIO<E1, S1, R1>
+  protected abstract fold<E2, A2, R2>(
+    state: A2,
+    cont: (s: A2) => boolean,
+    fn: (s: A2, a: A1) => FIO<E2, A2, R2>
+  ): FIO<E1 | E2, A2, R1 & R2>
 }
 
 class Fold<E1, A1, R1> extends Stream<E1, A1, R1> {
   public constructor(
-    public readonly fold: <S1>(
-      s: S1,
-      cont: (s: S1) => boolean,
-      next: (s: S1, a: A1) => FIO<E1, S1, R1>
-    ) => FIO<E1, S1, R1>
+    public readonly fold: <E2, A2, R2>(
+      state: A2,
+      cont: (s: A2) => boolean,
+      next: (s: A2, a: A1) => FIO<E2, A2, R2>
+    ) => FIO<E1 | E2, A2, R1 & R2>
   ) {
     super()
   }
