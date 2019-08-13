@@ -237,6 +237,17 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Alternative to ternary operator in typescript that forcefully narrows down the envs
+   */
+  public static if<E1, R1, E2, R2, A>(
+    cond: boolean,
+    left: FIO<E1, A, R1>,
+    right: FIO<E2, A, R2>
+  ): FIO<E1 | E2, A, R1 & R2> {
+    return ((cond ? left : right) as unknown) as FIO<E1 | E2, A, R1 & R2>
+  }
+
+  /**
    * @ignore
    */
   public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
