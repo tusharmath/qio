@@ -1,4 +1,4 @@
-import {FIO, NoEnv, UIO} from './FIO'
+import {FIO, NoEnv} from './FIO'
 import {Queue} from './Queue'
 
 const T = () => true
