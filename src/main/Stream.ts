@@ -124,6 +124,10 @@ export abstract class Stream<E1, A1, R1> {
     )
   }
 
+  public static reject<E1>(err: E1): Stream<E1, never, NoEnv> {
+    return Stream.fromEffect(FIO.reject(err))
+  }
+
   /**
    * Flattens the inner stream produced by the each value of the provided stream
    */
