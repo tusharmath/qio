@@ -73,8 +73,25 @@ export class Queue<A = never> {
     return this.Q.add(a).tap(_ => this.setAwaited(_.value))
   }
 
+  /**
+   * Adds all the provided items into the queue
+   */
   public offerAll(...a: A[]): UIO<Array<LinkedListNode<A>>> {
     return FIO.seq(a.map(_ => this.offer(_)))
+  }
+
+  /**
+   * Resolves after `n` items are available in the queue.
+   */
+  public takeN(n: number): UIO<A[]> {
+    const itar = (i: number, list: List<A>): UIO<List<A>> =>
+      FIO.if(
+        i === n,
+        FIO.of(list),
+        this.take.chain(_ => itar(i + 1, list.prepend(_)))
+      )
+
+    return itar(0, List.empty).map(_ => _.asArray)
   }
 
   private setAwaited(value: A): UIO<boolean[]> {
