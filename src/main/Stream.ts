@@ -18,7 +18,7 @@ const Id = <A>(a: A) => a
  * runtime.execute(s.drain, console.log) // 6
  * ```
  */
-export abstract class Stream<E1, A1, R1> {
+export class Stream<E1, A1, R1> {
   public get drain(): FIO<E1, void, R1> {
     return this.forEach(_ => FIO.void().addEnv<R1>())
   }
@@ -27,7 +27,7 @@ export abstract class Stream<E1, A1, R1> {
    * Create a stream from an array
    */
   public static fromArray<A>(t: A[]): Stream<never, A, NoEnv> {
-    return new Fold(
+    return new Stream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -48,7 +48,7 @@ export abstract class Stream<E1, A1, R1> {
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
   ): Stream<E1, A1, R1> {
-    return new Fold((state, cont, next) =>
+    return new Stream((state, cont, next) =>
       FIO.if(cont(state), io.chain(a => next(state, a)), FIO.of(state))
     )
   }
@@ -57,7 +57,7 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a stream from a [[Queue]]
    */
   public static fromQueue<A1>(Q: Queue<A1>): Stream<never, A1, NoEnv> {
-    return new Fold(
+    return new Stream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -75,7 +75,7 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a stream that emits an number after every given duration of time.
    */
   public static interval(duration: number): Stream<never, number, NoEnv> {
-    return new Fold(
+    return new Stream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -106,7 +106,7 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a stream that emits the given ranges of values
    */
   public static range(min: number, max: number): Stream<never, number, NoEnv> {
-    return new Fold(
+    return new Stream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -129,12 +129,23 @@ export abstract class Stream<E1, A1, R1> {
   }
 
   /**
+   * Constructor to create a new [[Stream]]
+   */
+  public constructor(
+    public readonly fold: <E2, A2, R2>(
+      state: A2,
+      cont: (s: A2) => boolean,
+      next: (s: A2, a: A1) => FIO<E2, A2, R2>
+    ) => FIO<E1 | E2, A2, R1 & R2>
+  ) {}
+
+  /**
    * Flattens the inner stream produced by the each value of the provided stream
    */
   public chain<E2, A2, R2>(
     aFb: (a: A1) => Stream<E2, A2, R2>
   ): Stream<E1 | E2, A2, R1 & R2> {
-    return new Fold((state, cont, next) =>
+    return new Stream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => aFb(a1).fold(s1, cont, next))
     )
   }
@@ -143,7 +154,7 @@ export abstract class Stream<E1, A1, R1> {
    * Creates a new streams that emits values, satisfied by the provided filter.
    */
   public filter(f: (a: A1) => boolean): Stream<E1, A1, R1> {
-    return new Fold((state, cont, next) =>
+    return new Stream((state, cont, next) =>
       this.fold(state, cont, FIO.when((s, a) => f(a), next, FIO.of))
     )
   }
@@ -158,23 +169,26 @@ export abstract class Stream<E1, A1, R1> {
   /**
    * Performs the given effect-full function for each value of the stream
    */
-  public forEach(f: (a: A1) => FIO<E1, void, R1>): FIO<E1, void, R1> {
+  public forEach<E2, R2>(
+    f: (a: A1) => FIO<E2, void, R2>
+  ): FIO<E1 | E2, void, R1 & R2> {
     return this.forEachWhile(a => f(a).const(true))
   }
 
   /**
    * Keeps consuming the stream until the effect-full function returns a false.
    */
-  public forEachWhile(f: (a: A1) => FIO<E1, boolean, R1>): FIO<E1, void, R1> {
-    return this.fold(true, Id, (s, a) => (s ? f(a) : FIO.of(s).addEnv<R1>()))
-      .void
+  public forEachWhile<E2, R2>(
+    f: (a: A1) => FIO<E2, boolean, R2>
+  ): FIO<E1 | E2, void, R1 & R2> {
+    return this.fold(true, Id, (s, a) => FIO.if(s, f(a), FIO.of(s))).void
   }
 
   /**
    * Transforms the values that are being produced by the stream.
    */
   public map<A2>(ab: (a: A1) => A2): Stream<E1, A2, R1> {
-    return new Fold((state, cont, next) =>
+    return new Stream((state, cont, next) =>
       this.fold(state, cont, (s, a) => next(s, ab(a)))
     )
   }
@@ -182,7 +196,7 @@ export abstract class Stream<E1, A1, R1> {
   public scan<E2, A2, R2>(
     f: (a: A1) => FIO<E1, A2, R2>
   ): Stream<E1 | E2, A2, R1 & R2> {
-    return new Fold((state, cont, next) =>
+    return new Stream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
     )
   }
@@ -191,33 +205,12 @@ export abstract class Stream<E1, A1, R1> {
    * Emits the first N values skipping the rest.
    */
   public take(count: number): Stream<E1, A1, R1> {
-    return new Fold((state, cont, next) =>
+    return new Stream((state, cont, next) =>
       this.fold(
         {_0: 0, _1: state},
         s => cont(s._1) && s._0 < count,
         (s, a) => next(s._1, a).map(s2 => ({_0: s._0 + 1, _1: s2}))
       ).map(_ => _._1)
     )
-  }
-
-  /**
-   * Base implementation for every stream
-   */
-  protected abstract fold<E2, A2, R2>(
-    state: A2,
-    cont: (s: A2) => boolean,
-    fn: (s: A2, a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A2, R1 & R2>
-}
-
-class Fold<E1, A1, R1> extends Stream<E1, A1, R1> {
-  public constructor(
-    public readonly fold: <E2, A2, R2>(
-      state: A2,
-      cont: (s: A2) => boolean,
-      next: (s: A2, a: A1) => FIO<E2, A2, R2>
-    ) => FIO<E1 | E2, A2, R1 & R2>
-  ) {
-    super()
   }
 }
