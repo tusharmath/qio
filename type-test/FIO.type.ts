@@ -6,20 +6,20 @@ import {FIO, defaultRuntime} from '../'
 
 //#region ASYNC
 // $ExpectType FIO<never, never, unknown>
-FIO.async((rej, res) => res(10))
+FIO.asyncIO((rej, res) => res(10))
 
 // $ExpectType FIO<never, never, unknown>
-FIO.async((rej, res, runtime) => {
+FIO.asyncIO((rej, res, runtime) => {
   const cancel = runtime.delay(() => {}, 10)
 
   return {cancel: () => cancel.cancel()}
 })
 
 // $ExpectType FIO<never, never, unknown>
-FIO.async((rej, res) => res(10))
+FIO.asyncIO((rej, res) => res(10))
 
 // $ExpectType FIO<never, string, unknown>
-FIO.async<never, string>((rej, res) => res(10))
+FIO.asyncIO<never, string>((rej, res) => res(10))
 //#endregion
 
 //#region Operators
