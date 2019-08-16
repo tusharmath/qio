@@ -6,6 +6,9 @@ const Id = <A>(a: A) => a
 
 /**
  * Represents a sequence of values that are emitted over time.
+ * @typeparam E1 Possible errors that could be thrown by the stream.
+ * @typeparam A1 The value that would be emitted by this stream.
+ * @typeparam R1 Environment needed to execute this instance.
  *
  * **Example:**
  * ```ts
