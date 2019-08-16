@@ -152,7 +152,7 @@ export abstract class Stream<E1, A1, R1> {
    * Folds a stream into a value.
    */
   public foldLeft<S2>(seed: S2, fn: (s: S2, a: A1) => S2): FIO<E1, S2, R1> {
-    return this.fold(seed, T, (s, a) => FIO.of(fn(s, a)).addEnv<R1>())
+    return this.fold(seed, T, (s, a) => FIO.of(fn(s, a)))
   }
 
   /**
