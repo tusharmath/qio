@@ -29,7 +29,9 @@ export class Managed<E1, A1, R1> {
     acquire: FIO<E1, A1, R1>,
     release: (a: A1) => FIO<never, void, R1>
   ): Managed<E1, A1, R1> {
-    return Managed.of(acquire.map(a1 => Reservation.of(acquire, release(a1))))
+    return Managed.of(
+      acquire.map(a1 => Reservation.of(FIO.of(a1).addEnv<R1>(), release(a1)))
+    )
   }
 
   public static of<E1, A1, R1>(
@@ -75,7 +77,10 @@ export class Managed<E1, A1, R1> {
     cb: (a: A1) => FIO<E2, A2, R2>
   ): FIO<E1 | E2, A2, R1 & R2> {
     return this.reservation.chain(r =>
-      r.acquire.chain(resource => cb(resource).chain(_ => r.release.const(_)))
+      r.acquire
+        .chain(cb)
+        .catch(e12 => r.release.and(FIO.reject(e12)))
+        .chain(a2 => r.release.const(a2))
     )
   }
 
