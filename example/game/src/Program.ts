@@ -39,11 +39,12 @@ const enterNumber: FIO<unknown, number, IConsole> = getStrLn(
   `Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}:`
 )
   .map(_ => parseInt(_, 10))
-  .when(
-    input =>
+  .chain(input =>
+    FIO.if(
       Number.isFinite(input) && input >= MIN_NUMBER && input <= MAX_NUMBER,
-    input => FIO.of(input),
-    () => enterNumber
+      FIO.of(input),
+      enterNumber
+    )
   )
 
 const game: FIO<unknown, void, IConsole & IRandom & ISystem> = enterNumber
@@ -62,7 +63,7 @@ const game: FIO<unknown, void, IConsole & IRandom & ISystem> = enterNumber
       input => input.toLowerCase() !== 'n'
     )
   )
-  .when(i => i, () => game, () => putStrLn('Good bye!').and(exit(0)))
+  .chain(i => FIO.if(i, game, putStrLn('Good bye!').and(exit(0))))
 
 export const program = putStrLn('Greetings!')
   .and(getStrLn('Enter your name: '))

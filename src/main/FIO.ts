@@ -21,6 +21,10 @@ const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
 
 export type NoEnv = unknown
 
+const UnCancellable: ICancellable = {
+  cancel(): void {}
+}
+
 /**
  * IO represents a [[FIO]] that doesn't need any environment to execute
  */
@@ -124,19 +128,10 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give users compile time error always while using.
    */
-  public static async<E1 = never, A1 = never>(
-    cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): FIO<E1, A1> {
-    return new FIO(Tag.Async, cb)
-  }
-
-  /**
-   * Creates a new async [[IO]]
-   */
   public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
-  ): FIO<E1, A1> {
-    return FIO.async(cb)
+  ): IO<E1, A1> {
+    return new FIO(Tag.Async, cb)
   }
 
   /**
@@ -145,7 +140,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static asyncTask<A1 = never>(
     cb: (rej: CB<Error>, res: CB<A1>, sh: IScheduler) => ICancellable
   ): Task<A1> {
-    return FIO.async(cb)
+    return FIO.asyncIO(cb)
   }
 
   /**
@@ -154,7 +149,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>, sh: IScheduler) => ICancellable
   ): UIO<A1> {
-    return FIO.async((rej, res, sh) => cb(res, sh))
+    return FIO.asyncIO((rej, res, sh) => cb(res, sh))
   }
 
   /**
@@ -193,7 +188,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     cb: (...t: T) => Promise<A>
   ): (...t: T) => IO<Error, A> {
     return (...t) =>
-      FIO.async((rej, res, sh) =>
+      FIO.asyncIO((rej, res, sh) =>
         sh.asap(() => {
           void cb(...t)
             .then(res)
@@ -362,7 +357,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Resolves with the provided value after the given time
    */
   public static timeout<A>(value: A, duration: number): UIO<A> {
-    return FIO.async((rej, res, sh) => sh.delay(res, duration, value))
+    return FIO.asyncIO((rej, res, sh) => sh.delay(res, duration, value))
   }
 
   /**
@@ -377,6 +372,19 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static uio<A>(cb: () => A): UIO<A> {
     return FIO.io(cb)
+  }
+
+  /**
+   * Creates an IO that does can not be interrupted in between.
+   */
+  public static uninterruptibleIO<E1 = never, A1 = never>(
+    fn: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => unknown
+  ): IO<E1, A1> {
+    return FIO.asyncIO<E1, A1>((rej, res, sh) => {
+      fn(rej, res, sh)
+
+      return UnCancellable
+    })
   }
 
   /**
@@ -531,17 +539,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     io: (A1: A1) => FIO<E2, unknown, R2>
   ): FIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io(_).const(_))
-  }
-
-  /**
-   * Used to evaluate different FIO instances based on a condition.
-   */
-  public when<E2, A2, R2, E3, R3>(
-    cond: (a: A1) => boolean,
-    t: (a: A1) => FIO<E2, A2, R2>,
-    f: (a: A1) => FIO<E3, A2, R3>
-  ): FIO<E1 | E2 | E3, A2, R1 & R2 & R3> {
-    return new FIO(Tag.Chain, this, (a1: A1) => (cond(a1) ? t(a1) : f(a1)))
   }
 
   /**
