@@ -27,6 +27,15 @@ export class Stream<E1, A1, R1> {
   }
 
   /**
+   * Creates a stream that constantly emits the provided value.
+   */
+  public static const<A1>(a: A1): Stream<never, A1, NoEnv> {
+    return new Stream((state, cont, next) =>
+      FIO.if(cont(state), next(state, a), FIO.of(state))
+    )
+  }
+
+  /**
    * Create a stream from an array
    */
   public static fromArray<A>(t: A[]): Stream<never, A, NoEnv> {
@@ -75,27 +84,10 @@ export class Stream<E1, A1, R1> {
   }
 
   /**
-   * Creates a stream that emits an number after every given duration of time.
+   * Creates a stream that emits after every given duration of time.
    */
-  public static interval(duration: number): Stream<never, number, NoEnv> {
-    return new Stream(
-      <E, S, R>(
-        state: S,
-        cont: (s: S) => boolean,
-        next: (s: S, a: number) => FIO<E, S, R>
-      ) => {
-        const itar = (s: typeof state, a: number): FIO<E, S, R> =>
-          FIO.if(
-            cont(s),
-            next(s, a)
-              .delay(duration)
-              .chain(_ => itar(_, a + 1)),
-            FIO.of(s)
-          )
-
-        return itar(state, 0)
-      }
-    )
+  public static interval(duration: number): Stream<never, void, NoEnv> {
+    return Stream.produce(FIO.timeout(void 0, duration))
   }
 
   /**
@@ -103,6 +95,24 @@ export class Stream<E1, A1, R1> {
    */
   public static of<A1>(...t: A1[]): Stream<never, A1, NoEnv> {
     return Stream.fromArray(t)
+  }
+
+  /**
+   * Creates a stream by continuously executing the provided IO
+   */
+  public static produce<E1, A1, R1>(io: FIO<E1, A1, R1>): Stream<E1, A1, R1> {
+    return new Stream(
+      <E, S, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: A1) => FIO<E, S, R>
+      ) => {
+        const itar = (s: S): FIO<E1 | E, S, R1 & R> =>
+          FIO.if(cont(s), io.chain(a => next(s, a)).chain(itar), FIO.of(s))
+
+        return itar(state)
+      }
+    )
   }
 
   /**
@@ -154,6 +164,13 @@ export class Stream<E1, A1, R1> {
   }
 
   /**
+   * Converts a stream to a constant stream
+   */
+  public const<A2>(a: A2): Stream<E1, A2, R1> {
+    return this.map(_ => a)
+  }
+
+  /**
    * Creates a new streams that emits values, satisfied by the provided filter.
    */
   public filter(f: (a: A1) => boolean): Stream<E1, A1, R1> {
@@ -196,6 +213,9 @@ export class Stream<E1, A1, R1> {
     )
   }
 
+  /**
+   * Performs an effect on each value emitted by the stream.
+   */
   public scan<E2, A2, R2>(
     f: (a: A1) => FIO<E1, A2, R2>
   ): Stream<E1 | E2, A2, R1 & R2> {
