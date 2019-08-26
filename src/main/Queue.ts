@@ -4,7 +4,8 @@ import {List} from 'standard-data-structures/src/immutable/list'
 import {PureMutableList} from '../internals/PureMutableList'
 
 import {Await} from './Await'
-import {FIO, UIO} from './FIO'
+import {FIO, NoEnv, UIO} from './FIO'
+import {Stream} from './Stream'
 
 /**
  * Queue Data Structure
@@ -105,5 +106,12 @@ export class Queue<A = never> {
     return itar(immutable.List.empty).chain(_ =>
       FIO.seq(_.asArray).tap(() => (!_.isEmpty ? this.Q.shift : FIO.void()))
     )
+  }
+
+  /**
+   * Converts a queue into a [[Stream]]
+   */
+  public get asStream(): Stream<never, A, NoEnv> {
+    return Stream.produce(this.take)
   }
 }
