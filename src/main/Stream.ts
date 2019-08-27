@@ -2,6 +2,8 @@ import {FIO, NoEnv} from './FIO'
 import {Queue} from './Queue'
 
 const T = () => true
+const FTrue = FIO.of(true)
+const FTrueCb = () => FTrue
 const Id = <A>(a: A) => a
 
 /**
@@ -23,16 +25,14 @@ const Id = <A>(a: A) => a
  */
 export class Stream<E1, A1, R1> {
   public get drain(): FIO<E1, void, R1> {
-    return this.forEach(_ => FIO.void().addEnv<R1>())
+    return this.fold(true, T, FTrueCb).void
   }
 
   /**
    * Creates a stream that constantly emits the provided value.
    */
   public static const<A1>(a: A1): Stream<never, A1, NoEnv> {
-    return new Stream((state, cont, next) =>
-      FIO.if(cont(state), next(state, a), FIO.of(state))
-    )
+    return new Stream((s, cont, next) => FIO.if(cont(s), next(s, a), FIO.of(s)))
   }
 
   /**
@@ -47,7 +47,7 @@ export class Stream<E1, A1, R1> {
       ) => {
         const itar = (s: S, i: number): FIO<E, S, R> =>
           FIO.if(
-            cont(s) && i < t.length,
+            cont(s) && i < t.length - 1,
             next(s, t[i]).chain(_ => itar(_, i + 1)),
             FIO.of(s)
           )
@@ -175,7 +175,7 @@ export class Stream<E1, A1, R1> {
    */
   public filter(f: (a: A1) => boolean): Stream<E1, A1, R1> {
     return new Stream((state, cont, next) =>
-      this.fold(state, cont, FIO.when((s, a) => f(a), next, FIO.of))
+      this.fold(state, cont, (s, a) => FIO.if(f(a), next(s, a), FIO.of(s)))
     )
   }
 
