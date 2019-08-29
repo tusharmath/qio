@@ -579,7 +579,7 @@ describe('FIO', () => {
       )
       const expected = new Error('Failed')
 
-      assert.deepStrictEqual('' + actual, '' + expected)
+      assert.deepStrictEqual('' + String(actual), '' + String(expected))
     })
 
     it('should capture sync exceptions', () => {
@@ -590,7 +590,7 @@ describe('FIO', () => {
       )
       const expected = new Error('Failed')
 
-      assert.deepStrictEqual('' + actual, '' + expected)
+      assert.deepStrictEqual('' + String(actual), '' + String(expected))
     })
 
     it('should capture success results', () => {

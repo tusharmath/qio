@@ -54,7 +54,7 @@ export const fibBird = (n: bigint): Promise<bigint> => {
 }
 
 const count = 20n
-RunSuite(`Fibonacci: ${count}`, {
+RunSuite(`Fibonacci: ${String(count)}`, {
   bluebird: () => fibBird(count),
   fio: () => fibFIO(count),
   fluture: () => fibFluture(count),

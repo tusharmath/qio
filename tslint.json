@@ -24,6 +24,7 @@
     "increment-decrement": false,
     "max-classes-per-file": false,
     "restrict-plus-operands": false,
+    "invalid-void": false,
     "strict-comparisons": [
       true,
       {
