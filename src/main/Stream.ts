@@ -1,5 +1,6 @@
 import {FIO, NoEnv} from './FIO'
 import {Queue} from './Queue'
+import {Ref} from './Ref'
 
 const T = () => true
 const FTrue = FIO.of(true)
@@ -210,6 +211,35 @@ export class Stream<E1, A1, R1> {
   public map<A2>(ab: (a: A1) => A2): Stream<E1, A2, R1> {
     return new Stream((state, cont, next) =>
       this.fold(state, cont, (s, a) => next(s, ab(a)))
+    )
+  }
+
+  /**
+   * Merges two streams.
+   */
+  public merge(that: Stream<E1, A1, R1>): Stream<E1, A1, R1> {
+    return new Stream(
+      <E, S, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: A1) => FIO<E, S, R>
+      ): FIO<E1 | E, S, R & R1> =>
+        Queue.bounded<A1>(1)
+          .zip(Ref.of(true))
+          .chain(({0: Q, 1: canContinue}) => {
+            const offer = (_: A1) => Q.offer(_).and(canContinue.read)
+            const itar = (SS: S): FIO<E | E1, S, R & R1> =>
+              FIO.if(
+                cont(SS),
+                Q.take.chain(a => next(SS, a).chain(itar)),
+                canContinue.set(false).and(FIO.of(SS))
+              )
+
+            return this.forEachWhile(offer)
+              .par(that.forEachWhile(offer))
+              .par(itar(state))
+              .map(({1: SS}) => SS)
+          })
     )
   }
 
