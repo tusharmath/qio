@@ -572,6 +572,59 @@ describe('FIO', () => {
     })
   })
 
+  describe('parN', () => {
+    it('should run the IO in parallel', () => {
+      const io = FIO.parN(3, [
+        FIO.of(10).delay(1000),
+        FIO.of(20).delay(1000),
+        FIO.of(30).delay(1000)
+      ])
+
+      const actual = testRuntime().executeSync(io)
+      const expected = [10, 20, 30]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+
+    it('should maintain order', () => {
+      const io = FIO.parN(3, [FIO.of(10), FIO.of(20), FIO.of(30)])
+
+      const actual = testRuntime().executeSync(io)
+      const expected = [10, 20, 30]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+
+    it('should run max N IOs in parallel', () => {
+      const ID = FIO.runtime().chain(FIO.encase(RTM => RTM.scheduler.now()))
+
+      const io = FIO.parN(1, [ID.delay(10), ID.delay(20), ID.delay(30)])
+
+      const actual = testRuntime().executeSync(io)
+      const expected = [11, 31, 61]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+
+    it('should run all when concurrency is set to Infinity', () => {
+      const ID = FIO.runtime().chain(FIO.encase(RTM => RTM.scheduler.now()))
+
+      const io = FIO.parN(Infinity, [ID.delay(10), ID.delay(20), ID.delay(30)])
+
+      const actual = testRuntime().executeSync(io)
+      const expected = [11, 21, 31]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+
+    it('should return empty array', () => {
+      const io = FIO.parN(Infinity, [])
+      const actual = testRuntime().executeSync(io)
+
+      assert.deepStrictEqual(actual, [])
+    })
+  })
+
   describe('node', () => {
     it('should capture exceptions from Node API', () => {
       const actual = testRuntime().executeSync(

@@ -311,6 +311,25 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Runs at max N IOs in parallel. Checkout [[FIO.par]] to run any number of [[FIO]]s in parallel
+   */
+  public static parN<E1, A1, R1>(
+    N: number,
+    ios: Array<FIO<E1, A1, R1>>
+  ): FIO<E1, A1[], R1> {
+    const itar = (list: Array<FIO<E1, A1, R1>>): FIO<E1, A1[], R1> =>
+      FIO.if(
+        list.length === 0,
+        FIO.of([]),
+        FIO.par(list.slice(0, N)).chain(l1 =>
+          itar(list.slice(N, list.length)).map(l2 => l1.concat(l2))
+        )
+      )
+
+    return itar(ios)
+  }
+
+  /**
    * Creates a FIO that rejects with the provided error
    */
   public static reject<E1>(error: E1): FIO<E1, never> {
