@@ -5,7 +5,7 @@ import {PureMutableList} from '../internals/PureMutableList'
 
 import {Await} from './Await'
 import {FIO, NoEnv, UIO} from './FIO'
-import {Stream} from './Stream'
+import {FStream} from './FStream'
 
 /**
  * Queue Data Structure
@@ -109,9 +109,9 @@ export class Queue<A = never> {
   }
 
   /**
-   * Converts a queue into a [[Stream]]
+   * Converts a queue into a [[FStream]]
    */
-  public get asStream(): Stream<never, A, NoEnv> {
-    return Stream.produce(this.take)
+  public get asStream(): FStream<never, A, NoEnv> {
+    return FStream.produce(this.take)
   }
 }

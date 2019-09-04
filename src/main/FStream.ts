@@ -10,7 +10,10 @@ const FTrue = FIO.of(true)
 const FTrueCb = () => FTrue
 const Id = <A>(a: A) => a
 
-export type PStream<A1> = Stream<never, A1, NoEnv>
+/**
+ * Represents a [[FStream]] that never fails and doesn't need any env to run.
+ */
+export type Stream<A1> = FStream<never, A1, NoEnv>
 
 /**
  * Represents a sequence of values that are emitted over time.
@@ -20,16 +23,16 @@ export type PStream<A1> = Stream<never, A1, NoEnv>
  *
  * **Example:**
  * ```ts
- * import {Stream} from 'fearless-io'
+ * import {FStream} from 'fearless-io'
  *
  *
- * const s = Stream.of(1, 2, 3).reduce(0, (a, b) => a + b)
+ * const s = FStream.of(1, 2, 3).reduce(0, (a, b) => a + b)
  *
  * const runtime = defaultRuntime()
  * runtime.execute(s.drain, console.log) // 6
  * ```
  */
-export class Stream<E1, A1, R1> {
+export class FStream<E1, A1, R1> {
   public get drain(): FIO<E1, void, R1> {
     return this.fold(true, T, FTrueCb).void
   }
@@ -37,15 +40,17 @@ export class Stream<E1, A1, R1> {
   /**
    * Creates a stream that constantly emits the provided value.
    */
-  public static const<A1>(a: A1): Stream<never, A1, NoEnv> {
-    return new Stream((s, cont, next) => FIO.if(cont(s), next(s, a), FIO.of(s)))
+  public static const<A1>(a: A1): FStream<never, A1, NoEnv> {
+    return new FStream((s, cont, next) =>
+      FIO.if(cont(s), next(s, a), FIO.of(s))
+    )
   }
 
   /**
    * Create a stream from an array
    */
-  public static fromArray<A>(t: A[]): Stream<never, A, NoEnv> {
-    return new Stream(
+  public static fromArray<A>(t: A[]): FStream<never, A, NoEnv> {
+    return new FStream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -65,8 +70,8 @@ export class Stream<E1, A1, R1> {
 
   public static fromEffect<E1, A1, R1>(
     io: FIO<E1, A1, R1>
-  ): Stream<E1, A1, R1> {
-    return new Stream((state, cont, next) =>
+  ): FStream<E1, A1, R1> {
+    return new FStream((state, cont, next) =>
       FIO.if(cont(state), io.chain(a => next(state, a)), FIO.of(state))
     )
   }
@@ -77,7 +82,7 @@ export class Stream<E1, A1, R1> {
   public static fromEventEmitter<A = unknown>(
     ev: EventEmitter,
     name: string
-  ): UIO<UManaged<PStream<A>>> {
+  ): UIO<UManaged<Stream<A>>> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
       const onEvent = (a: A) => RTM.execute(Q.offer(a))
 
@@ -91,8 +96,8 @@ export class Stream<E1, A1, R1> {
   /**
    * Creates a stream from a [[Queue]]
    */
-  public static fromQueue<A1>(Q: Queue<A1>): Stream<never, A1, NoEnv> {
-    return new Stream(
+  public static fromQueue<A1>(Q: Queue<A1>): FStream<never, A1, NoEnv> {
+    return new FStream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -109,22 +114,22 @@ export class Stream<E1, A1, R1> {
   /**
    * Creates a stream that emits after every given duration of time.
    */
-  public static interval(duration: number): Stream<never, void, NoEnv> {
-    return Stream.produce(FIO.timeout(void 0, duration))
+  public static interval(duration: number): FStream<never, void, NoEnv> {
+    return FStream.produce(FIO.timeout(void 0, duration))
   }
 
   /**
    * Creates a stream from the provided values
    */
-  public static of<A1>(...t: A1[]): Stream<never, A1, NoEnv> {
-    return Stream.fromArray(t)
+  public static of<A1>(...t: A1[]): FStream<never, A1, NoEnv> {
+    return FStream.fromArray(t)
   }
 
   /**
    * Creates a stream by continuously executing the provided IO
    */
-  public static produce<E1, A1, R1>(io: FIO<E1, A1, R1>): Stream<E1, A1, R1> {
-    return new Stream(
+  public static produce<E1, A1, R1>(io: FIO<E1, A1, R1>): FStream<E1, A1, R1> {
+    return new FStream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -141,8 +146,8 @@ export class Stream<E1, A1, R1> {
   /**
    * Creates a stream that emits the given ranges of values
    */
-  public static range(min: number, max: number): Stream<never, number, NoEnv> {
-    return new Stream(
+  public static range(min: number, max: number): FStream<never, number, NoEnv> {
+    return new FStream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -160,12 +165,12 @@ export class Stream<E1, A1, R1> {
     )
   }
 
-  public static reject<E1>(err: E1): Stream<E1, never, NoEnv> {
-    return Stream.fromEffect(FIO.reject(err))
+  public static reject<E1>(err: E1): FStream<E1, never, NoEnv> {
+    return FStream.fromEffect(FIO.reject(err))
   }
 
   /**
-   * Constructor to create a new [[Stream]]
+   * Constructor to create a new [[FStream]]
    */
   public constructor(
     public readonly fold: <E2, A2, R2>(
@@ -179,9 +184,9 @@ export class Stream<E1, A1, R1> {
    * Flattens the inner stream produced by the each value of the provided stream
    */
   public chain<E2, A2, R2>(
-    aFb: (a: A1) => Stream<E2, A2, R2>
-  ): Stream<E1 | E2, A2, R1 & R2> {
-    return new Stream((state, cont, next) =>
+    aFb: (a: A1) => FStream<E2, A2, R2>
+  ): FStream<E1 | E2, A2, R1 & R2> {
+    return new FStream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => aFb(a1).fold(s1, cont, next))
     )
   }
@@ -189,15 +194,15 @@ export class Stream<E1, A1, R1> {
   /**
    * Converts a stream to a constant stream
    */
-  public const<A2>(a: A2): Stream<E1, A2, R1> {
+  public const<A2>(a: A2): FStream<E1, A2, R1> {
     return this.map(_ => a)
   }
 
   /**
    * Creates a new streams that emits values, satisfied by the provided filter.
    */
-  public filter(f: (a: A1) => boolean): Stream<E1, A1, R1> {
-    return new Stream((state, cont, next) =>
+  public filter(f: (a: A1) => boolean): FStream<E1, A1, R1> {
+    return new FStream((state, cont, next) =>
       this.fold(state, cont, (s, a) => FIO.if(f(a), next(s, a), FIO.of(s)))
     )
   }
@@ -230,8 +235,8 @@ export class Stream<E1, A1, R1> {
   /**
    * Transforms the values that are being produced by the stream.
    */
-  public map<A2>(ab: (a: A1) => A2): Stream<E1, A2, R1> {
-    return new Stream((state, cont, next) =>
+  public map<A2>(ab: (a: A1) => A2): FStream<E1, A2, R1> {
+    return new FStream((state, cont, next) =>
       this.fold(state, cont, (s, a) => next(s, ab(a)))
     )
   }
@@ -239,8 +244,8 @@ export class Stream<E1, A1, R1> {
   /**
    * Merges two streams.
    */
-  public merge(that: Stream<E1, A1, R1>): Stream<E1, A1, R1> {
-    return new Stream(
+  public merge(that: FStream<E1, A1, R1>): FStream<E1, A1, R1> {
+    return new FStream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -270,8 +275,8 @@ export class Stream<E1, A1, R1> {
    */
   public scan<E2, A2, R2>(
     f: (a: A1) => FIO<E1, A2, R2>
-  ): Stream<E1 | E2, A2, R1 & R2> {
-    return new Stream((state, cont, next) =>
+  ): FStream<E1 | E2, A2, R1 & R2> {
+    return new FStream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
     )
   }
@@ -279,8 +284,8 @@ export class Stream<E1, A1, R1> {
   /**
    * Emits the first N values skipping the rest.
    */
-  public take(count: number): Stream<E1, A1, R1> {
-    return new Stream((state, cont, next) =>
+  public take(count: number): FStream<E1, A1, R1> {
+    return new FStream((state, cont, next) =>
       this.fold(
         {_0: 0, _1: state},
         s => cont(s._1) && s._0 < count,
