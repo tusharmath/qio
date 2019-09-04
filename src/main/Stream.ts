@@ -1,4 +1,7 @@
-import {FIO, NoEnv} from './FIO'
+import {EventEmitter} from 'events'
+
+import {FIO, NoEnv, UIO} from './FIO'
+import {Managed, UManaged} from './Managed'
 import {Queue} from './Queue'
 import {Ref} from './Ref'
 
@@ -6,6 +9,8 @@ const T = () => true
 const FTrue = FIO.of(true)
 const FTrueCb = () => FTrue
 const Id = <A>(a: A) => a
+
+export type PStream<A1> = Stream<never, A1, NoEnv>
 
 /**
  * Represents a sequence of values that are emitted over time.
@@ -64,6 +69,23 @@ export class Stream<E1, A1, R1> {
     return new Stream((state, cont, next) =>
       FIO.if(cont(state), io.chain(a => next(state, a)), FIO.of(state))
     )
+  }
+
+  /**
+   * Creates a stream of events from an event emitter.
+   */
+  public static fromEventEmitter<A = unknown>(
+    ev: EventEmitter,
+    name: string
+  ): UIO<UManaged<PStream<A>>> {
+    return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
+      const onEvent = (a: A) => RTM.execute(Q.offer(a))
+
+      return Managed.make(
+        UIO(() => ev.addListener(name, onEvent)).const(Q.asStream),
+        FIO.encase(() => void ev.off(name, onEvent))
+      )
+    })
   }
 
   /**
