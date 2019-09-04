@@ -34,16 +34,19 @@ export type IO<E, A> = FIO<E, A>
  * Task represents an [[IO]] that fails with a general failure.
  */
 export type Task<A> = IO<Error, A>
+export const Task = <A>(fn: () => A): Task<A> => FIO.try(fn)
 
 /**
  * A [[Task]] that also requires an environment to run.
  */
 export type TaskR<A, R> = FIO<Error, A, R>
+export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => FIO.access(fn)
 
 /**
  * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
  */
 export type UIO<A> = IO<never, A>
+export const UIO = <A>(fn: () => A): UIO<A> => FIO.uio(fn)
 
 /**
  * Callback function used in node.js to handle async operations.
