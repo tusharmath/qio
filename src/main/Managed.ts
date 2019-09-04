@@ -1,6 +1,11 @@
-import {FIO} from './FIO'
+import {FIO, NoEnv} from './FIO'
 import {Ref} from './Ref'
 import {Reservation} from './Reservation'
+
+/**
+ * A managed resource that never fails while creating and doesn't need any env.
+ */
+export type UManaged<A1> = Managed<never, A1, NoEnv>
 
 /**
  * Is a special data structures that encapsulates the acquisition and the release of a resource.
