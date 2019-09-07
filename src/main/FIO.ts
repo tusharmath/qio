@@ -168,6 +168,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Creates a [[UIO]] using a callback function
+   */
+  public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
+    return FIO.asyncUIO<A1>((res, sh) => sh.asap(fn, res))
+  }
+
+  /**
    * Serially executes one FIO after another.
    */
   public static chain<E1, A1, R1, E2, A2, R2>(

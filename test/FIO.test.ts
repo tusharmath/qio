@@ -514,12 +514,11 @@ describe('FIO', () => {
     })
 
     it('should return the output', () => {
-
       const a = FIO.of('A').delay(1000)
       const b = FIO.of('B').delay(2000)
 
       const actual = testRuntime().executeSync(
-        a.raceWith(b, ()=> FIO.of(10), () => FIO.of(20))
+        a.raceWith(b, () => FIO.of(10), () => FIO.of(20))
       )
 
       assert.strictEqual(actual, 10)
