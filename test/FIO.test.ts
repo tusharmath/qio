@@ -482,8 +482,7 @@ describe('FIO', () => {
       const a = snapshot.mark('A').delay(1000)
       const b = snapshot.mark('B').delay(2000)
 
-      const runtime = testRuntime()
-      runtime.executeSync(a.raceWith(b, FIO.void, FIO.void))
+      testRuntime().executeSync(a.raceWith(b, FIO.void, FIO.void))
 
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
@@ -494,8 +493,7 @@ describe('FIO', () => {
       const a = snapshot.mark('A').delay(1000)
       const b = snapshot.mark('B').delay(2000)
 
-      const runtime = testRuntime()
-      runtime.executeSync(
+      testRuntime().executeSync(
         a.raceWith(b, FIO.void, FIO.void).and(snapshot.mark('C'))
       )
 
@@ -508,12 +506,23 @@ describe('FIO', () => {
       const a = FIO.of('A').delay(1000)
       const b = FIO.of('B').delay(2000)
 
-      const runtime = testRuntime()
-      runtime.executeSync(
+      testRuntime().executeSync(
         a.raceWith(b, () => snapshot.mark('A'), () => snapshot.mark('B'))
       )
 
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
+    })
+
+    it('should return the output', () => {
+
+      const a = FIO.of('A').delay(1000)
+      const b = FIO.of('B').delay(2000)
+
+      const actual = testRuntime().executeSync(
+        a.raceWith(b, ()=> FIO.of(10), () => FIO.of(20))
+      )
+
+      assert.strictEqual(actual, 10)
     })
   })
 

@@ -523,19 +523,19 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
    */
-  public raceWith<E2, A2, R2>(
+  public raceWith<E2, A2, R2, C>(
     that: FIO<E2, A2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
-    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
-  ): FIO<never, void, R1 & R2> {
-    const Done = Await.of<never, void>()
+    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<C>,
+    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<C>
+  ): FIO<never, C, R1 & R2> {
+    const Done = Await.of<never, C>()
 
     return Done.chain(done => {
-      const complete = done.set(FIO.void()).void
+      const complete = (c: C) => done.set(FIO.of(c)).void
 
       return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
-        const resume1 = f1.resumeAsync(exit => cb1(exit, f2).and(complete))
-        const resume2 = f2.resumeAsync(exit => cb2(exit, f1).and(complete))
+        const resume1 = f1.resumeAsync(exit => cb1(exit, f2).chain(complete))
+        const resume2 = f2.resumeAsync(exit => cb2(exit, f1).chain(complete))
 
         return resume2.and(resume1).and(done.get)
       })
