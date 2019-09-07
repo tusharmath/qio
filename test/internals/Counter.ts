@@ -1,4 +1,4 @@
-import {FIO, UIO} from '../../src/main/FIO'
+import {UIO} from '../../src/main/FIO'
 
 export class Counter {
   public count = 0
