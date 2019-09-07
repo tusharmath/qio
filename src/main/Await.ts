@@ -13,7 +13,7 @@ import {FIO, UIO} from './FIO'
  */
 export class Await<E, A> {
   public static of<E = never, A = never>(): UIO<Await<E, A>> {
-    return FIO.uio(() => new Await())
+    return UIO(() => new Await())
   }
   private flag = false
   private readonly Q = mutable.DoublyLinkedList.of<[CB<E>, CB<A>]>()
@@ -24,7 +24,7 @@ export class Await<E, A> {
   }
 
   public get isSet(): UIO<boolean> {
-    return FIO.uio(() => this.flag)
+    return UIO(() => this.flag)
   }
 
   public set(io: FIO<E, A>): UIO<boolean> {
@@ -42,15 +42,15 @@ export class Await<E, A> {
   }
 
   private getResult(): UIO<Either<E, A>> {
-    return FIO.uio(() => this.result)
+    return UIO(() => this.result)
   }
 
   private setFlag(value: boolean): UIO<void> {
-    return FIO.uio(() => void (this.flag = value))
+    return UIO(() => void (this.flag = value))
   }
 
   private update(result: Either<E, A>): UIO<void> {
-    return FIO.uio(() => {
+    return UIO(() => {
       this.result = result
 
       while (this.Q.length > 0) {

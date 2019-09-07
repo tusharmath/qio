@@ -12,19 +12,19 @@ export const NoSuchElement = check('NoSuchElement')
  */
 export class FMap<K, V> {
   public static of<K = never, V = never>(): UIO<FMap<K, V>> {
-    return FIO.uio(() => new FMap())
+    return UIO(() => new FMap())
   }
   private readonly cache = new Map<K, V>()
   private constructor() {}
 
   public get(key: K): IO<typeof NoSuchElement.info, V> {
-    return FIO.uio(() => this.cache.get(key)).chain(_ =>
+    return UIO(() => this.cache.get(key)).chain(_ =>
       _ === undefined ? FIO.reject(NoSuchElement.of()) : FIO.of(_)
     )
   }
 
   public has(key: K): UIO<boolean> {
-    return FIO.uio(() => this.cache.has(key))
+    return UIO(() => this.cache.has(key))
   }
 
   public memoize<E1, R1>(
@@ -34,6 +34,6 @@ export class FMap<K, V> {
   }
 
   public set(key: K, value: V): UIO<V> {
-    return FIO.uio(() => void this.cache.set(key, value)).const(value)
+    return UIO(() => void this.cache.set(key, value)).const(value)
   }
 }

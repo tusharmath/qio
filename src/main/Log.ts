@@ -1,4 +1,4 @@
-import {FIO} from './FIO'
+import {FIO, UIO} from './FIO'
 
 // tslint:disable-next-line: no-console
-export const log = (...t: unknown[]) => FIO.uio(() => console.log(...t))
+export const log = (...t: unknown[]) => UIO(() => console.log(...t))

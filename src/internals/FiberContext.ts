@@ -23,7 +23,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
    * Pure implementation of cancel()
    */
   public get abort(): UIO<void> {
-    return FIO.uio(() => this.$abort())
+    return UIO(() => this.$abort())
   }
 
   /**
@@ -93,6 +93,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
       )
     }
 
-    return FIO.uio(() => void this.$resume(eee(Either.left), eee(Either.right)))
+    return UIO(() => void this.$resume(eee(Either.left), eee(Either.right)))
   }
 }

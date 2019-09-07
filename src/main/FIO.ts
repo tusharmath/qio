@@ -30,6 +30,8 @@ const UnCancellable: ICancellable = {
  * IO represents a [[FIO]] that doesn't need any environment to execute
  */
 export type IO<E, A> = FIO<E, A>
+export const IO = <E = never, A = unknown>(fn: () => A): IO<E, A> =>
+  FIO.resume(fn)
 
 /**
  * Task represents an [[IO]] that fails with a general failure.
@@ -47,7 +49,7 @@ export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => FIO.access(fn)
  * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
  */
 export type UIO<A> = IO<never, A>
-export const UIO = <A>(fn: () => A): UIO<A> => FIO.uio(fn)
+export const UIO = IO
 
 /**
  * Callback function used in node.js to handle async operations.
@@ -182,7 +184,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static encase<E = never, A = never, T extends unknown[] = unknown[]>(
     cb: (...t: T) => A
   ): (...t: T) => IO<E, A> {
-    return (...t) => FIO.io(() => cb(...t))
+    return (...t) => IO(() => cb(...t))
   }
 
   /**
@@ -244,10 +246,11 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
   /**
    * @ignore
+   * @deprecated Use [[IO]] constructor.
    */
-  public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
-    return FIO.resume(cb)
-  }
+  // public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
+  //   return FIO.resume(cb)
+  // }
 
   /**
    * Transforms the success value using the specified function
@@ -305,7 +308,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return ios
       .reduce(
         (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
-        FIO.env<R1>().and(FIO.io<E1, List<A1>>(() => immutable.List.empty))
+        FIO.env<R1>().and(IO<E1, List<A1>>(() => immutable.List.empty))
       )
       .map(_ => _.asArray.reverse())
   }
@@ -367,7 +370,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return ios
       .reduce(
         (fList, f) => fList.chain(list => f.map(value => list.prepend(value))),
-        FIO.env<R1>().and(FIO.io<E1, List<A1>>(() => immutable.List.empty))
+        IO<E1, List<A1>>(() => immutable.List.empty).addEnv<R1>()
       )
       .map(_ => _.asArray)
   }
@@ -383,7 +386,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Tries to run an effect-full synchronous function and returns a [[Task]] that resolves with the return value of that function
    */
   public static try<A>(cb: () => A): Task<A> {
-    return FIO.io(cb)
+    return IO(cb)
   }
 
   /**
@@ -395,10 +398,11 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
   /**
    * Similar to [[try]] but returns a [[UIO]]
+   * @deprecated Use [[UIO]] constructor.
    */
-  public static uio<A>(cb: () => A): UIO<A> {
-    return FIO.io(cb)
-  }
+  // public static uio<A>(cb: () => A): UIO<A> {
+  //   return IO(cb)
+  // }
 
   /**
    * Creates an IO that does can not be interrupted in between.

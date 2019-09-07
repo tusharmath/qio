@@ -9,17 +9,17 @@ import {FIO, UIO} from './FIO'
  */
 export class Ref<A> {
   public static of<A>(a: A): UIO<Ref<A>> {
-    return FIO.uio(() => new Ref(a))
+    return UIO(() => new Ref(a))
   }
   private constructor(private value: A) {}
 
   public get read(): UIO<A> {
-    return FIO.uio(() => this.value)
+    return UIO(() => this.value)
   }
   public set(a: A): UIO<A> {
-    return FIO.uio(() => (this.value = a))
+    return UIO(() => (this.value = a))
   }
   public update(ab: (a: A) => A): UIO<A> {
-    return FIO.uio(() => (this.value = ab(this.value)))
+    return UIO(() => (this.value = ab(this.value)))
   }
 }

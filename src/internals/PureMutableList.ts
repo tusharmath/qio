@@ -7,26 +7,26 @@ import {FIO, IO, UIO} from '../main/FIO'
  */
 export class PureMutableList<A> {
   public get asArray(): UIO<A[]> {
-    return FIO.uio(() => this.list.asArray)
+    return UIO(() => this.list.asArray)
   }
   public get isEmpty(): UIO<boolean> {
-    return FIO.uio(() => this.list.isEmpty)
+    return UIO(() => this.list.isEmpty)
   }
   public get length(): UIO<number> {
-    return FIO.uio(() => this.list.length)
+    return UIO(() => this.list.length)
   }
   public get shift(): UIO<void | A> {
-    return FIO.uio(() => this.list.shift())
+    return UIO(() => this.list.shift())
   }
 
   public static of<A = never>(): UIO<PureMutableList<A>> {
-    return FIO.uio(() => new PureMutableList())
+    return UIO(() => new PureMutableList())
   }
   private readonly list = mutable.DoublyLinkedList.of<A>()
 
   private constructor() {}
   public add(element: A): UIO<LinkedListNode<A>> {
-    return FIO.uio(() => this.list.add(element))
+    return UIO(() => this.list.add(element))
   }
   public forEach<E1>(f: (a: A) => IO<E1, void>): IO<E1, void> {
     const itar = (): IO<E1, void> =>
@@ -35,6 +35,6 @@ export class PureMutableList<A> {
     return itar()
   }
   public remove(node: LinkedListNode<A>): UIO<void> {
-    return FIO.uio(() => this.list.remove(node))
+    return UIO(() => this.list.remove(node))
   }
 }

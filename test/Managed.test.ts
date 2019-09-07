@@ -1,6 +1,6 @@
 import * as assert from 'assert'
 
-import {FIO} from '../src/main/FIO'
+import {FIO, UIO} from '../src/main/FIO'
 import {Managed} from '../src/main/Managed'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
@@ -9,7 +9,7 @@ describe('Managed', () => {
     let i = 0
 
     return {
-      acquire: FIO.uio(() => i++),
+      acquire: UIO(() => i++),
       release: FIO.encase(() => void i--),
       get count(): number {
         return i
