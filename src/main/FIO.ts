@@ -7,7 +7,6 @@ import {List} from 'standard-data-structures/src/immutable/list'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {coordinate} from '../internals/Coordinate'
 import {Id} from '../internals/Id'
 import {IRuntime} from '../runtimes/IRuntime'
 
@@ -529,11 +528,17 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
     cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
   ): FIO<never, void, R1 & R2> {
-    return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
-      const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
-      const resume2 = f2.resumeAsync(exit => cb2(exit, f1))
+    const Done = Await.of<never, void>()
 
-      return resume2.and(resume1).void
+    return Done.chain(done => {
+      const complete = done.set(FIO.void()).void
+
+      return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
+        const resume1 = f1.resumeAsync(exit => cb1(exit, f2).and(complete))
+        const resume2 = f2.resumeAsync(exit => cb2(exit, f1).and(complete))
+
+        return resume2.and(resume1).and(done.get)
+      })
     })
   }
 
@@ -584,24 +589,47 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     // Create Caches
     const cache = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
 
-    // Create a Counter
-    const counter = Ref.of(0)
+    // Create a Counter and an Await
+    return Ref.of(0)
+      .zip(Await.of<never, boolean>())
+      .chain(({0: count, 1: done}) => {
+        // Cancels the provided fiber on exit status.
+        // tslint:disable-next-line:no-shadowed-variable
+        const coordinate = <E1, A1, E2, A2>(
+          exit: Either<E1, A1>,
+          fiber: Fiber<E2, A2>,
+          ref: Ref<Either<E1, A1>>
+        ): UIO<boolean> =>
+          ref
+            .set(exit)
+            .chain(e =>
+              e.fold(
+                FIO.of(false),
+                () => fiber.abort.and(done.set(FIO.of(true))),
+                () =>
+                  count
+                    .update(_ => _ + 1)
+                    .and(
+                      count.read.chain(value =>
+                        value === 2 ? done.set(FIO.of(true)) : FIO.of(false)
+                      )
+                    )
+              )
+            )
 
-    // Create an Await
-    const done = Await.of<never, boolean>()
-
-    return counter.zip(done).chain(({0: count, 1: await}) =>
-      cache.chain(({0: c1, 1: c2}) =>
-        this.raceWith(
-          that,
-          (exit, fiber) => coordinate(exit, fiber, c1, count, await).void,
-          (exit, fiber) => coordinate(exit, fiber, c2, count, await).void
-        )
-          .and(await.get)
-          .and(
-            c1.read.chain(FIO.fromExit).zipWith(c2.read.chain(FIO.fromExit), c)
+        return cache.chain(({0: c1, 1: c2}) =>
+          this.raceWith(
+            that,
+            (exit, fiber) => coordinate(exit, fiber, c1).void,
+            (exit, fiber) => coordinate(exit, fiber, c2).void
           )
-      )
-    )
+            .and(done.get)
+            .and(
+              c1.read
+                .chain(FIO.fromExit)
+                .zipWith(c2.read.chain(FIO.fromExit), c)
+            )
+        )
+      })
   }
 }

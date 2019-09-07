@@ -14,6 +14,7 @@ import {IRuntime} from '../src/runtimes/IRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
+import {Snapshot} from './internals/Snapshot'
 
 describe('FIO', () => {
   describe('of', () => {
@@ -476,16 +477,43 @@ describe('FIO', () => {
 
   describe('raceWith', () => {
     it('should run in parallel', () => {
-      const counter = new Counter()
+      const snapshot = new Snapshot()
 
-      const a = FIO.timeout('A', 1000)
-      const b = FIO.timeout('B', 2000)
+      const a = snapshot.mark('A').delay(1000)
+      const b = snapshot.mark('B').delay(2000)
 
       const runtime = testRuntime()
-      runtime.execute(a.raceWith(b, FIO.void, FIO.void).and(counter.inc()))
-      runtime.scheduler.runTo(10)
+      runtime.executeSync(a.raceWith(b, FIO.void, FIO.void))
 
-      assert.strictEqual(counter.count, 1)
+      assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
+    })
+
+    it('should complete when either of them', () => {
+      const snapshot = new Snapshot()
+
+      const a = snapshot.mark('A').delay(1000)
+      const b = snapshot.mark('B').delay(2000)
+
+      const runtime = testRuntime()
+      runtime.executeSync(
+        a.raceWith(b, FIO.void, FIO.void).and(snapshot.mark('C'))
+      )
+
+      assert.deepEqual(snapshot.timeline, ['A@1001', 'C@1001', 'B@2001'])
+    })
+
+    it('should call both cbs', () => {
+      const snapshot = new Snapshot()
+
+      const a = FIO.of('A').delay(1000)
+      const b = FIO.of('B').delay(2000)
+
+      const runtime = testRuntime()
+      runtime.executeSync(
+        a.raceWith(b, () => snapshot.mark('A'), () => snapshot.mark('B'))
+      )
+
+      assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
   })
 
