@@ -55,10 +55,6 @@ export abstract class Either<L1, R1> {
 }
 
 class Left<L1> extends Either<L1, never> {
-  public readonly isLeft = true
-  public readonly isNeither = false
-  public readonly isRight = false
-
   public constructor(public readonly left: L1) {
     super()
   }
@@ -84,10 +80,6 @@ class Left<L1> extends Either<L1, never> {
 }
 
 class Right<R1> extends Either<never, R1> {
-  public readonly isLeft = false
-  public readonly isNeither = false
-  public readonly isRight = true
-
   public constructor(public readonly right: R1) {
     super()
   }
@@ -111,10 +103,6 @@ class Right<R1> extends Either<never, R1> {
 }
 
 class Neither extends Either<never, never> {
-  public readonly isLeft = false
-  public readonly isNeither = true
-  public readonly isRight = false
-
   public biChain<L2, R2>(
     LL: (l: never) => Either<L2, R2>,
     RR: (r: never) => Either<L2, R2>
