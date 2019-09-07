@@ -245,14 +245,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * @ignore
-   * @deprecated Use [[IO]] constructor.
-   */
-  // public static io<E = never, A = unknown>(cb: () => A): FIO<E, A> {
-  //   return FIO.resume(cb)
-  // }
-
-  /**
    * Transforms the success value using the specified function
    */
   public static map<E1, A1, R1, A2>(
@@ -395,14 +387,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static tryP<A>(cb: () => Promise<A>): Task<A> {
     return FIO.encaseP(cb)()
   }
-
-  /**
-   * Similar to [[try]] but returns a [[UIO]]
-   * @deprecated Use [[UIO]] constructor.
-   */
-  // public static uio<A>(cb: () => A): UIO<A> {
-  //   return IO(cb)
-  // }
 
   /**
    * Creates an IO that does can not be interrupted in between.
