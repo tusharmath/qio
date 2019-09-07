@@ -66,6 +66,12 @@ export type NodeJSCallback<A> = (
  */
 export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
+   * Safely converts an interuptable IO to non-interruptable one.
+   */
+  public get asEither(): FIO<never, Either<E1, A1>, R1> {
+    return this.map(Either.right).catch(_ => FIO.of(Either.left(_)))
+  }
+  /**
    * @ignore
    */
   public get asInstruction(): Instruction {
