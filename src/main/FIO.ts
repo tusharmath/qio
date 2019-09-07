@@ -534,17 +534,30 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Runs two IOs in parallel in returns the result of the first one.
+   */
+  public race<E2, A2, R2>(
+    that: FIO<E2, A2, R2>
+  ): FIO<E1 | E2, A1 | A2, R1 & R2> {
+    return this.raceWith(
+      that,
+      (E, F) => F.abort.const(E),
+      (E, F) => F.abort.const(E)
+    ).chain(E => FIO.fromEither(E as Either<E1 | E2, A1 | A2>))
+  }
+
+  /**
    * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
    */
-  public raceWith<E2, A2, R2, C>(
+  public raceWith<E2, A2, R2, C1, C2>(
     that: FIO<E2, A2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<C>,
-    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<C>
-  ): FIO<never, C, R1 & R2> {
-    const Done = Await.of<never, C>()
+    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<C1>,
+    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<C2>
+  ): FIO<never, C1 | C2, R1 & R2> {
+    const Done = Await.of<never, C1 | C2>()
 
     return Done.chain(done => {
-      const complete = (c: C) => done.set(FIO.of(c)).void
+      const complete = (c: C1 | C2) => done.set(FIO.of(c)).void
 
       return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
         const resume1 = f1.resumeAsync(exit => cb1(exit, f2).chain(complete))
@@ -639,8 +652,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
             .and(done.get)
             .and(
               c1.read
-                .chain(FIO.fromExit)
-                .zipWith(c2.read.chain(FIO.fromExit), c)
+                .chain(FIO.fromEither)
+                .zipWith(c2.read.chain(FIO.fromEither), c)
             )
         )
       })
