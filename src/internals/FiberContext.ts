@@ -4,7 +4,7 @@
 
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {Exit} from '../main/Exit'
+import {Either} from '../main/Either'
 import {Fiber} from '../main/Fiber'
 import {FIO, UIO} from '../main/FIO'
 import {Instruction} from '../main/Instructions'
@@ -84,8 +84,8 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
     return this
   }
 
-  public resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<void> {
-    const eee = <X>(con: (x: X) => Exit<E, A>) => (data: X) => {
+  public resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void> {
+    const eee = <X>(con: (x: X) => Either<E, A>) => (data: X) => {
       // tslint:disable-next-line: no-use-before-declare
       const cancel = () => this.cancellationList.remove(id)
       const id = this.cancellationList.push(
@@ -93,8 +93,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
       )
     }
 
-    return FIO.uio(
-      () => void this.$resume(eee(Exit.failure), eee(Exit.success))
-    )
+    return FIO.uio(() => void this.$resume(eee(Either.left), eee(Either.right)))
   }
 }

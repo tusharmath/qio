@@ -8,16 +8,17 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {coordinate} from '../internals/Coordinate'
+import {Id} from '../internals/Id'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
-import {Exit} from './Exit'
+import {Either} from './Either'
 import {Fiber} from './Fiber'
 import {Instruction, Tag} from './Instructions'
 import {Ref} from './Ref'
 
-const Id = <A>(_: A): A => _
-const ExitRef = <E = never, A = never>() => Ref.of<Exit<E, A>>(Exit.pending)
+const ExitRef = <E = never, A = never>() =>
+  Ref.of<Either<E, A>>(Either.neither())
 
 export type NoEnv = unknown
 
@@ -224,14 +225,10 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates an IO from [[Exit]]
+   * Creates an IO from [[Either]]
    */
-  public static fromExit<E, A>(exit: Exit<E, A>): FIO<E, A> {
-    return Exit.isSuccess(exit)
-      ? FIO.of(exit[1])
-      : Exit.isFailure(exit)
-      ? FIO.reject(exit[1])
-      : FIO.never()
+  public static fromExit<E, A>(exit: Either<E, A>): IO<E, A> {
+    return exit.fold<IO<E, A>>(FIO.never(), FIO.reject, FIO.of)
   }
 
   /**
@@ -541,8 +538,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public raceWith<E2, A2, R2>(
     that: FIO<E2, A2, R2>,
-    cb1: (exit: Exit<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
-    cb2: (exit: Exit<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
+    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<void>,
+    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<void>
   ): FIO<never, void, R1 & R2> {
     return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
       const resume1 = f1.resumeAsync(exit => cb1(exit, f2))
@@ -553,10 +550,10 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Runs the [[FIO]] instance asynchronously and calls the callback passed with an [[Exit]] object.
+   * Runs the [[FIO]] instance asynchronously and calls the callback passed with an [[Either]] object.
    */
   public resumeAsync(
-    cb: (exit: Exit<E1, A1>) => UIO<void>
+    cb: (exit: Either<E1, A1>) => UIO<void>
   ): FIO<never, void, R1> {
     return this.fork.chain(_ => _.resumeAsync(cb))
   }

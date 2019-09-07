@@ -2,7 +2,7 @@ import {mutable} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
-import {Exit} from './Exit'
+import {Either} from './Either'
 import {FIO, UIO} from './FIO'
 
 /**
@@ -17,16 +17,10 @@ export class Await<E, A> {
   }
   private flag = false
   private readonly Q = mutable.DoublyLinkedList.of<[CB<E>, CB<A>]>()
-  private result: Exit<E, A> = Exit.pending
+  private result: Either<E, A> = Either.neither()
 
   public get get(): FIO<E, A> {
-    return this.getResult().chain(([status, result]) =>
-      status === Exit.Success
-        ? FIO.of(result)
-        : status === Exit.Failure
-        ? FIO.reject(result)
-        : this.wait()
-    ) as FIO<E, A>
+    return this.getResult().chain(e => e.fold(this.wait(), FIO.reject, FIO.of))
   }
 
   public get isSet(): UIO<boolean> {
@@ -40,14 +34,14 @@ export class Await<E, A> {
         : this.setFlag(true)
             .and(
               io
-                .chain(result => this.update(Exit.success(result)))
-                .catch(err => this.update(Exit.failure(err)))
+                .chain(result => this.update(Either.right(result)))
+                .catch(err => this.update(Either.left(err)))
             )
             .const(true)
     )
   }
 
-  private getResult(): UIO<Exit<E, A>> {
+  private getResult(): UIO<Either<E, A>> {
     return FIO.uio(() => this.result)
   }
 
@@ -55,17 +49,13 @@ export class Await<E, A> {
     return FIO.uio(() => void (this.flag = value))
   }
 
-  private update(result: Exit<E, A>): UIO<void> {
+  private update(result: Either<E, A>): UIO<void> {
     return FIO.uio(() => {
       this.result = result
 
       while (this.Q.length > 0) {
         const cb = this.Q.shift() as [CB<E>, CB<A>]
-        if (result[0] === Exit.Success) {
-          cb[1](result[1])
-        } else if (result[0] === Exit.Failure) {
-          cb[0](result[1])
-        }
+        result.fold(undefined, ...cb)
       }
     })
   }

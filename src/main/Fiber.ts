@@ -2,7 +2,7 @@ import {ICancellable} from 'ts-scheduler'
 
 import {FIO, UIO} from '../main/FIO'
 
-import {Exit} from './Exit'
+import {Either} from './Either'
 
 /**
  * Fibers are data structures that provide you a handle to control the execution of its `IO`.
@@ -24,5 +24,5 @@ export abstract class Fiber<E, A> implements ICancellable {
   public cancel(): void {
     this.$abort()
   }
-  public abstract resumeAsync(cb: (exit: Exit<E, A>) => UIO<void>): UIO<void>
+  public abstract resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void>
 }

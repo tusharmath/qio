@@ -4,7 +4,8 @@
 
 import {testScheduler} from 'ts-scheduler/test'
 
-import {Exit} from '../main/Exit'
+import {Id} from '../internals/Id'
+import {Either} from '../main/Either'
 import {FIO, IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
@@ -15,21 +16,16 @@ export class TestRuntime extends BaseRuntime {
   public executeSync<E, A>(io: IO<E, A>): A | E | undefined {
     const result = this.exit(io)
     this.scheduler.run()
-    switch (result[0]) {
-      case Exit.Failure:
-      case Exit.Success:
-        return result[1]
-      default:
-        return undefined
-    }
+
+    return result.fold<E | A | undefined>(undefined, Id, Id)
   }
 
-  public exit<E, A>(io: FIO<E, A>): Exit<E, A> {
-    let result: Exit<E, A> = Exit.pending
+  public exit<E, A>(io: FIO<E, A>): Either<E, A> {
+    let result: Either<E, A> = Either.neither()
     this.execute(
       io,
-      _ => (result = Exit.success(_)),
-      _ => (result = Exit.failure(_))
+      _ => (result = Either.right(_)),
+      _ => (result = Either.left(_))
     )
     this.scheduler.run()
 

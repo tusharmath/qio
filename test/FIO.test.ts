@@ -6,7 +6,7 @@ import {assert} from 'chai'
 
 import {FiberContext} from '../src/internals/FiberContext'
 import {Await} from '../src/main/Await'
-import {Exit} from '../src/main/Exit'
+import {Either} from '../src/main/Either'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
@@ -391,9 +391,9 @@ describe('FIO', () => {
         assert.isUndefined(actual)
       })
 
-      it('should call with  Exit.success', () => {
+      it('should call with  Either.success', () => {
         const actual = testRuntime().executeSync(
-          Await.of<never, Exit<never, string>>().chain(await =>
+          Await.of<never, Either<never, string>>().chain(await =>
             FIO.of('Hi').fork.chain(fiber =>
               fiber
                 .resumeAsync(status => await.set(FIO.of(status)).void)
@@ -402,13 +402,13 @@ describe('FIO', () => {
           )
         )
 
-        const expected = Exit.success('Hi')
+        const expected = Either.right('Hi')
         assert.deepEqual(actual, expected)
       })
 
-      it('should call with  Exit.failure', () => {
+      it('should call with  Either.failure', () => {
         const actual = testRuntime().executeSync(
-          Await.of<never, Exit<string, never>>().chain(await =>
+          Await.of<never, Either<string, never>>().chain(await =>
             FIO.reject('Hi').fork.chain(fiber =>
               fiber
                 .resumeAsync(status => await.set(FIO.of(status)).void)
@@ -417,7 +417,7 @@ describe('FIO', () => {
           )
         )
 
-        const expected = Exit.failure('Hi')
+        const expected = Either.left('Hi')
         assert.deepEqual(actual, expected)
       })
     })
