@@ -242,6 +242,17 @@ export class FStream<E1, A1, R1> {
   }
 
   /**
+   * Performs an effect on each value emitted by the stream.
+   */
+  public mapM<E2, A2, R2>(
+    f: (a: A1) => FIO<E1, A2, R2>
+  ): FStream<E1 | E2, A2, R1 & R2> {
+    return new FStream((state, cont, next) =>
+      this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
+    )
+  }
+
+  /**
    * Merges two streams.
    */
   public merge(that: FStream<E1, A1, R1>): FStream<E1, A1, R1> {
@@ -267,17 +278,6 @@ export class FStream<E1, A1, R1> {
               .par(itar(state))
               .map(({1: SS}) => SS)
           })
-    )
-  }
-
-  /**
-   * Performs an effect on each value emitted by the stream.
-   */
-  public scan<E2, A2, R2>(
-    f: (a: A1) => FIO<E1, A2, R2>
-  ): FStream<E1 | E2, A2, R1 & R2> {
-    return new FStream((state, cont, next) =>
-      this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
     )
   }
 
