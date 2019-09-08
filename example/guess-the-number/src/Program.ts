@@ -46,7 +46,7 @@ const randomInt = (min: number, max: number) =>
  * Keeps taking a numeric input from the player.
  */
 const inputNumber = FStream.produce(
-  getStrLn(`\nEnter a number between ${MIN_NUMBER} & ${MAX_NUMBER}: `)
+  getStrLn(`Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}: `)
 )
   .map(_ => parseInt(_, 10))
   .filter(
@@ -58,21 +58,15 @@ const inputNumber = FStream.produce(
  * Takes the player's name.
  */
 const inputName = getStrLn('Enter your name: ').chain(name =>
-  putStrLn(`Welcome to the world of functional programming ${name}`)
+  putStrLn(`Welcome to the world of functional programming, ${name}`)
 )
 
 /**
  * Checks if the use wants to continue with the game.
  */
-const canContinue = getStrLn('Do you wish to continue? (y/n)')
-  .race(FIO.timeout('y', 3000))
-  .chain(input =>
-    FIO.if(
-      input.toLowerCase() !== 'n',
-      FIO.of(true),
-      putStrLn('Good bye!').const(false)
-    )
-  )
+const canContinue = getStrLn('Press ⏎  to continue (or will exit in 3sec): ')
+  .const(true)
+  .race(FIO.timeout(false, 3000).do(putStrLn('\nGood bye!')))
 
 /**
  * Takes an input integer and checks if it matches with a random number.
