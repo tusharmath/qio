@@ -42,4 +42,25 @@ describe('Managed', () => {
     )
     assert.strictEqual(r.count, 0)
   })
+
+  it('should acquire the resource', () => {
+    const r = Resource()
+    testRuntime().executeSync(Managed.make(r.acquire, FIO.void).use(FIO.void))
+
+    assert.strictEqual(r.count, 1)
+  })
+
+  it.skip('should release resource on cancellation', () => {
+    const r = Resource()
+    const runtime = testRuntime()
+
+    runtime.execute(
+      Managed.make(r.acquire, r.release)
+        .use(() => FIO.timeout(0, 1000))
+        .fork.chain(F => F.resumeAsync(FIO.void).and(F.abort.delay(500)))
+    )
+
+    runtime.scheduler.runTo(550)
+    assert.strictEqual(r.count, 0)
+  })
 })
