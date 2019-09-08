@@ -421,18 +421,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Conditionally calls the provided callbacks and returns an IO.
-   */
-  public static when<G extends unknown[], E1, E2, A, R1, R2>(
-    cond: (...g: G) => boolean,
-    T: (...g: G) => FIO<E1, A, R1>,
-    F: (...g: G) => FIO<E2, A, R2>
-  ): (...g: G) => FIO<E1 | E2, A, R1 & R2> {
-    return (...t: G) =>
-      ((cond(...t) ? T(...t) : F(...t)) as unknown) as FIO<E1 | E2, A, R1 & R2>
-  }
-
-  /**
    * Hack: The property $R1 is added to enable stricter checks.
    * More specifically enable contravariant check on R1.
    */
