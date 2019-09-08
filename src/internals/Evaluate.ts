@@ -121,7 +121,7 @@ export const Evaluate = <E, A>(
           return
 
         default:
-          throw new InvalidInstruction(j)
+          stackA.push(FIO.reject(new InvalidInstruction(j)).asInstruction)
       }
     } catch (e) {
       stackA.push(FIO.reject(e).asInstruction)
