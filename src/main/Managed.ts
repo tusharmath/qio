@@ -30,12 +30,16 @@ export type UManaged<A1> = Managed<never, A1, NoEnv>
  * In the above example as soon as the `fsWrite` is completed the file descriptor is automatically released.
  */
 export class Managed<E1, A1, R1> {
-  public static make<E1, A1, R1>(
+  public static make<E1, A1, R1, R2>(
     acquire: FIO<E1, A1, R1>,
-    release: (a: A1) => FIO<never, void, R1>
-  ): Managed<E1, A1, R1> {
+    release: (a: A1) => FIO<never, void, R2>
+  ): Managed<E1, A1, R1 & R2> {
     return Managed.of(
-      acquire.map(a1 => Reservation.of(FIO.of(a1).addEnv<R1>(), release(a1)))
+      acquire
+        .map(a1 =>
+          Reservation.of(FIO.of(a1).addEnv<R2>(), release(a1).addEnv<R1>())
+        )
+        .addEnv()
     )
   }
 
