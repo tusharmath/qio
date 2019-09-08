@@ -1,5 +1,3 @@
-import {ICancellable} from 'ts-scheduler'
-
 import {FIO, UIO} from '../main/FIO'
 
 import {Either} from './Either'
@@ -11,18 +9,8 @@ import {Either} from './Either'
  * @typeparam E Exceptions that can be thrown
  * @typeparam A The success value
  */
-export abstract class Fiber<E, A> implements ICancellable {
+export abstract class Fiber<E, A> {
   public abstract abort: UIO<void>
   public abstract resume: FIO<E, A>
-  /**
-   * @ignore
-   */
-  public abstract $abort(): void
-  /**
-   * @ignore
-   */
-  public cancel(): void {
-    this.$abort()
-  }
   public abstract resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void>
 }

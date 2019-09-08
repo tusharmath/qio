@@ -75,7 +75,7 @@ export const Evaluate = <E, A>(
           return
 
         case Tag.Fork:
-          const nContext = context.$fork(j.i0)
+          const nContext = context.unsafeFork(j.i0)
           cancellationList.push(nContext)
           data = nContext
           break
@@ -107,12 +107,12 @@ export const Evaluate = <E, A>(
               err => {
                 cancellationList.remove(id)
                 stackA.push(FIO.reject(err).asInstruction)
-                context.$resume(rej, res)
+                context.unsafeResume(rej, res)
               },
               val => {
                 cancellationList.remove(id)
                 stackA.push(FIO.of(val).asInstruction)
-                context.$resume(rej, res)
+                context.unsafeResume(rej, res)
               },
               sh
             )
