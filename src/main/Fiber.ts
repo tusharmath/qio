@@ -12,5 +12,6 @@ import {Either} from './Either'
 export abstract class Fiber<E, A> {
   public abstract abort: UIO<void>
   public abstract resume: FIO<E, A>
+  public abstract exit(p: UIO<void>): UIO<void>
   public abstract resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void>
 }

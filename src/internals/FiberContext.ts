@@ -13,6 +13,7 @@ import {IRuntime} from '../runtimes/IRuntime'
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 import {Evaluate} from './Evaluate'
+import {Exit} from './Exit'
 
 /**
  * @ignore
@@ -48,6 +49,12 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
 
   public cancel(): void {
     this.unsafeAbort()
+  }
+
+  public exit(fio: UIO<void>): UIO<void> {
+    return UIO(() => {
+      this.cancellationList.push(new Exit(fio, this.runtime))
+    })
   }
 
   public resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void> {

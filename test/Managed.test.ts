@@ -50,7 +50,7 @@ describe('Managed', () => {
     assert.strictEqual(r.count, 1)
   })
 
-  it.skip('should release resource on cancellation', () => {
+  it('should release resource on cancellation', () => {
     const r = Resource()
     const runtime = testRuntime()
 
