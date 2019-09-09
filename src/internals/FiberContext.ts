@@ -2,9 +2,9 @@
  * Created by tushar on 2019-05-24
  */
 
+import {Either} from 'standard-data-structures'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {Either} from '../main/Either'
 import {Fiber} from '../main/Fiber'
 import {FIO, UIO} from '../main/FIO'
 import {Instruction} from '../main/Instructions'

@@ -1,6 +1,5 @@
 /* tslint:disable:file-name-casing */
 export {Await} from './src/main/Await'
-export {Either} from './src/main/Either'
 export {Fiber} from './src/main/Fiber'
 export {FIO, IO, Task, TaskR, UIO} from './src/main/FIO'
 export {FStream, Stream} from './src/main/FStream'

@@ -1,4 +1,4 @@
-import {immutable, LinkedListNode} from 'standard-data-structures'
+import {LinkedListNode} from 'standard-data-structures'
 import {List} from 'standard-data-structures/src/immutable/list'
 
 import {PureMutableList} from '../internals/PureMutableList'
@@ -103,7 +103,7 @@ export class Queue<A = never> {
           : itar(list.prepend(_.set(FIO.of(value))))
       )
 
-    return itar(immutable.List.empty).chain(_ =>
+    return itar(List.empty).chain(_ =>
       FIO.seq(_.asArray).tap(() => (!_.isEmpty ? this.Q.shift : FIO.void()))
     )
   }

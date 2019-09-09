@@ -1,4 +1,4 @@
-import {LinkedListNode, mutable} from 'standard-data-structures'
+import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
 
 import {FIO, IO, UIO} from '../main/FIO'
 
@@ -22,7 +22,7 @@ export class PureMutableList<A> {
   public static of<A = never>(): UIO<PureMutableList<A>> {
     return UIO(() => new PureMutableList())
   }
-  private readonly list = mutable.DoublyLinkedList.of<A>()
+  private readonly list = DoublyLinkedList.of<A>()
 
   private constructor() {}
   public add(element: A): UIO<LinkedListNode<A>> {

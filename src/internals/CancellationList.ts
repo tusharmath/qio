@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 2019-05-24
  */
-import {LinkedListNode, mutable} from 'standard-data-structures'
+import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 /**
@@ -15,7 +15,7 @@ export type CancelId = LinkedListNode<ICancellable>
  */
 export class CancellationList implements ICancellable {
   private cancelled = false
-  private readonly Q = mutable.DoublyLinkedList.of<ICancellable>()
+  private readonly Q = DoublyLinkedList.of<ICancellable>()
 
   public cancel(): void {
     this.cancelled = true

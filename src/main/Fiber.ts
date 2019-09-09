@@ -1,6 +1,6 @@
-import {FIO, UIO} from '../main/FIO'
+import {Either} from 'standard-data-structures'
 
-import {Either} from './Either'
+import {FIO, UIO} from './FIO'
 
 /**
  * Fibers are data structures that provide you a handle to control the execution of its `IO`.

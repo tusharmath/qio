@@ -1,8 +1,7 @@
-import {mutable} from 'standard-data-structures'
+import {DoublyLinkedList, Either} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
-import {Either} from './Either'
 import {FIO, UIO} from './FIO'
 
 /**
@@ -16,7 +15,7 @@ export class Await<E, A> {
     return UIO(() => new Await())
   }
   private flag = false
-  private readonly Q = mutable.DoublyLinkedList.of<[CB<E>, CB<A>]>()
+  private readonly Q = DoublyLinkedList.of<[CB<E>, CB<A>]>()
   private result: Either<E, A> = Either.neither()
 
   public get get(): FIO<E, A> {

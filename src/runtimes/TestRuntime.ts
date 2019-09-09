@@ -2,10 +2,10 @@
  * Created by tushar on 2019-05-24
  */
 
+import {Either} from 'standard-data-structures'
 import {testScheduler} from 'ts-scheduler/test'
 
 import {Id} from '../internals/Id'
-import {Either} from '../main/Either'
 import {FIO, IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'

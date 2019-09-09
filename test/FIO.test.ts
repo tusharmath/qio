@@ -3,10 +3,10 @@
  */
 
 import {assert} from 'chai'
+import {Either} from 'standard-data-structures'
 
 import {FiberContext} from '../src/internals/FiberContext'
 import {Await} from '../src/main/Await'
-import {Either} from '../src/main/Either'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
