@@ -162,6 +162,17 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Calls the provided Effect-full function with the provided arguments.
+   * Useful particularly when calling a recursive function with stack safety.
+   */
+  public static call<E1, A1, R1, T extends unknown[]>(
+    fn: (...t: T) => FIO<E1, A1, R1>,
+    ...args: T
+  ): FIO<E1, A1, R1> {
+    return new FIO<E1, A1, R1>(Tag.Call, fn, args)
+  }
+
+  /**
    * @ignore
    */
   public static catch<E1, A1, R1, E2, A2, R2>(

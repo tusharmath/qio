@@ -7,6 +7,7 @@ import {CB} from '../internals/CB'
  */
 export enum Tag {
   Access,
+  Call,
   Async,
   Catch,
   Chain,
@@ -19,6 +20,12 @@ export enum Tag {
   Runtime,
   Try,
   TryM
+}
+
+export interface ICall<T extends unknown[] = unknown[]> {
+  i1: T
+  tag: Tag.Call
+  i0(...t: T): Instruction
 }
 
 export interface IConstant<A = unknown> {
@@ -81,6 +88,7 @@ export interface IRuntime {
  */
 export type Instruction =
   | IAccess
+  | ICall
   | IAsync
   | ICatch
   | IChain

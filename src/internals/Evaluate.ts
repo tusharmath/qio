@@ -38,6 +38,10 @@ export const Evaluate = <E, A>(
           data = j.i0
           break
 
+        case Tag.Call:
+          stackA.push(j.i0(...j.i1))
+          break
+
         case Tag.Reject:
           const cause = j.i0 as E
           const handler = stackE.pop()
