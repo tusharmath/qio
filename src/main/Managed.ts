@@ -1,3 +1,5 @@
+import {List} from 'standard-data-structures'
+
 import {FIO, NoEnv} from './FIO'
 import {Ref} from './Ref'
 import {Reservation} from './Reservation'
@@ -47,6 +49,18 @@ export class Managed<E1, A1, R1> {
     reservation: FIO<E1, Reservation<E1, A1, R1>, R1>
   ): Managed<E1, A1, R1> {
     return new Managed(reservation)
+  }
+
+  public static zip<E1, A1, R1>(
+    managed: Array<Managed<E1, A1, R1>>
+  ): Managed<E1, A1[], R1> {
+    return managed
+      .reduce(
+        (a: Managed<E1, List<A1>, R1>, b: Managed<E1, A1, R1>) =>
+          a.zipWith(b, (x, y) => x.prepend(y)),
+        Managed.make(FIO.of(List.empty).addEnv<R1>(), FIO.void)
+      )
+      .map(_ => _.asArray)
   }
 
   private constructor(
