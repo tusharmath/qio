@@ -525,6 +525,27 @@ describe('FIO', () => {
     })
   })
 
+  describe('race', () => {
+    it('should return the fastest', () => {
+      const snapshot = new Snapshot()
+
+      const a = snapshot.mark('A').delay(1000)
+      const b = snapshot.mark('B').delay(2000)
+
+      testRuntime().executeSync(a.race(b))
+
+      assert.deepEqual(snapshot.timeline, ['A@1001'])
+    })
+
+    it('should return the sync produced value', () => {
+      const a = FIO.of('A')
+      const b = FIO.of('B').delay(1000)
+
+      const actual = testRuntime().executeSync(a.race(b))
+
+      assert.strictEqual(actual, 'A')
+    })
+  })
   describe('provide', () => {
     it('should maintain env for multiple access', () => {
       const actual = testRuntime().executeSync(
