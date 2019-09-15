@@ -3,7 +3,8 @@
  */
 
 import {Either} from 'standard-data-structures'
-import {testScheduler} from 'ts-scheduler/test'
+import {ITestSchedulerOptions} from 'ts-scheduler/src/main/ITestSchedulerOptions'
+import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
 import {Id} from '../internals/Id'
 import {FIO, IO} from '../main/FIO'
@@ -11,7 +12,11 @@ import {FIO, IO} from '../main/FIO'
 import {BaseRuntime} from './BaseRuntime'
 
 export class TestRuntime extends BaseRuntime {
-  public readonly scheduler = testScheduler()
+  public readonly scheduler: TestScheduler
+  public constructor(options?: Partial<ITestSchedulerOptions>) {
+    super()
+    this.scheduler = testScheduler(options)
+  }
 
   public executeSync<E, A>(io: IO<E, A>): A | E | undefined {
     const result = this.exit(io)
@@ -33,4 +38,5 @@ export class TestRuntime extends BaseRuntime {
   }
 }
 
-export const testRuntime = () => new TestRuntime()
+export const testRuntime = (O?: Partial<ITestSchedulerOptions>) =>
+  new TestRuntime(O)
