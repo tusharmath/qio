@@ -46,7 +46,7 @@ export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => FIO.access(fn)
  * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
  */
 export type UIO<A> = IO<never, A>
-export const UIO = IO
+export const UIO = <A>(fn: () => A): UIO<A> => FIO.resume(fn)
 
 /**
  * Callback function used in node.js to handle async operations.
@@ -121,6 +121,15 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static access<R, A>(cb: (R: R) => A): FIO<never, A, R> {
     return new FIO(Tag.Access, cb)
+  }
+
+  /**
+   * Effectfully creates a new FIO instance with the provided environment
+   */
+  public static accessM<E1, A1, R1, R2>(
+    cb: (R: R1) => FIO<E1, A1, R2>
+  ): FIO<E1, A1, R1 & R2> {
+    return FIO.flatten(FIO.access(cb))
   }
 
   /**
@@ -540,7 +549,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
       that,
       (E, F) => F.abort.const(E),
       (E, F) => F.abort.const(E)
-    ).chain(E => FIO.fromEither(E as Either<E1 | E2, A1 | A2>))
+    ).chain(E => FIO.fromEither<E1 | E2, A1 | A2>(E))
   }
 
   /**
