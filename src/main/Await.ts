@@ -2,7 +2,7 @@ import {DoublyLinkedList, Either} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
-import {FIO, UIO} from './FIO'
+import {FIO, IO, UIO} from './FIO'
 
 /**
  * A special data structure that can be set only once.
@@ -19,51 +19,43 @@ export class Await<E, A> {
   private result: Either<E, A> = Either.neither()
 
   public get get(): FIO<E, A> {
-    return this.getResult().chain(e => e.fold(this.wait(), FIO.reject, FIO.of))
+    return FIO.flatten(
+      UIO(() => this.result.fold(this.wait, FIO.reject, FIO.of))
+    )
   }
 
   public get isSet(): UIO<boolean> {
     return UIO(() => this.flag)
   }
 
-  public set(io: FIO<E, A>): UIO<boolean> {
-    return this.isSet.chain(flag =>
-      flag
-        ? FIO.of(false)
-        : this.setFlag(true)
-            .and(
-              io
-                .chain(result => this.update(Either.right(result)))
-                .catch(err => this.update(Either.left(err)))
-            )
-            .const(true)
+  public set(io: IO<E, A>): UIO<boolean> {
+    return FIO.flatten(
+      UIO(() => {
+        if (this.flag) {
+          return FIO.of(false)
+        }
+        this.flag = true
+
+        return io.asEither.encase(either => {
+          this.result = either
+          while (this.Q.length > 0) {
+            const cb = this.Q.shift() as [CB<E>, CB<A>]
+            this.result.fold(undefined, ...cb)
+          }
+
+          return true
+        })
+      })
     )
   }
 
-  private getResult(): UIO<Either<E, A>> {
-    return UIO(() => this.result)
-  }
-
-  private setFlag(value: boolean): UIO<void> {
-    return UIO(() => void (this.flag = value))
-  }
-
-  private update(result: Either<E, A>): UIO<void> {
-    return UIO(() => {
-      this.result = result
-
-      while (this.Q.length > 0) {
-        const cb = this.Q.shift() as [CB<E>, CB<A>]
-        result.fold(undefined, ...cb)
-      }
-    })
-  }
-
-  private wait(): FIO<E, A> {
+  private get wait(): FIO<E, A> {
     return FIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 
-      return {cancel: () => this.Q.remove(id)}
+      return {
+        cancel: () => this.Q.remove(id)
+      }
     })
   }
 }
