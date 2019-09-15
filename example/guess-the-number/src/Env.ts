@@ -1,4 +1,6 @@
 import {Interface} from 'readline'
+
+import {UIO} from '../../../src/main/FIO'
 import ReadStream = NodeJS.ReadStream
 import WriteStream = NodeJS.WriteStream
 
@@ -36,9 +38,22 @@ export interface IMath {
   }
 }
 
+/**
+ * Provides access to process
+ */
 export interface IProcess {
   process: {
     stdin: ReadStream
     stdout: WriteStream
+  }
+}
+
+/**
+ * Access to text terminal (tty)
+ */
+export interface ITextTerminal {
+  tty: {
+    readLn(question: string): UIO<string>
+    writeLn(...t: unknown[]): UIO<void>
   }
 }

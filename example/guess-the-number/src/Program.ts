@@ -1,35 +1,22 @@
 import {FIO} from '../../../src/main/FIO'
 import {FStream} from '../../../src/main/FStream'
-import {Managed} from '../../../src/main/Managed'
 
-import {IConsole, IMath, IProcess, IReadLine} from './Env'
+import {IMath, ITextTerminal} from './Env'
 
 const MAX_NUMBER = 6
 const MIN_NUMBER = 1
 
 /**
- * Prints out the content string on stdout stream.
- */
-const putStrLn = (message: string) =>
-  FIO.access((env: IConsole) => env.console.log(message))
-
-/**
- * Creates a managed ReadLine interface using std in/out
- */
-const rlInterface = Managed.make(
-  FIO.access((_: IProcess) => _.process).chain(process =>
-    FIO.access((_: IReadLine) =>
-      _.readline.createInterface(process.stdin, process.stdout)
-    )
-  ),
-  FIO.encase(rl => rl.close())
-)
-
-/**
  * Takes input from the player through the stdin stream.
  */
 const getStrLn = (question: string) =>
-  rlInterface.use(rl => FIO.cb<string>(cb => rl.question(question, cb)))
+  FIO.accessM((_: ITextTerminal) => _.tty.readLn(question))
+
+/**
+ * Outputs anything passed as arguments to the stdout stream
+ */
+const putStrLn = (...t: unknown[]) =>
+  FIO.accessM((_: ITextTerminal) => _.tty.writeLn(...t))
 
 /**
  * Generates a random number.
@@ -58,15 +45,15 @@ const inputNumber = FStream.produce(
  * Takes the player's name.
  */
 const inputName = getStrLn('Enter your name: ').chain(name =>
-  putStrLn(`Welcome to the world of functional programming, ${name}`)
+  putStrLn(`Welcome to the world of functional programming, ${name}!`)
 )
 
 /**
  * Checks if the use wants to continue with the game.
  */
-const canContinue = getStrLn('Press ⏎  to continue (or will exit in 3sec): ')
-  .const(true)
-  .race(FIO.timeout(false, 3000).do(putStrLn('\nGood bye!')))
+export const canContinue = FIO.of(true)
+  // .race(FIO.timeout(false, 3000).do(putStrLn('\nGood bye!')))
+  .race(FIO.timeout(false, 3000))
 
 /**
  * Takes an input integer and checks if it matches with a random number.
@@ -88,7 +75,6 @@ const greet = putStrLn('Greetings!').and(inputName)
  */
 const gameLoop = inputNumber
   .mapM(checkWithRandom)
-  .mapM(() => canContinue)
-  .forEachWhile(FIO.of)
+  .forEachWhile(() => canContinue)
 
 export const program = greet.and(gameLoop)
