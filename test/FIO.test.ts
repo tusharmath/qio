@@ -249,7 +249,11 @@ describe('FIO', () => {
       assert.strictEqual(actual, expected)
     })
 
-    it('should run only once for async io', () => {
+    /**
+     * Some IOs might take some time to complete.
+     * During which if the IO is re-executed, the once operator should wait for the previous one complete.
+     */
+    it('should handle concurrent set', () => {
       const counter = new Counter()
       const runtime = testRuntime()
       const memoized = runtime.executeSync(counter.inc().delay(100).once)
@@ -259,10 +263,25 @@ describe('FIO', () => {
       runtime.execute(memoized as UIO<number>)
 
       // Schedule second run at 50ms
+      // Trying to execute the IO the second time before the first one completes
       runtime.scheduler.runTo(50)
       runtime.execute(memoized as UIO<number>)
 
       runtime.scheduler.run()
+
+      const actual = counter.count
+      const expected = 1
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should run only once for async ios', () => {
+      const counter = new Counter()
+      testRuntime().executeSync(
+        counter
+          .inc()
+          .delay(100)
+          .once.chain(_ => _.and(_))
+      )
 
       const actual = counter.count
       const expected = 1
