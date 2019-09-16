@@ -16,15 +16,19 @@ import {
 } from './IPeerCommunicationPort'
 
 export class WorkerNode extends EventEmitter {
-  public readonly nodeCount: number = workerData.nodeCount
-  public readonly nodeId: number = workerData.nodeId
   private readonly asyncId = new Float64Array([0])
   private readonly cbMap = new Map<number, (D: unknown) => {}>()
+  private readonly nodeCount: number
+  private readonly nodeId: number
   private readonly portMap = new Map<number, MessagePort>()
 
   public constructor() {
     super()
     this.init()
+
+    const data = workerData as {nodeCount: number; nodeId: number}
+    this.nodeCount = data.nodeCount
+    this.nodeId = data.nodeId
   }
 
   public remoteCall(node: number, value: unknown, cb: () => {}): void {
@@ -38,7 +42,7 @@ export class WorkerNode extends EventEmitter {
   }
 
   private init(): void {
-    if (parentPort) {
+    if (parentPort !== null) {
       // Listen to the parent messages
 
       parentPort.on('message', this.onMessageFromParent)
@@ -57,14 +61,19 @@ export class WorkerNode extends EventEmitter {
     }
   }
 
-  private readonly onMessageFromParent = (msg: IPeerCommunicationPort): void => {
+  private readonly onMessageFromParent = (
+    msg: IPeerCommunicationPort
+  ): void => {
     this.portMap.set(msg.toId, msg.port)
     if (this.portMap.size === this.nodeCount - 1) {
       this.emit('read')
     }
   }
 
-  private readonly onMessageFromPeer = ([asyncId, data]: [number, unknown]): void => {
+  private readonly onMessageFromPeer = ([asyncId, data]: [
+    number,
+    unknown
+  ]): void => {
     const cb = this.cbMap.get(asyncId)
     if (typeof cb === 'function') {
       cb(data)
@@ -78,7 +87,7 @@ export class WorkerNode extends EventEmitter {
     transferList?: Array<ArrayBuffer | MessagePort>
   ): void {
     const port = this.portMap.get(node)
-    if (port) {
+    if (port !== undefined) {
       port.postMessage(value, transferList)
     }
   }
