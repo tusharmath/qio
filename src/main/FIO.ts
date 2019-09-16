@@ -95,9 +95,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public get once(): FIO<never, IO<E1, A1>, R1> {
     return this.env.chain(env =>
-      Await.of<E1, A1>().map(await =>
-        await.set(this.provide(env)).and(await.get)
-      )
+      Await.of<E1, A1>().map(AWT => AWT.set(this.provide(env)).and(AWT.get))
     )
   }
 
@@ -514,6 +512,15 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public do<E2, R2>(io: FIO<E2, unknown, R2>): FIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io.const(_))
+  }
+
+  /**
+   * Calls the effect-full function on success of the current FIO instance.
+   */
+  public encase<E2 = never, A2 = unknown>(
+    fn: (A1: A1) => A2
+  ): FIO<E1 | E2, A2, R1> {
+    return this.chain(FIO.encase(fn))
   }
 
   /**
