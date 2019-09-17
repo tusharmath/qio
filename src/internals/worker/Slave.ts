@@ -13,13 +13,17 @@ import {
 import {
   IPeerCommunicationPort,
   PeerCommunicationPort
-} from './IPeerCommunicationPort'
+} from '../IPeerCommunicationPort'
 
-export class WorkerNode<T> extends EventEmitter {
-  private readonly asyncId = new Float64Array([0])
+/**
+ * Slaves actually do the work
+ */
+export class Slave<T> extends EventEmitter {
+  private asyncId = 0
   private readonly cbMap = new Map<number, (D: T) => void>()
   private readonly nodeCount: number
   private readonly nodeId: number
+  private readonly parentPort: MessagePort
   private readonly portMap = new Map<number, MessagePort>()
 
   public constructor() {
@@ -29,6 +33,10 @@ export class WorkerNode<T> extends EventEmitter {
     const data = workerData as {nodeCount: number; nodeId: number}
     this.nodeCount = data.nodeCount
     this.nodeId = data.nodeId
+    if (parentPort === null) {
+      throw new Error('Parent port unavailable')
+    }
+    this.parentPort = parentPort
   }
 
   public remoteCall(node: number, value: unknown, cb: () => {}): void {
@@ -38,25 +46,23 @@ export class WorkerNode<T> extends EventEmitter {
   }
 
   private getAsyncId(): number {
-    return ++this.asyncId[0]
+    return ++this.asyncId
   }
 
   private init(): void {
-    if (parentPort !== null) {
-      // Listen to the parent messages
+    // Listen to the parent messages
 
-      parentPort.on('message', this.onMessageFromParent)
+    this.parentPort.on('message', this.onMessageFromParent)
 
-      // Send all connection ports to parent
-      for (let i = 0; i < this.nodeCount; i++) {
-        if (i !== this.nodeId) {
-          const channel = new MessageChannel()
-          channel.port1.on('message', this.onMessageFromPeer)
-          parentPort.postMessage(
-            PeerCommunicationPort(i, this.nodeId, channel.port2),
-            [channel.port2]
-          )
-        }
+    // Send all connection ports to parent
+    for (let i = 0; i < this.nodeCount; i++) {
+      if (i !== this.nodeId) {
+        const channel = new MessageChannel()
+        channel.port1.on('message', this.onMessageFromPeer)
+        this.parentPort.postMessage(
+          PeerCommunicationPort(i, this.nodeId, channel.port2),
+          [channel.port2]
+        )
       }
     }
   }
@@ -83,7 +89,7 @@ export class WorkerNode<T> extends EventEmitter {
     value: unknown,
     transferList?: Array<ArrayBuffer | MessagePort>
   ): void {
-    const port = this.portMap.get(node)
+    const port = node === 0 ? this.parentPort : this.portMap.get(node)
     if (port !== undefined) {
       port.postMessage(value, transferList)
     }

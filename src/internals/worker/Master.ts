@@ -5,9 +5,12 @@
 import * as os from 'os'
 import {Worker} from 'worker_threads'
 
-import {IPeerCommunicationPort} from './IPeerCommunicationPort'
+import {IPeerCommunicationPort} from '../IPeerCommunicationPort'
 
-export class WorkerPool {
+/**
+ * Spawns of multiple workers and initiates communication channels between them.
+ */
+export class Master {
   private readonly portList = new Array<IPeerCommunicationPort>()
   private readonly workerList: Worker[] = new Array<Worker>()
 
@@ -20,7 +23,7 @@ export class WorkerPool {
 
   private init(): void {
     const nodeCount = this.nodeCount
-    for (let nodeId = 0; nodeId < this.nodeCount; nodeId++) {
+    for (let nodeId = 1; nodeId <= this.nodeCount; nodeId++) {
       const worker = new Worker(this.fileName, {
         workerData: {nodeId, nodeCount}
       })
