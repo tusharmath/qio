@@ -21,6 +21,6 @@ export abstract class BaseRuntime implements IRuntime {
       this,
       this.scheduler,
       io.asInstruction
-    ).unsafeResume(rej, res)
+    ).unsafeExecute(rej, res)
   }
 }
