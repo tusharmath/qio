@@ -51,9 +51,15 @@ const inputName = getStrLn('Enter your name: ').chain(name =>
 /**
  * Checks if the use wants to continue with the game.
  */
-export const canContinue = FIO.of(true)
-  // .race(FIO.timeout(false, 3000).do(putStrLn('\nGood bye!')))
-  .race(FIO.timeout(false, 3000))
+export const canContinue = getStrLn(
+  'Press ⏎  to continue (or will exit in 3sec): '
+)
+  .const(true)
+  .race(
+    putStrLn('\nGood bye!')
+      .delay(3000)
+      .const(false)
+  )
 
 /**
  * Takes an input integer and checks if it matches with a random number.

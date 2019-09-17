@@ -1,8 +1,8 @@
 import {assert} from 'chai'
 
-import {canContinue, program} from '../../example/guess-the-number/src/Program'
-import {FIO, UIO} from '../../src/main/FIO'
-import {testRuntime} from '../../src/runtimes/TestRuntime'
+import {canContinue, program} from '../src/Program'
+import {FIO, UIO} from '../../../src/main/FIO'
+import {testRuntime} from '../../../src/runtimes/TestRuntime'
 
 describe('Program', () => {
   const MockMath = (...a: number[]) => ({
@@ -100,7 +100,7 @@ describe('Program', () => {
   })
 
   it('should continue on pressing enter', () => {
-    const Math = MockMath(0.1, 0.5, 0.7)
+    const Math = MockMath(0.1, 0.1, 0.1)
     const tty = MockTTY({
       'Enter a number between 1 & 6: ': ['2', '3'],
       'Enter your name: ': ['John'],
@@ -115,18 +115,40 @@ describe('Program', () => {
       'Enter a number between 1 & 6: 2',
       'You guessed it right!',
       'Press ⏎  to continue (or will exit in 3sec): ',
-      'Enter a number between 1 & 6: 3'
+      'Enter a number between 1 & 6: 3',
+      'Sorry, the correct answer is 2',
+      'Press ⏎  to continue (or will exit in 3sec): ',
+      'Enter a number between 1 & 6: '
     ])
   })
 
   describe('canContinue', () => {
-    it('should return true', () => {
-      const tty = MockTTY({
-        'Press ⏎  to continue (or will exit in 3sec): ': ['']
-      })
-      const actual = testRuntime().executeSync(canContinue.provide({tty}))
+    context('when newline is provided', () => {
+      it('should return true', () => {
+        const tty = MockTTY({
+          'Press ⏎  to continue (or will exit in 3sec): ': ['']
+        })
+        const actual = testRuntime().executeSync(canContinue.provide({tty}))
 
-      assert.isTrue(actual)
+        assert.isTrue(actual)
+      })
+    })
+    context('when no input is provided', () => {
+      it('should return false', () => {
+        const tty = MockTTY({})
+        const actual = testRuntime().executeSync(canContinue.provide({tty}))
+
+        assert.isFalse(actual)
+      })
+      it('should output goodbye', () => {
+        const tty = MockTTY({})
+        testRuntime().executeSync(canContinue.provide({tty}))
+
+        assert.deepStrictEqual(tty.stdout, [
+          'Press ⏎  to continue (or will exit in 3sec): ',
+          '\nGood bye!'
+        ])
+      })
     })
   })
 })
