@@ -15,9 +15,9 @@ import {
   PeerCommunicationPort
 } from './IPeerCommunicationPort'
 
-export class WorkerNode extends EventEmitter {
+export class WorkerNode<T> extends EventEmitter {
   private readonly asyncId = new Float64Array([0])
-  private readonly cbMap = new Map<number, (D: unknown) => {}>()
+  private readonly cbMap = new Map<number, (D: T) => void>()
   private readonly nodeCount: number
   private readonly nodeId: number
   private readonly portMap = new Map<number, MessagePort>()
@@ -70,10 +70,7 @@ export class WorkerNode extends EventEmitter {
     }
   }
 
-  private readonly onMessageFromPeer = ([asyncId, data]: [
-    number,
-    unknown
-  ]): void => {
+  private readonly onMessageFromPeer = ([asyncId, data]: [number, T]): void => {
     const cb = this.cbMap.get(asyncId)
     if (typeof cb === 'function') {
       cb(data)
