@@ -5,7 +5,6 @@
 import {assert} from 'chai'
 import {Either} from 'standard-data-structures'
 
-import {FiberContext} from '../src/internals/FiberContext'
 import {Await} from '../src/main/Await'
 import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
@@ -303,7 +302,7 @@ describe('FIO', () => {
       assert.isTrue(counter.increased)
     })
 
-    describe('fiber.resume', () => {
+    describe('resume', () => {
       it('should not run forked fibers', () => {
         const runtime = testRuntime()
         const counter = new Counter()
@@ -353,7 +352,7 @@ describe('FIO', () => {
       })
     })
 
-    describe('fiber.abort', () => {
+    describe('abort', () => {
       it('should abort the fiber', () => {
         const counter = new Counter()
         testRuntime().executeSync(
@@ -375,7 +374,7 @@ describe('FIO', () => {
       })
     })
 
-    describe('fiber.resumeAsync', () => {
+    describe('resumeAsync', () => {
       it('should asynchronously execute the IO', () => {
         const a = new Counter()
         const runtime = testRuntime()
@@ -439,6 +438,24 @@ describe('FIO', () => {
 
         const expected = Either.left('Hi')
         assert.deepEqual(actual, expected)
+      })
+
+      it('should cancel async execution', () => {
+        const counter = new Counter()
+        const runtime = testRuntime()
+        runtime.execute(
+          FIO.of(0).fork.chain(_ =>
+            _.resumeAsync(() => counter.inc().delay(1000).void).and(
+              _.abort.delay(300)
+            )
+          )
+        )
+        runtime.scheduler.runTo(50)
+        assert.strictEqual(counter.count, 0)
+        runtime.scheduler.runTo(200)
+        assert.strictEqual(counter.count, 0)
+        runtime.scheduler.runTo(1100)
+        assert.strictEqual(counter.count, 0)
       })
     })
   })
@@ -565,6 +582,7 @@ describe('FIO', () => {
       assert.strictEqual(actual, 'A')
     })
   })
+
   describe('provide', () => {
     it('should maintain env for multiple access', () => {
       const actual = testRuntime().executeSync(
@@ -604,7 +622,10 @@ describe('FIO', () => {
         FIO.access((_: string) => _.length)
           .provide('FIO')
           .fork.chain(f =>
-            f.resume.map(() => (f as FiberContext).stackEnv.length)
+            f.resume.map(
+              // FIXME: remove type-casting and use a proper test.
+              () => ((f as unknown) as {[k: string]: []}).stackEnv.length
+            )
           )
       )
       const expected = 0
