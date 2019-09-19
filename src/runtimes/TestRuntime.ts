@@ -22,13 +22,7 @@ export class TestRuntime extends BaseRuntime {
     const result = this.exit(io)
     this.scheduler.run()
 
-    return result.fold<E | A | undefined>(
-      undefined,
-      err => {
-        throw err
-      },
-      Id
-    )
+    return result.fold<E | A | undefined>(undefined, Id, Id)
   }
 
   public exit<E, A>(io: FIO<E, A>): Either<E, A> {
