@@ -131,6 +131,15 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Creates a new FIO instance with the provided environment by invoking a promise returning function.
+   */
+  public static accessP<A1, R1>(
+    cb: (R: R1) => Promise<A1>
+  ): FIO<Error, A1, R1> {
+    return FIO.env<R1>().chain(FIO.encaseP(cb))
+  }
+
+  /**
    * Converts a [[FIO]] of a function into a [[FIO]] of a value.
    */
   public static ap<E1, A1, R1, A2>(
