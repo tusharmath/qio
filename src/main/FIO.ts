@@ -556,6 +556,27 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Provides the current instance of FIO the required env that is accessed effect-fully.
+   */
+  public provideM<E2>(io: FIO<E2, R1, R1>): FIO<E1 | E2, A1, R1> {
+    return io.chain(ENV => this.provide(ENV))
+  }
+
+  /**
+   * Provide only some of the environment
+   */
+  public provideSome<R0>(fn: (R2: R0) => R1): FIO<E1, A1, R0> {
+    return FIO.accessM((r0: R0) => this.provide(fn(r0)))
+  }
+
+  /**
+   * Provide only some of the environment using an effect
+   */
+  public provideSomeM<E2, R0>(fio: FIO<E2, R1, R0>): FIO<E1 | E2, A1, R0> {
+    return fio.chain(_ => this.provide(_))
+  }
+
+  /**
    * Runs two IOs in parallel in returns the result of the first one.
    */
   public race<E2, A2, R2>(
