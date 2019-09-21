@@ -362,6 +362,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Takes in a function that returns a FIO
+   * and converts it to a function that returns an IO by providing it the
+   * given env.
+   */
+  public static pipeEnv<T extends unknown[], E1, A1, R1>(
+    fn: (..._: T) => FIO<E1, A1, R1>,
+    R: R1
+  ): (..._: T) => IO<E1, A1> {
+    return (...T0: T) => fn(...T0).provide(R)
+  }
+
+  /**
    * Creates a FIO that rejects with the provided error
    */
   public static reject<E1>(error: E1): FIO<E1, never> {
