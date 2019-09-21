@@ -92,7 +92,7 @@ export class Queue<A = never> {
         this.take.chain(_ => itar(i + 1, list.prepend(_)))
       )
 
-    return itar(0, List.empty).map(_ => _.asArray)
+    return itar(0, List.empty<A>()).map(_ => _.asArray)
   }
 
   private setAwaited(value: A): UIO<boolean[]> {
@@ -103,7 +103,7 @@ export class Queue<A = never> {
           : itar(list.prepend(_.set(FIO.of(value))))
       )
 
-    return itar(List.empty).chain(_ =>
+    return itar(List.empty<UIO<boolean>>()).chain(_ =>
       FIO.seq(_.asArray).tap(() => (!_.isEmpty ? this.Q.shift : FIO.void()))
     )
   }

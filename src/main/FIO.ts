@@ -337,7 +337,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return ios
       .reduce(
         (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
-        FIO.env<R1>().and(IO<E1, List<A1>>(() => List.empty))
+        FIO.env<R1>().and(IO<E1, List<A1>>(() => List.empty<A1>()))
       )
       .map(_ => _.asArray.reverse())
   }
@@ -411,7 +411,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return ios
       .reduce(
         (fList, f) => fList.chain(list => f.map(value => list.prepend(value))),
-        IO<E1, List<A1>>(() => List.empty).addEnv<R1>()
+        IO<E1, List<A1>>(() => List.empty<A1>()).addEnv<R1>()
       )
       .map(_ => _.asArray)
   }

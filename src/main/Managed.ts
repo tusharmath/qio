@@ -58,7 +58,7 @@ export class Managed<E1, A1, R1> {
       .reduce(
         (a: Managed<E1, List<A1>, R1>, b: Managed<E1, A1, R1>) =>
           a.zipWith(b, (x, y) => x.prepend(y)),
-        Managed.make(FIO.of(List.empty).addEnv<R1>(), FIO.void)
+        Managed.make(FIO.of(List.empty<A1>()).addEnv<R1>(), FIO.void)
       )
       .map(_ => _.asArray)
   }
