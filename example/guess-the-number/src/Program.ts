@@ -10,13 +10,13 @@ const MIN_NUMBER = 1
  * Takes input from the player through the stdin stream.
  */
 const getStrLn = (question: string) =>
-  FIO.accessM((_: ITextTerminal) => _.tty.readLn(question))
+  FIO.accessM((_: ITextTerminal) => _.tty.getStrLn(question))
 
 /**
  * Outputs anything passed as arguments to the stdout stream
  */
 const putStrLn = (...t: unknown[]) =>
-  FIO.accessM((_: ITextTerminal) => _.tty.writeLn(...t))
+  FIO.accessM((_: ITextTerminal) => _.tty.putStrLn(...t))
 
 /**
  * Generates a random number.

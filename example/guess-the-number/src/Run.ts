@@ -2,41 +2,46 @@
  * Created by tushar on 2019-05-05
  */
 
-/* tslint:disable: no-import-side-effect ordered-imports no-console no-unbound-method */
+/* tslint:disable: no-import-side-effect ordered-imports no-console no-unbound-method no-any */
 
-import 'source-map-support/register'
-
-import {defaultRuntime} from '../../../src/runtimes/DefaultRuntime'
-
-import {program} from './Program'
 import * as readline from 'readline'
-import {IConsole, IProcess, IReadLine, ITextTerminal} from './Env'
+import 'source-map-support/register'
 import {FIO} from '../../../src/main/FIO'
 import {Managed} from '../../../src/main/Managed'
+
+import {defaultRuntime} from '../../../src/runtimes/DefaultRuntime'
+import {IConsole, IProcess, IReadLine} from './Env'
+
+import {program} from './Program'
 
 /**
  * Creates a managed ReadLine interface using std in/out
  */
-const rlInterface = Managed.make(
-  FIO.access((_: IProcess) => _.process).chain(process =>
-    FIO.access((_: IReadLine) =>
-      _.readline.createInterface(process.stdin, process.stdout)
-    )
+export const rlInterface = Managed.make(
+  FIO.access((_: IProcess & IReadLine) =>
+    _.readline.createInterface(_.process.stdin, _.process.stdout)
   ),
   FIO.encase(rl => rl.close())
 )
 
-const tty: ITextTerminal = {
-  tty: {
-    readLn: (question: string) =>
-      rlInterface
-        .use(rl => FIO.cb<string>(cb => rl.question(question, cb)))
-        .provide({process, readline}),
-    writeLn: (...t: unknown[]) =>
-      FIO.access((env: IConsole) => env.console.log(...t)).provide({
-        console
-      })
-  }
-}
+/**
+ * Uses the rlInterface to take input from the CLI
+ */
+export const getStrLn = (question: string) =>
+  rlInterface.use(rl => FIO.cb<string>(cb => rl.question(question, cb)))
 
-defaultRuntime().execute(program.provide({Math, ...tty}))
+/**
+ * Uses console.log to printout items on the CLI
+ */
+export const putStrLn = (...t: unknown[]) =>
+  FIO.access((env: IConsole) => env.console.log(...t))
+
+defaultRuntime().execute(
+  program.provide({
+    Math,
+    tty: {
+      getStrLn: FIO.pipeEnv(getStrLn, {process, readline}),
+      putStrLn: FIO.pipeEnv(putStrLn, {console})
+    }
+  })
+)

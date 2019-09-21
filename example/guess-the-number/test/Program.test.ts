@@ -5,17 +5,23 @@ import {testRuntime} from '../../../src/runtimes/TestRuntime'
 import {canContinue, program} from '../src/Program'
 
 describe('Program', () => {
+  /**
+   * Mock implementation for everything insde JS's native Math utility
+   */
   const MockMath = (...a: number[]) => ({
     random(): number {
       return a.shift() as number
     }
   })
 
+  /**
+   * Mock implementation of ITextTerminal
+   */
   const MockTTY = (input: {[k: string]: string[]}) => {
     const stdout = new Array<unknown>()
 
     return {
-      readLn: (question: string) =>
+      getStrLn: (question: string) =>
         FIO.flatten(
           UIO(() => {
             const popped = input.hasOwnProperty(question)
@@ -33,8 +39,8 @@ describe('Program', () => {
             return FIO.of(popped)
           })
         ),
-      stdout,
-      writeLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', ')))
+      putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
+      stdout
     }
   }
 

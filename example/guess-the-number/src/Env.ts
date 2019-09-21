@@ -49,11 +49,14 @@ export interface IProcess {
 }
 
 /**
- * Access to text terminal (tty)
+ * Access to text terminal (tty).
+ * The env here is created as a composition of two separate envs viz —
+ * IProcess & IReadLine.
+ * This is done just to make the testing easier.
  */
 export interface ITextTerminal {
   tty: {
-    readLn(question: string): UIO<string>
-    writeLn(...t: unknown[]): UIO<void>
+    getStrLn(question: string): UIO<string>
+    putStrLn(...t: unknown[]): UIO<void>
   }
 }
