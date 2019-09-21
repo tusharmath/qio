@@ -33,7 +33,7 @@ export interface IConsole {
  * Provides access to the Math env
  */
 export interface IMath {
-  Math: {
+  math: {
     random(): number
   }
 }

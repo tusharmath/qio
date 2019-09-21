@@ -21,7 +21,7 @@ const putStrLn = (...t: unknown[]) =>
 /**
  * Generates a random number.
  */
-const randomNumber = FIO.access((env: IMath) => env.Math.random())
+const randomNumber = FIO.access((env: IMath) => env.math.random())
 
 /**
  * Returns a random number within the provide range.

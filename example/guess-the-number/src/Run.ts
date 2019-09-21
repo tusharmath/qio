@@ -38,7 +38,7 @@ export const putStrLn = (...t: unknown[]) =>
 
 defaultRuntime().execute(
   program.provide({
-    Math,
+    math: Math,
     tty: {
       getStrLn: FIO.pipeEnv(getStrLn, {process, readline}),
       putStrLn: FIO.pipeEnv(putStrLn, {console})

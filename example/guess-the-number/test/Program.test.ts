@@ -6,7 +6,7 @@ import {canContinue, program} from '../src/Program'
 
 describe('Program', () => {
   /**
-   * Mock implementation for everything insde JS's native Math utility
+   * Mock implementation for everything insde JS's native math utility
    */
   const MockMath = (...a: number[]) => ({
     random(): number {
@@ -45,19 +45,19 @@ describe('Program', () => {
   }
 
   it('should greet', () => {
-    const Math = MockMath()
+    const math = MockMath()
     const tty = MockTTY({})
-    testRuntime().executeSync(program.provide({Math, tty}))
+    testRuntime().executeSync(program.provide({math, tty}))
 
     assert.deepStrictEqual(tty.stdout, ['Greetings!', 'Enter your name: '])
   })
 
   it('should ask user for a number', () => {
-    const Math = MockMath()
+    const math = MockMath()
     const tty = MockTTY({
       'Enter your name: ': ['John']
     })
-    testRuntime().executeSync(program.provide({Math, tty}))
+    testRuntime().executeSync(program.provide({math, tty}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -68,12 +68,12 @@ describe('Program', () => {
   })
 
   it('should check match guess with random', () => {
-    const Math = MockMath(0.1, 0.5, 0.7)
+    const math = MockMath(0.1, 0.5, 0.7)
     const tty = MockTTY({
       'Enter a number between 1 & 6: ': ['1'],
       'Enter your name: ': ['John']
     })
-    testRuntime().executeSync(program.provide({Math, tty}))
+    testRuntime().executeSync(program.provide({math, tty}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -87,12 +87,12 @@ describe('Program', () => {
   })
 
   it('should encourage user on correct answer', () => {
-    const Math = MockMath(0.1, 0.5, 0.7)
+    const math = MockMath(0.1, 0.5, 0.7)
     const tty = MockTTY({
       'Enter a number between 1 & 6: ': ['2'],
       'Enter your name: ': ['John']
     })
-    testRuntime().executeSync(program.provide({Math, tty}))
+    testRuntime().executeSync(program.provide({math, tty}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -106,13 +106,13 @@ describe('Program', () => {
   })
 
   it('should continue on pressing enter', () => {
-    const Math = MockMath(0.1, 0.1, 0.1)
+    const math = MockMath(0.1, 0.1, 0.1)
     const tty = MockTTY({
       'Enter a number between 1 & 6: ': ['2', '3'],
       'Enter your name: ': ['John'],
       'Press ⏎  to continue (or will exit in 3sec): ': ['', '']
     })
-    testRuntime().executeSync(program.provide({Math, tty}))
+    testRuntime().executeSync(program.provide({math, tty}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
