@@ -558,7 +558,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Provides the current instance of FIO the required env that is accessed effect-fully.
    */
-  public provideM<E2>(io: FIO<E2, R1, R1>): FIO<E1 | E2, A1, R1> {
+  public provideM<E2, R2>(io: FIO<E2, R1, R2>): FIO<E1 | E2, A1, R2> {
     return io.chain(ENV => this.provide(ENV))
   }
 
