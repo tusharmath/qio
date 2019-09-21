@@ -282,6 +282,15 @@ export class FStream<E1, A1, R1> {
   }
 
   /**
+   * Pipes the current stream through a function that creates a new FStream.
+   */
+  public pipe<E2, A2, R2>(
+    fn: (a1: FStream<E1, A1, R1>) => FStream<E2, A2, R2>
+  ): FStream<E2, A2, R2> {
+    return fn(this)
+  }
+
+  /**
    * Emits the first N values skipping the rest.
    */
   public take(count: number): FStream<E1, A1, R1> {
