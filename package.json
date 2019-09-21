@@ -29,7 +29,7 @@
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "typedoc",
     "update-benchmarks": "benchmarks/run.sh",
-    "check-types": "typings-checker --allow-expect-error type-test/*",
+    "check-types": "typings-checker --allow-expect-error type-test/*.ts",
     "typings-checker": "typings-checker",
     "example": "node example/guess-the-number/src/Run"
   },
