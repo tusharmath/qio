@@ -217,8 +217,8 @@ export class FStream<E1, A1, R1> {
   /**
    * Performs the given effect-full function for each value of the stream
    */
-  public forEach<E2, R2>(
-    f: (a: A1) => FIO<E2, void, R2>
+  public forEach<E2, A2, R2>(
+    f: (a: A1) => FIO<E2, A2, R2>
   ): FIO<E1 | E2, void, R1 & R2> {
     return this.forEachWhile(a => f(a).const(true))
   }
