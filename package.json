@@ -1,18 +1,11 @@
 {
   "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "private": true,
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "description": "A type-safe functional module that solves practical IO problems for node and the browser.",
-  "keywords": [
-    "io",
-    "functional",
-    "typescript",
-    "pure",
-    "promise"
-  ],
   "license": "ISC",
   "main": "index.js",
   "name": "fearless-io",
@@ -46,6 +39,7 @@
     "chai": "^4.2.0",
     "cz-conventional-changelog": "^3.0.2",
     "fluture": "^11.0.3",
+    "lerna": "^3.8.0",
     "mocha": "^6.2.0",
     "prettier": "^1.18.2",
     "semantic-release": "^15.13.24",
@@ -57,12 +51,5 @@
     "typescript": "^3.6.3",
     "typescript-tslint-plugin": "^0.5.4",
     "typings-checker": "^2.0.0"
-  },
-  "dependencies": {
-    "checked-exceptions": "^1.2.0",
-    "in-node": "^1.0.0",
-    "standard-data-structures": "^2.0.0",
-    "ts-scheduler": "^8.0.1",
-    "utility-types": "^3.7.0"
   }
 }

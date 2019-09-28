@@ -1,10 +1,8 @@
 import {ICancellable} from 'ts-scheduler'
 
+import {IRuntime} from '../../../../src/runtimes/IRuntime'
 import {UIO} from '../main/FIO'
-import {IRuntime} from '../runtimes/IRuntime'
-
-/**
- * Created by tushar on 08/09/19
+ed by tushar on 08/09/19
  */
 
 export class Exit implements ICancellable {

@@ -1,6 +1,6 @@
 import {Interface} from 'readline'
 
-import {UIO} from '../../../src/main/FIO'
+import {UIO} from '../../../packages/core/lib/main/FIO'
 import ReadStream = NodeJS.ReadStream
 import WriteStream = NodeJS.WriteStream
 

@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 07/09/19
  */
-import {FIO, UIO} from '../../src/main/FIO'
+import {FIO, UIO} from '../../packages/core/lib/main/FIO'
 
 export class Snapshot {
   public readonly timeline = new Array<string>()

@@ -3,8 +3,8 @@
  */
 import {assert} from 'chai'
 
-import {Ref} from '../src/main/Ref'
-import {testRuntime} from '../src/runtimes/TestRuntime'
+import {Ref} from '../packages/core/lib/main/Ref'
+import {testRuntime} from '../packages/core/lib/runtimes/TestRuntime'
 
 describe('Ref', () => {
   context('update', () => {

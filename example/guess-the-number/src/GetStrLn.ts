@@ -1,4 +1,4 @@
-import {FIO} from '../../../src/main/FIO'
+import {FIO} from '../../../packages/core/lib/main/FIO'
 
 import {rlInterface} from './RLInterface'
 
