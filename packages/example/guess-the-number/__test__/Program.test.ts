@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 
-import {FIO, UIO} from '../../../packages/core/lib/main/FIO'
-import {testRuntime} from '../../../packages/core/lib/runtimes/TestRuntime'
+import {FIO, UIO} from '../../../core/lib/main/FIO'
+import {testRuntime} from '../../../core/lib/runtimes/TestRuntime'
 import {canContinue, program} from '../src/Program'
 
 describe('Program', () => {

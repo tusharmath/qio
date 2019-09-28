@@ -5,12 +5,12 @@
 import {assert} from 'chai'
 import {Either} from 'standard-data-structures'
 
-import {Await} from '../packages/core/lib/main/Await'
-import {Fiber} from '../packages/core/lib/main/Fiber'
-import {FIO, UIO} from '../packages/core/lib/main/FIO'
-import {defaultRuntime} from '../packages/core/lib/runtimes/DefaultRuntime'
-import {IRuntime} from '../packages/core/lib/runtimes/IRuntime'
-import {testRuntime} from '../packages/core/lib/runtimes/TestRuntime'
+import {Await} from '../lib/main/Await'
+import {Fiber} from '../lib/main/Fiber'
+import {FIO, UIO} from '../lib/main/FIO'
+import {defaultRuntime} from '../lib/runtimes/DefaultRuntime'
+import {IRuntime} from '../lib/runtimes/IRuntime'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 import {Snapshot} from './internals/Snapshot'

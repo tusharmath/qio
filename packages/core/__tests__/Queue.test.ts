@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 
-import {Queue} from '../packages/core/lib/main/Queue'
-import {testRuntime} from '../packages/core/lib/runtimes/TestRuntime'
+import {Queue} from '../lib/main/Queue'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('Queue', () => {
   describe('unbounded', () => {

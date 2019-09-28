@@ -1,4 +1,4 @@
-import {UIO} from '../../packages/core/lib/main/FIO'
+import {UIO} from '../../lib/main/FIO'
 
 export class Counter {
   public count = 0

@@ -1,0 +1,19 @@
+{
+  "name": "@fio/benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/benchmark": "^1.0.31",
+    "@types/bluebird": "^3.5.27",
+    "bluebird": "^3.5.5",
+    "fluture": "^11.0.3"
+  },
+  "dependencies": {
+    "benchmark": "^2.1.4"
+  }
+}

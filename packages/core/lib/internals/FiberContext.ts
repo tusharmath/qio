@@ -8,11 +8,12 @@ import {check} from 'checked-exceptions'
 import {Either} from 'standard-data-structures'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {IRuntime} from '../../../../src/runtimes/IRuntime'
 import {Fiber} from '../main/Fiber'
 import {FIO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
-ellationList} from './CancellationList'
+import {IRuntime} from '../runtimes/IRuntime'
+
+import {CancellationList} from './CancellationList'
 import {CB} from './CB'
 import {Exit} from './Exit'
 

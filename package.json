@@ -28,22 +28,10 @@
   },
   "version": "0.0.0-development",
   "devDependencies": {
-    "@tusharmathur/typedoc": "^1.0.0",
-    "@types/benchmark": "^1.0.31",
-    "@types/bluebird": "^3.5.27",
-    "@types/chai": "^4.2.2",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.5",
-    "benchmark": "^2.1.4",
-    "bluebird": "^3.5.5",
-    "chai": "^4.2.0",
     "cz-conventional-changelog": "^3.0.2",
-    "fluture": "^11.0.3",
     "lerna": "^3.8.0",
-    "mocha": "^6.2.0",
     "prettier": "^1.18.2",
     "semantic-release": "^15.13.24",
-    "source-map-support": "^0.5.13",
     "travis-deploy-once": "^5.0.11",
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
@@ -51,5 +39,8 @@
     "typescript": "^3.6.3",
     "typescript-tslint-plugin": "^0.5.4",
     "typings-checker": "^2.0.0"
-  }
+  },
+  "workspaces": [
+    "packages/**"
+  ]
 }

@@ -5,7 +5,7 @@
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
-import {FIO} from '../packages/core/lib/main/FIO'
+import {FIO} from '../core/lib/main/FIO'
 
 import {inc} from './internals/Inc'
 import {RunSuite} from './internals/RunSuite'

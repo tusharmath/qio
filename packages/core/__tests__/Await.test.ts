@@ -1,8 +1,8 @@
 import {assert} from 'chai'
 
-import {Await} from '../packages/core/lib/main/Await'
-import {FIO} from '../packages/core/lib/main/FIO'
-import {testRuntime} from '../packages/core/lib/runtimes/TestRuntime'
+import {Await} from '../lib/main/Await'
+import {FIO} from '../lib/main/FIO'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 

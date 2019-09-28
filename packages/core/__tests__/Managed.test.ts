@@ -1,8 +1,8 @@
 import * as assert from 'assert'
 
-import {FIO, UIO} from '../packages/core/lib/main/FIO'
-import {Managed} from '../packages/core/lib/main/Managed'
-import {testRuntime} from '../packages/core/lib/runtimes/TestRuntime'
+import {FIO, UIO} from '../lib/main/FIO'
+import {Managed} from '../lib/main/Managed'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('Managed', () => {
   const Resource = () => {

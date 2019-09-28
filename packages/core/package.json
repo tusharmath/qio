@@ -39,5 +39,10 @@
     "standard-data-structures": "^2.0.0",
     "ts-scheduler": "^8.0.1",
     "utility-types": "^3.7.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/mocha": "^5.2.7",
+    "chai": "^4.2.0"
   }
 }

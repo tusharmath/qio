@@ -6,9 +6,9 @@
 
 import * as readline from 'readline'
 import 'source-map-support/register'
-import {FIO} from '../../../packages/core/lib/main/FIO'
+import {FIO} from '../../../core/lib/main/FIO'
 
-import {defaultRuntime} from '../../../packages/core/lib/runtimes/DefaultRuntime'
+import {defaultRuntime} from '../../../core/lib/runtimes/DefaultRuntime'
 import {getStrLn} from './GetStrLn'
 
 import {program} from './Program'
