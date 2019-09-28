@@ -5,7 +5,7 @@
 /* tslint:disable */
 import {Suite} from 'benchmark'
 
-import {FIO, UIO} from '../src/main/FIO'
+import {FIO, UIO} from '../packages/core/src/main/FIO'
 
 import {PrintLn} from './internals/PrintLn'
 import {fioRuntime} from './internals/RunSuite'

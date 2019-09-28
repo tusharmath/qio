@@ -1,5 +1,5 @@
-import {FIO} from '../../../src/main/FIO'
-import {Managed} from '../../../src/main/Managed'
+import {FIO} from '../../../core/src/main/FIO'
+import {Managed} from '../../../core/src/main/Managed'
 
 import {IProcess, IReadLine} from './Env'
 

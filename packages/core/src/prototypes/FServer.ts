@@ -1,6 +1,6 @@
 import * as http from 'http'
 
-import {defaultRuntime, FIO, IRuntime, Managed, UIO} from '../..'
+import {defaultRuntime, FIO, IRuntime, Managed, UIO} from '../../../..'
 
 const Exit = FIO.encase((message: Error) => {
   process.exit(1)
