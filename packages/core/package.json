@@ -1,0 +1,69 @@
+{
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "description": "A type-safe functional module that solves practical IO problems for node and the browser.",
+  "keywords": [
+    "io",
+    "functional",
+    "typescript",
+    "pure",
+    "promise"
+  ],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "@fio/core",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tusharmath/fearless-io.git"
+  },
+  "scripts": {
+    "lint": "tslint --project .",
+    "prepublishOnly": "tsc -d",
+    "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
+    "semantic-release": "semantic-release",
+    "test": "mocha --require=ts-node/register --watch-extensions ts test/**.ts example/**/*/test/**.ts",
+    "travis-deploy-once": "travis-deploy-once --pro",
+    "create-docs": "typedoc",
+    "update-benchmarks": "benchmarks/run.sh",
+    "check-types": "typings-checker --allow-expect-error type-test/*.ts",
+    "typings-checker": "typings-checker",
+    "example": "node example/guess-the-number/src/Run"
+  },
+  "version": "0.0.0-development",
+  "devDependencies": {
+    "@tusharmathur/typedoc": "^1.0.0",
+    "@types/benchmark": "^1.0.31",
+    "@types/bluebird": "^3.5.27",
+    "@types/chai": "^4.2.2",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.7.5",
+    "benchmark": "^2.1.4",
+    "bluebird": "^3.5.5",
+    "chai": "^4.2.0",
+    "cz-conventional-changelog": "^3.0.2",
+    "fluture": "^11.0.3",
+    "lerna": "^3.8.0",
+    "mocha": "^6.2.0",
+    "prettier": "^1.18.2",
+    "semantic-release": "^15.13.24",
+    "source-map-support": "^0.5.13",
+    "travis-deploy-once": "^5.0.11",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.6.3",
+    "typescript-tslint-plugin": "^0.5.4",
+    "typings-checker": "^2.0.0"
+  },
+  "dependencies": {
+    "checked-exceptions": "^1.2.0",
+    "in-node": "^1.0.0",
+    "standard-data-structures": "^2.0.0",
+    "ts-scheduler": "^8.0.1",
+    "utility-types": "^3.7.0"
+  }
+}

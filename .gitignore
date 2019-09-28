@@ -13,5 +13,3 @@
 coverage/
 docs/
 node_modules/
-!website/*.js
-s
