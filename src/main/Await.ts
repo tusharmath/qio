@@ -19,9 +19,7 @@ export class Await<E, A> {
   private result: Either<E, A> = Either.neither()
 
   public get get(): FIO<E, A> {
-    return FIO.flatten(
-      UIO(() => this.result.fold(this.wait, FIO.reject, FIO.of))
-    )
+    return FIO.flattenM(() => this.result.fold(this.wait, FIO.reject, FIO.of))
   }
 
   public get isSet(): UIO<boolean> {
@@ -29,24 +27,22 @@ export class Await<E, A> {
   }
 
   public set(io: IO<E, A>): UIO<boolean> {
-    return FIO.flatten(
-      UIO(() => {
-        if (this.flag) {
-          return FIO.of(false)
+    return FIO.flattenM(() => {
+      if (this.flag) {
+        return FIO.of(false)
+      }
+      this.flag = true
+
+      return io.asEither.encase(either => {
+        this.result = either
+        while (this.Q.length > 0) {
+          const cb = this.Q.shift() as [CB<E>, CB<A>]
+          this.result.fold(undefined, ...cb)
         }
-        this.flag = true
 
-        return io.asEither.encase(either => {
-          this.result = either
-          while (this.Q.length > 0) {
-            const cb = this.Q.shift() as [CB<E>, CB<A>]
-            this.result.fold(undefined, ...cb)
-          }
-
-          return true
-        })
+        return true
       })
-    )
+    })
   }
 
   private get wait(): FIO<E, A> {

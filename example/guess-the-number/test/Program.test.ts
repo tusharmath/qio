@@ -22,23 +22,21 @@ describe('Program', () => {
 
     return {
       getStrLn: (question: string) =>
-        FIO.flatten(
-          UIO(() => {
-            const popped = input.hasOwnProperty(question)
-              ? input[question].shift()
-              : undefined
+        FIO.flattenM(() => {
+          const popped = input.hasOwnProperty(question)
+            ? input[question].shift()
+            : undefined
 
-            if (popped === undefined) {
-              stdout.push(question)
+          if (popped === undefined) {
+            stdout.push(question)
 
-              return FIO.never()
-            }
+            return FIO.never()
+          }
 
-            stdout.push(question + popped)
+          stdout.push(question + popped)
 
-            return FIO.of(popped)
-          })
-        ),
+          return FIO.of(popped)
+        }),
       putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
       stdout
     }
