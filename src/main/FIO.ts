@@ -517,6 +517,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Runs the FIO instances one by one
    */
   public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, R1 & R2> {
+    // TODO: can improve PERF by add a new instruction type
     return this.chain(() => aFb)
   }
 
@@ -745,8 +746,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
       return Caches.chain(({0: cacheL, 1: cacheR}) =>
         this.raceWith(
           that,
-          (exit, fiber) => coordinate(exit, fiber, cacheL).void,
-          (exit, fiber) => coordinate(exit, fiber, cacheR).void
+          (exit, fiber) => coordinate(exit, fiber, cacheL),
+          (exit, fiber) => coordinate(exit, fiber, cacheR)
         )
           .and(isDone.get)
           .and(
