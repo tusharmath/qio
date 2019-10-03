@@ -14,7 +14,7 @@ import {Fiber} from './Fiber'
 import {Instruction, Tag} from './Instructions'
 import {Ref} from './Ref'
 
-const ExitRef = <E = never, A = never>() =>
+const EitherRef = <E = never, A = never>() =>
   Ref.of<Either<E, A>>(Either.neither())
 
 export type NoEnv = unknown
@@ -692,7 +692,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     c: (e1: A1, e2: A2) => C
   ): FIO<E1 | E2, C, R1 & R2> {
     // Create Caches
-    const Caches = ExitRef<E1, A1>().zip(ExitRef<E2, A2>())
+    const Caches = EitherRef<E1, A1>().zip(EitherRef<E2, A2>())
 
     // Maintains the count of results produced
     const Counter = Ref.of(0)
