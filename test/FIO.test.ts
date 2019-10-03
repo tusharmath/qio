@@ -500,7 +500,7 @@ describe('FIO', () => {
       assert.deepEqual(actual, [10, 20])
     })
 
-    context('when one rejects', () => {
+    context('when left rejects', () => {
       it('should abort the pending', () => {
         const counter = new Counter()
         const left = FIO.reject(10).delay(500)
@@ -518,6 +518,21 @@ describe('FIO', () => {
 
         const actual = testRuntime().executeSync(
           L.zipWithPar(R, (l, r) => 0)
+        ) as Error
+
+        const expected = new Error(ERROR_MESSAGE)
+        assert.strictEqual(actual.message, expected.message)
+      })
+    })
+
+    context('when right rejects', () => {
+      it('should return cause', () => {
+        const ERROR_MESSAGE = 'FAIL'
+        const A = FIO.of(10).delay(100)
+        const B = FIO.reject(new Error(ERROR_MESSAGE)).delay(50)
+
+        const actual = testRuntime().executeSync(
+          A.zipWithPar(B, (l, r) => 0)
         ) as Error
 
         const expected = new Error(ERROR_MESSAGE)
