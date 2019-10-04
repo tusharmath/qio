@@ -686,6 +686,16 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Combines the result of two FIOs and uses a combine function that returns a FIO
+   */
+  public zipWithM<E2, A2, R2, E3, A3, R3>(
+    that: FIO<E2, A2, R2>,
+    c: (a1: A1, a2: A2) => FIO<E3, A3, R3>
+  ): FIO<E1 | E2 | E3, A3, R1 & R2 & R3> {
+    return FIO.flatten(this.zipWith(that, c))
+  }
+
+  /**
    * Combine two FIO instances in parallel and use the combine function to combine the result.
    */
   public zipWithPar<E2, A2, R2, C>(
