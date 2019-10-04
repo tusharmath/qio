@@ -61,8 +61,7 @@
   "dependencies": {
     "checked-exceptions": "^1.2.0",
     "in-node": "^1.0.0",
-    "standard-data-structures": "^2.0.0",
-    "ts-scheduler": "^8.0.1",
-    "utility-types": "^3.7.0"
+    "standard-data-structures": "^2.9.0",
+    "ts-scheduler": "^8.0.1"
   }
 }

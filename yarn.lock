@@ -6069,10 +6069,10 @@ standard-data-structures@^1.7.1:
   resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-1.7.1.tgz#acba7a3a8ec86e8e3c865ab1a26f3f376df58a8d"
   integrity sha512-LJjWnS88uTZA7qHDqN6H7VsRJwqNcqQvfAbzBdbCaoulUdWrLo0muYxE4vWyynp0QI2IbL7SGsB4yNIBvL3Tug==
 
-standard-data-structures@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-2.0.0.tgz#5bfbe3b4372de31395ceb7bd4ef65f15e0072b7e"
-  integrity sha512-Nu6L2Gn5KCQVhrU38BGHo51QpdvIWei42Hfl8XUo50IiouBRPUp2ifPI8IzzyKVMOGfxIzEqB4pmnAk3+IO50Q==
+standard-data-structures@^2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-2.9.0.tgz#91198d17b9e5d4e2298b11d560bd00dc45a4ac7c"
+  integrity sha512-91j6cuSl8noveFyA+gefsSPTCsIkwd7UGYEgOxmN/uVtk9O8nR7puAMNkYu131dAM2/te9d5iqRigcC5GZmdWQ==
 
 static-extend@^0.1.1:
   version "0.1.2"
@@ -6692,11 +6692,6 @@ util-extend@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/util-extend/-/util-extend-1.0.3.tgz#a7c216d267545169637b3b6edc6ca9119e2ff93f"
   integrity sha1-p8IW0mdUUWljeztu3GypEZ4v+T8=
-
-utility-types@^3.7.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/utility-types/-/utility-types-3.7.0.tgz#51f1c29fa35d4267488345706efcf3f68f2b1933"
-  integrity sha512-mqRJXN7dEArK/NZNJUubjr9kbFFVZcmF/JHDc9jt5O/aYXUVmopHYujDMhLmLil1Bxo2+khe6KAIVvDH9Yc4VA==
 
 uuid@^3.3.2:
   version "3.3.2"
