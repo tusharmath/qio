@@ -17,10 +17,6 @@ export abstract class BaseRuntime implements IRuntime {
     res: (e: A) => void = noop,
     rej: (e: E) => void = noop
   ): ICancellable {
-    return new FiberContext<E, A>(
-      this,
-      this.scheduler,
-      io.asInstruction
-    ).unsafeExecute(rej, res)
+    return FiberContext.of(this.scheduler, io).unsafeExecute(rej, res)
   }
 }

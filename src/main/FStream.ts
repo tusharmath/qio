@@ -1,5 +1,7 @@
 import {EventEmitter} from 'events'
 
+import {IRuntimeEnv} from '../runtimes/IRuntime'
+
 import {FIO, NoEnv, UIO} from './FIO'
 import {Managed, UManaged} from './Managed'
 import {Queue} from './Queue'
@@ -82,7 +84,7 @@ export class FStream<E1, A1, R1> {
   public static fromEventEmitter<A = unknown>(
     ev: EventEmitter,
     name: string
-  ): UIO<UManaged<Stream<A>>> {
+  ): FIO<never, UManaged<Stream<A>>, IRuntimeEnv> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
       const onEvent = (a: A) => RTM.execute(Q.offer(a))
 

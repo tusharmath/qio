@@ -548,7 +548,8 @@ describe('FIO', () => {
       const a = snapshot.mark('A').delay(1000)
       const b = snapshot.mark('B').delay(2000)
 
-      testRuntime().executeSync(a.raceWith(b, FIO.void, FIO.void))
+      const runtime = testRuntime()
+      runtime.executeSync(a.raceWith(b, FIO.void, FIO.void).provide({runtime}))
 
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
@@ -559,8 +560,12 @@ describe('FIO', () => {
       const a = snapshot.mark('A').delay(1000)
       const b = snapshot.mark('B').delay(2000)
 
-      testRuntime().executeSync(
-        a.raceWith(b, FIO.void, FIO.void).and(snapshot.mark('C'))
+      const runtime = testRuntime()
+      runtime.executeSync(
+        a
+          .raceWith(b, FIO.void, FIO.void)
+          .and(snapshot.mark('C'))
+          .provide({runtime})
       )
 
       assert.deepEqual(snapshot.timeline, ['A@1001', 'C@1001', 'B@2001'])
@@ -572,8 +577,13 @@ describe('FIO', () => {
       const a = FIO.of('A').delay(1000)
       const b = FIO.of('B').delay(2000)
 
-      testRuntime().executeSync(
-        a.raceWith(b, () => snapshot.mark('A'), () => snapshot.mark('B'))
+      const runtime = testRuntime()
+      runtime.executeSync(
+        a.raceWith(
+          b,
+          () => snapshot.mark('A').provide({runtime}),
+          () => snapshot.mark('B').provide({runtime})
+        )
       )
 
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
@@ -598,7 +608,8 @@ describe('FIO', () => {
       const a = snapshot.mark('A').delay(1000)
       const b = snapshot.mark('B').delay(2000)
 
-      testRuntime().executeSync(a.race(b))
+      const runtime = testRuntime()
+      runtime.executeSync(a.race(b).provide({runtime}))
 
       assert.deepEqual(snapshot.timeline, ['A@1001'])
     })
@@ -727,7 +738,8 @@ describe('FIO', () => {
 
       const io = FIO.parN(1, [ID.delay(10), ID.delay(20), ID.delay(30)])
 
-      const actual = testRuntime().executeSync(io)
+      const runtime = testRuntime()
+      const actual = runtime.executeSync(io.provide({runtime}))
       const expected = [11, 31, 61]
 
       assert.deepStrictEqual(actual, expected)
@@ -738,7 +750,8 @@ describe('FIO', () => {
 
       const io = FIO.parN(Infinity, [ID.delay(10), ID.delay(20), ID.delay(30)])
 
-      const actual = testRuntime().executeSync(io)
+      const runtime = testRuntime()
+      const actual = runtime.executeSync(io.provide({runtime}))
       const expected = [11, 21, 31]
 
       assert.deepStrictEqual(actual, expected)
@@ -788,7 +801,7 @@ describe('FIO', () => {
     it('should give access to current runtime', () => {
       const runtime = testRuntime()
 
-      const actual = runtime.executeSync(FIO.runtime())
+      const actual = runtime.executeSync(FIO.runtime().provide({runtime}))
 
       assert.strictEqual(actual, runtime as IRuntime)
     })

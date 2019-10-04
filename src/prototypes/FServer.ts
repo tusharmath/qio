@@ -1,6 +1,7 @@
 import * as http from 'http'
 
 import {defaultRuntime, FIO, IRuntime, Managed, UIO} from '../..'
+import {IRuntimeEnv} from '../runtimes/IRuntime'
 
 const Exit = FIO.encase((message: Error) => {
   process.exit(1)
@@ -12,7 +13,7 @@ interface IFIOServerOptions {
 }
 
 class FIOServerBuilder {
-  public get serve(): UIO<never> {
+  public get serve(): FIO<never, never, IRuntimeEnv> {
     return Managed.make(
       FIO.runtime().encase(RTM => new FIOServer(RTM, this.options)),
       server => server.close
@@ -65,6 +66,9 @@ class FIOServer {
   }
 }
 
-defaultRuntime().execute(
-  FIOServerBuilder.of().mount('/greet', () => FIO.of('Hello World!')).serve
+const runtime = defaultRuntime()
+runtime.execute(
+  FIOServerBuilder.of()
+    .mount('/greet', () => FIO.of('Hello World!'))
+    .serve.provide({runtime})
 )

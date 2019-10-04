@@ -9,9 +9,8 @@ import {Either} from 'standard-data-structures'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {Fiber} from '../main/Fiber'
-import {FIO, UIO} from '../main/FIO'
+import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
-import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CB} from './CB'
@@ -23,7 +22,8 @@ const InvalidInstruction = check(
 )
 
 /**
- * @ignore
+ * An actual implementation of [[Fiber]] type.
+ * FiberContext evaluates a FIO expression tree in a stack safe manner.
  */
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
@@ -40,18 +40,20 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   public get resume(): FIO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) => this.unsafeExecute(rej, res))
   }
+  public static of<E, A>(sh: IScheduler, io: IO<E, A>): FiberContext<E, A> {
+    return new FiberContext(sh, io.asInstruction)
+  }
   private readonly cancellationList = new CancellationList()
   private readonly stackA: Instruction[] = []
   private readonly stackE: Array<(e: unknown) => Instruction> = []
   private readonly stackEnv: unknown[] = []
 
-  public constructor(
-    public readonly runtime: IRuntime,
+  private constructor(
     public readonly sh: IScheduler,
-    io: Instruction
+    instruction: Instruction
   ) {
     super()
-    this.stackA.push(io)
+    this.stackA.push(instruction)
   }
 
   public cancel(): void {
@@ -61,7 +63,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
 
   public exit(fio: UIO<void>): UIO<void> {
     return UIO(() => {
-      this.cancellationList.push(new Exit(fio, this.runtime))
+      this.cancellationList.push(new Exit(FiberContext.of(this.sh, fio)))
     })
   }
 
@@ -69,7 +71,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
     const collect = <X>(con: (x: X) => Either<E, A>) => (data: X) => {
       const cancel = () => this.cancellationList.remove(id)
       const id = this.cancellationList.push(
-        this.runtime.execute(cb(con(data)), cancel, cancel)
+        FiberContext.of(this.sh, cb(con(data))).unsafeExecute(cancel, cancel)
       )
     }
 
@@ -157,7 +159,10 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             return
 
           case Tag.Fork:
-            const nContext = new FiberContext(this.runtime, this.sh, j.i0)
+            // Using the `new` operator because FiberContext.of() needs an IO.
+            // Computation should continue in the background.
+            // FIXME: Instead of creating a new FiberContext, the current context should be sent.
+            const nContext = new FiberContext(this.sh, j.i0)
             this.cancellationList.push(nContext)
             data = nContext
             break
@@ -179,10 +184,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             data = j.i0(env)
             break
 
-          case Tag.Runtime:
-            data = this.runtime
-            break
-
           case Tag.Async:
             const id = this.cancellationList.push(
               j.i0(
@@ -196,6 +197,8 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
                   this.stackA.push(FIO.of(val).asInstruction)
                   this.unsafeExecute(rej, res)
                 },
+                // FIXME: Remove passing of scheduler.
+                // Scheduler access can be provided via [[IRuntimeEnv]]
                 this.sh
               )
             )

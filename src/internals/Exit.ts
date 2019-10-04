@@ -1,19 +1,19 @@
-import {ICancellable} from 'ts-scheduler'
-
-import {UIO} from '../main/FIO'
-import {IRuntime} from '../runtimes/IRuntime'
-
 /**
  * Created by tushar on 08/09/19
  */
 
+import {ICancellable} from 'ts-scheduler'
+
+import {FiberContext} from './FiberContext'
+import {noop} from './Noop'
+
+/**
+ * Executes a FiberContext on cancellation.
+ */
 export class Exit implements ICancellable {
-  public constructor(
-    private readonly uio: UIO<void>,
-    private readonly runtime: IRuntime
-  ) {}
+  public constructor(private readonly ctx: FiberContext<never, void>) {}
 
   public cancel(): void {
-    this.runtime.execute(this.uio)
+    this.ctx.unsafeExecute(noop, noop)
   }
 }

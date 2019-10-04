@@ -17,3 +17,10 @@ export interface IRuntime {
   scheduler: IScheduler
   execute<E, A>(io: FIO<E, A>, res?: CB<A>, rej?: CB<E>): ICancellable
 }
+
+/**
+ * Env needed to get access to the current [[IRuntime]].
+ */
+export interface IRuntimeEnv {
+  runtime: IRuntime
+}

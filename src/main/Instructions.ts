@@ -79,9 +79,6 @@ export interface IProvide<R = unknown> {
   i1: R
   tag: Tag.Provide
 }
-export interface IRuntime {
-  tag: Tag.Runtime
-}
 
 /**
  * @ignore
@@ -98,6 +95,5 @@ export type Instruction =
   | INever
   | IProvide
   | IReject
-  | IRuntime
   | ITry
   | ITryM

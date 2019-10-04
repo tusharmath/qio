@@ -7,7 +7,7 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {Id} from '../internals/Id'
-import {IRuntime} from '../runtimes/IRuntime'
+import {IRuntime, IRuntimeEnv} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
 import {Fiber} from './Fiber'
@@ -421,8 +421,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Returns the current runtime in a pure way.
    */
-  public static runtime(): UIO<IRuntime> {
-    return new FIO(Tag.Runtime)
+  public static runtime(): FIO<never, IRuntime, IRuntimeEnv> {
+    return FIO.access((_: IRuntimeEnv) => _.runtime)
   }
 
   /**
