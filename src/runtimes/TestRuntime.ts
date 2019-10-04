@@ -18,16 +18,9 @@ export class TestRuntime extends BaseRuntime {
     this.scheduler = testScheduler(options)
   }
 
-  public executeSync<E, A>(io: IO<E, A>): A | E | undefined {
-    const result = this.exit(io)
-    this.scheduler.run()
-
-    return result.fold<E | A | undefined>(undefined, Id, Id)
-  }
-
   public exit<E, A>(io: FIO<E, A>): Either<E, A> {
     let result: Either<E, A> = Either.neither()
-    this.execute(
+    this.unsafeExecute(
       io,
       _ => (result = Either.right(_)),
       _ => (result = Either.left(_))
@@ -35,6 +28,13 @@ export class TestRuntime extends BaseRuntime {
     this.scheduler.run()
 
     return result
+  }
+
+  public unsafeExecuteSync<E, A>(io: IO<E, A>): A | E | undefined {
+    const result = this.exit(io)
+    this.scheduler.run()
+
+    return result.fold<E | A | undefined>(undefined, Id, Id)
   }
 }
 

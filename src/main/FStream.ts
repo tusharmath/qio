@@ -86,7 +86,7 @@ export class FStream<E1, A1, R1> {
     name: string
   ): FIO<never, UManaged<Stream<A>>, IRuntimeEnv> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
-      const onEvent = (a: A) => RTM.execute(Q.offer(a))
+      const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
       return Managed.make(
         UIO(() => ev.addListener(name, onEvent)).const(Q.asStream),

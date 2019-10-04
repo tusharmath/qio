@@ -18,7 +18,7 @@ import {Snapshot} from './internals/Snapshot'
 describe('FIO', () => {
   describe('of', () => {
     it('should evaluate to a constant value', () => {
-      const actual = testRuntime().executeSync(FIO.of(1000))
+      const actual = testRuntime().unsafeExecuteSync(FIO.of(1000))
       const expected = 1000
       assert.strictEqual(actual, expected)
     })
@@ -26,7 +26,9 @@ describe('FIO', () => {
 
   describe('map', () => {
     it('should map over the value', () => {
-      const actual = testRuntime().executeSync(FIO.of(1000).map(i => i + 1))
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.of(1000).map(i => i + 1)
+      )
       const expected = 1001
       assert.strictEqual(actual, expected)
     })
@@ -34,7 +36,7 @@ describe('FIO', () => {
 
   describe('access', () => {
     it('should access a value and transform', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.access((name: string) => name.length).provide('FIO')
       )
       const expected = 3
@@ -44,7 +46,7 @@ describe('FIO', () => {
 
   describe('reject', () => {
     it('should sequence the operations', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.reject(new Error('foo'))
       ) as Error
       const expected = 'foo'
@@ -54,7 +56,7 @@ describe('FIO', () => {
 
   describe('async', () => {
     it('should evaluate asynchronously', async () => {
-      const actual = await defaultRuntime().executePromise(
+      const actual = await defaultRuntime().unsafeExecutePromise(
         FIO.asyncIO((rej, res) => {
           const id = setTimeout(res, 100, 1000)
 
@@ -68,7 +70,7 @@ describe('FIO', () => {
     it('should be cancellable', () => {
       let cancelled = false
       const runtime = testRuntime()
-      const cancellable = runtime.execute(
+      const cancellable = runtime.unsafeExecute(
         FIO.asyncIO(() => ({cancel: () => (cancelled = true)}))
       )
       runtime.scheduler.runTo(50)
@@ -80,7 +82,7 @@ describe('FIO', () => {
   describe('try', () => {
     it('should call the cb function', () => {
       let i = 1000
-      const actual = testRuntime().executeSync(FIO.try(() => ++i))
+      const actual = testRuntime().unsafeExecuteSync(FIO.try(() => ++i))
       const expected = 1001
       assert.strictEqual(actual, expected)
     })
@@ -88,14 +90,14 @@ describe('FIO', () => {
     it('should be cancellable', () => {
       let actual = 1000
       const runtime = testRuntime()
-      runtime.execute(FIO.try(() => ++actual)).cancel()
+      runtime.unsafeExecute(FIO.try(() => ++actual)).cancel()
       runtime.scheduler.run()
       const expected = 1000
       assert.strictEqual(actual, expected)
     })
 
     it('should capture exceptions', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.try(() => {
           throw new Error('foo')
         }).catch(err => FIO.of(err.message + '-bar'))
@@ -105,7 +107,7 @@ describe('FIO', () => {
     })
 
     it('should fail', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.try(() => {
           throw new Error('foo')
         })
@@ -118,7 +120,7 @@ describe('FIO', () => {
   describe('and', () => {
     it('should chain two IOs', () => {
       const M = new Array<string>()
-      testRuntime().executeSync(
+      testRuntime().unsafeExecuteSync(
         FIO.try(() => M.push('A')).and(FIO.try(() => M.push('B')))
       )
       const actual = M
@@ -129,14 +131,14 @@ describe('FIO', () => {
 
   describe('timeout', () => {
     it('should emit the provided value', () => {
-      const actual = testRuntime().executeSync(FIO.timeout('Happy', 100))
+      const actual = testRuntime().unsafeExecuteSync(FIO.timeout('Happy', 100))
 
       const expected = 'Happy'
       assert.strictEqual(actual, expected)
     })
     it('should emit after the provided duration', () => {
       const runtime = testRuntime()
-      runtime.executeSync(FIO.timeout('Happy', 100))
+      runtime.unsafeExecuteSync(FIO.timeout('Happy', 100))
       const actual = runtime.scheduler.now()
       const expected = 101
       assert.strictEqual(actual, expected)
@@ -147,7 +149,7 @@ describe('FIO', () => {
     it('should delay the io execution', () => {
       let executedAt = -1
       const runtime = testRuntime()
-      runtime.executeSync(
+      runtime.unsafeExecuteSync(
         FIO.try(() => (executedAt = runtime.scheduler.now())).delay(1000)
       )
 
@@ -156,7 +158,7 @@ describe('FIO', () => {
     })
     it('should emit after the provided duration', () => {
       const runtime = testRuntime()
-      runtime.executeSync(FIO.timeout('Happy', 100))
+      runtime.unsafeExecuteSync(FIO.timeout('Happy', 100))
       const actual = runtime.scheduler.now()
       const expected = 101
       assert.strictEqual(actual, expected)
@@ -165,7 +167,7 @@ describe('FIO', () => {
     it('should be cancellable', () => {
       let executed = false
       const runtime = testRuntime()
-      const cancellable = runtime.execute(
+      const cancellable = runtime.unsafeExecute(
         FIO.try(() => (executed = true)).delay(100)
       )
       runtime.scheduler.runTo(50)
@@ -178,7 +180,7 @@ describe('FIO', () => {
 
   describe('encase', () => {
     it('should call the encased function', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.encase((a: number, b: number) => a + b)(1, 1000)
       )
       const expected = 1001
@@ -188,7 +190,7 @@ describe('FIO', () => {
 
   describe('encaseP', () => {
     it('should resolve the encased function', async () => {
-      const actual = await defaultRuntime().executePromise(
+      const actual = await defaultRuntime().unsafeExecutePromise(
         FIO.encaseP((a: number, b: number) => Promise.resolve(a + b))(1, 1000)
       )
       const expected = 1001
@@ -198,7 +200,7 @@ describe('FIO', () => {
 
   describe('never', () => {
     it('should never resolve/reject', () => {
-      const actual = testRuntime().executeSync(FIO.never())
+      const actual = testRuntime().unsafeExecuteSync(FIO.never())
       const expected = undefined
       assert.strictEqual(actual, expected)
     })
@@ -206,7 +208,7 @@ describe('FIO', () => {
 
   describe('catch', () => {
     it('should capture exceptions', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.reject(new Error('Bye')).catch(err => FIO.of(err.message))
       )
       const expected = 'Bye'
@@ -214,7 +216,7 @@ describe('FIO', () => {
     })
 
     it('should capture async exceptions', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.asyncTask((rej, res, sh) => sh.asap(rej, new Error('Bye'))).catch(
           err => FIO.of(err.message)
         )
@@ -224,7 +226,7 @@ describe('FIO', () => {
     })
 
     it('should capture nested async exceptions', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.asyncTask((rej, res, sh) => sh.asap(rej, new Error('A')))
           .catch(err => FIO.reject(new Error(err.message + 'B')))
           .catch(err => FIO.reject(new Error(err.message + 'C')))
@@ -241,7 +243,7 @@ describe('FIO', () => {
     it('should return a memoized IO', () => {
       const counter = new Counter()
       const runtime = testRuntime()
-      runtime.executeSync(counter.inc().once.chain(_ => _.and(_)))
+      runtime.unsafeExecuteSync(counter.inc().once.chain(_ => _.and(_)))
 
       const actual = counter.count
       const expected = 1
@@ -255,16 +257,16 @@ describe('FIO', () => {
     it('should handle concurrent set', () => {
       const counter = new Counter()
       const runtime = testRuntime()
-      const memoized = runtime.executeSync(counter.inc().delay(100).once)
+      const memoized = runtime.unsafeExecuteSync(counter.inc().delay(100).once)
 
       // Schedule first run at 10ms
       runtime.scheduler.runTo(10)
-      runtime.execute(memoized as UIO<number>)
+      runtime.unsafeExecute(memoized as UIO<number>)
 
       // Schedule second run at 50ms
       // Trying to execute the IO the second time before the first one completes
       runtime.scheduler.runTo(50)
-      runtime.execute(memoized as UIO<number>)
+      runtime.unsafeExecute(memoized as UIO<number>)
 
       runtime.scheduler.run()
 
@@ -275,7 +277,7 @@ describe('FIO', () => {
 
     it('should run only once for async ios', () => {
       const counter = new Counter()
-      testRuntime().executeSync(
+      testRuntime().unsafeExecuteSync(
         counter
           .inc()
           .delay(100)
@@ -290,14 +292,14 @@ describe('FIO', () => {
 
   describe('fork', () => {
     it('should return an instance of Fiber', () => {
-      const actual = testRuntime().executeSync(FIO.of(10).fork)
+      const actual = testRuntime().unsafeExecuteSync(FIO.of(10).fork)
       assert.instanceOf(actual, Fiber)
     })
 
     it('should complete immediately', () => {
       const runtime = testRuntime()
       const counter = new Counter()
-      runtime.execute(FIO.timeout('A', 1000).fork.and(counter.inc()))
+      runtime.unsafeExecute(FIO.timeout('A', 1000).fork.and(counter.inc()))
       runtime.scheduler.runTo(10)
       assert.isTrue(counter.increased)
     })
@@ -306,14 +308,16 @@ describe('FIO', () => {
       it('should not run forked fibers', () => {
         const runtime = testRuntime()
         const counter = new Counter()
-        const actual = runtime.executeSync(counter.inc().fork.chain(FIO.never))
+        const actual = runtime.unsafeExecuteSync(
+          counter.inc().fork.chain(FIO.never)
+        )
 
         assert.isUndefined(actual)
         assert.strictEqual(counter.count, 0)
       })
 
       it('should resume with the io', () => {
-        const actual = testRuntime().executeSync(
+        const actual = testRuntime().unsafeExecuteSync(
           FIO.of(10).fork.chain(fiber => fiber.resume)
         )
 
@@ -324,7 +328,7 @@ describe('FIO', () => {
       it('should resume async io', () => {
         const a = new Counter()
         const runtime = testRuntime()
-        const actual = runtime.executeSync(
+        const actual = runtime.unsafeExecuteSync(
           a
             .inc()
             .delay(1000)
@@ -339,7 +343,7 @@ describe('FIO', () => {
       it('should resolve after the IO is completed', () => {
         const counter = new Counter()
         const runtime = testRuntime()
-        runtime.execute(
+        runtime.unsafeExecute(
           FIO.of(10)
             .delay(100)
             .fork.chain(fib => fib.resume.and(counter.inc()))
@@ -355,7 +359,7 @@ describe('FIO', () => {
     describe('abort', () => {
       it('should abort the fiber', () => {
         const counter = new Counter()
-        testRuntime().executeSync(
+        testRuntime().unsafeExecuteSync(
           counter.inc().fork.chain(fiber => fiber.abort)
         )
 
@@ -364,7 +368,7 @@ describe('FIO', () => {
 
       it('should abort a throwing fiber', () => {
         const counter = new Counter()
-        testRuntime().executeSync(
+        testRuntime().unsafeExecuteSync(
           FIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
             .fork.chain(fiber => fiber.abort)
@@ -378,7 +382,7 @@ describe('FIO', () => {
       it('should asynchronously execute the IO', () => {
         const a = new Counter()
         const runtime = testRuntime()
-        runtime.execute(
+        runtime.unsafeExecute(
           a
             .inc()
             .delay(1000)
@@ -392,7 +396,7 @@ describe('FIO', () => {
       it('should complete without waiting', () => {
         const a = new Counter()
         const runtime = testRuntime()
-        runtime.execute(
+        runtime.unsafeExecute(
           FIO.timeout(0, 1000).fork.chain(fiber =>
             fiber.resumeAsync(FIO.void).and(a.inc())
           )
@@ -403,7 +407,7 @@ describe('FIO', () => {
       })
 
       it('should return void', () => {
-        const actual = testRuntime().executeSync(
+        const actual = testRuntime().unsafeExecuteSync(
           FIO.void().fork.chain(fiber => fiber.resumeAsync(FIO.void))
         )
 
@@ -411,7 +415,7 @@ describe('FIO', () => {
       })
 
       it('should call with  Either.success', () => {
-        const actual = testRuntime().executeSync(
+        const actual = testRuntime().unsafeExecuteSync(
           Await.of<never, Either<never, string>>().chain(await =>
             FIO.of('Hi').fork.chain(fiber =>
               fiber
@@ -426,7 +430,7 @@ describe('FIO', () => {
       })
 
       it('should call with  Either.failure', () => {
-        const actual = testRuntime().executeSync(
+        const actual = testRuntime().unsafeExecuteSync(
           Await.of<never, Either<string, never>>().chain(await =>
             FIO.reject('Hi').fork.chain(fiber =>
               fiber
@@ -443,7 +447,7 @@ describe('FIO', () => {
       it('should cancel async execution', () => {
         const counter = new Counter()
         const runtime = testRuntime()
-        runtime.execute(
+        runtime.unsafeExecute(
           FIO.of(0).fork.chain(_ =>
             _.resumeAsync(() => counter.inc().delay(1000).void).and(
               _.abort.delay(300)
@@ -462,7 +466,7 @@ describe('FIO', () => {
 
   describe('zipWith', () => {
     it('should sequentially combine two FIO', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.of(10).zipWith(FIO.of(20), (a, b) => a + b)
       )
       const expected = 30
@@ -472,7 +476,7 @@ describe('FIO', () => {
 
   describe('zipWithPar', () => {
     it('should combine two IO', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.of(10).zipWithPar(FIO.of(20), (a, b) => [a, b])
       )
 
@@ -483,7 +487,7 @@ describe('FIO', () => {
       const left = FIO.of(10).delay(1500)
       const right = FIO.of(20).delay(1000)
       const runtime = testRuntime()
-      runtime.executeSync(left.zipWithPar(right, (a, b) => [a, b]))
+      runtime.unsafeExecuteSync(left.zipWithPar(right, (a, b) => [a, b]))
 
       const actual = runtime.scheduler.now()
       assert.strictEqual(actual, 1501)
@@ -494,7 +498,7 @@ describe('FIO', () => {
       const right = FIO.of(20).delay(1000)
       const runtime = testRuntime()
 
-      const actual = runtime.executeSync(
+      const actual = runtime.unsafeExecuteSync(
         left.zipWithPar(right, (a, b) => [a, b])
       )
       assert.deepEqual(actual, [10, 20])
@@ -507,7 +511,7 @@ describe('FIO', () => {
         const right = counter.inc().delay(1000)
         const runtime = testRuntime()
 
-        runtime.executeSync(left.zipWithPar(right, (a, b) => [a, b]))
+        runtime.unsafeExecuteSync(left.zipWithPar(right, (a, b) => [a, b]))
         assert.deepEqual(counter.count, 0)
       })
 
@@ -516,7 +520,7 @@ describe('FIO', () => {
         const L = FIO.reject(new Error(ERROR_MESSAGE)).delay(100)
         const R = FIO.of(10).delay(200)
 
-        const actual = testRuntime().executeSync(
+        const actual = testRuntime().unsafeExecuteSync(
           L.zipWithPar(R, (l, r) => 0)
         ) as Error
 
@@ -531,7 +535,7 @@ describe('FIO', () => {
         const A = FIO.of(10).delay(100)
         const B = FIO.reject(new Error(ERROR_MESSAGE)).delay(50)
 
-        const actual = testRuntime().executeSync(
+        const actual = testRuntime().unsafeExecuteSync(
           A.zipWithPar(B, (l, r) => 0)
         ) as Error
 
@@ -549,7 +553,9 @@ describe('FIO', () => {
       const b = snapshot.mark('B').delay(2000)
 
       const runtime = testRuntime()
-      runtime.executeSync(a.raceWith(b, FIO.void, FIO.void).provide({runtime}))
+      runtime.unsafeExecuteSync(
+        a.raceWith(b, FIO.void, FIO.void).provide({runtime})
+      )
 
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
@@ -561,7 +567,7 @@ describe('FIO', () => {
       const b = snapshot.mark('B').delay(2000)
 
       const runtime = testRuntime()
-      runtime.executeSync(
+      runtime.unsafeExecuteSync(
         a
           .raceWith(b, FIO.void, FIO.void)
           .and(snapshot.mark('C'))
@@ -578,7 +584,7 @@ describe('FIO', () => {
       const b = FIO.of('B').delay(2000)
 
       const runtime = testRuntime()
-      runtime.executeSync(
+      runtime.unsafeExecuteSync(
         a.raceWith(
           b,
           () => snapshot.mark('A').provide({runtime}),
@@ -593,7 +599,7 @@ describe('FIO', () => {
       const a = FIO.of('A').delay(1000)
       const b = FIO.of('B').delay(2000)
 
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         a.raceWith(b, () => FIO.of(10), () => FIO.of(20))
       )
 
@@ -609,7 +615,7 @@ describe('FIO', () => {
       const b = snapshot.mark('B').delay(2000)
 
       const runtime = testRuntime()
-      runtime.executeSync(a.race(b).provide({runtime}))
+      runtime.unsafeExecuteSync(a.race(b).provide({runtime}))
 
       assert.deepEqual(snapshot.timeline, ['A@1001'])
     })
@@ -618,7 +624,7 @@ describe('FIO', () => {
       const a = FIO.of('A')
       const b = FIO.of('B').delay(1000)
 
-      const actual = testRuntime().executeSync(a.race(b))
+      const actual = testRuntime().unsafeExecuteSync(a.race(b))
 
       assert.strictEqual(actual, 'A')
     })
@@ -626,7 +632,7 @@ describe('FIO', () => {
 
   describe('provide', () => {
     it('should maintain env for multiple access', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.access((_: string) => _)
           .chain(s => FIO.access((_: string) => _ + '-' + s))
           .provide('FIO')
@@ -637,7 +643,7 @@ describe('FIO', () => {
     })
 
     it('should handle nested provides', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.access((_: string) => _.length)
           .chain(a => FIO.access((b: number) => b + a).provide(100))
           .provide('FIO')
@@ -648,7 +654,7 @@ describe('FIO', () => {
     })
 
     it('should handle multiple accesses', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.access((_: string) => _.length)
           .fork.chain(_ => _.resume)
           .provide('ABCD')
@@ -659,7 +665,7 @@ describe('FIO', () => {
     })
 
     it('should remove from env stack (memory leak)', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.access((_: string) => _.length)
           .provide('FIO')
           .fork.chain(f =>
@@ -675,7 +681,7 @@ describe('FIO', () => {
     })
 
     it('should provide env to async functions', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.access((_: number) => _ + 1)
           .delay(1000)
           .provide(10)
@@ -694,7 +700,7 @@ describe('FIO', () => {
         FIO.of(30).delay(1000)
       ])
 
-      const actual = testRuntime().executeSync(io)
+      const actual = testRuntime().unsafeExecuteSync(io)
       const expected = [10, 20, 30]
 
       assert.deepStrictEqual(actual, expected)
@@ -703,7 +709,7 @@ describe('FIO', () => {
     it('should maintain order', () => {
       const io = FIO.par([FIO.of(10), FIO.of(20), FIO.of(30)])
 
-      const actual = testRuntime().executeSync(io)
+      const actual = testRuntime().unsafeExecuteSync(io)
       const expected = [10, 20, 30]
 
       assert.deepStrictEqual(actual, expected)
@@ -718,7 +724,7 @@ describe('FIO', () => {
         FIO.of(30).delay(1000)
       ])
 
-      const actual = testRuntime().executeSync(io)
+      const actual = testRuntime().unsafeExecuteSync(io)
       const expected = [10, 20, 30]
 
       assert.deepStrictEqual(actual, expected)
@@ -727,7 +733,7 @@ describe('FIO', () => {
     it('should maintain order', () => {
       const io = FIO.parN(3, [FIO.of(10), FIO.of(20), FIO.of(30)])
 
-      const actual = testRuntime().executeSync(io)
+      const actual = testRuntime().unsafeExecuteSync(io)
       const expected = [10, 20, 30]
 
       assert.deepStrictEqual(actual, expected)
@@ -739,7 +745,7 @@ describe('FIO', () => {
       const io = FIO.parN(1, [ID.delay(10), ID.delay(20), ID.delay(30)])
 
       const runtime = testRuntime()
-      const actual = runtime.executeSync(io.provide({runtime}))
+      const actual = runtime.unsafeExecuteSync(io.provide({runtime}))
       const expected = [11, 31, 61]
 
       assert.deepStrictEqual(actual, expected)
@@ -751,7 +757,7 @@ describe('FIO', () => {
       const io = FIO.parN(Infinity, [ID.delay(10), ID.delay(20), ID.delay(30)])
 
       const runtime = testRuntime()
-      const actual = runtime.executeSync(io.provide({runtime}))
+      const actual = runtime.unsafeExecuteSync(io.provide({runtime}))
       const expected = [11, 21, 31]
 
       assert.deepStrictEqual(actual, expected)
@@ -759,7 +765,7 @@ describe('FIO', () => {
 
     it('should return empty array', () => {
       const io = FIO.parN(Infinity, [])
-      const actual = testRuntime().executeSync(io)
+      const actual = testRuntime().unsafeExecuteSync(io)
 
       assert.deepStrictEqual(actual, [])
     })
@@ -767,7 +773,7 @@ describe('FIO', () => {
 
   describe('node', () => {
     it('should capture exceptions from Node API', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.node(cb => cb(new Error('Failed')))
       )
       const expected = new Error('Failed')
@@ -776,7 +782,7 @@ describe('FIO', () => {
     })
 
     it('should capture sync exceptions', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         FIO.node(cb => {
           throw new Error('Failed')
         })
@@ -787,7 +793,7 @@ describe('FIO', () => {
     })
 
     it('should capture success results', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         // tslint:disable-next-line: no-null-keyword
         FIO.node<number>(cb => cb(null, 1000))
       )
@@ -801,7 +807,7 @@ describe('FIO', () => {
     it('should give access to current runtime', () => {
       const runtime = testRuntime()
 
-      const actual = runtime.executeSync(FIO.runtime().provide({runtime}))
+      const actual = runtime.unsafeExecuteSync(FIO.runtime().provide({runtime}))
 
       assert.strictEqual(actual, runtime as IRuntime)
     })

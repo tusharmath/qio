@@ -19,7 +19,7 @@ describe('Managed', () => {
 
   it('should release resource on exception', () => {
     const r = Resource()
-    testRuntime().executeSync(
+    testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() => FIO.reject('Failure'))
     )
     assert.strictEqual(r.count, 0)
@@ -27,7 +27,7 @@ describe('Managed', () => {
 
   it('should return the cause of the failure', () => {
     const r = Resource()
-    const actual = testRuntime().executeSync(
+    const actual = testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() =>
         FIO.reject<'Failure'>('Failure')
       )
@@ -37,7 +37,7 @@ describe('Managed', () => {
 
   it('should release resource on completion', () => {
     const r = Resource()
-    testRuntime().executeSync(
+    testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() => FIO.void())
     )
     assert.strictEqual(r.count, 0)
@@ -45,7 +45,9 @@ describe('Managed', () => {
 
   it('should acquire the resource', () => {
     const r = Resource()
-    testRuntime().executeSync(Managed.make(r.acquire, FIO.void).use(FIO.void))
+    testRuntime().unsafeExecuteSync(
+      Managed.make(r.acquire, FIO.void).use(FIO.void)
+    )
 
     assert.strictEqual(r.count, 1)
   })
@@ -54,7 +56,7 @@ describe('Managed', () => {
     const r = Resource()
     const runtime = testRuntime()
 
-    runtime.execute(
+    runtime.unsafeExecute(
       Managed.make(r.acquire, r.release)
         .use(() => FIO.timeout(0, 1000))
         .fork.chain(F => F.resumeAsync(FIO.void).and(F.abort.delay(500)))

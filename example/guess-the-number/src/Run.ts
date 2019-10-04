@@ -14,7 +14,7 @@ import {getStrLn} from './GetStrLn'
 import {program} from './Program'
 import {putStrLn} from './PutStrLn'
 
-defaultRuntime().execute(
+defaultRuntime().unsafeExecute(
   program.provide({
     math: Math,
     tty: {

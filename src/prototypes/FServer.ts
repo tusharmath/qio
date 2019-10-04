@@ -53,7 +53,7 @@ class FIOServer {
     res: http.ServerResponse
   ) => {
     if (req.url !== undefined && this.options.mounted.hasOwnProperty(req.url)) {
-      this.RTM.execute(
+      this.RTM.unsafeExecute(
         this.options.mounted[req.url](req).encase(chunk => res.end(chunk))
       )
     }
@@ -67,7 +67,7 @@ class FIOServer {
 }
 
 const runtime = defaultRuntime()
-runtime.execute(
+runtime.unsafeExecute(
   FIOServerBuilder.of()
     .mount('/greet', () => FIO.of('Hello World!'))
     .serve.provide({runtime})

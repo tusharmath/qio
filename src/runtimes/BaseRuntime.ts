@@ -12,7 +12,7 @@ import {IRuntime} from './IRuntime'
 export abstract class BaseRuntime implements IRuntime {
   public abstract readonly scheduler: IScheduler
 
-  public execute<E, A>(
+  public unsafeExecute<E, A>(
     io: FIO<E, A>,
     res: (e: A) => void = noop,
     rej: (e: E) => void = noop

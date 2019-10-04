@@ -9,21 +9,21 @@ import {Counter} from './internals/Counter'
 describe('Await', () => {
   describe('of', () => {
     it('should create an instance of Await', () => {
-      const actual = testRuntime().executeSync(Await.of())
+      const actual = testRuntime().unsafeExecuteSync(Await.of())
       assert.instanceOf(actual, Await)
     })
   })
 
   describe('set', () => {
     it('should return true', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await => await.set(FIO.of('Hi')))
       )
       assert.ok(actual)
     })
     it('should set only once', () => {
       const runtime = testRuntime()
-      const actual = runtime.executeSync(
+      const actual = runtime.unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await
             .set(FIO.of('Hi'))
@@ -36,7 +36,7 @@ describe('Await', () => {
 
     it('should evaluate the IO only once', () => {
       const counter = new Counter()
-      testRuntime().executeSync(
+      testRuntime().unsafeExecuteSync(
         Await.of<never, number>().chain(await =>
           await
             .set(counter.inc())
@@ -62,14 +62,14 @@ describe('Await', () => {
           const counter = new Counter()
 
           // Create an IO that takes a second to run
-          runtime.execute(AWT.set(counter.inc().delay(1000)))
+          runtime.unsafeExecute(AWT.set(counter.inc().delay(1000)))
 
           // Run till 500 (half time for the original IO
           runtime.scheduler.runTo(500)
 
           // Again try setting another IO
           // This time the IO shouldn't execute
-          runtime.execute(AWT.set(counter.inc()))
+          runtime.unsafeExecute(AWT.set(counter.inc()))
 
           // Run the IO till the very end
           runtime.scheduler.run()
@@ -84,7 +84,7 @@ describe('Await', () => {
 
     it('should return false if its not set', () => {
       const runtime = testRuntime()
-      const actual = runtime.executeSync(
+      const actual = runtime.unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await.set(FIO.of('Hi')).and(await.set(FIO.of('Bye')))
         )
@@ -95,7 +95,7 @@ describe('Await', () => {
 
   describe('get', () => {
     it('should return the IO value', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await.set(FIO.of('Hi')).and(await.get)
         )
@@ -104,7 +104,7 @@ describe('Await', () => {
     })
 
     it('should not resolve unless set', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await => await.get)
       )
       assert.isUndefined(actual)
@@ -112,13 +112,12 @@ describe('Await', () => {
 
     it('should not return', () => {
       const runtime = testRuntime()
-      const await = runtime.executeSync(Await.of<never, string>()) as Await<
-        never,
-        string
-      >
+      const await = runtime.unsafeExecuteSync(
+        Await.of<never, string>()
+      ) as Await<never, string>
       let actual: string | undefined
-      runtime.execute(await.get, r => (actual = r))
-      runtime.execute(await.set(FIO.timeout('Hey', 1000)))
+      runtime.unsafeExecute(await.get, r => (actual = r))
+      runtime.unsafeExecute(await.set(FIO.timeout('Hey', 1000)))
 
       assert.isUndefined(actual)
       runtime.scheduler.run()
@@ -128,7 +127,7 @@ describe('Await', () => {
 
   describe('isSet', () => {
     it('should return false initially', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await => await.isSet)
       )
 
@@ -136,7 +135,7 @@ describe('Await', () => {
     })
 
     it('should return true after setting', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, number>().chain(await =>
           await.set(FIO.of(100)).and(await.isSet)
         )
