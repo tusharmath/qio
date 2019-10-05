@@ -8,6 +8,7 @@ import {check} from 'checked-exceptions'
 import {Either} from 'standard-data-structures'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
+import {Await} from '../main/Await'
 import {Fiber} from '../main/Fiber'
 import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
@@ -24,6 +25,8 @@ const InvalidInstruction = check(
 /**
  * An actual implementation of [[Fiber]] type.
  * FiberContext evaluates a FIO expression tree in a stack safe manner.
+ * It internally uses a job scheduler to maintain a queue of all the tasks that need to be performed.
+ * The job queue is represented by [[IScheduler]] and can be shared across multiple instances of [[FiberContext]].
  */
 export class FiberContext<E = never, A = never> extends Fiber<E, A>
   implements ICancellable {
@@ -34,15 +37,21 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
     return UIO(() => this.cancel())
   }
 
-  /**
-   * Safe implementation of unsafeExecute().
-   */
-  public get resume(): FIO<E, A> {
+  private get execute(): FIO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) => this.unsafeExecute(rej, res))
   }
+
+  /**
+   * Runs the fiber context once and caches the result.
+   */
+  public get join(): FIO<E, A> {
+    return this.await.set(this.execute).and(this.await.get)
+  }
+
   public static of<E, A>(sh: IScheduler, io: IO<E, A>): FiberContext<E, A> {
     return new FiberContext(sh, io.asInstruction)
   }
+  private readonly await = new Await<E, A>()
   private readonly cancellationList = new CancellationList()
   private readonly stackA: Instruction[] = []
   private readonly stackEnv: unknown[] = []
@@ -131,8 +140,8 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             }
             const cause = j.i0 as E
             const handler = this.stackA.pop()
-            if (handler !== undefined) {
-              this.stackA.push((handler as ICapture).i0(cause))
+            if (handler !== undefined && handler.tag === Tag.Capture) {
+              this.stackA.push(handler.i0(cause))
             } else {
               return rej(cause)
             }
@@ -170,7 +179,9 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
           case Tag.Fork:
             // Using the `new` operator because FiberContext.of() needs an IO.
             // Computation should continue in the background.
-            // FIXME: Instead of creating a new FiberContext, the current context should be sent.
+            // A new context is created so that computation from that instruction can happen separately.
+            // and then join back into the current context.
+            // Using the same stack will corrupt it completely.
             const nContext = new FiberContext(this.sh, j.i0)
             this.cancellationList.push(nContext)
             data = nContext

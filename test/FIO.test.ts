@@ -78,7 +78,7 @@ describe('FIO', () => {
       )
       const expected = 33
       assert.strictEqual(actual, expected)
-  })
+    })
   })
 
   describe('async', () => {
@@ -365,12 +365,12 @@ describe('FIO', () => {
       assert.isTrue(counter.increased)
     })
 
-    describe('resume', () => {
+    describe('join', () => {
       it('should not run forked fibers', () => {
         const runtime = testRuntime()
         const counter = new Counter()
         const actual = runtime.unsafeExecuteSync(
-          counter.inc().fork.chain(FIO.never)
+          counter.inc().fork.chain(FIO.void)
         )
 
         assert.isUndefined(actual)
@@ -380,7 +380,7 @@ describe('FIO', () => {
       it('should resume with the io', () => {
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(
-          FIO.of(10).fork.chain(fiber => fiber.resume)
+          FIO.of(10).fork.chain(fiber => fiber.join)
         )
 
         const expected = 10
@@ -394,7 +394,7 @@ describe('FIO', () => {
           a
             .inc()
             .delay(1000)
-            .fork.chain(fiber => fiber.resume.delay(100))
+            .fork.chain(fiber => fiber.join.delay(100))
             .provide({runtime})
         )
 
@@ -409,7 +409,7 @@ describe('FIO', () => {
         runtime.unsafeExecute(
           FIO.of(10)
             .delay(100)
-            .fork.chain(fib => fib.resume.and(counter.inc()))
+            .fork.chain(fib => fib.join.and(counter.inc()))
             .provide({runtime})
         )
         runtime.scheduler.runTo(50)
@@ -417,6 +417,19 @@ describe('FIO', () => {
         const actual = counter.count
         const expected = 0
         assert.deepEqual(actual, expected)
+      })
+      context('when called multiple times', () => {
+        it('should execute only once', () => {
+          const counter = new Counter()
+          const runtime = testRuntime()
+          const io = counter
+            .inc(10)
+            .fork.chain(F => FIO.par([F.join, F.join, F.join]))
+
+          const actual = runtime.unsafeExecuteSync(io)
+          const expected = [10, 10, 10]
+          assert.deepStrictEqual(actual, expected)
+        })
       })
     })
 
@@ -746,7 +759,7 @@ describe('FIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         FIO.access((_: string) => _.length)
-          .fork.chain(_ => _.resume)
+          .fork.chain(_ => _.join)
           .provide('ABCD')
       )
 
@@ -760,7 +773,7 @@ describe('FIO', () => {
         FIO.access((_: string) => _.length)
           .provide('FIO')
           .fork.chain(f =>
-            f.resume.map(
+            f.join.map(
               // FIXME: remove type-casting and use a proper test.
               () => ((f as unknown) as {[k: string]: []}).stackEnv.length
             )
