@@ -187,6 +187,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * @ignore
    */
+  public static capture<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
+    return new FIO(Tag.Capture, cb)
+  }
+
+  /**
+   * @ignore
+   */
   public static catch<E1, A1, R1, E2, A2, R2>(
     fa: FIO<E1, A1, R1>,
     aFe: (e: E1) => FIO<E2, A2, R2>

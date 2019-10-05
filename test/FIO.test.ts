@@ -54,6 +54,31 @@ describe('FIO', () => {
       const expected = 'foo'
       assert.deepEqual(actual.message, expected)
     })
+
+    it('should skip pre catch', () => {
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.reject(10)
+          .map(_ => _ * 2)
+          .catch(_ => FIO.of(_ * 3))
+      )
+      const expected = 30
+      assert.strictEqual(actual, expected)
+    })
+
+    it('should pass post catch', () => {
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.reject(10)
+          .map(_ => _ * 2)
+          .map(_ => _ * 2)
+          .map(_ => _ * 2)
+          .catch(_ => FIO.of(_ * 3))
+          .map(_ => _ + 1)
+          .map(_ => _ + 1)
+          .map(_ => _ + 1)
+      )
+      const expected = 33
+      assert.strictEqual(actual, expected)
+  })
   })
 
   describe('async', () => {

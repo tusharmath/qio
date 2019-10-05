@@ -7,8 +7,9 @@ import {CB} from '../internals/CB'
  */
 export enum Tag {
   Access,
-  Call,
   Async,
+  Call,
+  Capture,
   Catch,
   Chain,
   Constant,
@@ -80,13 +81,19 @@ export interface IProvide<R = unknown> {
   tag: Tag.Provide
 }
 
+export interface ICapture<A = unknown> {
+  tag: Tag.Capture
+  i0(i: A): Instruction
+}
+
 /**
  * @ignore
  */
 export type Instruction =
   | IAccess
-  | ICall
   | IAsync
+  | ICall
+  | ICapture
   | ICatch
   | IChain
   | IConstant

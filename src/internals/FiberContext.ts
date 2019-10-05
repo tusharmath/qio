@@ -45,7 +45,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   }
   private readonly cancellationList = new CancellationList()
   private readonly stackA: Instruction[] = []
-  private readonly stackE: Array<(e: unknown) => Instruction> = []
   private readonly stackEnv: unknown[] = []
 
   private constructor(
@@ -102,6 +101,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
     return this
   }
 
+  // tslint:disable-next-line: cyclomatic-complexity
   private evaluate(rej: CB<E>, res: CB<A>): void {
     let data: unknown
 
@@ -123,10 +123,16 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             break
 
           case Tag.Reject:
+            while (
+              this.stackA.length > 0 &&
+              this.stackA[this.stackA.length - 1].tag !== Tag.Capture
+            ) {
+              this.stackA.pop()
+            }
             const cause = j.i0 as E
-            const handler = this.stackE.pop()
+            const handler = this.stackA.pop()
             if (handler !== undefined) {
-              this.stackA.push(handler(cause))
+              this.stackA.push((handler as ICapture).i0(cause))
             } else {
               return rej(cause)
             }
@@ -145,13 +151,16 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             this.stackA.push(j.i0)
             break
 
+          case Tag.Capture:
+            break
+
           case Tag.Chain:
             this.stackA.push(FIO.resumeM(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
           case Tag.Catch:
-            this.stackE.push(j.i1)
+            this.stackA.push(FIO.capture(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
