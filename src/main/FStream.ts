@@ -116,7 +116,7 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream that emits after every given duration of time.
    */
-  public static interval(duration: number): FStream<never, void, NoEnv> {
+  public static interval(duration: number): FStream<never, void, IRuntimeEnv> {
     return FStream.produce(FIO.timeout(void 0, duration))
   }
 

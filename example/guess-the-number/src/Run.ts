@@ -14,11 +14,13 @@ import {getStrLn} from './GetStrLn'
 import {program} from './Program'
 import {putStrLn} from './PutStrLn'
 
-defaultRuntime().unsafeExecute(
+const runtime = defaultRuntime()
+runtime.unsafeExecute(
   program.provide({
     math: Math,
+    runtime,
     tty: {
-      getStrLn: FIO.pipeEnv(getStrLn, {process, readline}),
+      getStrLn: FIO.pipeEnv(getStrLn, {process, readline, runtime}),
       putStrLn: FIO.pipeEnv(putStrLn, {console})
     }
   })

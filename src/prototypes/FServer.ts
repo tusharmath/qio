@@ -59,9 +59,9 @@ class FIOServer {
     }
   }
 
-  public get close(): UIO<void> {
-    return FIO.asyncIO<Error, void>((rej, res, sh) =>
-      sh.asap(() => this.server.close(E => (E !== undefined ? rej(E) : res())))
+  public get close(): FIO<never, void, IRuntimeEnv> {
+    return FIO.uninterruptibleIO<Error, void>((rej, res) => () =>
+      this.server.close(E => (E !== undefined ? rej(E) : res()))
     ).catch(Exit)
   }
 }

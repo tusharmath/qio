@@ -56,9 +56,9 @@ describe('Queue', () => {
     it('should wait if the queue is empty', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Queue.unbounded<string>().chain(Q =>
-          Q.take.par(Q.offer('A').delay(1000)).map(_ => _[0])
-        )
+        Queue.unbounded<string>()
+          .chain(Q => Q.take.par(Q.offer('A').delay(1000)).map(_ => _[0]))
+          .provide({runtime})
       )
 
       const expected = 'A'
@@ -68,9 +68,9 @@ describe('Queue', () => {
     it('should empty the queue once resolved', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Queue.unbounded<string>().chain(Q =>
-          Q.take.par(Q.offer('A').delay(1000)).and(Q.length)
-        )
+        Queue.unbounded<string>()
+          .chain(Q => Q.take.par(Q.offer('A').delay(1000)).and(Q.length))
+          .provide({runtime})
       )
 
       assert.strictEqual(actual, 0)

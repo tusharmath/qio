@@ -1,4 +1,4 @@
-import {ICancellable, IScheduler} from 'ts-scheduler'
+import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 
@@ -61,7 +61,7 @@ export interface ICatch<E = unknown> {
 }
 export interface IAsync<E = unknown, A = unknown> {
   tag: Tag.Async
-  i0(rej: CB<E>, res: CB<A>, sh: IScheduler): ICancellable
+  i0(rej: CB<E>, res: CB<A>): ICancellable
 }
 export interface INever {
   tag: Tag.Never

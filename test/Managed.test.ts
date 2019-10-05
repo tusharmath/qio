@@ -56,10 +56,11 @@ describe('Managed', () => {
     const r = Resource()
     const runtime = testRuntime()
 
-    runtime.unsafeExecute(
+    runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
         .use(() => FIO.timeout(0, 1000))
         .fork.chain(F => F.resumeAsync(FIO.void).and(F.abort.delay(500)))
+        .provide({runtime})
     )
 
     runtime.scheduler.runTo(550)

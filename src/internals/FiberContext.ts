@@ -196,10 +196,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
                   this.cancellationList.remove(id)
                   this.stackA.push(FIO.of(val).asInstruction)
                   this.unsafeExecute(rej, res)
-                },
-                // FIXME: Remove passing of scheduler.
-                // Scheduler access can be provided via [[IRuntimeEnv]]
-                this.sh
+                }
               )
             )
 

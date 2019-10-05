@@ -62,7 +62,14 @@ describe('Await', () => {
           const counter = new Counter()
 
           // Create an IO that takes a second to run
-          runtime.unsafeExecute(AWT.set(counter.inc().delay(1000)))
+          runtime.unsafeExecuteSync(
+            AWT.set(
+              counter
+                .inc()
+                .delay(1000)
+                .provide({runtime})
+            )
+          )
 
           // Run till 500 (half time for the original IO
           runtime.scheduler.runTo(500)
@@ -117,7 +124,9 @@ describe('Await', () => {
       ) as Await<never, string>
       let actual: string | undefined
       runtime.unsafeExecute(await.get, r => (actual = r))
-      runtime.unsafeExecute(await.set(FIO.timeout('Hey', 1000)))
+      runtime.unsafeExecute(
+        await.set(FIO.timeout('Hey', 1000).provide({runtime}))
+      )
 
       assert.isUndefined(actual)
       runtime.scheduler.run()

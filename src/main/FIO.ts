@@ -3,7 +3,7 @@
  */
 
 import {Either, List} from 'standard-data-structures'
-import {ICancellable, IScheduler} from 'ts-scheduler'
+import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {Id} from '../internals/Id'
@@ -18,10 +18,6 @@ const EitherRef = <E = never, A = never>() =>
   Ref.of<Either<E, A>>(Either.neither())
 
 export type NoEnv = unknown
-
-const UnCancellable: ICancellable = {
-  cancel(): void {}
-}
 
 /**
  * IO represents a [[FIO]] that doesn't need any environment to execute
@@ -135,7 +131,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static accessP<A1, R1>(
     cb: (R: R1) => Promise<A1>
-  ): FIO<Error, A1, R1> {
+  ): FIO<Error, A1, R1 & IRuntimeEnv> {
     return FIO.env<R1>().chain(FIO.encaseP(cb))
   }
 
@@ -154,7 +150,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Using `never` will give users compile time error always while using.
    */
   public static asyncIO<E1 = never, A1 = never>(
-    cb: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => ICancellable
+    cb: (rej: CB<E1>, res: CB<A1>) => ICancellable
   ): IO<E1, A1> {
     return new FIO(Tag.Async, cb)
   }
@@ -163,7 +159,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Creates a new async [[Task]]
    */
   public static asyncTask<A1 = never>(
-    cb: (rej: CB<Error>, res: CB<A1>, sh: IScheduler) => ICancellable
+    cb: (rej: CB<Error>, res: CB<A1>) => ICancellable
   ): Task<A1> {
     return FIO.asyncIO(cb)
   }
@@ -172,9 +168,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Creates a [[UIO]] using a callback
    */
   public static asyncUIO<A1 = never>(
-    cb: (res: CB<A1>, sh: IScheduler) => ICancellable
+    cb: (res: CB<A1>) => ICancellable
   ): UIO<A1> {
-    return FIO.asyncIO((rej, res, sh) => cb(res, sh))
+    return FIO.asyncIO((rej, res) => cb(res))
   }
 
   /**
@@ -199,10 +195,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a [[UIO]] using a callback function
+   * Creates a [[FIO]] using a callback function.
    */
-  public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
-    return FIO.asyncUIO<A1>((res, sh) => sh.asap(fn, res))
+  public static cb<A1>(
+    fn: (cb: (A1: A1) => void) => void
+  ): FIO<never, A1, IRuntimeEnv> {
+    return FIO.runtime().chain(RTM =>
+      FIO.asyncUIO<A1>(res => RTM.scheduler.asap(fn, res))
+    )
   }
 
   /**
@@ -229,14 +229,16 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static encaseP<A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
-  ): (...t: T) => IO<Error, A> {
+  ): (...t: T) => FIO<Error, A, IRuntimeEnv> {
     return (...t) =>
-      FIO.asyncIO((rej, res, sh) =>
-        sh.asap(() => {
-          void cb(...t)
-            .then(res)
-            .catch(rej)
-        })
+      FIO.runtime().chain(RTM =>
+        FIO.asyncIO((rej, res) =>
+          RTM.scheduler.asap(() => {
+            void cb(...t)
+              .then(res)
+              .catch(rej)
+          })
+        )
       )
   }
 
@@ -332,16 +334,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * ```
    */
   public static node<A = never>(
-    fn: (cb: NodeJSCallback<A>, sh: IScheduler) => void
-  ): IO<NodeJS.ErrnoException, A | undefined> {
-    return FIO.asyncIO<NodeJS.ErrnoException, A>((rej, res, sh) =>
-      sh.asap(() => {
-        try {
-          fn((err, result) => (err === null ? res(result as A) : rej(err)), sh)
-        } catch (e) {
-          rej(e as NodeJS.ErrnoException)
-        }
-      })
+    fn: (cb: NodeJSCallback<A>) => void
+  ): FIO<NodeJS.ErrnoException, A | undefined, IRuntimeEnv> {
+    return FIO.runtime().chain(RTM =>
+      FIO.asyncIO<NodeJS.ErrnoException, A>((rej, res) =>
+        RTM.scheduler.asap(() => {
+          try {
+            fn((err, result) => (err === null ? res(result as A) : rej(err)))
+          } catch (e) {
+            rej(e as NodeJS.ErrnoException)
+          }
+        })
+      )
     )
   }
 
@@ -443,8 +447,13 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Resolves with the provided value after the given time
    */
-  public static timeout<A>(value: A, duration: number): UIO<A> {
-    return FIO.asyncIO((rej, res, sh) => sh.delay(res, duration, value))
+  public static timeout<A>(
+    value: A,
+    duration: number
+  ): FIO<never, A, IRuntimeEnv> {
+    return FIO.runtime().chain(RTM =>
+      FIO.asyncIO((rej, res) => RTM.scheduler.delay(res, duration, value))
+    )
   }
 
   /**
@@ -457,21 +466,20 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Tries to run an function that returns a promise.
    */
-  public static tryP<A>(cb: () => Promise<A>): Task<A> {
+  public static tryP<A>(cb: () => Promise<A>): TaskR<A, IRuntimeEnv> {
     return FIO.encaseP(cb)()
   }
 
   /**
-   * Creates an IO that does can not be interrupted in between.
+   * Creates an IO from an async/callback based function ie. non cancellable.
+   * It tries to make it cancellable by delaying the function call.
    */
   public static uninterruptibleIO<E1 = never, A1 = never>(
-    fn: (rej: CB<E1>, res: CB<A1>, sh: IScheduler) => unknown
-  ): IO<E1, A1> {
-    return FIO.asyncIO<E1, A1>((rej, res, sh) => {
-      fn(rej, res, sh)
-
-      return UnCancellable
-    })
+    fn: (rej: CB<E1>, res: CB<A1>) => unknown
+  ): FIO<E1, A1, IRuntimeEnv> {
+    return FIO.runtime().chain(RTM =>
+      FIO.asyncIO<E1, A1>((rej, res) => RTM.scheduler.asap(fn, rej, res))
+    )
   }
 
   /**
@@ -549,7 +557,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Delays the execution of the [[FIO]] by the provided time.
    */
-  public delay(duration: number): FIO<E1, A1, R1> {
+  public delay(duration: number): FIO<E1, A1, R1 & IRuntimeEnv> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
