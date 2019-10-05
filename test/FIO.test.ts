@@ -912,4 +912,21 @@ describe('FIO', () => {
       assert.strictEqual(actual, runtime as IRuntime)
     })
   })
+
+  describe('asEither', () => {
+    context('when succeeds', () => {
+      it('should return a Right', () => {
+        const actual = testRuntime().unsafeExecuteSync(FIO.of(10).asEither)
+        const expected = Either.right(10)
+        assert.deepStrictEqual(actual, expected)
+      })
+    })
+    context('when fails', () => {
+      it('should return a Left', () => {
+        const actual = testRuntime().unsafeExecuteSync(FIO.reject(100).asEither)
+        const expected = Either.left(100)
+        assert.deepStrictEqual(actual, expected)
+      })
+    })
+  })
 })
