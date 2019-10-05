@@ -25,6 +25,8 @@
     "max-classes-per-file": false,
     "restrict-plus-operands": false,
     "invalid-void": false,
+    // Some tslint bug that's converting numbers to string
+    "strict-string-expressions": false,
     "strict-comparisons": [
       true,
       {
