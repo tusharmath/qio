@@ -549,6 +549,31 @@ describe('FIO', () => {
         runtime.scheduler.runTo(1100)
         assert.strictEqual(counter.count, 0)
       })
+      context('when called multiple times', () => {
+        it.skip('should execute only once', () => {
+          const counter0 = new Counter()
+          const counter1 = new Counter()
+          const counter2 = new Counter()
+
+          const counter = new Counter()
+          const runtime = testRuntime()
+          const io = counter
+            .inc(1)
+
+            .fork.chain(F =>
+              FIO.par([
+                F.resumeAsync(_ => counter0.inc(_.getRightOrElse(0)).void),
+                F.resumeAsync(_ => counter1.inc(_.getRightOrElse(0)).void),
+                F.resumeAsync(_ => counter2.inc(_.getRightOrElse(0)).void)
+              ])
+            )
+
+          runtime.unsafeExecuteSync(io.provide({runtime}))
+          const actual = [counter0.count, counter1.count, counter2.count]
+          const expected = [10, 10, 10]
+          assert.deepStrictEqual(actual, expected)
+        })
+      })
     })
   })
 
