@@ -3,11 +3,11 @@
  */
 
 import {Either} from 'standard-data-structures'
-import {ICancellable, IScheduler} from 'ts-scheduler'
+import {IScheduler} from 'ts-scheduler'
 
 import {Await} from '../main/Await'
-import {Fiber} from '../main/Fiber'
 import {FIO, IO, UIO} from '../main/FIO'
+import {IFiber} from '../main/IFiber'
 import {Instruction} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
@@ -21,8 +21,7 @@ import {unsafeEvaluate} from './UnsafeEvaluate'
  * It internally uses a job scheduler to maintain a queue of all the tasks that need to be performed.
  * The job queue is represented by [[IScheduler]] and can be shared across multiple instances of [[FiberContext]].
  */
-export class FiberContext<E = never, A = never> extends Fiber<E, A>
-  implements ICancellable {
+export class FiberContext<E = never, A = never> implements IFiber<E, A> {
   /**
    * Pure implementation of cancel()
    */
@@ -50,7 +49,6 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
   private readonly stackEnv: unknown[] = []
 
   public constructor(public readonly sh: IScheduler, instruction: Instruction) {
-    super()
     this.stackA.push(instruction)
   }
 

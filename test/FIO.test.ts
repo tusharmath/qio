@@ -5,8 +5,8 @@
 import {assert} from 'chai'
 import {Either} from 'standard-data-structures'
 
+import {FiberContext} from '../src/internals/FiberContext'
 import {Await} from '../src/main/Await'
-import {Fiber} from '../src/main/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {IRuntime} from '../src/runtimes/IRuntime'
@@ -350,7 +350,7 @@ describe('FIO', () => {
     it('should return an instance of Fiber', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(FIO.of(10).fork)
-      assert.instanceOf(actual, Fiber)
+      assert.instanceOf(actual, FiberContext)
     })
 
     it('should complete immediately', () => {

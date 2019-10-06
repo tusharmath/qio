@@ -10,7 +10,7 @@ import {Id} from '../internals/Id'
 import {IRuntime, IRuntimeEnv} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
-import {Fiber} from './Fiber'
+import {IFiber} from './IFiber'
 import {Instruction, Tag} from './Instructions'
 import {Ref} from './Ref'
 
@@ -82,7 +82,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Returns a [[Fiber]]. The returned fiber is always in a paused state.
    */
-  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
+  public get fork(): FIO<never, IFiber<E1, A1>, R1> {
     return FIO.env<R1>().chain(env => FIO.fork(this.provide(env)))
   }
 
@@ -292,7 +292,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Creates a new [[Fiber]] to run the given [[IO]].
    */
-  public static fork<E1, A1>(io: IO<E1, A1>): UIO<Fiber<E1, A1>> {
+  public static fork<E1, A1>(io: IO<E1, A1>): UIO<IFiber<E1, A1>> {
     return new FIO(Tag.Fork, io)
   }
 
@@ -646,8 +646,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public raceWith<E2, A2, R2, C1, C2>(
     that: FIO<E2, A2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => UIO<C1>,
-    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => UIO<C2>
+    cb1: (exit: Either<E1, A1>, fiber: IFiber<E2, A2>) => UIO<C1>,
+    cb2: (exit: Either<E2, A2>, fiber: IFiber<E1, A1>) => UIO<C2>
   ): FIO<never, C1 | C2, R1 & R2> {
     const Done = Await.of<never, C1 | C2>()
 
@@ -730,7 +730,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
       // Cancels the provided fiber on exit status.
       const coordinate = <EE1, AA1, EE2, AA2>(
         exit: Either<EE1, AA1>,
-        fiber: Fiber<EE2, AA2>,
+        fiber: IFiber<EE2, AA2>,
         cache: Ref<Either<EE1, AA1>>
       ): UIO<boolean> => {
         // Saves the result into a [[Ref]] instance
