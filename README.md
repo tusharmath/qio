@@ -237,7 +237,7 @@ Calling the cancelling callback.
 ```diff
   import {FIO, defaultRuntime} from 'fearless-io'
   const delayIO = FIO.timeout('Hello World', 1000)
-  const cancel = delayIO.fork(defaultRuntime)
+  const cancel = defaultRuntime().execute(delayIO)
 + cancel()
 ```
 
