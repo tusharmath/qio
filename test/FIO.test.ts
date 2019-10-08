@@ -106,11 +106,11 @@ describe('FIO', () => {
 
   describe('try', () => {
     it('should call the cb function', () => {
-      let i = 1000
+      const cb = spy()
       const runtime = testRuntime()
-      const actual = runtime.unsafeExecuteSync(FIO.try(() => ++i))
-      const expected = 1001
-      assert.strictEqual(actual, expected)
+      runtime.unsafeExecuteSync(FIO.try(cb))
+
+      cb.should.be.called()
     })
 
     it('should be cancellable', () => {
