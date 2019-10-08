@@ -584,8 +584,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public par<E2, A2, R2>(
     that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, {0: A1; 1: A2}, R1 & R2> {
-    return this.zipWithPar(that, (a, b) => ({0: a, 1: b}))
+  ): FIO<E1 | E2, [A1, A2], R1 & R2> {
+    return this.zipWithPar(that, (a, b) => [a, b])
   }
 
   /**
@@ -665,8 +665,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public zip<E2, A2, R2>(
     that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, {0: A1; 1: A2}, R1 & R2> {
-    return this.zipWith(that, (a, b) => ({0: a, 1: b}))
+  ): FIO<E1 | E2, [A1, A2], R1 & R2> {
+    return this.zipWith(that, (a, b) => [a, b])
   }
 
   /**
