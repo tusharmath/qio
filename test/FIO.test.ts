@@ -286,6 +286,17 @@ describe('FIO', () => {
       const expected = 'ABCDE'
       assert.strictEqual(actual, expected)
     })
+
+    it('should let value pass thru', () => {
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.of('input')
+          .catch(x => FIO.of(['catch', x]))
+          .chain(x => FIO.reject(['chain', x]))
+      )
+      const expected = ['chain', 'input']
+
+      assert.deepStrictEqual(actual, expected)
+    })
   })
 
   describe('once', () => {
