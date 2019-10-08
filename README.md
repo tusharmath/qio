@@ -105,30 +105,6 @@ Execution of FIO happens through a [Runtime].
 + defaultRuntime().unsafeExecute(GreetIO())
 ```
 
-The `execute` method can take two optional params viz. `onError` and `onSuccess`.
-
-```diff
-  import {FIO} from 'fearless-io'
-  import {FIO, defaultRuntime} from 'fearless-io'
-
-  const Greet = () => console.log('Hello World!')
-  const GreetIO = FIO.encase(Greet)
-
-+ // Callback to handle errors
-+ onError = (err: Error) => {
-+   console.log(err.message)
-+   process.exit(1)
-+ }
-+
-+ // Callback to handle success
-+ onSuccess = () => {
-+   process.exit(0)
-+ }
-
-- defaultRuntime().unsafeExecute(GreetIO())
-+ defaultRuntime().unsafeExecute(GreetIO(), onSuccess, onError)
-```
-
 # Serial Execution
 
 Since these data structures don't specify how or when they are going to be executed, writing them one after the other in procedural style will not guarantee any order of execution, for Eg —
@@ -171,9 +147,9 @@ In the above code either `foo` or `bar` can be printed first depending on intern
 
 # Parallel Execution
 
-Similar to the `and` operator, the [zip] operator runs the two IOs in parallel. For eg.
+Similar to the `and` operator, the [par] operator runs the two IOs in parallel. For eg.
 
-[zip]: https://tusharmath.com/fearless-io/classes/fio.html#zip
+[par]: https://tusharmath.com/fearless-io/classes/fio.html#par
 
 Create the two IOs
 
@@ -184,25 +160,26 @@ Create the two IOs
 +  const bar = FIO.timeout('bar', 1500)
 ```
 
-Combine them using [zip]
+Combine them using [par]
 
 ```diff
 - import {FIO} from 'fearless-io'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
-+ const fooBar = foo.zip(bar)
++ const fooBar = foo.par(bar)
 ```
 
 Execute the created IO
 
 ```diff
-  import {FIO} from 'fearless-io'
-  import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from 'fearless-io'
++ import {FIO, defaultRuntime} from 'fearless-io'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
   const fooBar = foo.zip(bar)
+
 + defaultRuntime().unsafeExecute(fooBar)
 ```
 
