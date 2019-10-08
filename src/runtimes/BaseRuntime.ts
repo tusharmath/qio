@@ -3,6 +3,7 @@
  */
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
+import {CBOption} from '../internals/CBOption'
 import {FiberContext} from '../internals/FiberContext'
 import {noop} from '../internals/Noop'
 import {FIO} from '../main/FIO'
@@ -14,9 +15,11 @@ export abstract class BaseRuntime implements IRuntime {
 
   public unsafeExecute<E, A>(
     io: FIO<E, A>,
-    res: (e: A) => void = noop,
-    rej: (e: E) => void = noop
+    cb: CBOption<E, A> = noop
   ): ICancellable {
-    return FiberContext.of(this.scheduler, io).unsafeExecute(rej, res)
+    const context = FiberContext.of(this.scheduler, io)
+    context.unsafeObserve(cb)
+
+    return context
   }
 }

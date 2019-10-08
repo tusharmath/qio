@@ -13,6 +13,7 @@ import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
+import {CBOption} from './CBOption'
 
 const InvalidInstruction = check(
   'InvalidInstruction',
@@ -24,8 +25,6 @@ enum FiberStatus {
   COMPLETED,
   CANCELLED
 }
-
-export type CBOption<E, A> = (E: Option<Either<E, A>>) => void
 
 /**
  * FiberContext actually evaluates the FIO expression.
