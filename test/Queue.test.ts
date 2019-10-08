@@ -3,7 +3,7 @@ import * as assert from 'assert'
 import {Queue} from '../src/main/Queue'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
-describe.skip('Queue', () => {
+describe('Queue', () => {
   describe('unbounded', () => {
     it('should create an instance of Queue', () => {
       const actual = testRuntime().unsafeExecuteSync(Queue.unbounded<number>())

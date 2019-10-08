@@ -482,7 +482,7 @@ describe('FIO', () => {
     })
   })
 
-  describe.skip('zipWithPar', () => {
+  describe('zipWithPar', () => {
     it('should combine two IO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
@@ -544,7 +544,7 @@ describe('FIO', () => {
     })
 
     context('when right rejects', () => {
-      it.skip('should return cause', () => {
+      it('should return cause', () => {
         const ERROR_MESSAGE = 'FAIL'
         const A = FIO.of(10).delay(100)
         const B = FIO.reject(new Error(ERROR_MESSAGE)).delay(50)
@@ -746,7 +746,7 @@ describe('FIO', () => {
     })
   })
 
-  describe.skip('par', () => {
+  describe('par', () => {
     it('should run the IO in parallel', () => {
       const io = FIO.par([
         FIO.of(10).delay(1000),
@@ -772,7 +772,7 @@ describe('FIO', () => {
     })
   })
 
-  describe.skip('parN', () => {
+  describe('parN', () => {
     it('should run the IO in parallel', () => {
       const io = FIO.parN(3, [
         FIO.of(10).delay(1000),

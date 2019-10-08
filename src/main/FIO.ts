@@ -696,6 +696,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     that: FIO<E2, A2, R2>,
     c: (e1: A1, e2: A2) => C
   ): FIO<E1 | E2, C, R1 & R2> {
-    throw new Error('TODO: Not Implemented' + this)
+    return this.raceWith(
+      that,
+      (E, F) =>
+        E.biMap(
+          cause => F.abort.and(FIO.reject(cause)),
+          a1 => F.join.map(a2 => c(a1, a2))
+        ).reduce<IO<E1 | E2, C>>(Id, Id),
+      (E, F) =>
+        E.biMap(
+          cause => F.abort.and(FIO.reject(cause)),
+          a2 => F.join.map(a1 => c(a1, a2))
+        ).reduce<IO<E1 | E2, C>>(Id, Id)
+    )
   }
 }
