@@ -6,9 +6,11 @@ import {IRuntimeEnv} from '../../src/runtimes/IRuntime'
 
 export class Snapshot {
   public readonly timeline = new Array<string>()
-  public mark(value: string): FIO<never, void, IRuntimeEnv> {
+  public mark(value: string): FIO<never, string, IRuntimeEnv> {
     return FIO.runtime().chain(RTM =>
-      UIO(() => void this.timeline.push(value + '@' + RTM.scheduler.now()))
+      UIO(
+        () => void this.timeline.push(value + '@' + RTM.scheduler.now())
+      ).const(value)
     )
   }
 }
