@@ -1,4 +1,4 @@
-import {DoublyLinkedList, Either} from 'standard-data-structures'
+import {DoublyLinkedList, Either, Option} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
@@ -17,10 +17,14 @@ export class Await<E, A> {
   }
   private flag = false
   private readonly Q = DoublyLinkedList.of<[CB<E>, CB<A>]>()
-  private result: Either<E, A> = Either.neither()
+  private result: Option<Either<E, A>> = Option.none()
 
-  public get get(): FIO<E, A> {
-    return FIO.flattenM(() => this.result.fold(this.wait, FIO.reject, FIO.of))
+  public get get(): IO<E, A> {
+    return FIO.flattenM(() =>
+      this.result
+        .map(S => S.reduce<IO<E, A>>(FIO.reject, XX => FIO.of(XX)))
+        .getOrElse(this.wait)
+    )
   }
 
   public get isSet(): UIO<boolean> {
@@ -35,10 +39,10 @@ export class Await<E, A> {
       this.flag = true
 
       return io.asEither.encase(either => {
-        this.result = either
+        this.result = Option.some(either)
         while (this.Q.length > 0) {
           const cb = this.Q.shift() as [CB<E>, CB<A>]
-          this.result.fold(undefined, ...cb)
+          either.reduce(...cb)
         }
 
         return true
@@ -46,7 +50,7 @@ export class Await<E, A> {
     })
   }
 
-  private get wait(): FIO<E, A> {
+  private get wait(): IO<E, A> {
     return FIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 
