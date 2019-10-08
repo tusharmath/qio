@@ -10,6 +10,7 @@ import {
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {FIO, IO, UIO} from '../main/FIO'
+import {IFiber} from '../main/IFiber'
 import {Instruction, Tag} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
@@ -32,7 +33,7 @@ enum FiberStatus {
  * As soon as its created it starts to evaluate the FIO expression.
  * It provides public APIs to [[Fiber]] to consume.
  */
-export class FiberContext<E, A> implements ICancellable {
+export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
   public get abort(): UIO<void> {
     return UIO(() => this.cancel())
   }
@@ -92,14 +93,8 @@ export class FiberContext<E, A> implements ICancellable {
     this.observers.map(_ => _(Option.none()))
   }
 
-  public exit(p: UIO<void>): UIO<void> {
-    return UIO(() => this.release(p))
-  }
-
-  public release(p: UIO<void>): void {
-    this.cancellationList.push({
-      cancel: () => FiberContext.evaluateWith(p, this.scheduler)
-    })
+  public release(p: UIO<void>): UIO<void> {
+    return UIO(() => this.unsafeRelease(p))
   }
 
   public unsafeObserve(cb: CBOption<E, A>): ICancellable {
@@ -242,5 +237,11 @@ export class FiberContext<E, A> implements ICancellable {
         this.stackA.push(FIO.reject(e).asInstruction)
       }
     }
+  }
+
+  private unsafeRelease(p: UIO<void>): void {
+    this.cancellationList.push({
+      cancel: () => FiberContext.evaluateWith(p, this.scheduler)
+    })
   }
 }

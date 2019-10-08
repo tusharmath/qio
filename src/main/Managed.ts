@@ -104,7 +104,7 @@ export class Managed<E1, A1, R1> {
         .chain(fn)
         .catch(e12 => R.release.and(FIO.reject(e12)))
         .chain(a2 => R.release.const(a2))
-        .fork.chain(F => F.exit(R.release.provide(ENV)).and(F.join))
+        .fork.chain(F => F.release(R.release.provide(ENV)).and(F.join))
     )
   }
 

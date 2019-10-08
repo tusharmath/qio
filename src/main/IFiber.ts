@@ -13,5 +13,5 @@ export interface IFiber<E, A> {
   abort: UIO<void>
   await: UIO<Option<Either<E, A>>>
   join: FIO<E, A>
-  exit(p: UIO<void>): UIO<void>
+  release(p: UIO<void>): UIO<void>
 }
