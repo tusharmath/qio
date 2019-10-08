@@ -1,4 +1,4 @@
-import {Either} from 'standard-data-structures'
+import {Either, Option} from 'standard-data-structures'
 
 import {FIO, UIO} from './FIO'
 
@@ -11,7 +11,7 @@ import {FIO, UIO} from './FIO'
  */
 export interface IFiber<E, A> {
   abort: UIO<void>
+  await: UIO<Option<Either<E, A>>>
   join: FIO<E, A>
   exit(p: UIO<void>): UIO<void>
-  resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void>
 }

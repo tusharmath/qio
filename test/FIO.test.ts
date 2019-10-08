@@ -2,11 +2,10 @@
  * Created by tushar on 2019-05-24
  */
 
-import {assert} from 'chai'
+import {assert, spy} from 'chai'
 import {Either} from 'standard-data-structures'
 
 import {FiberContext} from '../src/internals/FiberContext'
-import {Await} from '../src/main/Await'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {IRuntime} from '../src/runtimes/IRuntime'
@@ -96,14 +95,12 @@ describe('FIO', () => {
     })
 
     it('should be cancellable', () => {
-      let cancelled = false
+      const cancel = spy()
       const runtime = testRuntime()
-      const cancellable = runtime.unsafeExecute(
-        FIO.asyncIO(() => ({cancel: () => (cancelled = true)}))
-      )
-      runtime.scheduler.runTo(50)
+      const cancellable = runtime.unsafeExecute(FIO.asyncIO(() => ({cancel})))
+      runtime.scheduler.run()
       cancellable.cancel()
-      assert.ok(cancelled, 'Cancelled should be true')
+      cancel.should.be.called()
     })
   })
 
@@ -377,7 +374,7 @@ describe('FIO', () => {
     })
 
     describe('join', () => {
-      it('should not run forked fibers', () => {
+      it('should auto run forked fibers', () => {
         const runtime = testRuntime()
         const counter = new Counter()
         const actual = runtime.unsafeExecuteSync(
@@ -385,7 +382,7 @@ describe('FIO', () => {
         )
 
         assert.isUndefined(actual)
-        assert.strictEqual(counter.count, 0)
+        assert.strictEqual(counter.count, 1)
       })
 
       it('should resume with the io', () => {
@@ -398,7 +395,7 @@ describe('FIO', () => {
         assert.strictEqual(actual, expected)
       })
 
-      it('should resume async io', () => {
+      it.skip('should resume async io immediately', () => {
         const a = new Counter()
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(
@@ -411,7 +408,7 @@ describe('FIO', () => {
 
         const expected = 1
         assert.strictEqual(actual, expected)
-        assert.strictEqual(runtime.scheduler.now(), 1101)
+        assert.strictEqual(runtime.scheduler.now(), 1001)
       })
 
       it('should resolve after the IO is completed', () => {
@@ -429,13 +426,18 @@ describe('FIO', () => {
         const expected = 0
         assert.deepEqual(actual, expected)
       })
+
       context('when called multiple times', () => {
         it('should execute only once', () => {
           const counter = new Counter()
           const runtime = testRuntime()
           const io = counter
             .inc(10)
-            .fork.chain(F => FIO.par([F.join, F.join, F.join]))
+            .fork.chain(F =>
+              F.join
+                .zipWith(F.join, (a, b): number[] => [a, b])
+                .zipWith(F.join, (a, b): number[] => [...a, b])
+            )
 
           const actual = runtime.unsafeExecuteSync(io)
           const expected = [10, 10, 10]
@@ -467,125 +469,6 @@ describe('FIO', () => {
         assert.strictEqual(counter.count, 0)
       })
     })
-
-    describe('resumeAsync', () => {
-      it('should asynchronously execute the IO', () => {
-        const a = new Counter()
-        const runtime = testRuntime()
-        runtime.unsafeExecute(
-          a
-            .inc()
-            .delay(1000)
-            .fork.chain(fiber => fiber.resumeAsync(FIO.void))
-            .provide({runtime})
-        )
-        runtime.scheduler.runTo(50)
-
-        assert.strictEqual(a.count, 0)
-      })
-
-      it('should complete without waiting', () => {
-        const a = new Counter()
-        const runtime = testRuntime()
-        runtime.unsafeExecute(
-          FIO.timeout(0, 1000)
-            .fork.chain(fiber => fiber.resumeAsync(FIO.void).and(a.inc()))
-            .provide({runtime})
-        )
-        runtime.scheduler.runTo(10)
-
-        assert.strictEqual(a.count, 1)
-      })
-
-      it('should return void', () => {
-        const runtime = testRuntime()
-        const actual = runtime.unsafeExecuteSync(
-          FIO.void().fork.chain(fiber => fiber.resumeAsync(FIO.void))
-        )
-
-        assert.isUndefined(actual)
-      })
-
-      it('should call with  Either.success', () => {
-        const runtime = testRuntime()
-        const actual = runtime.unsafeExecuteSync(
-          Await.of<never, Either<never, string>>().chain(await =>
-            FIO.of('Hi').fork.chain(fiber =>
-              fiber
-                .resumeAsync(status => await.set(FIO.of(status)).void)
-                .and(await.get)
-            )
-          )
-        )
-
-        const expected = Either.right('Hi')
-        assert.deepEqual(actual, expected)
-      })
-
-      it('should call with  Either.failure', () => {
-        const runtime = testRuntime()
-        const actual = runtime.unsafeExecuteSync(
-          Await.of<never, Either<string, never>>().chain(await =>
-            FIO.reject('Hi').fork.chain(fiber =>
-              fiber
-                .resumeAsync(status => await.set(FIO.of(status)).void)
-                .and(await.get)
-            )
-          )
-        )
-
-        const expected = Either.left('Hi')
-        assert.deepEqual(actual, expected)
-      })
-
-      it('should cancel async execution', () => {
-        const counter = new Counter()
-        const runtime = testRuntime()
-        runtime.unsafeExecute(
-          FIO.of(0)
-            .fork.chain(_ =>
-              _.resumeAsync(() =>
-                counter
-                  .inc()
-                  .delay(1000)
-                  .void.provide({runtime})
-              ).and(_.abort.delay(300))
-            )
-            .provide({runtime})
-        )
-        runtime.scheduler.runTo(50)
-        assert.strictEqual(counter.count, 0)
-        runtime.scheduler.runTo(200)
-        assert.strictEqual(counter.count, 0)
-        runtime.scheduler.runTo(1100)
-        assert.strictEqual(counter.count, 0)
-      })
-      context('when called multiple times', () => {
-        it.skip('should execute only once', () => {
-          const counter0 = new Counter()
-          const counter1 = new Counter()
-          const counter2 = new Counter()
-
-          const counter = new Counter()
-          const runtime = testRuntime()
-          const io = counter
-            .inc(1)
-
-            .fork.chain(F =>
-              FIO.par([
-                F.resumeAsync(_ => counter0.inc(_.getRightOrElse(0)).void),
-                F.resumeAsync(_ => counter1.inc(_.getRightOrElse(0)).void),
-                F.resumeAsync(_ => counter2.inc(_.getRightOrElse(0)).void)
-              ])
-            )
-
-          runtime.unsafeExecuteSync(io.provide({runtime}))
-          const actual = [counter0.count, counter1.count, counter2.count]
-          const expected = [10, 10, 10]
-          assert.deepStrictEqual(actual, expected)
-        })
-      })
-    })
   })
 
   describe('zipWith', () => {
@@ -599,7 +482,7 @@ describe('FIO', () => {
     })
   })
 
-  describe('zipWithPar', () => {
+  describe.skip('zipWithPar', () => {
     it('should combine two IO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
@@ -692,41 +575,71 @@ describe('FIO', () => {
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
 
-    it('should complete when either of them', () => {
+    it('should complete when both complete', () => {
       const snapshot = new Snapshot()
 
-      const a = snapshot.mark('A').delay(1000)
-      const b = snapshot.mark('B').delay(2000)
-
+      const F1 = snapshot.mark('A').delay(1000)
+      const F2 = snapshot.mark('B').delay(2000)
       const runtime = testRuntime()
+
       runtime.unsafeExecuteSync(
-        a
-          .raceWith(b, FIO.void, FIO.void)
+        F1.raceWith(F2, FIO.void, FIO.void)
           .and(snapshot.mark('C'))
           .provide({runtime})
       )
 
-      assert.deepEqual(snapshot.timeline, ['A@1001', 'C@1001', 'B@2001'])
+      assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001', 'C@2001'])
+    })
+
+    context('when slower is cancelled', () => {
+      it('should complete with the fastest', () => {
+        const snapshot = new Snapshot()
+
+        const F1 = snapshot.mark('A').delay(1000)
+        const F2 = snapshot.mark('B').delay(2000)
+        const runtime = testRuntime()
+
+        runtime.unsafeExecuteSync(
+          F1.raceWith(
+            F2,
+            (E, F) => F.abort.and(FIO.fromEither(E)),
+            (E, F) => F.abort.and(FIO.fromEither(E))
+          )
+            .and(snapshot.mark('C'))
+            .provide({runtime})
+        )
+
+        assert.deepEqual(snapshot.timeline, ['A@1001', 'C@1001'])
+      })
+
+      it('should return the fastest produced value', () => {
+        const F1 = FIO.of('A')
+        const F2 = FIO.of('B')
+        const runtime = testRuntime()
+
+        const actual = runtime.unsafeExecuteSync(
+          F1.raceWith(
+            F2,
+            (E, F) => F.abort.and(FIO.fromEither(E)),
+            (E, F) => F.abort.and(FIO.fromEither(E))
+          )
+        )
+
+        assert.strictEqual(actual, 'A')
+      })
     })
 
     it('should call both cbs', () => {
-      const snapshot = new Snapshot()
-
       const a = FIO.of('A').delay(1000)
       const b = FIO.of('B').delay(2000)
+      const cbA = spy(FIO.void)
+      const cbB = spy(FIO.void)
 
       const runtime = testRuntime()
-      runtime.unsafeExecuteSync(
-        a
-          .raceWith(
-            b,
-            () => snapshot.mark('A').provide({runtime}),
-            () => snapshot.mark('B').provide({runtime})
-          )
-          .provide({runtime})
-      )
+      runtime.unsafeExecuteSync(a.raceWith(b, cbA, cbB).provide({runtime}))
 
-      assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
+      cbA.should.be.called()
+      cbB.should.be.called()
     })
 
     it('should return the output', () => {
@@ -833,7 +746,7 @@ describe('FIO', () => {
     })
   })
 
-  describe('par', () => {
+  describe.skip('par', () => {
     it('should run the IO in parallel', () => {
       const io = FIO.par([
         FIO.of(10).delay(1000),
@@ -859,7 +772,7 @@ describe('FIO', () => {
     })
   })
 
-  describe('parN', () => {
+  describe.skip('parN', () => {
     it('should run the IO in parallel', () => {
       const io = FIO.parN(3, [
         FIO.of(10).delay(1000),

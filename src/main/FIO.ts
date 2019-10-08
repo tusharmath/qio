@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-20
  */
 
-import {Either, List} from 'standard-data-structures'
+import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
@@ -12,10 +12,6 @@ import {IRuntime, IRuntimeEnv} from '../runtimes/IRuntime'
 import {Await} from './Await'
 import {IFiber} from './IFiber'
 import {Instruction, Tag} from './Instructions'
-import {Ref} from './Ref'
-
-const EitherRef = <E = never, A = never>() =>
-  Ref.of<Either<E, A>>(Either.neither())
 
 export type NoEnv = unknown
 
@@ -93,14 +89,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     return this.env.chain(env =>
       Await.of<E1, A1>().map(AWT => AWT.set(this.provide(env)).and(AWT.get))
     )
-  }
-
-  /**
-   * Runs the [[FIO]] instance asynchronously and ignores the result.
-   */
-
-  public get resume(): FIO<never, void, R1> {
-    return this.resumeAsync(FIO.void)
   }
 
   /**
@@ -644,32 +632,23 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
    */
-  public raceWith<E2, A2, R2, C1, C2>(
+  public raceWith<E2, A2, R2, E3, A3, E4, A4>(
     that: FIO<E2, A2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: IFiber<E2, A2>) => UIO<C1>,
-    cb2: (exit: Either<E2, A2>, fiber: IFiber<E1, A1>) => UIO<C2>
-  ): FIO<never, C1 | C2, R1 & R2> {
-    const Done = Await.of<never, C1 | C2>()
+    cb1: (exit: Either<E1, A1>, fiber: IFiber<E2, A2>) => IO<E3, A3>,
+    cb2: (exit: Either<E2, A2>, fiber: IFiber<E1, A1>) => IO<E4, A4>
+  ): FIO<E3 | E4, A3 | A4, R1 & R2> {
+    return Await.of<E3 | E4, A3 | A4>().chain(done =>
+      this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
+        const resume1 = f1.await.chain(exit =>
+          Option.isSome(exit) ? done.set(cb1(exit.value, f2)) : FIO.of(true)
+        )
+        const resume2 = f2.await.chain(exit =>
+          Option.isSome(exit) ? done.set(cb2(exit.value, f1)) : FIO.of(true)
+        )
 
-    return Done.chain(done => {
-      const complete = (c: C1 | C2) => done.set(FIO.of(c)).void
-
-      return this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
-        const resume1 = f1.resumeAsync(exit => cb1(exit, f2).chain(complete))
-        const resume2 = f2.resumeAsync(exit => cb2(exit, f1).chain(complete))
-
-        return resume2.and(resume1).and(done.get)
+        return resume1.and(resume2).and(done.get)
       })
-    })
-  }
-
-  /**
-   * Runs the [[FIO]] instance asynchronously and calls the callback passed with an [[Either]] object.
-   */
-  public resumeAsync(
-    cb: (exit: Either<E1, A1>) => UIO<void>
-  ): FIO<never, void, R1> {
-    return this.fork.chain(_ => _.resumeAsync(cb))
+    )
   }
 
   /**
@@ -717,70 +696,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     that: FIO<E2, A2, R2>,
     c: (e1: A1, e2: A2) => C
   ): FIO<E1 | E2, C, R1 & R2> {
-    // Create Caches
-    const Caches = EitherRef<E1, A1>().zip(EitherRef<E2, A2>())
-
-    // Maintains the count of results produced
-    const Counter = Ref.of(0)
-
-    // Is set only when the IO is completed.
-    const Done = Await.of<never, boolean>()
-
-    return Counter.zip(Done).chain(({0: count, 1: isDone}) => {
-      // Cancels the provided fiber on exit status.
-      const coordinate = <EE1, AA1, EE2, AA2>(
-        exit: Either<EE1, AA1>,
-        fiber: IFiber<EE2, AA2>,
-        cache: Ref<Either<EE1, AA1>>
-      ): UIO<boolean> => {
-        // Saves the result into a [[Ref]] instance
-        const cacheResult = cache.set(exit)
-
-        // Abort the other Fiber
-        const abortFiber = fiber.abort
-
-        // Set the result
-        const markAsDone = isDone.set(FIO.of(true))
-
-        // Increases the result count by 1
-        const incCount = count.update(_ => _ + 1)
-
-        return cacheResult.and(
-          exit.fold(
-            FIO.of(false),
-
-            // On failure —
-            // 1. Increase count
-            // 2. Abort fiber
-            // 3. Set final result
-            () => abortFiber.and(markAsDone),
-
-            // On success  —
-            // 1. Increase count
-            // 2. if count === 2 : Set final result
-            () =>
-              incCount.and(
-                count.read.chain(value =>
-                  value === 2 ? markAsDone : FIO.of(false)
-                )
-              )
-          )
-        )
-      }
-
-      return Caches.chain(({0: cacheL, 1: cacheR}) =>
-        this.raceWith(
-          that,
-          (exit, fiber) => coordinate(exit, fiber, cacheL),
-          (exit, fiber) => coordinate(exit, fiber, cacheR)
-        )
-          .and(isDone.get)
-          .and(
-            cacheL.read
-              .chain(FIO.fromEither)
-              .zipWith(cacheR.read.chain(FIO.fromEither), c)
-          )
-      )
-    })
+    throw new Error('TODO: Not Implemented' + this)
   }
 }
