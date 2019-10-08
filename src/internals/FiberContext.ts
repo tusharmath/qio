@@ -13,7 +13,6 @@ import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
-import {Exit} from './Exit'
 
 const InvalidInstruction = check(
   'InvalidInstruction',
@@ -99,7 +98,9 @@ export class FiberContext<E, A> implements ICancellable {
   }
 
   public release(p: UIO<void>): void {
-    this.cancellationList.push(new Exit(this.scheduler, p))
+    this.cancellationList.push({
+      cancel: () => FiberContext.evaluateWith(p, this.scheduler)
+    })
   }
 
   public unsafeObserve(cb: CBOption<E, A>): ICancellable {
