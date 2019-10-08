@@ -6086,10 +6086,10 @@ standard-data-structures@^1.7.1:
   resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-1.7.1.tgz#acba7a3a8ec86e8e3c865ab1a26f3f376df58a8d"
   integrity sha512-LJjWnS88uTZA7qHDqN6H7VsRJwqNcqQvfAbzBdbCaoulUdWrLo0muYxE4vWyynp0QI2IbL7SGsB4yNIBvL3Tug==
 
-standard-data-structures@^2.9.0:
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-2.9.0.tgz#91198d17b9e5d4e2298b11d560bd00dc45a4ac7c"
-  integrity sha512-91j6cuSl8noveFyA+gefsSPTCsIkwd7UGYEgOxmN/uVtk9O8nR7puAMNkYu131dAM2/te9d5iqRigcC5GZmdWQ==
+standard-data-structures@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/standard-data-structures/-/standard-data-structures-3.0.0.tgz#e7fa8288194c12f5d7f34806d91c9d547ffb05fe"
+  integrity sha512-zc+IlT6p8bhWmlLGPVozOxeiEIB/AHNF6eaSKyywDJ0D9v0ecE1RMbbvjITa77wLIkv9aA2S0jRo5E2gQngFfA==
 
 static-extend@^0.1.1:
   version "0.1.2"
