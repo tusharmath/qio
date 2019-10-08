@@ -13,6 +13,9 @@ describe('Managed', () => {
       release: FIO.encase(() => void i--),
       get count(): number {
         return i
+      },
+      get isReleased(): boolean {
+        return i === 0
       }
     }
   }
@@ -59,11 +62,11 @@ describe('Managed', () => {
     runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
         .use(() => FIO.timeout(0, 1000))
-        .fork.chain(F => F.resumeAsync(FIO.void).and(F.abort.delay(500)))
+        .fork.chain(F => F.abort.delay(500))
         .provide({runtime})
     )
 
     runtime.scheduler.runTo(550)
-    assert.strictEqual(r.count, 0)
+    assert.ok(r.isReleased)
   })
 })
