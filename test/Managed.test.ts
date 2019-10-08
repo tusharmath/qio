@@ -66,7 +66,20 @@ describe('Managed', () => {
         .provide({runtime})
     )
 
-    runtime.scheduler.runTo(550)
     assert.ok(r.isReleased)
+  })
+
+  it.skip('should release only once', () => {
+    const r = Resource()
+    const runtime = testRuntime()
+
+    runtime.unsafeExecuteSync(
+      Managed.make(r.acquire, r.release)
+        .use(() => FIO.timeout(0, 1000))
+        .fork.chain(F => F.join.and(F.abort))
+        .provide({runtime})
+    )
+
+    assert.strictEqual(r.count, 0)
   })
 })
