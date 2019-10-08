@@ -395,7 +395,7 @@ describe('FIO', () => {
         assert.strictEqual(actual, expected)
       })
 
-      it.skip('should resume async io immediately', () => {
+      it('should resume async io immediately', () => {
         const a = new Counter()
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(
