@@ -38,8 +38,10 @@ export class Managed<E1, A1, R1> {
   ): Managed<E1, A1, R1 & R2> {
     return Managed.of(
       acquire
-        .map(a1 =>
-          Reservation.of(FIO.of(a1).addEnv<R2>(), release(a1).addEnv<R1>())
+        .chain(a1 =>
+          release(a1).once.map(memoized =>
+            Reservation.of(FIO.of(a1).addEnv<R2>(), memoized.addEnv<R1>())
+          )
         )
         .addEnv()
     )
