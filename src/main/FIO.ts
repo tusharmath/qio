@@ -220,6 +220,30 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * Takes in a effect-ful function that return a FIO and unwraps it.
+   * This is an alias to `FIO.flatten(UIO(fn))`
+   *
+   * ```ts
+   * // An impure function that creates mutable state but also returns a FIO.
+   * const FN = () => {
+   *   let count = 0
+   *
+   *   return FIO.try(() => count++)
+   * }
+   * // Using flatten
+   * FIO.flatten(UIO(FN))
+   *
+   * // Using encaseM
+   * FIO.encaseM(FN)
+   * ```
+   */
+  public static encaseM<E1, A1, R1>(
+    fio: () => FIO<E1, A1, R1>
+  ): FIO<E1, A1, R1> {
+    return FIO.flatten(UIO(fio))
+  }
+
+  /**
    * Converts a function returning a Promise to a function that returns an [[IO]]
    */
   public static encaseP<A, T extends unknown[]>(
@@ -251,30 +275,6 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     fio: FIO<E1, FIO<E2, A2, R2>, R1>
   ): FIO<E1 | E2, A2, R1 & R2> {
     return fio.chain(Id)
-  }
-
-  /**
-   * Takes in a effect-ful function that return a FIO and unwraps it.
-   * This is an alias to `FIO.flatten(UIO(fn))`
-   *
-   * ```ts
-   * // An impure function that creates mutable state but also returns a FIO.
-   * const FN = () => {
-   *   let count = 0
-   *
-   *   return FIO.try(() => count++)
-   * }
-   * // Using flatten
-   * FIO.flatten(UIO(FN))
-   *
-   * // Using flattenM
-   * FIO.flattenM(FN)
-   * ```
-   */
-  public static flattenM<E1, A1, R1>(
-    fio: () => FIO<E1, A1, R1>
-  ): FIO<E1, A1, R1> {
-    return FIO.flatten(UIO(fio))
   }
 
   /**

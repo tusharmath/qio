@@ -20,7 +20,7 @@ export class Await<E, A> {
   private result: Option<Either<E, A>> = Option.none()
 
   public get get(): IO<E, A> {
-    return FIO.flattenM(() =>
+    return FIO.encaseM(() =>
       this.result
         .map(S => S.reduce<IO<E, A>>(FIO.reject, XX => FIO.of(XX)))
         .getOrElse(this.wait)
@@ -32,7 +32,7 @@ export class Await<E, A> {
   }
 
   public set(io: IO<E, A>): UIO<boolean> {
-    return FIO.flattenM(() => {
+    return FIO.encaseM(() => {
       if (this.flag) {
         return FIO.of(false)
       }

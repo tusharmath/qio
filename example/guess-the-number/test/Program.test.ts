@@ -22,7 +22,7 @@ describe('Program', () => {
 
     return {
       getStrLn: (question: string) =>
-        FIO.flattenM(() => {
+        FIO.encaseM(() => {
           const popped = input.hasOwnProperty(question)
             ? input[question].shift()
             : undefined
