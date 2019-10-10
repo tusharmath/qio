@@ -266,7 +266,7 @@ export class FStream<E1, A1, R1> {
       ): FIO<E1 | E, S, R & R1> =>
         Queue.bounded<A1>(1)
           .zip(Ref.of(true))
-          .chain(({0: Q, 1: canContinue}) => {
+          .chain(([Q, canContinue]) => {
             const offer = (_: A1) => Q.offer(_).and(canContinue.read)
             const itar = (SS: S): FIO<E | E1, S, R & R1> =>
               FIO.if(

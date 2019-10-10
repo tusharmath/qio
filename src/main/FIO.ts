@@ -638,7 +638,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     cb2: (exit: Either<E2, A2>, fiber: IFiber<E1, A1>) => IO<E4, A4>
   ): FIO<E3 | E4, A3 | A4, R1 & R2> {
     return Await.of<E3 | E4, A3 | A4>().chain(done =>
-      this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
+      this.fork.zip(that.fork).chain(([f1, f2]) => {
         const resume1 = f1.await.chain(exit =>
           Option.isSome(exit) ? done.set(cb1(exit.value, f2)) : FIO.of(true)
         )
