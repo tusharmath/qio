@@ -17,7 +17,7 @@ export abstract class BaseRuntime implements IRuntime {
     io: FIO<E, A>,
     cb: CBOption<E, A> = noop
   ): ICancellable {
-    const context = FiberContext.of(this.scheduler, io)
+    const context = FiberContext.evaluateWith(io, this.scheduler)
     context.unsafeObserve(cb)
 
     return context

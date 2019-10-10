@@ -56,12 +56,6 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
     return new FiberContext(scheduler, io.asInstruction)
   }
 
-  public static of<E, A>(
-    scheduler: IScheduler,
-    p: FIO<E, A, unknown>
-  ): FiberContext<E, A> {
-    return new FiberContext(scheduler, p.asInstruction)
-  }
   private static dispatchResult<E, A>(
     result: Option<Either<E, A>>,
     cb: CBOption<E, A>
