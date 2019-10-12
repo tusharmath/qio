@@ -44,7 +44,7 @@ export class FStream<E1, A1, R1> {
    */
   public static const<A1>(a: A1): FStream<never, A1, NoEnv> {
     return new FStream((s, cont, next) =>
-      FIO.if(cont(s), next(s, a), FIO.of(s))
+      FIO.if0()(() => cont(s), () => next(s, a), () => FIO.of(s))
     )
   }
 
@@ -59,10 +59,10 @@ export class FStream<E1, A1, R1> {
         next: (s: S, a: A) => FIO<E, S, R>
       ) => {
         const itar = (s: S, i: number): FIO<E, S, R> =>
-          FIO.if(
-            cont(s) && i < t.length,
-            next(s, t[i]).chain(_ => itar(_, i + 1)),
-            FIO.of(s)
+          FIO.if0()(
+            () => cont(s) && i < t.length,
+            () => next(s, t[i]).chain(_ => itar(_, i + 1)),
+            () => FIO.of(s)
           )
 
         return itar(state, 0)
@@ -74,7 +74,11 @@ export class FStream<E1, A1, R1> {
     io: FIO<E1, A1, R1>
   ): FStream<E1, A1, R1> {
     return new FStream((state, cont, next) =>
-      FIO.if(cont(state), io.chain(a => next(state, a)), FIO.of(state))
+      FIO.if0()(
+        () => cont(state),
+        () => io.chain(a => next(state, a)),
+        () => FIO.of(state)
+      )
     )
   }
 
@@ -106,7 +110,11 @@ export class FStream<E1, A1, R1> {
         next: (s: S, a: A1) => FIO<E, S, R>
       ) => {
         const itar = (s: S): FIO<E, S, R> =>
-          FIO.if(cont(s), Q.take.chain(a => next(s, a).chain(itar)), FIO.of(s))
+          FIO.if0()(
+            () => cont(s),
+            () => Q.take.chain(a => next(s, a).chain(itar)),
+            () => FIO.of(s)
+          )
 
         return itar(state)
       }
@@ -141,7 +149,11 @@ export class FStream<E1, A1, R1> {
         next: (s: S, a: A1) => FIO<E, S, R>
       ) => {
         const itar = (s: S): FIO<E1 | E, S, R1 & R> =>
-          FIO.if(cont(s), io.chain(a => next(s, a)).chain(itar), FIO.of(s))
+          FIO.if0()(
+            () => cont(s),
+            () => io.chain(a => next(s, a)).chain(itar),
+            () => FIO.of(s)
+          )
 
         return itar(state)
       }
@@ -159,10 +171,10 @@ export class FStream<E1, A1, R1> {
         next: (s: S, a: number) => FIO<E, S, R>
       ) => {
         const itar = (s: typeof state, i: number): FIO<E, S, R> =>
-          FIO.if(
-            i <= max && cont(s),
-            next(s, i).chain(ss => itar(ss, i + 1)),
-            FIO.of(s)
+          FIO.if0()(
+            () => i <= max && cont(s),
+            () => next(s, i).chain(ss => itar(ss, i + 1)),
+            () => FIO.of(s)
           )
 
         return itar(state, min)
@@ -208,7 +220,9 @@ export class FStream<E1, A1, R1> {
    */
   public filter(f: (a: A1) => boolean): FStream<E1, A1, R1> {
     return new FStream((state, cont, next) =>
-      this.fold(state, cont, (s, a) => FIO.if(f(a), next(s, a), FIO.of(s)))
+      this.fold(state, cont, (s, a) =>
+        FIO.if0()(() => f(a), () => next(s, a), () => FIO.of(s))
+      )
     )
   }
 
@@ -234,7 +248,9 @@ export class FStream<E1, A1, R1> {
   public forEachWhile<E2, R2>(
     f: (a: A1) => FIO<E2, boolean, R2>
   ): FIO<E1 | E2, boolean, R1 & R2> {
-    return this.fold(true as boolean, Id, (s, a) => FIO.if(s, f(a), FIO.of(s)))
+    return this.fold(true as boolean, Id, (s, a) =>
+      FIO.if0()(() => s, () => f(a), () => FIO.of(s))
+    )
   }
 
   /**
@@ -270,10 +286,10 @@ export class FStream<E1, A1, R1> {
         Queue.bounded<A1>(1).zipWithM(Ref.of(true), (Q, canContinue) => {
           const offer = (_: A1) => Q.offer(_).and(canContinue.read)
           const itar = (SS: S): FIO<E | E1, S, R & R1> =>
-            FIO.if(
-              cont(SS),
-              Q.take.chain(a => next(SS, a).chain(itar)),
-              canContinue.set(false).and(FIO.of(SS))
+            FIO.if0()(
+              () => cont(SS),
+              () => Q.take.chain(a => next(SS, a).chain(itar)),
+              () => canContinue.set(false).and(FIO.of(SS))
             )
 
           return this.forEachWhile(offer)
@@ -299,10 +315,10 @@ export class FStream<E1, A1, R1> {
   public take(count: number): FStream<E1, A1, R1> {
     return new FStream((state, cont, next) =>
       this.fold(
-        {_0: 0, _1: state},
-        s => cont(s._1) && s._0 < count,
-        (s, a) => next(s._1, a).map(s2 => ({_0: s._0 + 1, _1: s2}))
-      ).map(_ => _._1)
+        {count: 0, state},
+        s => cont(s.state) && s.count < count,
+        (s, a) => next(s.state, a).map(s2 => ({count: s.count + 1, state: s2}))
+      ).map(_ => _.state)
     )
   }
 

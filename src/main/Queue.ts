@@ -87,10 +87,10 @@ export class Queue<A = never> {
    */
   public takeN(n: number): UIO<A[]> {
     const itar = (i: number, list: List<A>): UIO<List<A>> =>
-      FIO.if(
-        i === n,
-        FIO.of(list),
-        this.take.chain(_ => itar(i + 1, list.prepend(_)))
+      FIO.if0()(
+        () => i === n,
+        () => FIO.of(list),
+        () => this.take.chain(_ => itar(i + 1, list.prepend(_)))
       )
 
     return itar(0, List.empty<A>()).map(_ => _.asArray)

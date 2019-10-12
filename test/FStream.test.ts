@@ -1,5 +1,6 @@
-import {assert} from 'chai'
+import {assert, spy} from 'chai'
 
+import {T} from '../src/internals/T'
 import {FIO} from '../src/main/FIO'
 import {FStream} from '../src/main/FStream'
 import {testRuntime} from '../src/runtimes/TestRuntime'
@@ -41,6 +42,13 @@ describe('FStream', () => {
       const expected = [100, 101, 102, 103]
       assert.deepStrictEqual(actual, expected)
     })
+
+    it('should call next 4 times', () => {
+      const ID = spy(<TT>(_: TT) => FIO.of(_))
+      testRuntime().unsafeExecuteSync(FStream.range(100, 103).fold(true, T, ID))
+
+      ID.should.be.called.exactly(4)
+    })
   })
 
   describe('merge', () => {
@@ -49,6 +57,16 @@ describe('FStream', () => {
         FStream.of(1)
           .merge(FStream.of(2))
           .fold(new Array<number>(), () => true, (s, a) => FIO.of([...s, a]))
+      )
+      const expected = [1, 2]
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
+
+  describe('take', () => {
+    it('should take first 2 elements', () => {
+      const actual = testRuntime().unsafeExecuteSync(
+        FStream.of(1, 2, 3).take(2).asArray
       )
       const expected = [1, 2]
       assert.deepStrictEqual(actual, expected)
