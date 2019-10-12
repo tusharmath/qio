@@ -20,4 +20,4 @@ const fib = (N: bigint) =>
     return itar(N)
   })
 
-defaultRuntime().execute(fib(10n), console.log)
+defaultRuntime().unsafeExecute(fib(10n), console.log)

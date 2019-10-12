@@ -1,4 +1,4 @@
-import {DoublyLinkedList, Either} from 'standard-data-structures'
+import {DoublyLinkedList, Either, Option} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
@@ -7,6 +7,7 @@ import {FIO, IO, UIO} from './FIO'
 /**
  * A special data structure that can be set only once.
  * Any get operation on Await will "wait" for a set to happen first.
+ * Its kind of like a Promise, because it can be set only once.
  * @typeparam E Errors thrown
  * @typeparam A Success value
  */
@@ -16,11 +17,13 @@ export class Await<E, A> {
   }
   private flag = false
   private readonly Q = DoublyLinkedList.of<[CB<E>, CB<A>]>()
-  private result: Either<E, A> = Either.neither()
+  private result: Option<Either<E, A>> = Option.none()
 
-  public get get(): FIO<E, A> {
-    return FIO.flatten(
-      UIO(() => this.result.fold(this.wait, FIO.reject, FIO.of))
+  public get get(): IO<E, A> {
+    return FIO.flattenM(() =>
+      this.result
+        .map(S => S.reduce<IO<E, A>>(FIO.reject, XX => FIO.of(XX)))
+        .getOrElse(this.wait)
     )
   }
 
@@ -29,27 +32,25 @@ export class Await<E, A> {
   }
 
   public set(io: IO<E, A>): UIO<boolean> {
-    return FIO.flatten(
-      UIO(() => {
-        if (this.flag) {
-          return FIO.of(false)
+    return FIO.flattenM(() => {
+      if (this.flag) {
+        return FIO.of(false)
+      }
+      this.flag = true
+
+      return io.asEither.encase(either => {
+        this.result = Option.some(either)
+        while (this.Q.length > 0) {
+          const cb = this.Q.shift() as [CB<E>, CB<A>]
+          either.reduce(...cb)
         }
-        this.flag = true
 
-        return io.asEither.encase(either => {
-          this.result = either
-          while (this.Q.length > 0) {
-            const cb = this.Q.shift() as [CB<E>, CB<A>]
-            this.result.fold(undefined, ...cb)
-          }
-
-          return true
-        })
+        return true
       })
-    )
+    })
   }
 
-  private get wait(): FIO<E, A> {
+  private get wait(): IO<E, A> {
     return FIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 

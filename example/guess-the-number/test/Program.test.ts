@@ -22,23 +22,21 @@ describe('Program', () => {
 
     return {
       getStrLn: (question: string) =>
-        FIO.flatten(
-          UIO(() => {
-            const popped = input.hasOwnProperty(question)
-              ? input[question].shift()
-              : undefined
+        FIO.flattenM(() => {
+          const popped = input.hasOwnProperty(question)
+            ? input[question].shift()
+            : undefined
 
-            if (popped === undefined) {
-              stdout.push(question)
+          if (popped === undefined) {
+            stdout.push(question)
 
-              return FIO.never()
-            }
+            return FIO.never()
+          }
 
-            stdout.push(question + popped)
+          stdout.push(question + popped)
 
-            return FIO.of(popped)
-          })
-        ),
+          return FIO.of(popped)
+        }),
       putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
       stdout
     }
@@ -47,7 +45,8 @@ describe('Program', () => {
   it('should greet', () => {
     const math = MockMath()
     const tty = MockTTY({})
-    testRuntime().executeSync(program.provide({math, tty}))
+    const runtime = testRuntime()
+    runtime.unsafeExecuteSync(program.provide({math, tty, runtime}))
 
     assert.deepStrictEqual(tty.stdout, ['Greetings!', 'Enter your name: '])
   })
@@ -57,7 +56,8 @@ describe('Program', () => {
     const tty = MockTTY({
       'Enter your name: ': ['John']
     })
-    testRuntime().executeSync(program.provide({math, tty}))
+    const runtime = testRuntime()
+    runtime.unsafeExecuteSync(program.provide({math, tty, runtime}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -73,7 +73,8 @@ describe('Program', () => {
       'Enter a number between 1 & 6: ': ['1'],
       'Enter your name: ': ['John']
     })
-    testRuntime().executeSync(program.provide({math, tty}))
+    const runtime = testRuntime()
+    runtime.unsafeExecuteSync(program.provide({math, tty, runtime}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -92,7 +93,8 @@ describe('Program', () => {
       'Enter a number between 1 & 6: ': ['2'],
       'Enter your name: ': ['John']
     })
-    testRuntime().executeSync(program.provide({math, tty}))
+    const runtime = testRuntime()
+    runtime.unsafeExecuteSync(program.provide({math, tty, runtime}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -112,7 +114,8 @@ describe('Program', () => {
       'Enter your name: ': ['John'],
       'Press ⏎  to continue (or will exit in 3sec): ': ['', '']
     })
-    testRuntime().executeSync(program.provide({math, tty}))
+    const runtime = testRuntime()
+    runtime.unsafeExecuteSync(program.provide({math, tty, runtime}))
 
     assert.deepStrictEqual(tty.stdout, [
       'Greetings!',
@@ -134,7 +137,10 @@ describe('Program', () => {
         const tty = MockTTY({
           'Press ⏎  to continue (or will exit in 3sec): ': ['']
         })
-        const actual = testRuntime().executeSync(canContinue.provide({tty}))
+        const runtime = testRuntime()
+        const actual = runtime.unsafeExecuteSync(
+          canContinue.provide({tty, runtime})
+        )
 
         assert.isTrue(actual)
       })
@@ -142,13 +148,17 @@ describe('Program', () => {
     context('when no input is provided', () => {
       it('should return false', () => {
         const tty = MockTTY({})
-        const actual = testRuntime().executeSync(canContinue.provide({tty}))
+        const runtime = testRuntime()
+        const actual = runtime.unsafeExecuteSync(
+          canContinue.provide({tty, runtime})
+        )
 
         assert.isFalse(actual)
       })
       it('should output goodbye', () => {
         const tty = MockTTY({})
-        testRuntime().executeSync(canContinue.provide({tty}))
+        const runtime = testRuntime()
+        runtime.unsafeExecuteSync(canContinue.provide({tty, runtime}))
 
         assert.deepStrictEqual(tty.stdout, [
           'Press ⏎  to continue (or will exit in 3sec): ',

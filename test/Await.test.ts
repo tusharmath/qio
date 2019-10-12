@@ -1,4 +1,5 @@
-import {assert} from 'chai'
+import {assert, spy} from 'chai'
+import {Either, Option} from 'standard-data-structures'
 
 import {Await} from '../src/main/Await'
 import {FIO} from '../src/main/FIO'
@@ -9,21 +10,21 @@ import {Counter} from './internals/Counter'
 describe('Await', () => {
   describe('of', () => {
     it('should create an instance of Await', () => {
-      const actual = testRuntime().executeSync(Await.of())
+      const actual = testRuntime().unsafeExecuteSync(Await.of())
       assert.instanceOf(actual, Await)
     })
   })
 
   describe('set', () => {
     it('should return true', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await => await.set(FIO.of('Hi')))
       )
       assert.ok(actual)
     })
     it('should set only once', () => {
       const runtime = testRuntime()
-      const actual = runtime.executeSync(
+      const actual = runtime.unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await
             .set(FIO.of('Hi'))
@@ -36,7 +37,7 @@ describe('Await', () => {
 
     it('should evaluate the IO only once', () => {
       const counter = new Counter()
-      testRuntime().executeSync(
+      testRuntime().unsafeExecuteSync(
         Await.of<never, number>().chain(await =>
           await
             .set(counter.inc())
@@ -53,38 +54,43 @@ describe('Await', () => {
      */
     it('should run only for long running IOs', () => {
       const runtime = testRuntime()
-
       // Create Await instance
-      const actual = runtime
-        .exit(Await.of<never, number>())
-        .map(AWT => {
-          // Counter
-          const counter = new Counter()
+      const AWT = runtime.unsafeExecuteSync(Await.of<never, number>()) as Await<
+        never,
+        number
+      >
 
-          // Create an IO that takes a second to run
-          runtime.execute(AWT.set(counter.inc().delay(1000)))
+      // Counter
+      const counter = new Counter()
 
-          // Run till 500 (half time for the original IO
-          runtime.scheduler.runTo(500)
+      // Create an IO that takes a second to run
+      runtime.unsafeExecuteSync(
+        AWT.set(
+          counter
+            .inc()
+            .delay(1000)
+            .provide({runtime})
+        )
+      )
 
-          // Again try setting another IO
-          // This time the IO shouldn't execute
-          runtime.execute(AWT.set(counter.inc()))
+      // Run till 500 (half time for the original IO
+      runtime.scheduler.runTo(500)
 
-          // Run the IO till the very end
-          runtime.scheduler.run()
+      // Again try setting another IO
+      // This time the IO shouldn't execute
+      runtime.unsafeExecute(AWT.set(counter.inc()))
 
-          return counter.count
-        })
-        .getRightOrElse(-1)
+      // Run the IO till the very end
+      runtime.scheduler.run()
 
+      const actual = counter.count
       const expected = 1
       assert.strictEqual(actual, expected)
     })
 
     it('should return false if its not set', () => {
       const runtime = testRuntime()
-      const actual = runtime.executeSync(
+      const actual = runtime.unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await.set(FIO.of('Hi')).and(await.set(FIO.of('Bye')))
         )
@@ -95,7 +101,7 @@ describe('Await', () => {
 
   describe('get', () => {
     it('should return the IO value', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await.set(FIO.of('Hi')).and(await.get)
         )
@@ -104,7 +110,7 @@ describe('Await', () => {
     })
 
     it('should not resolve unless set', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await => await.get)
       )
       assert.isUndefined(actual)
@@ -112,23 +118,24 @@ describe('Await', () => {
 
     it('should not return', () => {
       const runtime = testRuntime()
-      const await = runtime.executeSync(Await.of<never, string>()) as Await<
-        never,
-        string
-      >
-      let actual: string | undefined
-      runtime.execute(await.get, r => (actual = r))
-      runtime.execute(await.set(FIO.timeout('Hey', 1000)))
+      const await = runtime.unsafeExecuteSync(
+        Await.of<never, string>()
+      ) as Await<never, string>
+      const res = spy()
+      runtime.unsafeExecute(await.get, res)
+      runtime.unsafeExecute(
+        await.set(FIO.timeout('Hey', 1000).provide({runtime}))
+      )
 
-      assert.isUndefined(actual)
+      res.should.not.be.called()
       runtime.scheduler.run()
-      assert.strictEqual(actual, 'Hey')
+      res.should.be.called.with(Option.some(Either.right('Hey')))
     })
   })
 
   describe('isSet', () => {
     it('should return false initially', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await => await.isSet)
       )
 
@@ -136,7 +143,7 @@ describe('Await', () => {
     })
 
     it('should return true after setting', () => {
-      const actual = testRuntime().executeSync(
+      const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, number>().chain(await =>
           await.set(FIO.of(100)).and(await.isSet)
         )

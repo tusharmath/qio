@@ -32,7 +32,7 @@ const putStrLn = IO.encase((str: string) => console.log(str))
 const hello = putStrLn('Hello World!')
 
 const runtime = defaultRuntime()
-runtime.execute(hello)
+runtime.unsafeExecute(hello)
 ```
 
 # Getting Started
@@ -102,31 +102,7 @@ Execution of FIO happens through a [Runtime].
 
   const Greet = () => console.log('Hello World!')
   const GreetIO = FIO.encase(Greet)
-+ defaultRuntime().execute(GreetIO())
-```
-
-The `execute` method can take two optional params viz. `onError` and `onSuccess`.
-
-```diff
-  import {FIO} from 'fearless-io'
-  import {FIO, defaultRuntime} from 'fearless-io'
-
-  const Greet = () => console.log('Hello World!')
-  const GreetIO = FIO.encase(Greet)
-
-+ // Callback to handle errors
-+ onError = (err: Error) => {
-+   console.log(err.message)
-+   process.exit(1)
-+ }
-+
-+ // Callback to handle success
-+ onSuccess = () => {
-+   process.exit(0)
-+ }
-
-- defaultRuntime().execute(GreetIO())
-+ defaultRuntime().execute(GreetIO(), onSuccess, onError)
++ defaultRuntime().unsafeExecute(GreetIO())
 ```
 
 # Serial Execution
@@ -164,16 +140,16 @@ In the above code either `foo` or `bar` can be printed first depending on intern
   const barIO = putStrLn('bar')
 
   const fooBar = fooIO.and(barIO)
-+ defaultRuntime().execute(fooBar)
++ defaultRuntime().unsafeExecute(fooBar)
 ```
 
 [and]: https://tusharmath.com/fearless-io/classes/fio.html#and
 
 # Parallel Execution
 
-Similar to the `and` operator, the [zip] operator runs the two IOs in parallel. For eg.
+Similar to the `and` operator, the [par] operator runs the two IOs in parallel. For eg.
 
-[zip]: https://tusharmath.com/fearless-io/classes/fio.html#zip
+[par]: https://tusharmath.com/fearless-io/classes/fio.html#par
 
 Create the two IOs
 
@@ -184,26 +160,27 @@ Create the two IOs
 +  const bar = FIO.timeout('bar', 1500)
 ```
 
-Combine them using [zip]
+Combine them using [par]
 
 ```diff
 - import {FIO} from 'fearless-io'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
-+ const fooBar = foo.zip(bar)
++ const fooBar = foo.par(bar)
 ```
 
 Execute the created IO
 
 ```diff
-  import {FIO} from 'fearless-io'
-  import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from 'fearless-io'
++ import {FIO, defaultRuntime} from 'fearless-io'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
   const fooBar = foo.zip(bar)
-+ defaultRuntime().execute(fooBar)
+
++ defaultRuntime().unsafeExecute(fooBar)
 ```
 
 The program `fooBar` will complete in `1500`ms because both are executed in parallel.
@@ -229,7 +206,7 @@ Execute by passing it to `defaultRuntime`
 - import {FIO} from 'fearless-io'
 + import {FIO, defaultRuntime} from 'fearless-io'
   const delayIO = FIO.timeout('Hello World', 1000)
-+ const cancel = defaultRuntime().execute(delayIO)
++ const cancel = defaultRuntime().unsafeExecute(delayIO)
 ```
 
 Calling the cancelling callback.
@@ -355,7 +332,7 @@ Running the program can be done by using the runtime.
     config: config
   }
   const program0 = program.provide(env)
-+ defaultRuntime().execute(program0)
++ defaultRuntime().unsafeExecute(program0)
 ```
 
 [provide]: https://tusharmath.com/fearless-io/classes/fio.html#provide

@@ -13,13 +13,16 @@ describe('Managed', () => {
       release: FIO.encase(() => void i--),
       get count(): number {
         return i
+      },
+      get isReleased(): boolean {
+        return i === 0
       }
     }
   }
 
   it('should release resource on exception', () => {
     const r = Resource()
-    testRuntime().executeSync(
+    testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() => FIO.reject('Failure'))
     )
     assert.strictEqual(r.count, 0)
@@ -27,7 +30,7 @@ describe('Managed', () => {
 
   it('should return the cause of the failure', () => {
     const r = Resource()
-    const actual = testRuntime().executeSync(
+    const actual = testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() =>
         FIO.reject<'Failure'>('Failure')
       )
@@ -37,7 +40,7 @@ describe('Managed', () => {
 
   it('should release resource on completion', () => {
     const r = Resource()
-    testRuntime().executeSync(
+    testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() => FIO.void())
     )
     assert.strictEqual(r.count, 0)
@@ -45,7 +48,9 @@ describe('Managed', () => {
 
   it('should acquire the resource', () => {
     const r = Resource()
-    testRuntime().executeSync(Managed.make(r.acquire, FIO.void).use(FIO.void))
+    testRuntime().unsafeExecuteSync(
+      Managed.make(r.acquire, FIO.void).use(FIO.void)
+    )
 
     assert.strictEqual(r.count, 1)
   })
@@ -54,13 +59,27 @@ describe('Managed', () => {
     const r = Resource()
     const runtime = testRuntime()
 
-    runtime.execute(
+    runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
         .use(() => FIO.timeout(0, 1000))
-        .fork.chain(F => F.resumeAsync(FIO.void).and(F.abort.delay(500)))
+        .fork.chain(F => F.abort.delay(500))
+        .provide({runtime})
     )
 
-    runtime.scheduler.runTo(550)
+    assert.ok(r.isReleased)
+  })
+
+  it.skip('should release only once', () => {
+    const r = Resource()
+    const runtime = testRuntime()
+
+    runtime.unsafeExecuteSync(
+      Managed.make(r.acquire, r.release)
+        .use(() => FIO.timeout(0, 1000))
+        .fork.chain(F => F.join.and(F.abort))
+        .provide({runtime})
+    )
+
     assert.strictEqual(r.count, 0)
   })
 })

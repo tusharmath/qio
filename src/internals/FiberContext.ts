@@ -1,106 +1,123 @@
-/**
- * Created by tushar on 2019-05-24
- */
-
-/* tslint:disable: no-unbound-method */
+/* tslint:disable: no-unbound-method cyclomatic-complexity */
 
 import {check} from 'checked-exceptions'
-import {Either} from 'standard-data-structures'
+import {
+  DoublyLinkedList,
+  Either,
+  LinkedListNode,
+  Option
+} from 'standard-data-structures'
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {Fiber} from '../main/Fiber'
-import {FIO, UIO} from '../main/FIO'
+import {FIO, IO, UIO} from '../main/FIO'
+import {IFiber} from '../main/IFiber'
 import {Instruction, Tag} from '../main/Instructions'
-import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
-import {CB} from './CB'
-import {Exit} from './Exit'
+import {CBOption} from './CBOption'
 
 const InvalidInstruction = check(
   'InvalidInstruction',
   (ins: Instruction) => `${Tag[ins.tag]}`
 )
 
+enum FiberStatus {
+  PENDING,
+  COMPLETED,
+  CANCELLED
+}
+
 /**
- * @ignore
+ * FiberContext actually evaluates the FIO expression.
+ * Its creation is effectful.
+ * As soon as its created it starts to evaluate the FIO expression.
+ * It provides public APIs to [[Fiber]] to consume.
  */
-export class FiberContext<E = never, A = never> extends Fiber<E, A>
-  implements ICancellable {
-  /**
-   * Pure implementation of cancel()
-   */
+export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
   public get abort(): UIO<void> {
     return UIO(() => this.cancel())
   }
+  public get await(): UIO<Option<Either<E, A>>> {
+    return FIO.asyncUIO(cb => this.unsafeObserve(cb))
+  }
+  public get join(): FIO<E, A> {
+    return FIO.asyncIO<E, A>((rej, res) =>
+      this.unsafeObserve(ob => ob.map(_ => _.reduce(rej, res)))
+    )
+  }
 
   /**
-   * Safe implementation of unsafeExecute().
+   * Evaluates an IO using the provided scheduler
    */
-  public get resume(): FIO<E, A> {
-    return FIO.asyncIO<E, A>((rej, res) => this.unsafeExecute(rej, res))
+  public static evaluateWith<E, A>(
+    io: IO<E, A>,
+    scheduler: IScheduler
+  ): FiberContext<E, A> {
+    return new FiberContext(scheduler, io.asInstruction)
+  }
+
+  public static of<E, A>(
+    scheduler: IScheduler,
+    p: FIO<E, A, unknown>
+  ): FiberContext<E, A> {
+    return new FiberContext(scheduler, p.asInstruction)
+  }
+  private static dispatchResult<E, A>(
+    result: Option<Either<E, A>>,
+    cb: CBOption<E, A>
+  ): void {
+    cb(result)
   }
   private readonly cancellationList = new CancellationList()
-  private readonly stackA: Instruction[] = []
-  private readonly stackE: Array<(e: unknown) => Instruction> = []
-  private readonly stackEnv: unknown[] = []
+  private readonly node: LinkedListNode<ICancellable>
+  private readonly observers = DoublyLinkedList.of<CBOption<E, A>>()
+  private result: Option<Either<E, A>> = Option.none()
+  private readonly stackA = new Array<Instruction>()
+  private readonly stackEnv = new Array<unknown>()
+  private status = FiberStatus.PENDING
 
-  public constructor(
-    public readonly runtime: IRuntime,
-    public readonly sh: IScheduler,
-    io: Instruction
+  private constructor(
+    private readonly scheduler: IScheduler,
+    instruction: Instruction
   ) {
-    super()
-    this.stackA.push(io)
+    this.stackA.push(instruction)
+    this.node = this.cancellationList.push(
+      this.scheduler.asap(this.unsafeEvaluate.bind(this))
+    )
   }
 
   public cancel(): void {
-    this.stackA.splice(0, this.stackA.length)
+    this.status = FiberStatus.CANCELLED
     this.cancellationList.cancel()
+
+    this.observers.map(_ => _(Option.none()))
   }
 
-  public exit(fio: UIO<void>): UIO<void> {
-    return UIO(() => {
-      this.cancellationList.push(new Exit(fio, this.runtime))
-    })
+  public release(p: UIO<void>): UIO<void> {
+    return UIO(() => this.unsafeRelease(p))
   }
 
-  public resumeAsync(cb: (exit: Either<E, A>) => UIO<void>): UIO<void> {
-    const collect = <X>(con: (x: X) => Either<E, A>) => (data: X) => {
-      const cancel = () => this.cancellationList.remove(id)
-      const id = this.cancellationList.push(
-        this.runtime.execute(cb(con(data)), cancel, cancel)
-      )
+  public unsafeObserve(cb: CBOption<E, A>): ICancellable {
+    if (this.status === FiberStatus.CANCELLED) {
+      return this.scheduler.asap(FiberContext.dispatchResult, Option.none(), cb)
+    }
+    if (this.status === FiberStatus.COMPLETED) {
+      return this.scheduler.asap(FiberContext.dispatchResult, this.result, cb)
     }
 
-    return UIO(
-      () => void this.unsafeExecute(collect(Either.left), collect(Either.right))
-    )
+    const node = this.observers.add(cb)
+
+    return {cancel: () => this.observers.remove(node)}
   }
 
-  /**
-   * Continues to evaluate the current stack.
-   * Used after the fiber yielded.
-   */
-  public unsafeExecute(rej: CB<E>, res: CB<A>): FiberContext<E, A> {
-    const id = this.cancellationList.push(
-      this.sh.asap(
-        this.evaluate.bind(this),
-        (cause: E) => {
-          this.cancellationList.remove(id)
-          rej(cause)
-        },
-        (value: A) => {
-          this.cancellationList.remove(id)
-          res(value)
-        }
-      )
-    )
-
-    return this
+  private dispatchResult(result: Either<E, A>): void {
+    this.status = FiberStatus.COMPLETED
+    this.result = Option.some(result)
+    this.observers.map(_ => _(this.result))
   }
 
-  private evaluate(rej: CB<E>, res: CB<A>): void {
+  private unsafeEvaluate(): void {
+    this.cancellationList.remove(this.node)
     let data: unknown
 
     while (true) {
@@ -108,7 +125,7 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
         const j = this.stackA.pop()
 
         if (j === undefined) {
-          return res(data as A)
+          return this.dispatchResult(Either.right(data as A))
         }
 
         switch (j.tag) {
@@ -121,12 +138,18 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             break
 
           case Tag.Reject:
+            while (
+              this.stackA.length > 0 &&
+              this.stackA[this.stackA.length - 1].tag !== Tag.Capture
+            ) {
+              this.stackA.pop()
+            }
             const cause = j.i0 as E
-            const handler = this.stackE.pop()
-            if (handler !== undefined) {
-              this.stackA.push(handler(cause))
+            const handler = this.stackA.pop()
+            if (handler !== undefined && handler.tag === Tag.Capture) {
+              this.stackA.push(handler.i0(cause))
             } else {
-              return rej(cause)
+              return this.dispatchResult(Either.left(cause))
             }
             break
 
@@ -143,13 +166,16 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             this.stackA.push(j.i0)
             break
 
+          case Tag.Capture:
+            break
+
           case Tag.Chain:
             this.stackA.push(FIO.resumeM(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
           case Tag.Catch:
-            this.stackE.push(j.i1)
+            this.stackA.push(FIO.capture(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
@@ -157,7 +183,12 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             return
 
           case Tag.Fork:
-            const nContext = new FiberContext(this.runtime, this.sh, j.i0)
+            // Using the `new` operator because FiberContext.of() needs an IO.
+            // Computation should continue in the background.
+            // A new context is created so that computation from that instruction can happen separately.
+            // and then join back into the current context.
+            // Using the same stack will corrupt it completely.
+            const nContext = new FiberContext(this.scheduler, j.i0)
             this.cancellationList.push(nContext)
             data = nContext
             break
@@ -179,24 +210,19 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
             data = j.i0(env)
             break
 
-          case Tag.Runtime:
-            data = this.runtime
-            break
-
           case Tag.Async:
             const id = this.cancellationList.push(
               j.i0(
                 err => {
                   this.cancellationList.remove(id)
                   this.stackA.push(FIO.reject(err).asInstruction)
-                  this.unsafeExecute(rej, res)
+                  this.unsafeEvaluate()
                 },
                 val => {
                   this.cancellationList.remove(id)
                   this.stackA.push(FIO.of(val).asInstruction)
-                  this.unsafeExecute(rej, res)
-                },
-                this.sh
+                  this.unsafeEvaluate()
+                }
               )
             )
 
@@ -211,5 +237,11 @@ export class FiberContext<E = never, A = never> extends Fiber<E, A>
         this.stackA.push(FIO.reject(e).asInstruction)
       }
     }
+  }
+
+  private unsafeRelease(p: UIO<void>): void {
+    this.cancellationList.push({
+      cancel: () => FiberContext.evaluateWith(p, this.scheduler)
+    })
   }
 }

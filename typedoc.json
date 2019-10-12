@@ -20,6 +20,10 @@
     "Exit",
     "Managed",
     "Queue",
-    "Stream"
+    "Stream",
+    "IRuntime",
+    "BaseRuntime",
+    "DefaultRuntime",
+    "TestRuntime"
   ]
 }

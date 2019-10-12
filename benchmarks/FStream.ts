@@ -42,13 +42,15 @@ suite
 
   .add(
     'Recursion',
-    (cb: IDefer) => fioRuntime.execute(fioRecursion(arr), () => cb.resolve()),
+    (cb: IDefer) =>
+      fioRuntime.unsafeExecute(fioRecursion(arr), () => cb.resolve()),
     {defer: true}
   )
 
   .add(
     'Iterative',
-    (cb: IDefer) => fioRuntime.execute(fioIteration(arr), () => cb.resolve()),
+    (cb: IDefer) =>
+      fioRuntime.unsafeExecute(fioIteration(arr), () => cb.resolve()),
     {defer: true}
   )
 

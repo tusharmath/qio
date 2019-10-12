@@ -55,16 +55,16 @@ FIO.of(10).chain(_ => FIO.of(_))
 //#endregion
 
 //#region ZIP
-// $ExpectType FIO<never, { 0: never; 1: number; }, unknown>
+// $ExpectType FIO<never, [never, number], unknown>
 FIO.never().zip(FIO.of(10))
 
-// $ExpectType FIO<never, { 0: never; 1: never; }, unknown>
+// $ExpectType FIO<never, [never, never], unknown>
 FIO.never().zip(FIO.never())
 
-// $ExpectType FIO<never, { 0: number; 1: Date; }, unknown>
+// $ExpectType FIO<never, [number, Date], unknown>
 FIO.of(1000).zip(FIO.of(new Date()))
 
-// $ExpectType FIO<never, { 0: number; 1: Date; }, unknown>
+// $ExpectType FIO<never, [number, Date], unknown>
 FIO.of(1000).zip(FIO.of(new Date()))
 //#endregion
 
@@ -89,10 +89,10 @@ FIO.never().map(_ => 10)
 // $ExpectType FIO<never, never, unknown>
 FIO.of(10).chain(FIO.never)
 
-// $ExpectType FIO<never, { 0: number; 1: never; }, unknown>
+// $ExpectType FIO<never, [number, never], unknown>
 FIO.of(10).zip(FIO.never())
 
-// $ExpectType FIO<never, { 0: never; 1: number; }, unknown>
+// $ExpectType FIO<never, [never, number], unknown>
 FIO.never().zip(FIO.of(10))
 
 // $ExpectType FIO<never, number, unknown>
@@ -105,4 +105,4 @@ FIO.never().zipWithPar(FIO.of(10), (a, b) => 10)
 FIO.never().raceWith(FIO.of(10), FIO.void, FIO.void)
 
 // $ExpectError Argument of type 'FIO<never, number, string>' is not assignable to parameter of type 'FIO<never, number, unknown>'.
-defaultRuntime().execute(FIO.access((_: string) => _.length))
+defaultRuntime().unsafeExecute(FIO.access((_: string) => _.length))

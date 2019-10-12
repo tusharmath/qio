@@ -99,14 +99,12 @@ export class Managed<E1, A1, R1> {
   public use<E2, A2, R2>(
     fn: (a: A1) => FIO<E2, A2, R2>
   ): FIO<E1 | E2, A2, R1 & R2> {
-    return FIO.flatten(
-      this.reservation.zipWith(FIO.env<R1 & R2>(), (R, ENV) =>
-        R.acquire
-          .chain(fn)
-          .catch(e12 => R.release.and(FIO.reject(e12)))
-          .chain(a2 => R.release.const(a2))
-          .fork.chain(F => F.exit(R.release.provide(ENV)).and(F.resume))
-      )
+    return this.reservation.zipWithM(FIO.env<R1 & R2>(), (R, ENV) =>
+      R.acquire
+        .chain(fn)
+        .catch(e12 => R.release.and(FIO.reject(e12)))
+        .chain(a2 => R.release.const(a2))
+        .fork.chain(F => F.release(R.release.provide(ENV)).and(F.join))
     )
   }
 

@@ -3,7 +3,7 @@
  */
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {CB} from '../internals/CB'
+import {CBOption} from '../internals/CBOption'
 import {FIO} from '../main/FIO'
 
 /**
@@ -15,5 +15,17 @@ import {FIO} from '../main/FIO'
  */
 export interface IRuntime {
   scheduler: IScheduler
-  execute<E, A>(io: FIO<E, A>, res?: CB<A>, rej?: CB<E>): ICancellable
+
+  /**
+   * Executes the provided [[FIO]] expression.
+   * Returns a [[ICancellable]] that can be used to interrupt the execution.
+   */
+  unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
+}
+
+/**
+ * Env needed to get access to the current [[IRuntime]].
+ */
+export interface IRuntimeEnv {
+  runtime: IRuntime
 }

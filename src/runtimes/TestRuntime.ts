@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-24
  */
 
-import {Either} from 'standard-data-structures'
+import {Either, Option} from 'standard-data-structures'
 import {ITestSchedulerOptions} from 'ts-scheduler/src/main/ITestSchedulerOptions'
 import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
@@ -18,20 +18,15 @@ export class TestRuntime extends BaseRuntime {
     this.scheduler = testScheduler(options)
   }
 
-  public executeSync<E, A>(io: IO<E, A>): A | E | undefined {
-    const result = this.exit(io)
-    this.scheduler.run()
-
-    return result.fold<E | A | undefined>(undefined, Id, Id)
+  public unsafeExecuteSync<E, A>(io: IO<E, A>): A | E | undefined {
+    return this.unsafeExecuteSync0(io)
+      .map(_ => _.reduce<A | E | undefined>(Id, Id))
+      .getOrElse(undefined)
   }
 
-  public exit<E, A>(io: FIO<E, A>): Either<E, A> {
-    let result: Either<E, A> = Either.neither()
-    this.execute(
-      io,
-      _ => (result = Either.right(_)),
-      _ => (result = Either.left(_))
-    )
+  public unsafeExecuteSync0<E, A>(io: FIO<E, A>): Option<Either<E, A>> {
+    let result: Option<Either<E, A>> = Option.none()
+    this.unsafeExecute(io, _ => (result = _))
     this.scheduler.run()
 
     return result

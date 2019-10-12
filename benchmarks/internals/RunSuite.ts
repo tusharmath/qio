@@ -32,7 +32,7 @@ export const RunSuite = (
   suite
     .add(
       'FIO',
-      (cb: IDefer) => fioRuntime.execute(test.fio(), () => cb.resolve()),
+      (cb: IDefer) => fioRuntime.unsafeExecute(test.fio(), () => cb.resolve()),
       {defer: true}
     )
     .add(

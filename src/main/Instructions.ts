@@ -1,4 +1,4 @@
-import {ICancellable, IScheduler} from 'ts-scheduler'
+import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 
@@ -7,8 +7,9 @@ import {CB} from '../internals/CB'
  */
 export enum Tag {
   Access,
-  Call,
   Async,
+  Call,
+  Capture,
   Catch,
   Chain,
   Constant,
@@ -61,7 +62,7 @@ export interface ICatch<E = unknown> {
 }
 export interface IAsync<E = unknown, A = unknown> {
   tag: Tag.Async
-  i0(rej: CB<E>, res: CB<A>, sh: IScheduler): ICancellable
+  i0(rej: CB<E>, res: CB<A>): ICancellable
 }
 export interface INever {
   tag: Tag.Never
@@ -79,8 +80,10 @@ export interface IProvide<R = unknown> {
   i1: R
   tag: Tag.Provide
 }
-export interface IRuntime {
-  tag: Tag.Runtime
+
+export interface ICapture<A = unknown> {
+  tag: Tag.Capture
+  i0(i: A): Instruction
 }
 
 /**
@@ -88,8 +91,9 @@ export interface IRuntime {
  */
 export type Instruction =
   | IAccess
-  | ICall
   | IAsync
+  | ICall
+  | ICapture
   | ICatch
   | IChain
   | IConstant
@@ -98,6 +102,5 @@ export type Instruction =
   | INever
   | IProvide
   | IReject
-  | IRuntime
   | ITry
   | ITryM

@@ -1,5 +1,4 @@
-import {LinkedListNode} from 'standard-data-structures'
-import {List} from 'standard-data-structures/src/immutable/list'
+import {LinkedListNode, List} from 'standard-data-structures'
 
 import {PureMutableList} from '../internals/PureMutableList'
 

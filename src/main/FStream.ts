@@ -1,5 +1,7 @@
 import {EventEmitter} from 'events'
 
+import {IRuntimeEnv} from '../runtimes/IRuntime'
+
 import {FIO, NoEnv, UIO} from './FIO'
 import {Managed, UManaged} from './Managed'
 import {Queue} from './Queue'
@@ -82,9 +84,9 @@ export class FStream<E1, A1, R1> {
   public static fromEventEmitter<A = unknown>(
     ev: EventEmitter,
     name: string
-  ): UIO<UManaged<Stream<A>>> {
+  ): FIO<never, UManaged<Stream<A>>, IRuntimeEnv> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
-      const onEvent = (a: A) => RTM.execute(Q.offer(a))
+      const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
       return Managed.make(
         UIO(() => ev.addListener(name, onEvent)).const(Q.asStream),
@@ -114,7 +116,7 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream that emits after every given duration of time.
    */
-  public static interval(duration: number): FStream<never, void, NoEnv> {
+  public static interval(duration: number): FStream<never, void, IRuntimeEnv> {
     return FStream.produce(FIO.timeout(void 0, duration))
   }
 
