@@ -1,13 +1,13 @@
 import {EventEmitter} from 'events'
+import {List} from 'standard-data-structures'
 
+import {T} from '../internals/T'
 import {IRuntimeEnv} from '../runtimes/IRuntime'
 
 import {FIO, NoEnv, UIO} from './FIO'
 import {Managed, UManaged} from './Managed'
 import {Queue} from './Queue'
 import {Ref} from './Ref'
-
-const T = () => true
 const FTrue = FIO.of(true)
 const FTrueCb = () => FTrue
 const Id = <A>(a: A) => a
@@ -60,7 +60,7 @@ export class FStream<E1, A1, R1> {
       ) => {
         const itar = (s: S, i: number): FIO<E, S, R> =>
           FIO.if(
-            cont(s) && i < t.length - 1,
+            cont(s) && i < t.length,
             next(s, t[i]).chain(_ => itar(_, i + 1)),
             FIO.of(s)
           )
@@ -116,8 +116,11 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream that emits after every given duration of time.
    */
-  public static interval(duration: number): FStream<never, void, IRuntimeEnv> {
-    return FStream.produce(FIO.timeout(void 0, duration))
+  public static interval<A1>(
+    A1: A1,
+    duration: number
+  ): FStream<never, A1, IRuntimeEnv> {
+    return FStream.produce(FIO.timeout(A1, duration))
   }
 
   /**
@@ -221,7 +224,7 @@ export class FStream<E1, A1, R1> {
    */
   public forEach<E2, A2, R2>(
     f: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, void, R1 & R2> {
+  ): FIO<E1 | E2, boolean, R1 & R2> {
     return this.forEachWhile(a => f(a).const(true))
   }
 
@@ -230,8 +233,8 @@ export class FStream<E1, A1, R1> {
    */
   public forEachWhile<E2, R2>(
     f: (a: A1) => FIO<E2, boolean, R2>
-  ): FIO<E1 | E2, void, R1 & R2> {
-    return this.fold(true, Id, (s, a) => FIO.if(s, f(a), FIO.of(s))).void
+  ): FIO<E1 | E2, boolean, R1 & R2> {
+    return this.fold(true as boolean, Id, (s, a) => FIO.if(s, f(a), FIO.of(s)))
   }
 
   /**
@@ -302,6 +305,15 @@ export class FStream<E1, A1, R1> {
         s => cont(s._1) && s._0 < count,
         (s, a) => next(s._1, a).map(s2 => ({_0: s._0 + 1, _1: s2}))
       ).map(_ => _._1)
+    )
+  }
+
+  /**
+   * Collects all the values from a stream and returns an Array of those values.
+   */
+  public get asArray(): FIO<E1, A1[], R1> {
+    return this.foldLeft(List.empty<A1>(), (S, A) => S.prepend(A)).map(
+      _ => _.reverse.asArray
     )
   }
 }
