@@ -1,4 +1,8 @@
-import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
+import {
+  DoublyLinkedList,
+  LinkedListNode,
+  Option
+} from 'standard-data-structures'
 
 import {FIO, IO, UIO} from '../main/FIO'
 
@@ -15,7 +19,7 @@ export class PureMutableList<A> {
   public get length(): UIO<number> {
     return UIO(() => this.list.length)
   }
-  public get shift(): UIO<void | A> {
+  public get shift(): UIO<Option<A>> {
     return UIO(() => this.list.shift())
   }
 
@@ -30,7 +34,11 @@ export class PureMutableList<A> {
   }
   public forEach<E1>(f: (a: A) => IO<E1, void>): IO<E1, void> {
     const itar = (): IO<E1, void> =>
-      this.shift.chain(_ => (_ === undefined ? FIO.void() : f(_).chain(itar)))
+      this.shift.chain(_ =>
+        _.map(f)
+          .getOrElse(FIO.void())
+          .chain(itar)
+      )
 
     return itar()
   }

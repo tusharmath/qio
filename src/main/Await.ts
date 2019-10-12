@@ -41,8 +41,11 @@ export class Await<E, A> {
       return io.asEither.encase(either => {
         this.result = Option.some(either)
         while (this.Q.length > 0) {
-          const cb = this.Q.shift() as [CB<E>, CB<A>]
-          either.reduce(...cb)
+          const node = this.Q.shift()
+
+          if (Option.isSome(node)) {
+            either.reduce(...node.value)
+          }
         }
 
         return true

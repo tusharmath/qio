@@ -33,13 +33,15 @@ export class Queue<A = never> {
    */
   public get take(): UIO<A> {
     return this.Q.shift.chain(sz =>
-      sz !== undefined
-        ? FIO.of(sz)
-        : FIO.flatten(
+      sz
+        .map(FIO.of)
+        .getOrElse(
+          FIO.flatten(
             Await.of<never, A>().chain(
               FIO.encase(await => this.T.add(await).and(await.get))
             )
           )
+        )
     )
   }
 
@@ -97,9 +99,9 @@ export class Queue<A = never> {
   private setAwaited(value: A): UIO<boolean[]> {
     const itar = (list: List<UIO<boolean>>): UIO<List<UIO<boolean>>> =>
       this.T.shift.chain(_ =>
-        _ === undefined
-          ? FIO.of(list)
-          : itar(list.prepend(_.set(FIO.of(value))))
+        _.map(AWT => itar(list.prepend(AWT.set(FIO.of(value))))).getOrElse(
+          FIO.of(list)
+        )
       )
 
     return itar(List.empty<UIO<boolean>>()).chain(_ =>

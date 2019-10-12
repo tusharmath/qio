@@ -1,7 +1,11 @@
 /**
  * Created by tushar on 2019-05-24
  */
-import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
+import {
+  DoublyLinkedList,
+  LinkedListNode,
+  Option
+} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 /**
@@ -19,10 +23,12 @@ export class CancellationList implements ICancellable {
 
   public cancel(): void {
     this.cancelled = true
-    let node = this.Q.pop()
-    while (node !== undefined) {
-      node.cancel()
-      node = this.Q.pop()
+    while (this.Q.length > 0) {
+      const node = this.Q.pop()
+
+      if (Option.isSome(node)) {
+        node.value.cancel()
+      }
     }
   }
 
