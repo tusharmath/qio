@@ -303,6 +303,21 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
+   * A different flavour of [[FIO.if]] that takes in functions instead of FIO instances.
+   */
+  public static if0<T extends unknown[]>(
+    ...args: T
+  ): <E1, R1, E2, R2, A>(
+    cond: (...args: T) => boolean,
+    left: (...args: T) => FIO<E1, A, R1>,
+    right: (...args: T) => FIO<E2, A, R2>
+  ) => FIO<E1 | E2, A, R1 & R2> {
+    return (cond, left, right) =>
+      // tslint:disable-next-line: no-any
+      cond(...args) ? left(...args) : (right(...args) as any)
+  }
+
+  /**
    * Transforms the success value using the specified function
    */
   public static map<E1, A1, R1, A2>(
