@@ -33,6 +33,26 @@ describe('FIO', () => {
     })
   })
 
+  describe('chain', () => {
+    it('should error on first failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.reject(err).chain(_ => FIO.of(1))
+      )
+
+      assert.deepEqual(actual, err)
+    })
+
+    it('should error on second failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.of(1).chain(_ => FIO.reject(err))
+      )
+
+      assert.deepEqual(actual, err)
+    })
+  })
+
   describe('access', () => {
     it('should access a value and transform', () => {
       const runtime = testRuntime()
@@ -101,6 +121,26 @@ describe('FIO', () => {
       runtime.scheduler.run()
       cancellable.cancel()
       cancel.should.be.called()
+    })
+  })
+
+  describe('zip', () => {
+    it('should error on first failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.reject(err).zip(FIO.of(1))
+      )
+
+      assert.deepEqual(actual, err)
+    })
+
+    it('should error on second failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.of(1).zip(FIO.reject(err))
+      )
+
+      assert.deepEqual(actual, err)
     })
   })
 
@@ -480,6 +520,24 @@ describe('FIO', () => {
       const expected = 30
       assert.strictEqual(actual, expected)
     })
+
+    it('should error on first failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.reject(err).zipWith(FIO.of(1), (a, b) => [a, b])
+      )
+
+      assert.deepEqual(actual, err)
+    })
+
+    it('should error on second failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.of(1).zipWith(FIO.reject(err), (a, b) => [a, b])
+      )
+
+      assert.deepEqual(actual, err)
+    })
   })
 
   describe('zipWithPar', () => {
@@ -490,6 +548,24 @@ describe('FIO', () => {
       )
 
       assert.deepEqual(actual, [10, 20])
+    })
+
+    it('should error on first failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.reject(err).zipWithPar(FIO.of(1), (a, b) => [a, b])
+      )
+
+      assert.deepEqual(actual, err)
+    })
+
+    it('should error on second failure', () => {
+      const err = new Error('oups')
+      const actual = testRuntime().unsafeExecuteSync(
+        FIO.of(1).zipWithPar(FIO.reject(err), (a, b) => [a, b])
+      )
+
+      assert.deepEqual(actual, err)
     })
 
     it('should combine them in parallel', () => {
