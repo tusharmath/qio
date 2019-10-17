@@ -20,7 +20,7 @@ describe('Queue', () => {
   describe('offer', () => {
     it('should add the element to the queue', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Queue.unbounded<number>().chain(Q => Q.offer(1000).and(Q.size))
+        Queue.unbounded<number>().chain(Q => Q.offer(1000).and(Q.length))
       )
       const expected = 1
 
@@ -32,7 +32,7 @@ describe('Queue', () => {
     it('should add multiple elements to the queue', () => {
       const actual = testRuntime().unsafeExecuteSync(
         Queue.unbounded<number>().chain(Q =>
-          Q.offerAll(1, 2, 3, 4, 5).and(Q.size)
+          Q.offerAll(1, 2, 3, 4, 5).and(Q.length)
         )
       )
       const expected = 5

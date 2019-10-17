@@ -17,14 +17,10 @@ export class Queue<A = never> {
     return this.Q.asArray
   }
 
-  public get length(): UIO<number> {
-    return this.Q.length
-  }
-
   /**
-   * Returns the current size of the queue
+   * Returns the number of elements in the queue
    */
-  public get size(): UIO<number> {
+  public get length(): UIO<number> {
     return this.Q.length
   }
 
