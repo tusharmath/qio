@@ -4,9 +4,9 @@
 import {FIO, UIO} from '../../src/main/FIO'
 import {IRuntimeEnv} from '../../src/runtimes/IRuntime'
 
-export class Snapshot {
+export class Snapshot<T = string> {
   public readonly timeline = new Array<string>()
-  public mark(value: string): FIO<never, string, IRuntimeEnv> {
+  public mark(value: T): FIO<never, T, IRuntimeEnv> {
     return FIO.runtime().chain(RTM =>
       UIO(
         () => void this.timeline.push(value + '@' + RTM.scheduler.now())
