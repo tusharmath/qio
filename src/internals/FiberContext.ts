@@ -53,7 +53,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
     io: IO<E, A>,
     scheduler: IScheduler
   ): FiberContext<E, A> {
-    return new FiberContext(scheduler, io.asInstruction)
+    return new FiberContext(io.asInstruction, scheduler)
   }
 
   private static dispatchResult<E, A>(
@@ -62,8 +62,9 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
   ): void {
     cb(result)
   }
+
   private readonly cancellationList = new CancellationList()
-  private readonly node: LinkedListNode<ICancellable>
+  private node?: LinkedListNode<ICancellable>
   private readonly observers = DoublyLinkedList.of<CBOption<E, A>>()
   private result: Option<Either<E, A>> = Option.none()
   private readonly stackA = new Array<Instruction>()
@@ -71,13 +72,12 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
   private status = FiberStatus.PENDING
 
   private constructor(
+    instruction: Instruction,
     private readonly scheduler: IScheduler,
-    instruction: Instruction
+    private readonly maxInstructionCount: number = Number.MAX_SAFE_INTEGER
   ) {
     this.stackA.push(instruction)
-    this.node = this.cancellationList.push(
-      this.scheduler.asap(this.unsafeEvaluate.bind(this))
-    )
+    this.init()
   }
 
   public cancel(): void {
@@ -110,11 +110,25 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
     this.observers.map(_ => _(this.result))
   }
 
-  private unsafeEvaluate(): void {
-    this.cancellationList.remove(this.node)
-    let data: unknown
+  private init(data?: unknown): void {
+    this.node = this.cancellationList.push(
+      this.scheduler.asap(this.unsafeEvaluate.bind(this), data)
+    )
+  }
 
+  private unsafeEvaluate(ddd?: unknown): void {
+    if (this.node !== undefined) {
+      this.cancellationList.remove(this.node)
+      this.node = undefined
+    }
+
+    let data: unknown = ddd
+    let count = 0
     while (true) {
+      count++
+      if (count === this.maxInstructionCount) {
+        return this.init(data)
+      }
       try {
         const j = this.stackA.pop()
 
@@ -182,7 +196,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
             // A new context is created so that computation from that instruction can happen separately.
             // and then join back into the current context.
             // Using the same stack will corrupt it completely.
-            const nContext = new FiberContext(this.scheduler, j.i0)
+            const nContext = new FiberContext(j.i0, this.scheduler)
             this.cancellationList.push(nContext)
             data = nContext
             break
