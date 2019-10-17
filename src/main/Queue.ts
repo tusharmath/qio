@@ -100,9 +100,9 @@ export class Queue<A = never> {
         )
       )
 
-    return itar(List.empty<UIO<boolean>>()).chain(_ =>
-      FIO.seq(_.asArray).tap(() => (!_.isEmpty ? this.Q.shift : FIO.void()))
-    )
+    return itar(List.empty<UIO<boolean>>())
+      .tap(_ => (!_.isEmpty ? this.Q.shift : FIO.void()))
+      .chain(_ => FIO.seq(_.asArray))
   }
 
   /**

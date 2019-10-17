@@ -5,6 +5,8 @@ import {FIO} from '../src/main/FIO'
 import {FStream} from '../src/main/FStream'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
+import {Snapshot} from './internals/Snapshot'
+
 describe('FStream', () => {
   describe('of', () => {
     it('should emit provided values', () => {
@@ -52,14 +54,19 @@ describe('FStream', () => {
   })
 
   describe('merge', () => {
-    it.skip('should merge two streams', () => {
-      const actual = testRuntime().unsafeExecuteSync(
-        FStream.of(1)
-          .merge(FStream.of(2))
-          .fold(new Array<number>(), () => true, (s, a) => FIO.of([...s, a]))
+    it('should merge two streams', () => {
+      const actual = new Snapshot()
+      const runtime = testRuntime()
+
+      runtime.unsafeExecuteSync(
+        FStream.of('A')
+          .merge(FStream.of('B'))
+          .forEach(_ => actual.mark(_))
+          .provide({runtime})
       )
-      const expected = [1, 2]
-      assert.deepStrictEqual(actual, expected)
+
+      const expected = ['A@1', 'B@1']
+      assert.deepStrictEqual(actual.timeline, expected)
     })
   })
 
