@@ -62,7 +62,6 @@ describe('FStream', () => {
         FStream.of('A')
           .merge(FStream.of('B'))
           .forEach(_ => actual.mark(_))
-          .provide({runtime})
       )
 
       const expected = ['A@1', 'B@1']

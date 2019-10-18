@@ -2,7 +2,6 @@ import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
 import {T} from '../internals/T'
-import {IRuntimeEnv} from '../runtimes/IRuntime'
 
 import {FIO, NoEnv, UIO} from './FIO'
 import {Managed, UManaged} from './Managed'
@@ -88,7 +87,7 @@ export class FStream<E1, A1, R1> {
   public static fromEventEmitter<A = unknown>(
     ev: EventEmitter,
     name: string
-  ): FIO<never, UManaged<Stream<A>>, IRuntimeEnv> {
+  ): FIO<never, UManaged<Stream<A>>> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
       const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
@@ -127,7 +126,7 @@ export class FStream<E1, A1, R1> {
   public static interval<A1>(
     A1: A1,
     duration: number
-  ): FStream<never, A1, IRuntimeEnv> {
+  ): FStream<never, A1, NoEnv> {
     return FStream.produce(FIO.timeout(A1, duration))
   }
 

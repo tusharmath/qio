@@ -4,20 +4,18 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
-import {FiberContext} from '../internals/Fiber'
+import {Fiber} from '../internals/Fiber'
 import {FIO} from '../main/FIO'
 
 import {IRuntime} from './IRuntime'
 
 export abstract class BaseRuntime implements IRuntime {
   public abstract readonly scheduler: IScheduler
+  public constructor(
+    public readonly maxInstructionCount: number = Number.MAX_SAFE_INTEGER
+  ) {}
 
   public unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable {
-    const context = FiberContext.evaluateWith(io, this.scheduler)
-    if (cb !== undefined) {
-      context.unsafeObserve(cb)
-    }
-
-    return context
+    return Fiber.unsafeExecute(io, this, cb)
   }
 }

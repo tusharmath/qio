@@ -7,10 +7,11 @@ import {
   LinkedListNode,
   Option
 } from 'standard-data-structures'
-import {ICancellable, IScheduler} from 'ts-scheduler'
+import {ICancellable} from 'ts-scheduler'
 
 import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
+import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
@@ -33,11 +34,23 @@ enum FiberStatus {
  * @typeparam E Exceptions that can be thrown
  * @typeparam A The success value
  */
-export interface IFiber<E, A> {
-  abort: UIO<void>
-  await: UIO<Option<Either<E, A>>>
-  join: FIO<E, A>
-  release(p: UIO<void>): UIO<void>
+export abstract class Fiber<E, A> {
+  /**
+   * Executes the provided [[FIO]] expression.
+   * Returns a [[ICancellable]] that can be used to interrupt the execution.
+   */
+  public static unsafeExecute<E, A>(
+    io: IO<E, A>,
+    runtime: IRuntime,
+    cb?: CBOption<E, A>
+  ): ICancellable {
+    return FiberContext.unsafeExecute<E, A>(io, runtime, cb)
+  }
+  public abstract abort: UIO<void>
+  public abstract await: UIO<Option<Either<E, A>>>
+  public abstract join: FIO<E, A>
+  public abstract runtime: IRuntime
+  public abstract release(p: UIO<void>): UIO<void>
 }
 
 /**
@@ -46,7 +59,7 @@ export interface IFiber<E, A> {
  * As soon as its created it starts to evaluate the FIO expression.
  * It provides public APIs to [[Fiber]] to consume.
  */
-export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
+export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
   public get abort(): UIO<void> {
     return UIO(() => this.cancel())
   }
@@ -62,12 +75,17 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
   /**
    * Evaluates an IO using the provided scheduler
    */
-  public static evaluateWith<E, A>(
+  public static unsafeExecute<E, A>(
     io: IO<E, A>,
-    scheduler: IScheduler,
-    maxInstructionCount: number = Number.MAX_SAFE_INTEGER
+    runtime: IRuntime,
+    cb?: CBOption<E, A>
   ): FiberContext<E, A> {
-    return new FiberContext(io.asInstruction, scheduler, maxInstructionCount)
+    const context = new FiberContext<E, A>(io.asInstruction, runtime)
+    if (cb !== undefined) {
+      context.unsafeObserve(cb)
+    }
+
+    return context
   }
 
   private static dispatchResult<E, A>(
@@ -87,9 +105,9 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
 
   private constructor(
     instruction: Instruction,
-    private readonly scheduler: IScheduler,
-    private readonly maxInstructionCount: number
+    public readonly runtime: IRuntime
   ) {
+    super()
     this.stackA.push(instruction)
     this.init()
   }
@@ -107,10 +125,18 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
 
   public unsafeObserve(cb: CBOption<E, A>): ICancellable {
     if (this.status === FiberStatus.CANCELLED) {
-      return this.scheduler.asap(FiberContext.dispatchResult, Option.none(), cb)
+      return this.runtime.scheduler.asap(
+        FiberContext.dispatchResult,
+        Option.none(),
+        cb
+      )
     }
     if (this.status === FiberStatus.COMPLETED) {
-      return this.scheduler.asap(FiberContext.dispatchResult, this.result, cb)
+      return this.runtime.scheduler.asap(
+        FiberContext.dispatchResult,
+        this.result,
+        cb
+      )
     }
 
     const node = this.observers.add(cb)
@@ -126,7 +152,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
 
   private init(data?: unknown): void {
     this.node = this.cancellationList.push(
-      this.scheduler.asap(this.unsafeEvaluate.bind(this), data)
+      this.runtime.scheduler.asap(this.unsafeEvaluate.bind(this), data)
     )
   }
 
@@ -140,7 +166,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
     let count = 0
     while (true) {
       count++
-      if (count === this.maxInstructionCount) {
+      if (count === this.runtime.maxInstructionCount) {
         return this.init(data)
       }
       try {
@@ -157,6 +183,10 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
 
           case Tag.Call:
             this.stackA.push(j.i0(...j.i1))
+            break
+
+          case Tag.Runtime:
+            data = this.runtime
             break
 
           case Tag.Reject:
@@ -210,7 +240,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
             // A new context is created so that computation from that instruction can happen separately.
             // and then join back into the current context.
             // Using the same stack will corrupt it completely.
-            const nContext = new FiberContext(j.i0, this.scheduler, j.i1)
+            const nContext = new FiberContext(j.i0, j.i1)
             this.cancellationList.push(nContext)
             data = nContext
             break
@@ -263,7 +293,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
 
   private unsafeRelease(p: UIO<void>): void {
     this.cancellationList.push({
-      cancel: () => FiberContext.evaluateWith(p, this.scheduler)
+      cancel: () => Fiber.unsafeExecute(p, this.runtime)
     })
   }
 }

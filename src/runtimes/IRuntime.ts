@@ -14,6 +14,7 @@ import {FIO} from '../main/FIO'
  * Actual implementation is available at [[DefaultRuntime]] & [[TestRuntime]].
  */
 export interface IRuntime {
+  maxInstructionCount: number
   scheduler: IScheduler
 
   /**
@@ -21,11 +22,4 @@ export interface IRuntime {
    * Returns a [[ICancellable]] that can be used to interrupt the execution.
    */
   unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
-}
-
-/**
- * Env needed to get access to the current [[IRuntime]].
- */
-export interface IRuntimeEnv {
-  runtime: IRuntime
 }

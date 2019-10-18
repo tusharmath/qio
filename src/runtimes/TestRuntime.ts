@@ -11,10 +11,13 @@ import {FIO, IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
+type TestRuntimeOptions = Partial<
+  ITestSchedulerOptions & {maxInstructionCount: number}
+>
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler: TestScheduler
-  public constructor(options?: Partial<ITestSchedulerOptions>) {
-    super()
+  public constructor(options: TestRuntimeOptions) {
+    super(options.maxInstructionCount)
     this.scheduler = testScheduler(options)
   }
 
@@ -33,5 +36,4 @@ export class TestRuntime extends BaseRuntime {
   }
 }
 
-export const testRuntime = (O?: Partial<ITestSchedulerOptions>) =>
-  new TestRuntime(O)
+export const testRuntime = (O: TestRuntimeOptions = {}) => new TestRuntime(O)
