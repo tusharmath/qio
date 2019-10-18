@@ -1,9 +1,9 @@
 /* tslint:disable: no-use-before-declare no-console no-unbound-method strict-comparisons */
 
 import {FIO} from '../..'
+import {Fiber} from '../../src/internals/Fiber'
 import {UIO} from '../../src/main/FIO'
 import {FMap} from '../../src/main/FMap'
-import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 const fib = (N: bigint) =>
   FMap.of<bigint, bigint>().chain(cache => {
@@ -20,4 +20,4 @@ const fib = (N: bigint) =>
     return itar(N)
   })
 
-defaultRuntime().unsafeExecute(fib(10n), console.log)
+Fiber.unsafeExecute(fib(10n), console.log)

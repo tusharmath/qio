@@ -13,10 +13,4 @@ import {IScheduler} from 'ts-scheduler'
 export interface IRuntime {
   maxInstructionCount: number
   scheduler: IScheduler
-
-  /**
-   * Executes the provided [[FIO]] expression.
-   * Returns a [[ICancellable]] that can be used to interrupt the execution.
-   */
-  // unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
 }

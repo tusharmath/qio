@@ -1,6 +1,6 @@
 import * as http from 'http'
 
-import {defaultRuntime, FIO, IRuntime, Managed, UIO} from '../..'
+import {FIO, IRuntime, Managed, UIO} from '../..'
 import {Fiber} from '../internals/Fiber'
 
 const Exit = FIO.encase((message: Error) => {
@@ -53,7 +53,7 @@ class FIOServer {
     res: http.ServerResponse
   ) => {
     if (req.url !== undefined && this.options.mounted.hasOwnProperty(req.url)) {
-      Fiber.unsafeExecute(
+      Fiber.unsafeExecuteWith(
         this.options.mounted[req.url](req).encase(chunk => res.end(chunk)),
         this.RTM
       )
@@ -67,7 +67,6 @@ class FIOServer {
   }
 }
 
-const runtime = defaultRuntime()
-runtime.unsafeExecute(
+Fiber.unsafeExecute(
   FIOServerBuilder.of().mount('/greet', () => FIO.of('Hello World!')).serve
 )

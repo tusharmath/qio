@@ -14,8 +14,4 @@ export abstract class BaseRuntime implements IRuntime {
   public constructor(
     public readonly maxInstructionCount: number = Number.MAX_SAFE_INTEGER
   ) {}
-
-  public unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable {
-    return Fiber.unsafeExecute(io, this, cb)
-  }
 }

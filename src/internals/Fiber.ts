@@ -11,6 +11,7 @@ import {ICancellable} from 'ts-scheduler'
 
 import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
+import {defaultRuntime} from '../runtimes/DefaultRuntime'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
@@ -41,10 +42,32 @@ export abstract class Fiber<E, A> {
    */
   public static unsafeExecute<E, A>(
     io: IO<E, A>,
+    cb?: CBOption<E, A>
+  ): ICancellable {
+    const runtime = defaultRuntime()
+
+    return FiberContext.unsafeExecuteWith<E, A>(io, runtime, cb)
+  }
+
+  public static async unsafeExecutePromise<E, A>(
+    io: IO<E, A>,
+    cb?: CBOption<E, A>
+  ): Promise<A> {
+    return new Promise((res, rej) => {
+      Fiber.unsafeExecute(io, O => O.map(_ => _.reduce(rej, res)))
+    })
+  }
+
+  /**
+   * Uses a shared runtime to evaluate a [[FIO]] expression.
+   * Returns a [[ICancellable]] that can be used to interrupt the execution.
+   */
+  public static unsafeExecuteWith<E, A>(
+    io: IO<E, A>,
     runtime: IRuntime,
     cb?: CBOption<E, A>
   ): ICancellable {
-    return FiberContext.unsafeExecute<E, A>(io, runtime, cb)
+    return FiberContext.unsafeExecuteWith<E, A>(io, runtime, cb)
   }
   public abstract abort: UIO<void>
   public abstract await: UIO<Option<Either<E, A>>>
@@ -75,7 +98,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
   /**
    * Evaluates an IO using the provided scheduler
    */
-  public static unsafeExecute<E, A>(
+  public static unsafeExecuteWith<E, A>(
     io: IO<E, A>,
     runtime: IRuntime,
     cb?: CBOption<E, A>
@@ -293,7 +316,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
 
   private unsafeRelease(p: UIO<void>): void {
     this.cancellationList.push({
-      cancel: () => Fiber.unsafeExecute(p, this.runtime)
+      cancel: () => Fiber.unsafeExecuteWith(p, this.runtime)
     })
   }
 }

@@ -4,11 +4,9 @@
 
 /* tslint:disable */
 import {Suite} from 'benchmark'
-
+import {Fiber} from '../src/internals/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
-
 import {PrintLn} from './internals/PrintLn'
-import {fioRuntime} from './internals/RunSuite'
 
 const suite = new Suite('Stream')
 
@@ -42,15 +40,13 @@ suite
 
   .add(
     'Recursion',
-    (cb: IDefer) =>
-      fioRuntime.unsafeExecute(fioRecursion(arr), () => cb.resolve()),
+    (cb: IDefer) => Fiber.unsafeExecute(fioRecursion(arr), () => cb.resolve()),
     {defer: true}
   )
 
   .add(
     'Iterative',
-    (cb: IDefer) =>
-      fioRuntime.unsafeExecute(fioIteration(arr), () => cb.resolve()),
+    (cb: IDefer) => Fiber.unsafeExecute(fioIteration(arr), () => cb.resolve()),
     {defer: true}
   )
 

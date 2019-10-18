@@ -6,16 +6,13 @@
 
 import * as readline from 'readline'
 import 'source-map-support/register'
+import {Fiber} from '../../../src/internals/Fiber'
 import {FIO} from '../../../src/main/FIO'
-
-import {defaultRuntime} from '../../../src/runtimes/DefaultRuntime'
 import {getStrLn} from './GetStrLn'
-
 import {program} from './Program'
 import {putStrLn} from './PutStrLn'
 
-const runtime = defaultRuntime()
-runtime.unsafeExecute(
+Fiber.unsafeExecute(
   program.provide({
     math: Math,
     tty: {

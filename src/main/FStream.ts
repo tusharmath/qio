@@ -90,7 +90,7 @@ export class FStream<E1, A1, R1> {
     name: string
   ): FIO<never, UManaged<Stream<A>>> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
-      const onEvent = (a: A) => Fiber.unsafeExecute(Q.offer(a), RTM)
+      const onEvent = (a: A) => Fiber.unsafeExecuteWith(Q.offer(a), RTM)
 
       return Managed.make(
         UIO(() => ev.addListener(name, onEvent)).const(Q.asStream),

@@ -2,13 +2,11 @@
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
+import {Fiber} from '../../src/internals/Fiber'
 import {noop} from '../../src/internals/Noop'
 import {UIO} from '../../src/main/FIO'
-import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
 
 import {PrintLn} from './PrintLn'
-
-export const fioRuntime = defaultRuntime()
 
 export const RunSuite = (
   name: string,
@@ -32,7 +30,7 @@ export const RunSuite = (
   suite
     .add(
       'FIO',
-      (cb: IDefer) => fioRuntime.unsafeExecute(test.fio(), () => cb.resolve()),
+      (cb: IDefer) => Fiber.unsafeExecute(test.fio(), () => cb.resolve()),
       {defer: true}
     )
     .add(
