@@ -4,7 +4,7 @@
 import {FIO, UIO} from '../../src/main/FIO'
 import {IRuntimeEnv} from '../../src/runtimes/IRuntime'
 
-export class Snapshot<T = string> {
+export class Snapshot<T = string | number> {
   public readonly timeline = new Array<string>()
   public mark(value: T): FIO<never, T, IRuntimeEnv> {
     return FIO.runtime().chain(RTM =>
