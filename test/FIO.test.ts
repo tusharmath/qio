@@ -5,9 +5,8 @@
 import {assert, spy} from 'chai'
 import {Either} from 'standard-data-structures'
 
-import {FiberContext} from '../src/internals/Fiber'
+import {Fiber, FiberContext} from '../src/internals/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
-import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
@@ -81,8 +80,7 @@ describe('FIO', () => {
 
   describe('async', () => {
     it('should evaluate asynchronously', async () => {
-      const runtime = defaultRuntime()
-      const actual = await runtime.unsafeExecutePromise(
+      const actual = await Fiber.unsafeExecutePromise(
         FIO.asyncIO((rej, res) => {
           const id = setTimeout(res, 100, 1000)
 
@@ -220,8 +218,7 @@ describe('FIO', () => {
 
   describe('encaseP', () => {
     it('should resolve the encased function', async () => {
-      const runtime = defaultRuntime()
-      const actual = await runtime.unsafeExecutePromise(
+      const actual = await Fiber.unsafeExecutePromise(
         FIO.encaseP((a: number, b: number) => Promise.resolve(a + b))(1, 1000)
       )
       const expected = 1001
