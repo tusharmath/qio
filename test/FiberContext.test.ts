@@ -4,6 +4,7 @@ import {testScheduler} from 'ts-scheduler/test'
 
 import {FiberContext} from '../src/internals/FiberContext'
 import {FIO} from '../src/main/FIO'
+import {FStream} from '../src/main/FStream'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
@@ -194,6 +195,49 @@ describe('FiberContext', () => {
     })
     context('on cancellation', () => {
       it.skip('should return none')
+    })
+  })
+
+  context('instruction count is reduced', () => {
+    it.skip('should cooperatively merge two streams', () => {
+      const list = new Array<number>()
+      const insert = FIO.encase((_: number) => void list.push(_))
+
+      const scheduler = testScheduler()
+      FiberContext.evaluateWith(
+        FStream.range(101, 103)
+          .merge(FStream.range(901, 903))
+          .mapM(insert).drain,
+        scheduler,
+        5
+      )
+
+      scheduler.run()
+
+      const expected = [901, 101, 102, 103, 902, 903]
+      assert.deepStrictEqual(list, expected)
+    })
+
+    it('should switch between multiple contexts', () => {
+      const MAX_INSTRUCTION_COUNT = 5
+      const scheduler = testScheduler()
+      const actual = new Array<number>()
+      const insert = FIO.encase((_: number) => void actual.push(_))
+      const longIO = FIO.of(1)
+        .and(FIO.of(2))
+        .and(FIO.of(3))
+        .and(FIO.of(4))
+        .and(FIO.of(5))
+        .chain(insert)
+      const shortIO = FIO.of(1000).chain(insert)
+
+      FiberContext.evaluateWith(longIO, scheduler, MAX_INSTRUCTION_COUNT)
+      FiberContext.evaluateWith(shortIO, scheduler, 5)
+
+      scheduler.run()
+
+      const expected = [1000, 5]
+      assert.deepStrictEqual(actual, expected)
     })
   })
 })

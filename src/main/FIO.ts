@@ -280,8 +280,11 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Creates a new [[Fiber]] to run the given [[IO]].
    */
-  public static fork<E1, A1>(io: IO<E1, A1>): UIO<IFiber<E1, A1>> {
-    return new FIO(Tag.Fork, io)
+  public static fork<E1, A1>(
+    io: IO<E1, A1>,
+    maxInstructionCount: number = Number.MAX_SAFE_INTEGER
+  ): UIO<IFiber<E1, A1>> {
+    return new FIO(Tag.Fork, io, maxInstructionCount)
   }
 
   /**

@@ -1,6 +1,4 @@
-import {LinkedListNode, List} from 'standard-data-structures'
-
-import {PureMutableList} from '../internals/PureMutableList'
+import {DoublyLinkedList, List, Option} from 'standard-data-structures'
 
 import {Await} from './Await'
 import {FIO, NoEnv, UIO} from './FIO'
@@ -14,41 +12,44 @@ export class Queue<A = never> {
    * Returns the Queue as an array
    */
   public get asArray(): UIO<A[]> {
-    return this.Q.asArray
+    return UIO(() => this.Q.asArray)
   }
 
   /**
    * Returns the number of elements in the queue
    */
   public get length(): UIO<number> {
-    return this.Q.length
+    return UIO(() => this.Q.length)
   }
 
   /**
    * Pulls an item from the queue
    */
   public get take(): UIO<A> {
-    return this.Q.shift.chain(sz =>
-      sz
-        .map(FIO.of)
-        .getOrElse(
-          FIO.flatten(
-            Await.of<never, A>().chain(
-              FIO.encase(await => this.T.add(await).and(await.get))
-            )
-          )
+    return FIO.flattenM(() => {
+      const sz = this.Q.shift()
+
+      if (Option.isSome(sz)) {
+        return FIO.of(sz.value)
+      }
+
+      return FIO.flatten(
+        Await.of<never, A>().chain(
+          FIO.encase(await => {
+            this.T.add(await)
+
+            return await.get
+          })
         )
-    )
+      )
+    })
   }
 
   /**
    * Creates a new bounded Queue
    */
   public static bounded<A>(capacity: number): UIO<Queue<A>> {
-    return PureMutableList.of<A>().zipWith(
-      PureMutableList.of<Await<never, A>>(),
-      (Q, T) => new Queue(capacity, Q, T)
-    )
+    return UIO(() => new Queue(capacity))
   }
 
   /**
@@ -58,24 +59,40 @@ export class Queue<A = never> {
     return Queue.bounded(Number.MAX_SAFE_INTEGER)
   }
 
-  private constructor(
-    public readonly capacity: number,
-    private readonly Q: PureMutableList<A>,
-    private readonly T: PureMutableList<Await<never, A>>
-  ) {}
+  private readonly Q = DoublyLinkedList.of<A>()
+  private readonly T = DoublyLinkedList.of<Await<never, A>>()
+  private constructor(public readonly capacity: number) {}
 
   /**
    * Inserts an item into the queue
    */
-  public offer(a: A): UIO<LinkedListNode<A>> {
-    return this.Q.add(a).tap(_ => this.setAwaited(_.value))
+  public offer(a: A): UIO<void> {
+    return FIO.flattenM(
+      (): UIO<void> => {
+        if (this.T.length === 0) {
+          this.Q.add(a)
+
+          return FIO.void()
+        }
+
+        const io = new Array<UIO<boolean>>()
+        while (this.T.length !== 0) {
+          const item = this.T.shift()
+          if (Option.isSome(item)) {
+            io.push(item.value.set(FIO.of(a)))
+          }
+        }
+
+        return FIO.seq(io).void
+      }
+    )
   }
 
   /**
    * Adds all the provided items into the queue
    */
-  public offerAll(...a: A[]): UIO<Array<LinkedListNode<A>>> {
-    return FIO.seq(a.map(_ => this.offer(_)))
+  public offerAll(...a: A[]): UIO<void> {
+    return FIO.seq(a.map(_ => this.offer(_))).void
   }
 
   /**
@@ -90,19 +107,6 @@ export class Queue<A = never> {
       )
 
     return itar(0, List.empty<A>()).map(_ => _.asArray)
-  }
-
-  private setAwaited(value: A): UIO<boolean[]> {
-    const itar = (list: List<UIO<boolean>>): UIO<List<UIO<boolean>>> =>
-      this.T.shift.chain(_ =>
-        _.map(AWT => itar(list.prepend(AWT.set(FIO.of(value))))).getOrElse(
-          FIO.of(list)
-        )
-      )
-
-    return itar(List.empty<UIO<boolean>>())
-      .tap(_ => (!_.isEmpty ? this.Q.shift : FIO.void()))
-      .chain(_ => FIO.seq(_.asArray))
   }
 
   /**

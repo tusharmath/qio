@@ -69,6 +69,7 @@ export interface INever {
 }
 export interface IFork {
   i0: Instruction
+  i1: number // TODO: Instead of number pass runtime.
   tag: Tag.Fork
 }
 export interface IAccess<X = unknown, Y = unknown> {

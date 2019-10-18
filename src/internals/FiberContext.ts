@@ -51,9 +51,10 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
    */
   public static evaluateWith<E, A>(
     io: IO<E, A>,
-    scheduler: IScheduler
+    scheduler: IScheduler,
+    maxInstructionCount: number = Number.MAX_SAFE_INTEGER
   ): FiberContext<E, A> {
-    return new FiberContext(io.asInstruction, scheduler)
+    return new FiberContext(io.asInstruction, scheduler, maxInstructionCount)
   }
 
   private static dispatchResult<E, A>(
@@ -74,7 +75,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
   private constructor(
     instruction: Instruction,
     private readonly scheduler: IScheduler,
-    private readonly maxInstructionCount: number = Number.MAX_SAFE_INTEGER
+    private readonly maxInstructionCount: number
   ) {
     this.stackA.push(instruction)
     this.init()
@@ -196,7 +197,7 @@ export class FiberContext<E, A> implements ICancellable, IFiber<E, A> {
             // A new context is created so that computation from that instruction can happen separately.
             // and then join back into the current context.
             // Using the same stack will corrupt it completely.
-            const nContext = new FiberContext(j.i0, this.scheduler)
+            const nContext = new FiberContext(j.i0, this.scheduler, j.i1)
             this.cancellationList.push(nContext)
             data = nContext
             break
