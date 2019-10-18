@@ -1,10 +1,7 @@
 /**
  * Created by tushar on 2019-05-07
  */
-import {ICancellable, IScheduler} from 'ts-scheduler'
-
-import {CBOption} from '../internals/CBOption'
-import {FIO} from '../main/FIO'
+import {IScheduler} from 'ts-scheduler'
 
 /**
  * Base runtime that is used to execute any [[FIO]].
@@ -21,5 +18,5 @@ export interface IRuntime {
    * Executes the provided [[FIO]] expression.
    * Returns a [[ICancellable]] that can be used to interrupt the execution.
    */
-  unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
+  // unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
 }

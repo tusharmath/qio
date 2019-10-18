@@ -1,6 +1,7 @@
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
+import {Fiber} from '../internals/Fiber'
 import {T} from '../internals/T'
 
 import {FIO, NoEnv, UIO} from './FIO'
@@ -89,7 +90,7 @@ export class FStream<E1, A1, R1> {
     name: string
   ): FIO<never, UManaged<Stream<A>>> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
-      const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
+      const onEvent = (a: A) => Fiber.unsafeExecute(Q.offer(a), RTM)
 
       return Managed.make(
         UIO(() => ev.addListener(name, onEvent)).const(Q.asStream),

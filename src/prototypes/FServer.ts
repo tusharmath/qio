@@ -1,6 +1,7 @@
 import * as http from 'http'
 
 import {defaultRuntime, FIO, IRuntime, Managed, UIO} from '../..'
+import {Fiber} from '../internals/Fiber'
 
 const Exit = FIO.encase((message: Error) => {
   process.exit(1)
@@ -52,8 +53,9 @@ class FIOServer {
     res: http.ServerResponse
   ) => {
     if (req.url !== undefined && this.options.mounted.hasOwnProperty(req.url)) {
-      this.RTM.unsafeExecute(
-        this.options.mounted[req.url](req).encase(chunk => res.end(chunk))
+      Fiber.unsafeExecute(
+        this.options.mounted[req.url](req).encase(chunk => res.end(chunk)),
+        this.RTM
       )
     }
   }
