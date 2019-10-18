@@ -5,7 +5,7 @@
 import {assert, spy} from 'chai'
 import {Either} from 'standard-data-structures'
 
-import {FiberContext} from '../src/internals/FiberContext'
+import {FiberContext} from '../src/internals/Fiber'
 import {FIO, UIO} from '../src/main/FIO'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {IRuntime} from '../src/runtimes/IRuntime'

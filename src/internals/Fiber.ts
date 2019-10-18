@@ -10,7 +10,6 @@ import {
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {FIO, IO, UIO} from '../main/FIO'
-import {IFiber} from '../main/IFiber'
 import {Instruction, Tag} from '../main/Instructions'
 
 import {CancellationList} from './CancellationList'
@@ -25,6 +24,20 @@ enum FiberStatus {
   PENDING,
   COMPLETED,
   CANCELLED
+}
+
+/**
+ * Fibers are data structures that provide you a handle to control the execution of its `IO`.
+ * They can be created by calling the [[FIO.fork]] method.
+ * Fiber created is always going to be in a `Paused` state. To resume the fiber, you should call the `resume` or the `resumeAsync` methods.
+ * @typeparam E Exceptions that can be thrown
+ * @typeparam A The success value
+ */
+export interface IFiber<E, A> {
+  abort: UIO<void>
+  await: UIO<Option<Either<E, A>>>
+  join: FIO<E, A>
+  release(p: UIO<void>): UIO<void>
 }
 
 /**

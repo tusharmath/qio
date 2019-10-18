@@ -4,7 +4,7 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
-import {FiberContext} from '../internals/FiberContext'
+import {FiberContext} from '../internals/Fiber'
 import {FIO} from '../main/FIO'
 
 import {IRuntime} from './IRuntime'

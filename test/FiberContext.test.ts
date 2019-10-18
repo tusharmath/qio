@@ -2,7 +2,7 @@ import {assert, spy} from 'chai'
 import {Either, Option} from 'standard-data-structures'
 import {testScheduler} from 'ts-scheduler/test'
 
-import {FiberContext} from '../src/internals/FiberContext'
+import {FiberContext} from '../src/internals/Fiber'
 import {FIO} from '../src/main/FIO'
 import {FStream} from '../src/main/FStream'
 import {testRuntime} from '../src/runtimes/TestRuntime'

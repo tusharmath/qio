@@ -6,11 +6,11 @@ import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
+import {IFiber} from '../internals/Fiber'
 import {Id} from '../internals/Id'
 import {IRuntime, IRuntimeEnv} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
-import {IFiber} from './IFiber'
 import {Instruction, Tag} from './Instructions'
 
 export type NoEnv = unknown
