@@ -1,11 +1,7 @@
 /**
  * Created by tushar on 2019-05-25
  */
-import {ICancellable, IScheduler} from 'ts-scheduler'
-
-import {CBOption} from '../internals/CBOption'
-import {Fiber} from '../internals/Fiber'
-import {FIO} from '../main/FIO'
+import {IScheduler} from 'ts-scheduler'
 
 import {IRuntime} from './IRuntime'
 

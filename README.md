@@ -24,15 +24,14 @@ npm i fearless-io
 # Usage
 
 ```typescript
-import {IO, defaultRuntime} from 'fearless-io'
+import {IO, Fiber} from 'fearless-io'
 
 // Create a pure version of `console.log` called `putStrLn`
 const putStrLn = IO.encase((str: string) => console.log(str))
 
 const hello = putStrLn('Hello World!')
 
-const runtime = defaultRuntime()
-runtime.unsafeExecute(hello)
+Fiber.unsafeExecute(hello)
 ```
 
 # Getting Started
@@ -98,11 +97,11 @@ Execution of FIO happens through a [Runtime].
 
 ```diff
 - import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
++ import {FIO, Fiber} from 'fearless-io'
 
   const Greet = () => console.log('Hello World!')
   const GreetIO = FIO.encase(Greet)
-+ defaultRuntime().unsafeExecute(GreetIO())
++ Fiber.unsafeExecute(GreetIO())
 ```
 
 # Serial Execution
@@ -133,14 +132,14 @@ In the above code either `foo` or `bar` can be printed first depending on intern
 
 ```diff
 - import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
++ import {FIO, Fiber} from 'fearless-io'
   const putStrLn = FIO.encase((msg: string) => console.log(msg))
 
   const fooIO = putStrLn('foo')
   const barIO = putStrLn('bar')
 
   const fooBar = fooIO.and(barIO)
-+ defaultRuntime().unsafeExecute(fooBar)
++ Fiber.unsafeExecute(fooBar)
 ```
 
 [and]: https://tusharmath.com/fearless-io/classes/fio.html#and
@@ -174,13 +173,13 @@ Execute the created IO
 
 ```diff
 - import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
++ import {FIO, Fiber} from 'fearless-io'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
   const fooBar = foo.zip(bar)
 
-+ defaultRuntime().unsafeExecute(fooBar)
++ Fiber.unsafeExecute(fooBar)
 ```
 
 The program `fooBar` will complete in `1500`ms because both are executed in parallel.
@@ -200,21 +199,21 @@ Create an IO
 + const delayIO = FIO.timeout('Hello World', 1000)
 ```
 
-Execute by passing it to `defaultRuntime`
+Execute by passing it to `Fiber`
 
 ```diff
 - import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
++ import {FIO, Fiber} from 'fearless-io'
   const delayIO = FIO.timeout('Hello World', 1000)
-+ const cancel = defaultRuntime().unsafeExecute(delayIO)
++ const cancel = Fiber.unsafeExecute(delayIO)
 ```
 
 Calling the cancelling callback.
 
 ```diff
-  import {FIO, defaultRuntime} from 'fearless-io'
+  import {FIO, Fiber} from 'fearless-io'
   const delayIO = FIO.timeout('Hello World', 1000)
-  const cancel = defaultRuntime().execute(delayIO)
+  const cancel = Fiber.execute(delayIO)
 + cancel()
 ```
 
@@ -315,7 +314,7 @@ Running the program can be done by using the runtime.
 
 ```diff
 - import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
++ import {FIO, Fiber} from 'fearless-io'
   import config from 'node-config'
   interface Config {
     port: number
@@ -332,7 +331,7 @@ Running the program can be done by using the runtime.
     config: config
   }
   const program0 = program.provide(env)
-+ defaultRuntime().unsafeExecute(program0)
++ Fiber.unsafeExecute(program0)
 ```
 
 [provide]: https://tusharmath.com/fearless-io/classes/fio.html#provide

@@ -25,13 +25,12 @@ export type Stream<A1> = FStream<never, A1, NoEnv>
  *
  * **Example:**
  * ```ts
- * import {FStream} from 'fearless-io'
+ * import {FStream, Fiber} from 'fearless-io'
  *
  *
  * const s = FStream.of(1, 2, 3).reduce(0, (a, b) => a + b)
  *
- * const runtime = defaultRuntime()
- * runtime.execute(s.drain, console.log) // 6
+ * Fiber.unsafeExecute(s.drain, console.log) // 6
  * ```
  */
 export class FStream<E1, A1, R1> {
