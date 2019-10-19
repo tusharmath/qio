@@ -3,7 +3,6 @@ import {Either, Option} from 'standard-data-structures'
 
 import {FiberContext} from '../src/internals/Fiber'
 import {FIO} from '../src/main/FIO'
-import {FStream} from '../src/main/FStream'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'

@@ -476,7 +476,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Tries to run an function that returns a promise.
    */
-  public static tryP<A>(cb: () => Promise<A>): TaskR<A, NoEnv> {
+  public static tryP<A>(cb: () => Promise<A>): Task<A> {
     return FIO.encaseP(cb)()
   }
 
