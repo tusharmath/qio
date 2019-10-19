@@ -27,7 +27,7 @@
     "semantic-release": "semantic-release",
     "test": "mocha",
     "travis-deploy-once": "travis-deploy-once --pro",
-    "create-docs": "typedoc",
+    "create-docs": "cd website; yarn build; cd ..; typedoc;",
     "update-benchmarks": "benchmarks/run.sh",
     "check-types": "typings-checker --allow-expect-error type-test/*.ts",
     "typings-checker": "typings-checker",
@@ -65,8 +65,5 @@
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
     "ts-scheduler": "^8.0.1"
-  },
-  "workspaces": [
-    "website"
-  ]
+  }
 }
