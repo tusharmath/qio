@@ -47,7 +47,9 @@
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
     "cz-conventional-changelog": "^3.0.2",
+    "docusaurus": "^1.13.0",
     "fluture": "^11.0.3",
+    "lerna": "^3.8.0",
     "mocha": "^6.2.1",
     "prettier": "^1.18.2",
     "semantic-release": "^15.13.24",
@@ -58,8 +60,7 @@
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.6.4",
     "typescript-tslint-plugin": "^0.5.4",
-    "typings-checker": "^2.0.0",
-    "docusaurus": "^1.13.0"
+    "typings-checker": "^2.0.0"
   },
   "dependencies": {
     "checked-exceptions": "^1.2.0",
