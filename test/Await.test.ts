@@ -64,14 +64,7 @@ describe('Await', () => {
       const counter = new Counter()
 
       // Create an IO that takes a second to run
-      runtime.unsafeExecuteSync(
-        AWT.set(
-          counter
-            .inc()
-            .delay(1000)
-            .provide({runtime})
-        )
-      )
+      runtime.unsafeExecuteSync(AWT.set(counter.inc().delay(1000)))
 
       // Run till 500 (half time for the original IO
       runtime.scheduler.runTo(500)
@@ -123,9 +116,7 @@ describe('Await', () => {
       ) as Await<never, string>
       const res = spy()
       runtime.unsafeExecute(await.get, res)
-      runtime.unsafeExecute(
-        await.set(FIO.timeout('Hey', 1000).provide({runtime}))
-      )
+      runtime.unsafeExecute(await.set(FIO.timeout('Hey', 1000)))
 
       res.should.not.be.called()
       runtime.scheduler.run()

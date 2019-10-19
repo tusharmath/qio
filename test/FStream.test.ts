@@ -62,11 +62,32 @@ describe('FStream', () => {
         FStream.of('A')
           .merge(FStream.of('B'))
           .forEach(_ => actual.mark(_))
-          .provide({runtime})
       )
 
       const expected = ['A@1', 'B@1']
       assert.deepStrictEqual(actual.timeline, expected)
+    })
+    context('lower maxInstructionCount', () => {
+      it('should interleave values from two ranges', () => {
+        const actual = new Array<number>()
+        const insert = FIO.encase((_: number) => void actual.push(_))
+        const MAX_INSTRUCTION_COUNT = 5
+        const runtime = testRuntime({
+          maxInstructionCount: MAX_INSTRUCTION_COUNT
+        })
+
+        runtime.unsafeExecuteSync(
+          FStream.range(101, 103)
+            .merge(FStream.range(901, 903))
+            .mapM(insert).drain
+        )
+
+        runtime.scheduler.run()
+
+        const expected = [101, 102, 103, 901, 902, 903]
+        assert.sameDeepMembers(actual, expected)
+        assert.notDeepEqual(actual, expected)
+      })
     })
   })
 

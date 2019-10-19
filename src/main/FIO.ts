@@ -6,11 +6,11 @@ import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
+import {Fiber} from '../internals/Fiber'
 import {Id} from '../internals/Id'
-import {IRuntime, IRuntimeEnv} from '../runtimes/IRuntime'
+import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
-import {IFiber} from './IFiber'
 import {Instruction, Tag} from './Instructions'
 
 export type NoEnv = unknown
@@ -76,10 +76,12 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Returns a [[Fiber]]. The returned fiber is always in a paused state.
+   * Returns a [[Fiber]]
    */
-  public get fork(): FIO<never, IFiber<E1, A1>, R1> {
-    return FIO.env<R1>().chain(env => FIO.fork(this.provide(env)))
+  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
+    return FIO.env<R1>().zipWithM(FIO.runtime(), (ENV, RTM) =>
+      FIO.fork(this.provide(ENV), RTM)
+    )
   }
 
   /**
@@ -119,7 +121,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static accessP<A1, R1>(
     cb: (R: R1) => Promise<A1>
-  ): FIO<Error, A1, R1 & IRuntimeEnv> {
+  ): FIO<Error, A1, R1> {
     return FIO.env<R1>().chain(FIO.encaseP(cb))
   }
 
@@ -192,9 +194,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Creates a [[FIO]] using a callback function.
    */
-  public static cb<A1>(
-    fn: (cb: (A1: A1) => void) => void
-  ): FIO<never, A1, IRuntimeEnv> {
+  public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
     return FIO.runtime().chain(RTM =>
       FIO.asyncUIO<A1>(res => RTM.scheduler.asap(fn, res))
     )
@@ -224,7 +224,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static encaseP<A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
-  ): (...t: T) => FIO<Error, A, IRuntimeEnv> {
+  ): (...t: T) => FIO<Error, A> {
     return (...t) =>
       FIO.runtime().chain(RTM =>
         FIO.asyncIO((rej, res) =>
@@ -280,8 +280,11 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Creates a new [[Fiber]] to run the given [[IO]].
    */
-  public static fork<E1, A1>(io: IO<E1, A1>): UIO<IFiber<E1, A1>> {
-    return new FIO(Tag.Fork, io)
+  public static fork<E1, A1>(
+    io: IO<E1, A1>,
+    runtime: IRuntime
+  ): UIO<Fiber<E1, A1>> {
+    return new FIO(Tag.Fork, io, runtime)
   }
 
   /**
@@ -345,12 +348,12 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static node<A = never>(
     fn: (cb: NodeJSCallback<A>) => void
-  ): FIO<NodeJS.ErrnoException, A | undefined, IRuntimeEnv> {
+  ): FIO<NodeJS.ErrnoException, A | undefined> {
     return FIO.runtime().chain(RTM =>
-      FIO.asyncIO<NodeJS.ErrnoException, A>((rej, res) =>
+      FIO.asyncIO<NodeJS.ErrnoException, A | undefined>((rej, res) =>
         RTM.scheduler.asap(() => {
           try {
-            fn((err, result) => (err === null ? res(result as A) : rej(err)))
+            fn((err, result) => (err === null ? res(result) : rej(err)))
           } catch (e) {
             rej(e as NodeJS.ErrnoException)
           }
@@ -435,8 +438,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Returns the current runtime in a pure way.
    */
-  public static runtime(): FIO<never, IRuntime, IRuntimeEnv> {
-    return FIO.access((_: IRuntimeEnv) => _.runtime)
+  public static runtime(): UIO<IRuntime> {
+    return new FIO(Tag.Runtime)
   }
 
   /**
@@ -457,12 +460,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Resolves with the provided value after the given time
    */
-  public static timeout<A>(
-    value: A,
-    duration: number
-  ): FIO<never, A, IRuntimeEnv> {
+  public static timeout<A>(value: A, duration: number): FIO<never, A> {
     return FIO.runtime().chain(RTM =>
-      FIO.asyncIO((rej, res) => RTM.scheduler.delay(res, duration, value))
+      FIO.asyncUIO(res => RTM.scheduler.delay(res, duration, value))
     )
   }
 
@@ -476,7 +476,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Tries to run an function that returns a promise.
    */
-  public static tryP<A>(cb: () => Promise<A>): TaskR<A, IRuntimeEnv> {
+  public static tryP<A>(cb: () => Promise<A>): Task<A> {
     return FIO.encaseP(cb)()
   }
 
@@ -486,7 +486,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static uninterruptibleIO<E1 = never, A1 = never>(
     fn: (rej: CB<E1>, res: CB<A1>) => unknown
-  ): FIO<E1, A1, IRuntimeEnv> {
+  ): IO<E1, A1> {
     return FIO.runtime().chain(RTM =>
       FIO.asyncIO<E1, A1>((rej, res) => RTM.scheduler.asap(fn, rej, res))
     )
@@ -567,7 +567,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Delays the execution of the [[FIO]] by the provided time.
    */
-  public delay(duration: number): FIO<E1, A1, R1 & IRuntimeEnv> {
+  public delay(duration: number): FIO<E1, A1, R1> {
     return FIO.timeout(this, duration).chain(Id)
   }
 
@@ -585,6 +585,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     fn: (A1: A1) => A2
   ): FIO<E1 | E2, A2, R1> {
     return this.chain(FIO.encase(fn))
+  }
+
+  /**
+   * Returns a [[Fiber]] with a different `maxInstructionCount`.
+   */
+  public forkWith(maxInstructionCount: number): FIO<never, Fiber<E1, A1>, R1> {
+    return FIO.env<R1>().zipWithM(FIO.runtime(), (ENV, RTM) =>
+      FIO.fork(
+        this.provide(ENV),
+        RTM.setMaxInstructionCount(maxInstructionCount)
+      )
+    )
   }
 
   /**
@@ -649,8 +661,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public raceWith<E2, A2, R2, E3, A3, E4, A4>(
     that: FIO<E2, A2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: IFiber<E2, A2>) => IO<E3, A3>,
-    cb2: (exit: Either<E2, A2>, fiber: IFiber<E1, A1>) => IO<E4, A4>
+    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => IO<E3, A3>,
+    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => IO<E4, A4>
   ): FIO<E3 | E4, A3 | A4, R1 & R2> {
     return Await.of<E3 | E4, A3 | A4>().chain(done =>
       this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {

@@ -2,7 +2,6 @@ import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
 import {T} from '../internals/T'
-import {IRuntimeEnv} from '../runtimes/IRuntime'
 
 import {FIO, NoEnv, UIO} from './FIO'
 import {Managed, UManaged} from './Managed'
@@ -42,7 +41,7 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream that constantly emits the provided value.
    */
-  public static const<A1>(a: A1): FStream<never, A1, NoEnv> {
+  public static const<A1>(a: A1): Stream<A1> {
     return new FStream((s, cont, next) =>
       FIO.if0()(() => cont(s), () => next(s, a), () => FIO.of(s))
     )
@@ -51,12 +50,12 @@ export class FStream<E1, A1, R1> {
   /**
    * Create a stream from an array
    */
-  public static fromArray<A>(t: A[]): FStream<never, A, NoEnv> {
+  public static fromArray<A1>(t: A1[]): Stream<A1> {
     return new FStream(
       <E, S, R>(
         state: S,
         cont: (s: S) => boolean,
-        next: (s: S, a: A) => FIO<E, S, R>
+        next: (s: S, a: A1) => FIO<E, S, R>
       ) => {
         const itar = (s: S, i: number): FIO<E, S, R> =>
           FIO.if0()(
@@ -88,7 +87,7 @@ export class FStream<E1, A1, R1> {
   public static fromEventEmitter<A = unknown>(
     ev: EventEmitter,
     name: string
-  ): FIO<never, UManaged<Stream<A>>, IRuntimeEnv> {
+  ): UIO<UManaged<Stream<A>>> {
     return FIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
       const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
@@ -102,7 +101,7 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream from a [[Queue]]
    */
-  public static fromQueue<A1>(Q: Queue<A1>): FStream<never, A1, NoEnv> {
+  public static fromQueue<A1>(Q: Queue<A1>): Stream<A1> {
     return new FStream(
       <E, S, R>(
         state: S,
@@ -124,17 +123,14 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream that emits after every given duration of time.
    */
-  public static interval<A1>(
-    A1: A1,
-    duration: number
-  ): FStream<never, A1, IRuntimeEnv> {
+  public static interval<A1>(A1: A1, duration: number): Stream<A1> {
     return FStream.produce(FIO.timeout(A1, duration))
   }
 
   /**
    * Creates a stream from the provided values
    */
-  public static of<A1>(...t: A1[]): FStream<never, A1, NoEnv> {
+  public static of<A1>(...t: A1[]): Stream<A1> {
     return FStream.fromArray(t)
   }
 
@@ -163,7 +159,7 @@ export class FStream<E1, A1, R1> {
   /**
    * Creates a stream that emits the given ranges of values
    */
-  public static range(min: number, max: number): FStream<never, number, NoEnv> {
+  public static range(min: number, max: number): Stream<number> {
     return new FStream(
       <E, S, R>(
         state: S,

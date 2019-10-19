@@ -63,7 +63,6 @@ describe('Managed', () => {
       Managed.make(r.acquire, r.release)
         .use(() => FIO.timeout(0, 1000))
         .fork.chain(F => F.abort.delay(500))
-        .provide({runtime})
     )
 
     assert.ok(r.isReleased)
@@ -77,7 +76,6 @@ describe('Managed', () => {
       Managed.make(r.acquire, r.release)
         .use(() => FIO.timeout(0, 1000))
         .fork.chain(F => F.join.and(F.abort))
-        .provide({runtime})
     )
 
     assert.strictEqual(r.count, 0)

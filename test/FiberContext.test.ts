@@ -1,8 +1,7 @@
 import {assert, spy} from 'chai'
 import {Either, Option} from 'standard-data-structures'
-import {testScheduler} from 'ts-scheduler/test'
 
-import {FiberContext} from '../src/internals/FiberContext'
+import {FiberContext} from '../src/internals/Fiber'
 import {FIO} from '../src/main/FIO'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
@@ -14,9 +13,7 @@ describe('FiberContext', () => {
     context('scheduler idle', () => {
       it('should not execute', () => {
         const counter = new Counter()
-        const scheduler = testScheduler()
-
-        FiberContext.evaluateWith(counter.inc(), scheduler)
+        FiberContext.unsafeExecuteWith(counter.inc(), testRuntime())
 
         assert.strictEqual(counter.count, 0)
       })
@@ -25,10 +22,10 @@ describe('FiberContext', () => {
     context('scheduler triggers', () => {
       it('should execute', () => {
         const counter = new Counter()
-        const scheduler = testScheduler()
+        const runtime = testRuntime()
 
-        FiberContext.evaluateWith(counter.inc(), scheduler)
-        scheduler.run()
+        FiberContext.unsafeExecuteWith(counter.inc(), runtime)
+        runtime.scheduler.run()
 
         assert.strictEqual(counter.count, 1)
       })
@@ -38,36 +35,36 @@ describe('FiberContext', () => {
   context('on cancellation', () => {
     it('should not execute', () => {
       const counter = new Counter()
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
 
-      const context = FiberContext.evaluateWith(counter.inc(), scheduler)
+      const context = FiberContext.unsafeExecuteWith(counter.inc(), runtime)
       context.cancel()
-      scheduler.run()
+      runtime.scheduler.run()
 
       assert.strictEqual(counter.count, 0)
     })
 
     it('should callback with none', () => {
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
       const cb = spy()
 
-      const context = FiberContext.evaluateWith(FIO.of(0), scheduler)
+      const context = FiberContext.unsafeExecuteWith(FIO.of(0), runtime)
       context.unsafeObserve(cb)
       context.cancel()
-      scheduler.run()
+      runtime.scheduler.run()
 
       cb.should.be.called.with(Option.none())
     })
 
     context('observer is added', () => {
       it('should call back with none', () => {
-        const scheduler = testScheduler()
+        const runtime = testRuntime()
         const cb = spy()
 
-        const context = FiberContext.evaluateWith(FIO.of(0), scheduler)
+        const context = FiberContext.unsafeExecuteWith(FIO.of(0), runtime)
         context.cancel()
         context.unsafeObserve(cb)
-        scheduler.run()
+        runtime.scheduler.run()
 
         cb.should.be.called.with(Option.none())
       })
@@ -76,13 +73,13 @@ describe('FiberContext', () => {
 
   context('on observer cancellation', () => {
     it('should not call observers', () => {
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
       const cb = spy()
 
-      FiberContext.evaluateWith(FIO.of(0), scheduler)
+      FiberContext.unsafeExecuteWith(FIO.of(0), runtime)
         .unsafeObserve(cb)
         .cancel()
-      scheduler.run()
+      runtime.scheduler.run()
 
       cb.should.be.not.be.called()
     })
@@ -90,11 +87,11 @@ describe('FiberContext', () => {
 
   context('on error', () => {
     it('should call rej with cause', () => {
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
       const cb = spy()
 
-      FiberContext.evaluateWith(FIO.reject(1), scheduler).unsafeObserve(cb)
-      scheduler.run()
+      FiberContext.unsafeExecuteWith(FIO.reject(1), runtime).unsafeObserve(cb)
+      runtime.scheduler.run()
 
       cb.should.called.with(Option.some(Either.left(1)))
     })
@@ -102,11 +99,11 @@ describe('FiberContext', () => {
 
   context('on success', () => {
     it('should call res with value', () => {
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
       const cb = spy()
 
-      FiberContext.evaluateWith(FIO.of(1), scheduler).unsafeObserve(cb)
-      scheduler.run()
+      FiberContext.unsafeExecuteWith(FIO.of(1), runtime).unsafeObserve(cb)
+      runtime.scheduler.run()
 
       cb.should.called.with(Option.some(Either.left(1)))
     })
@@ -114,25 +111,25 @@ describe('FiberContext', () => {
 
   context('on completed', () => {
     it('should call res with computed result', () => {
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
       const cb = spy()
 
-      const context = FiberContext.evaluateWith(FIO.of(1), scheduler)
-      scheduler.run()
+      const context = FiberContext.unsafeExecuteWith(FIO.of(1), runtime)
+      runtime.scheduler.run()
       context.unsafeObserve(cb)
-      scheduler.run()
+      runtime.scheduler.run()
 
       cb.should.called.with(Option.some(Either.right(1)))
     })
 
     it('should call rej with computed cause', () => {
-      const scheduler = testScheduler()
+      const runtime = testRuntime()
       const cb = spy()
 
-      const context = FiberContext.evaluateWith(FIO.reject(1), scheduler)
-      scheduler.run()
+      const context = FiberContext.unsafeExecuteWith(FIO.reject(1), runtime)
+      runtime.scheduler.run()
       context.unsafeObserve(cb)
-      scheduler.run()
+      runtime.scheduler.run()
 
       cb.should.called.with(Option.some(Either.left(1)))
     })
@@ -142,16 +139,9 @@ describe('FiberContext', () => {
     it('should wait for completion', () => {
       const runtime = testRuntime()
       const snapshot = new Snapshot()
-      const scheduler = runtime.scheduler
 
-      FiberContext.evaluateWith(
-        snapshot
-          .mark('A')
-          .delay(1000)
-          .provide({runtime}),
-        scheduler
-      )
-      scheduler.run()
+      FiberContext.unsafeExecuteWith(snapshot.mark('A').delay(1000), runtime)
+      runtime.scheduler.run()
 
       assert.deepStrictEqual(snapshot.timeline, ['A@1001'])
     })
@@ -161,21 +151,15 @@ describe('FiberContext', () => {
     it('should be executed in parallel', () => {
       const runtime = testRuntime()
       const snapshot = new Snapshot()
-      const scheduler = runtime.scheduler
 
-      const A = snapshot
-        .mark('A')
-        .delay(1000)
-        .provide({runtime})
-      const B = snapshot
-        .mark('B')
-        .delay(2000)
-        .provide({runtime})
+      const A = snapshot.mark('A').delay(1000)
 
-      FiberContext.evaluateWith(A, scheduler)
-      FiberContext.evaluateWith(B, scheduler)
+      const B = snapshot.mark('B').delay(2000)
 
-      scheduler.run()
+      FiberContext.unsafeExecuteWith(A, runtime)
+      FiberContext.unsafeExecuteWith(B, runtime)
+
+      runtime.scheduler.run()
 
       assert.deepStrictEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
@@ -194,6 +178,58 @@ describe('FiberContext', () => {
     })
     context('on cancellation', () => {
       it.skip('should return none')
+    })
+  })
+
+  context('instruction count is reduced', () => {
+    it('should switch between multiple contexts', () => {
+      const MAX_INSTRUCTION_COUNT = 5
+      const runtime = testRuntime({maxInstructionCount: MAX_INSTRUCTION_COUNT})
+      const actual = new Array<number>()
+      const insert = FIO.encase((_: number) => void actual.push(_))
+      const longIO = FIO.of(1)
+        .and(FIO.of(2))
+        .and(FIO.of(3))
+        .and(FIO.of(4))
+        .and(FIO.of(5))
+        .chain(insert)
+      const shortIO = FIO.of(1000).chain(insert)
+
+      FiberContext.unsafeExecuteWith(longIO, runtime)
+      FiberContext.unsafeExecuteWith(shortIO, runtime)
+
+      runtime.scheduler.run()
+
+      const expected = [1000, 5]
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
+
+  context('instruction count is zero', () => {
+    it('should not fail', () => {
+      const snapshot = new Snapshot()
+      const runtime = testRuntime({maxInstructionCount: 0})
+      FiberContext.unsafeExecuteWith(
+        FIO.of('A').chain(_ => snapshot.mark(_)),
+        runtime
+      )
+      runtime.scheduler.run()
+
+      assert.deepStrictEqual(snapshot.timeline, ['A@1'])
+    })
+  })
+
+  context('instruction count is negative', () => {
+    it('should not fail', () => {
+      const snapshot = new Snapshot()
+      const runtime = testRuntime({maxInstructionCount: -100})
+      FiberContext.unsafeExecuteWith(
+        FIO.of('A').chain(_ => snapshot.mark(_)),
+        runtime
+      )
+      runtime.scheduler.run()
+
+      assert.deepStrictEqual(snapshot.timeline, ['A@1'])
     })
   })
 })

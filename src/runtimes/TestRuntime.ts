@@ -11,19 +11,23 @@ import {FIO, IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
+type TestRuntimeOptions = Partial<
+  ITestSchedulerOptions & {maxInstructionCount: number}
+>
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler: TestScheduler
-  public constructor(options?: Partial<ITestSchedulerOptions>) {
-    super()
+  public constructor(private readonly options: TestRuntimeOptions) {
+    super(options.maxInstructionCount)
     this.scheduler = testScheduler(options)
   }
-
+  public setMaxInstructionCount(maxInstructionCount: number): TestRuntime {
+    return new TestRuntime({...this.options, maxInstructionCount})
+  }
   public unsafeExecuteSync<E, A>(io: IO<E, A>): A | E | undefined {
     return this.unsafeExecuteSync0(io)
       .map(_ => _.reduce<A | E | undefined>(Id, Id))
       .getOrElse(undefined)
   }
-
   public unsafeExecuteSync0<E, A>(io: FIO<E, A>): Option<Either<E, A>> {
     let result: Option<Either<E, A>> = Option.none()
     this.unsafeExecute(io, _ => (result = _))
@@ -33,5 +37,4 @@ export class TestRuntime extends BaseRuntime {
   }
 }
 
-export const testRuntime = (O?: Partial<ITestSchedulerOptions>) =>
-  new TestRuntime(O)
+export const testRuntime = (O: TestRuntimeOptions = {}) => new TestRuntime(O)

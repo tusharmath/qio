@@ -18,9 +18,8 @@ const runtime = defaultRuntime()
 runtime.unsafeExecute(
   program.provide({
     math: Math,
-    runtime,
     tty: {
-      getStrLn: FIO.pipeEnv(getStrLn, {process, readline, runtime}),
+      getStrLn: FIO.pipeEnv(getStrLn, {process, readline}),
       putStrLn: FIO.pipeEnv(putStrLn, {console})
     }
   })
