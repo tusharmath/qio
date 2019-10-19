@@ -14,7 +14,7 @@ export abstract class BaseRuntime implements IRuntime {
   public constructor(
     public readonly maxInstructionCount: number = Number.MAX_SAFE_INTEGER
   ) {}
-
+  public abstract setMaxInstructionCount(maxInstructionCount: number): IRuntime
   public unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable {
     return Fiber.unsafeExecuteWith(io, this, cb)
   }

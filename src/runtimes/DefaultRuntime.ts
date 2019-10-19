@@ -13,6 +13,11 @@ export class DefaultRuntime extends BaseRuntime {
     super(maxInstructionCount)
   }
 
+  // tslint:disable-next-line: prefer-function-over-method
+  public setMaxInstructionCount(maxInstructionCount: number): DefaultRuntime {
+    return new DefaultRuntime(maxInstructionCount)
+  }
+
   public async unsafeExecutePromise<E, A>(io: FIO<E, A>): Promise<A> {
     return new Promise((res, rej) => {
       this.unsafeExecute(io, O => O.map(_ => _.reduce(rej, res)))

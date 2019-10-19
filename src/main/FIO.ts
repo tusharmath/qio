@@ -76,7 +76,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Returns a [[Fiber]]. The returned fiber is always in a paused state.
+   * Returns a [[Fiber]]
    */
   public get fork(): FIO<never, Fiber<E1, A1>, R1> {
     return FIO.env<R1>().zipWithM(FIO.runtime(), (ENV, RTM) =>
@@ -585,6 +585,18 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     fn: (A1: A1) => A2
   ): FIO<E1 | E2, A2, R1> {
     return this.chain(FIO.encase(fn))
+  }
+
+  /**
+   * Returns a [[Fiber]] with a different `maxInstructionCount`.
+   */
+  public forkWith(maxInstructionCount: number): FIO<never, Fiber<E1, A1>, R1> {
+    return FIO.env<R1>().zipWithM(FIO.runtime(), (ENV, RTM) =>
+      FIO.fork(
+        this.provide(ENV),
+        RTM.setMaxInstructionCount(maxInstructionCount)
+      )
+    )
   }
 
   /**

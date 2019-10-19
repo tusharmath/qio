@@ -16,6 +16,7 @@ import {FIO} from '../main/FIO'
 export interface IRuntime {
   maxInstructionCount: number
   scheduler: IScheduler
+  setMaxInstructionCount(maxInstructionCount: number): IRuntime
 
   /**
    * Executes the provided [[FIO]] expression.
