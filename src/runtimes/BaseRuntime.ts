@@ -16,6 +16,6 @@ export abstract class BaseRuntime implements IRuntime {
   ) {}
 
   public unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable {
-    return Fiber.unsafeExecute(io, this, cb)
+    return Fiber.unsafeExecuteWith(io, this, cb)
   }
 }

@@ -29,22 +29,20 @@ enum FiberStatus {
 
 /**
  * Fibers are data structures that provide you a handle to control the execution of its `IO`.
- * They can be created by calling the [[FIO.fork]] method.
- * Fiber created is always going to be in a `Paused` state. To resume the fiber, you should call the `resume` or the `resumeAsync` methods.
  * @typeparam E Exceptions that can be thrown
  * @typeparam A The success value
  */
 export abstract class Fiber<E, A> {
   /**
-   * Executes the provided [[FIO]] expression.
+   * Uses a shared runtime to evaluate a [[FIO]] expression.
    * Returns a [[ICancellable]] that can be used to interrupt the execution.
    */
-  public static unsafeExecute<E, A>(
+  public static unsafeExecuteWith<E, A>(
     io: IO<E, A>,
     runtime: IRuntime,
     cb?: CBOption<E, A>
   ): ICancellable {
-    return FiberContext.unsafeExecute<E, A>(io, runtime, cb)
+    return FiberContext.unsafeExecuteWith<E, A>(io, runtime, cb)
   }
   public abstract abort: UIO<void>
   public abstract await: UIO<Option<Either<E, A>>>
@@ -75,7 +73,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
   /**
    * Evaluates an IO using the provided scheduler
    */
-  public static unsafeExecute<E, A>(
+  public static unsafeExecuteWith<E, A>(
     io: IO<E, A>,
     runtime: IRuntime,
     cb?: CBOption<E, A>
@@ -293,7 +291,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
 
   private unsafeRelease(p: UIO<void>): void {
     this.cancellationList.push({
-      cancel: () => Fiber.unsafeExecute(p, this.runtime)
+      cancel: () => Fiber.unsafeExecuteWith(p, this.runtime)
     })
   }
 }
