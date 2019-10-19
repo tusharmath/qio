@@ -183,24 +183,6 @@ describe('FiberContext', () => {
   })
 
   context('instruction count is reduced', () => {
-    it.skip('should cooperatively merge two streams', () => {
-      const list = new Array<number>()
-      const insert = FIO.encase((_: number) => void list.push(_))
-
-      const runtime = testRuntime({maxInstructionCount: 5})
-      FiberContext.unsafeExecuteWith(
-        FStream.range(101, 103)
-          .merge(FStream.range(901, 903))
-          .mapM(insert).drain,
-        runtime
-      )
-
-      runtime.scheduler.run()
-
-      const expected = [901, 101, 102, 103, 902, 903]
-      assert.deepStrictEqual(list, expected)
-    })
-
     it('should switch between multiple contexts', () => {
       const MAX_INSTRUCTION_COUNT = 5
       const runtime = testRuntime({maxInstructionCount: MAX_INSTRUCTION_COUNT})
@@ -221,6 +203,34 @@ describe('FiberContext', () => {
 
       const expected = [1000, 5]
       assert.deepStrictEqual(actual, expected)
+    })
+  })
+
+  context('instruction count is zero', () => {
+    it('should not fail', () => {
+      const snapshot = new Snapshot()
+      const runtime = testRuntime({maxInstructionCount: 0})
+      FiberContext.unsafeExecuteWith(
+        FIO.of('A').chain(_ => snapshot.mark(_)),
+        runtime
+      )
+      runtime.scheduler.run()
+
+      assert.deepStrictEqual(snapshot.timeline, ['A@1'])
+    })
+  })
+
+  context('instruction count is negative', () => {
+    it('should not fail', () => {
+      const snapshot = new Snapshot()
+      const runtime = testRuntime({maxInstructionCount: -100})
+      FiberContext.unsafeExecuteWith(
+        FIO.of('A').chain(_ => snapshot.mark(_)),
+        runtime
+      )
+      runtime.scheduler.run()
+
+      assert.deepStrictEqual(snapshot.timeline, ['A@1'])
     })
   })
 })

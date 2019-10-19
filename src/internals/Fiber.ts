@@ -163,7 +163,6 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
     let data: unknown = ddd
     let count = 0
     while (true) {
-      count++
       if (count === this.runtime.maxInstructionCount) {
         return this.init(data)
       }
@@ -286,6 +285,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
       } catch (e) {
         this.stackA.push(FIO.reject(e).asInstruction)
       }
+      count++
     }
   }
 
