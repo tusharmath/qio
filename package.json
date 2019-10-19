@@ -65,5 +65,8 @@
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
     "ts-scheduler": "^8.0.1"
-  }
+  },
+  "workspaces": [
+    "website"
+  ]
 }
