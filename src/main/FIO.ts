@@ -121,7 +121,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static accessP<A1, R1>(
     cb: (R: R1) => Promise<A1>
-  ): FIO<Error, A1, R1 & NoEnv> {
+  ): FIO<Error, A1, R1> {
     return FIO.env<R1>().chain(FIO.encaseP(cb))
   }
 
