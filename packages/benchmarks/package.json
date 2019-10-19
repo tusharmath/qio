@@ -25,5 +25,13 @@
   },
   "bugs": {
     "url": "https://github.com/tusharmath/fearless-io/issues"
+  },
+  "devDependencies": {
+    "@fio/core": "*",
+    "@types/benchmark": "^1.0.31",
+    "@types/bluebird": "^3.5.28",
+    "benchmark": "^2.1.4",
+    "bluebird": "^3.7.1",
+    "fluture": "^11.0.3"
   }
 }

@@ -1,7 +1,16 @@
 {
+  "scripts": {
+    "examples": "docusaurus-examples",
+    "start": "docusaurus-start",
+    "build": "docusaurus-build",
+    "publish-gh-pages": "docusaurus-publish",
+    "write-translations": "docusaurus-write-translations",
+    "version": "docusaurus-version",
+    "rename-version": "docusaurus-rename-version"
+  },
   "name": "@fio/website",
-  "version": "0.0.0",
   "description": "> TODO: description",
+  "version": "0.0.0",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/fearless-io#readme",
   "license": "ISC",
@@ -19,9 +28,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tusharmath/fearless-io.git"
-  },
-  "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
     "url": "https://github.com/tusharmath/fearless-io/issues"

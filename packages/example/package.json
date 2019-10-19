@@ -25,5 +25,10 @@
   },
   "bugs": {
     "url": "https://github.com/tusharmath/fearless-io/issues"
+  },
+  "dependencies": {
+    "@fio/core": "*",
+    "chai": "^4.2.0",
+    "source-map-support": "^0.5.13"
   }
 }

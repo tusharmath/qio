@@ -14,7 +14,7 @@
     "promise"
   ],
   "license": "ISC",
-  "main": "index.js",
+  "main": "packages/core/index.js",
   "name": "fearless-io",
   "repository": {
     "type": "git",
@@ -28,44 +28,28 @@
     "test": "mocha",
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "cd website; yarn build; cd ..; typedoc;",
-    "update-benchmarks": "benchmarks/run.sh",
+    "update-benchmarks": "packages/benchmarks/run.sh",
     "check-types": "typings-checker --allow-expect-error type-test/*.ts",
     "typings-checker": "typings-checker",
-    "example": "node example/guess-the-number/src/Run"
+    "example": "node packages/example/guess-the-number/src/Run"
   },
   "version": "0.0.0-development",
   "devDependencies": {
     "@tusharmathur/typedoc": "^1.0.0",
-    "@types/benchmark": "^1.0.31",
-    "@types/bluebird": "^3.5.27",
-    "@types/chai": "^4.2.3",
-    "@types/chai-spies": "^1.0.1",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.12",
-    "benchmark": "^2.1.4",
-    "bluebird": "^3.7.0",
-    "chai": "^4.2.0",
-    "chai-spies": "^1.0.0",
     "cz-conventional-changelog": "^3.0.2",
     "docusaurus": "^1.13.0",
-    "fluture": "^11.0.3",
     "lerna": "^3.8.0",
-    "mocha": "^6.2.1",
     "prettier": "^1.18.2",
     "semantic-release": "^15.13.24",
-    "source-map-support": "^0.5.13",
     "travis-deploy-once": "^5.0.11",
-    "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.6.4",
     "typescript-tslint-plugin": "^0.5.4",
     "typings-checker": "^2.0.0"
   },
-  "dependencies": {
-    "checked-exceptions": "^1.2.0",
-    "in-node": "^1.0.0",
-    "standard-data-structures": "^4.0.0",
-    "ts-scheduler": "^8.0.1"
-  }
+  "workspaces": [
+    "packages/*"
+  ],
+  "private": true
 }

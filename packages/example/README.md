@@ -1,11 +1,10 @@
-# `@fio/example`
+# FIO Example
 
-> TODO: description
+Steps to run example —
 
-## Usage
-
-```
-const example = require('@fio/example');
-
-// TODO: DEMONSTRATE API
+```bash
+git clone https://github.com/tusharmath/fearless-io.git
+yarn install
+yarn tsc
+yarn run example
 ```
