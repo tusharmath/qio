@@ -58,7 +58,8 @@
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.6.4",
     "typescript-tslint-plugin": "^0.5.4",
-    "typings-checker": "^2.0.0"
+    "typings-checker": "^2.0.0",
+    "docusaurus": "^1.13.0"
   },
   "dependencies": {
     "checked-exceptions": "^1.2.0",
