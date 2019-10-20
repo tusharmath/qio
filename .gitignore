@@ -13,5 +13,5 @@
 coverage/
 node_modules/
 !packages/website/**/*.js
-website/build
-website/i18n
+packages/website/build
+packages/website/i18n

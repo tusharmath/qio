@@ -17,11 +17,15 @@
   "version": "0.0.0-development",
   "dependencies": {
     "checked-exceptions": "^1.2.0",
+    "debug": "^4.1.1",
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
     "ts-scheduler": "^8.0.1"
   },
-  "workspaces": [
-    "packages/*"
-  ]
+  "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/chai-spies": "^1.0.1",
+    "chai": "^4.2.0",
+    "chai-spies": "^1.0.0"
+  }
 }
