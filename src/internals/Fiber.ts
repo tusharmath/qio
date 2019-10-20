@@ -1,6 +1,7 @@
 /* tslint:disable: no-unbound-method cyclomatic-complexity */
 
 import {check} from 'checked-exceptions'
+import {debug} from 'debug'
 import {
   DoublyLinkedList,
   Either,
@@ -16,6 +17,8 @@ import {IRuntime} from '../runtimes/IRuntime'
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
 
+const D = debug('fio:fiber')
+
 const InvalidInstruction = check(
   'InvalidInstruction',
   (ins: Instruction) => `${Tag[ins.tag]}`
@@ -26,6 +29,11 @@ enum FiberStatus {
   COMPLETED,
   CANCELLED
 }
+
+/**
+ * Fiber Id is used while debugging
+ */
+let FIBER_ID = 0
 
 /**
  * Fibers are data structures that provide you a handle to control the execution of its `IO`.
@@ -46,6 +54,7 @@ export abstract class Fiber<E, A> {
   }
   public abstract abort: UIO<void>
   public abstract await: UIO<Option<Either<E, A>>>
+  public readonly id = FIBER_ID++
   public abstract join: FIO<E, A>
   public abstract runtime: IRuntime
   public abstract release(p: UIO<void>): UIO<void>
@@ -62,7 +71,13 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
     return UIO(() => this.cancel())
   }
   public get await(): UIO<Option<Either<E, A>>> {
-    return FIO.asyncUIO(cb => this.unsafeObserve(cb))
+    D(this.id, 'await')
+
+    return FIO.asyncUIO(cb => {
+      D(this.id, 'unsafe observe')
+
+      return this.unsafeObserve(cb)
+    })
   }
   public get join(): FIO<E, A> {
     return FIO.asyncIO<E, A>((rej, res) =>
@@ -106,6 +121,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
     public readonly runtime: IRuntime
   ) {
     super()
+    D(this.id, 'created')
     this.stackA.push(instruction)
     this.init()
   }
@@ -122,6 +138,8 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
   }
 
   public unsafeObserve(cb: CBOption<E, A>): ICancellable {
+    D(this.id, 'unsafe observe')
+
     if (this.status === FiberStatus.CANCELLED) {
       return this.runtime.scheduler.asap(
         FiberContext.dispatchResult,
