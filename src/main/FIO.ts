@@ -2,6 +2,7 @@
  * Created by tushar on 2019-05-20
  */
 
+import {debug} from 'debug'
 import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
@@ -12,6 +13,8 @@ import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
 import {Instruction, Tag} from './Instructions'
+
+const D = debug('fio:core')
 
 export type NoEnv = unknown
 
@@ -56,7 +59,7 @@ export type NodeJSCallback<A> = (
  */
 export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
-   * Safely converts an interuptable IO to non-interruptable one.
+   * Safely converts an interuptable IO to non-interuptable one.
    */
   public get asEither(): FIO<never, Either<E1, A1>, R1> {
     return this.map(Either.right).catch(_ => FIO.of(Either.left(_)))
@@ -660,15 +663,24 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => IO<E4, A4>
   ): FIO<E3 | E4, A3 | A4, R1 & R2> {
     return Await.of<E3 | E4, A3 | A4>().chain(done =>
-      this.fork.zip(that.fork).chain(({0: f1, 1: f2}) => {
-        const resume1 = f1.await.chain(exit =>
-          Option.isSome(exit) ? done.set(cb1(exit.value, f2)) : FIO.of(true)
-        )
-        const resume2 = f2.await.chain(exit =>
-          Option.isSome(exit) ? done.set(cb2(exit.value, f1)) : FIO.of(true)
-        )
+      this.fork.zip(that.fork).chain(([L, R]) => {
+        D('zip', 'fiber L', L.id, '& fiber R', R.id)
+        const resume1 = L.await.chain(exit => {
+          D('zip', 'L cb')
 
-        return resume1.and(resume2).and(done.get)
+          return Option.isSome(exit)
+            ? done.set(cb1(exit.value, R))
+            : FIO.of(true)
+        })
+        const resume2 = R.await.chain(exit => {
+          D('zip', 'R cb')
+
+          return Option.isSome(exit)
+            ? done.set(cb2(exit.value, L))
+            : FIO.of(true)
+        })
+
+        return resume1.fork.and(resume2.fork).and(done.get)
       })
     )
   }

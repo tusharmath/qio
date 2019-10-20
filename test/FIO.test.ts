@@ -622,7 +622,7 @@ describe('FIO', () => {
       assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001'])
     })
 
-    it('should complete when both complete', () => {
+    it('should complete when either complete', () => {
       const snapshot = new Snapshot()
 
       const F1 = snapshot.mark('A').delay(1000)
@@ -633,7 +633,7 @@ describe('FIO', () => {
         F1.raceWith(F2, FIO.void, FIO.void).and(snapshot.mark('C'))
       )
 
-      assert.deepEqual(snapshot.timeline, ['A@1001', 'B@2001', 'C@2001'])
+      assert.sameDeepMembers(snapshot.timeline, ['A@1001', 'B@2001', 'C@1001'])
     })
 
     context('when slower is cancelled', () => {
