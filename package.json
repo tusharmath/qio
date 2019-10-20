@@ -25,7 +25,7 @@
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
     "semantic-release": "semantic-release",
-    "test": "mocha",
+    "test": "mocha packages/**/*__tests__/**.js --opts=./mocha.opts",
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "cd website; yarn build; cd ..; typedoc;",
     "update-benchmarks": "packages/benchmarks/run.sh",
