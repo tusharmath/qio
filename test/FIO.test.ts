@@ -720,6 +720,17 @@ describe('FIO', () => {
 
       assert.strictEqual(actual, 'A')
     })
+    context('left never completes', () => {
+      it('should return right', () => {
+        const R = FIO.of('R').delay(1000)
+        const L = FIO.never().const('L')
+
+        const runtime = testRuntime()
+        const actual = runtime.unsafeExecuteSync(L.race(R))
+
+        assert.strictEqual(actual, 'R')
+      })
+    })
   })
 
   describe('provide', () => {

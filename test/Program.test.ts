@@ -1,8 +1,8 @@
 import {assert} from 'chai'
 
-import {FIO, UIO} from '../../../src/main/FIO'
-import {testRuntime} from '../../../src/runtimes/TestRuntime'
-import {canContinue, program} from '../src/Program'
+import {canContinue, program} from '../example/guess-the-number/src/Program'
+import {FIO, UIO} from '../src/main/FIO'
+import {testRuntime} from '../src/runtimes/TestRuntime'
 
 describe('Program', () => {
   /**
