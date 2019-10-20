@@ -1,6 +1,6 @@
 /* tslint:disable: promise-function-async strict-comparisons */
 
-import {FIO, UIO} from '@fio/core/main/FIO'
+import {FIO, UIO} from '@fio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 

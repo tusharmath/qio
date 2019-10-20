@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 2019-05-09
  */
-import {FIO} from '@fio/core/main/FIO'
+import {FIO} from '@fio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
