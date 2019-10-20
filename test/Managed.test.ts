@@ -68,7 +68,7 @@ describe('Managed', () => {
     assert.ok(r.isReleased)
   })
 
-  it.skip('should release only once', () => {
+  it('should release only once', () => {
     const r = Resource()
     const runtime = testRuntime()
 

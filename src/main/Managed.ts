@@ -36,12 +36,12 @@ export class Managed<E1, A1, R1> {
     acquire: FIO<E1, A1, R1>,
     release: (a: A1) => FIO<never, void, R2>
   ): Managed<E1, A1, R1 & R2> {
-    return Managed.of(
-      acquire
-        .map(a1 =>
-          Reservation.of(FIO.of(a1).addEnv<R2>(), release(a1).addEnv<R1>())
+    return Managed.of<E1, A1, R1 & R2>(
+      acquire.chain(a1 =>
+        release(a1).once.map(r =>
+          Reservation.of(FIO.of(a1).addEnv<R1>(), r.addEnv<R2>())
         )
-        .addEnv()
+      )
     )
   }
 
