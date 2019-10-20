@@ -8,7 +8,7 @@
 // See https://docusaurus.io/docs/site-config for all the possible
 // site configuration options.
 
-const name = ''
+const name = 'web'
 
 
 // List of projects/orgs using your project for the users page.
@@ -24,7 +24,7 @@ const users = [
 ]
 
 const siteConfig = {
-  title: 'Test Site', // Title for your website.
+  title: 'FIO', // Title for your website.
   tagline: 'A website for testing',
   url: 'https://tusharm.com/fearless-io', // Your website URL
   baseUrl: `/fearless-io/${name}/`, // Base URL for your project */
