@@ -588,15 +588,10 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Returns a [[Fiber]] with a different `maxInstructionCount`.
+   * Creates a separate [[Fiber]] with a different [[IRuntime]].
    */
-  public forkWith(maxInstructionCount: number): FIO<never, Fiber<E1, A1>, R1> {
-    return FIO.env<R1>().zipWithM(FIO.runtime(), (ENV, RTM) =>
-      FIO.fork(
-        this.provide(ENV),
-        RTM.setMaxInstructionCount(maxInstructionCount)
-      )
-    )
+  public forkWith(runtime: IRuntime): FIO<never, Fiber<E1, A1>, R1> {
+    return FIO.env<R1>().chain(ENV => FIO.fork(this.provide(ENV), runtime))
   }
 
   /**
