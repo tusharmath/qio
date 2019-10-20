@@ -1,0 +1,27 @@
+{
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "keywords": [
+    "io",
+    "functional",
+    "typescript",
+    "pure",
+    "promise"
+  ],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "@fio/core",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tusharmath/fearless-io.git"
+  },
+  "version": "0.0.0-development",
+  "dependencies": {
+    "checked-exceptions": "^1.2.0",
+    "in-node": "^1.0.0",
+    "standard-data-structures": "^4.0.0",
+    "ts-scheduler": "^8.0.1"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

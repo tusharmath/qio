@@ -1,4 +1,5 @@
 {
+  "private": true,
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "config": {
     "commitizen": {
@@ -28,10 +29,10 @@
     "test": "mocha",
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "cd website; yarn build; cd ..; typedoc;",
-    "update-benchmarks": "benchmarks/run.sh",
+    "update-benchmarks": "packages/benchmarks/run.sh",
     "check-types": "typings-checker --allow-expect-error type-test/*.ts",
     "typings-checker": "typings-checker",
-    "example": "node example/guess-the-number/src/Run"
+    "example": "node packages/example/guess-the-number/src/Run"
   },
   "version": "0.0.0-development",
   "devDependencies": {
@@ -68,5 +69,8 @@
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
     "ts-scheduler": "^8.0.1"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

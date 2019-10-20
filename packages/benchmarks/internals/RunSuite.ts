@@ -2,9 +2,9 @@
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
-import {noop} from '../../src/internals/Noop'
-import {UIO} from '../../src/main/FIO'
-import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
+import {noop} from '../../core/src/internals/Noop'
+import {UIO} from '../../core/src/main/FIO'
+import {defaultRuntime} from '../../core/src/runtimes/DefaultRuntime'
 
 import {PrintLn} from './PrintLn'
 

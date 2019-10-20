@@ -1,9 +1,9 @@
 /* tslint:disable: no-use-before-declare no-console no-unbound-method strict-comparisons */
 
-import {FIO} from '../..'
-import {UIO} from '../../src/main/FIO'
-import {FMap} from '../../src/main/FMap'
-import {defaultRuntime} from '../../src/runtimes/DefaultRuntime'
+import {FIO} from '../../../index'
+import {UIO} from '../../core/src/main/FIO'
+import {FMap} from '../../core/src/main/FMap'
+import {defaultRuntime} from '../../core/src/runtimes/DefaultRuntime'
 
 const fib = (N: bigint) =>
   FMap.of<bigint, bigint>().chain(cache => {

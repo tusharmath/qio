@@ -1,4 +1,4 @@
-import {FIO} from '../../../src/main/FIO'
+import {FIO} from '../../../core/src/main/FIO'
 
 import {IConsole} from './Env'
 

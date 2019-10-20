@@ -2,7 +2,7 @@
  * Created by tushar on 13/09/19
  */
 
-import {promises} from 'fs'
+import {promises} from 'packages/core/src/main/FS'
 
 import {FIO} from './FIO'
 

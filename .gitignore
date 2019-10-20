@@ -12,6 +12,6 @@
 **repl**
 coverage/
 node_modules/
-!website/**/*.js
+!packages/website/**/*.js
 website/build
 website/i18n
