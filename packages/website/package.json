@@ -1,4 +1,11 @@
 {
+  "name": "@fio/website",
+  "private": false,
+  "description": "> TODO: description",
+  "version": "0.0.0",
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "homepage": "https://github.com/tusharmath/fearless-io#readme",
+  "license": "ISC",
   "scripts": {
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
@@ -7,23 +14,6 @@
     "write-translations": "docusaurus-write-translations",
     "version": "docusaurus-version",
     "rename-version": "docusaurus-rename-version"
-  },
-  "name": "@fio/website",
-  "description": "> TODO: description",
-  "version": "0.0.0",
-  "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fearless-io#readme",
-  "license": "ISC",
-  "main": "lib/website.js",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
-  "files": [
-    "lib"
-  ],
-  "publishConfig": {
-    "access": "public"
   },
   "repository": {
     "type": "git",
