@@ -26,7 +26,7 @@
     "semantic-release": "lerna-semantic-release pre && lerna-semantic-release perform && lerna-semantic-release post",
     "test": "mocha --opts=packages/chai/mocha.opts",
     "travis-deploy-once": "travis-deploy-once --pro",
-    "create-docs": "cd packages/website; yarn build; cd ..; cd ..; typedoc;",
+    "create-docs": "cd packages/website && yarn build && cd .. && cd .. && typedoc;",
     "update-benchmarks": "packages/benchmarks/run.sh",
     "check-types": "typings-checker --allow-expect-error type-test/*.ts",
     "typings-checker": "typings-checker",
