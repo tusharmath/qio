@@ -1,6 +1,7 @@
 /* tslint:disable: no-use-before-declare no-console no-unbound-method strict-comparisons */
 
-import {FIO} from '../../../index'
+import {FIO} from '@fio/core/index'
+
 import {UIO} from '../../core/src/main/FIO'
 import {FMap} from '../../core/src/main/FMap'
 import {defaultRuntime} from '../../core/src/runtimes/DefaultRuntime'
