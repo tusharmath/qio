@@ -1,5 +1,4 @@
-import {FIO} from '../../../core/src/main/FIO'
-import {FStream} from '../../../core/src/main/FStream'
+import {FIO, FStream} from '@fio/core'
 
 import {IMath, ITextTerminal} from './Env'
 
