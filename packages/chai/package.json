@@ -1,10 +1,21 @@
 {
-  "name": "@fio/prelude",
+  "name": "@fio/chai",
   "version": "0.0.0",
-  "description": "helper utilities for FIO and its sister project",
+  "description": "Chai setup for FIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/fearless-io#readme",
   "license": "ISC",
+  "main": "Chai.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tusharmath/fearless-io.git"
@@ -14,5 +25,11 @@
   },
   "bugs": {
     "url": "https://github.com/tusharmath/fearless-io/issues"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/chai-spies": "^1.0.1",
+    "chai": "^4.2.0",
+    "chai-spies": "^1.0.0"
   }
 }
