@@ -15,7 +15,5 @@
   "bugs": {
     "url": "https://github.com/tusharmath/fearless-io/issues"
   },
-  "dependencies": {
-    "@fio/core": "^0.0.0-development"
-  }
+  "dependencies": {}
 }
