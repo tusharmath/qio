@@ -43,7 +43,7 @@ let FIBER_ID = 0
 export abstract class Fiber<E, A> {
   /**
    * Uses a shared runtime to evaluate a [[FIO]] expression.
-   * Returns a [[ICancellable]] that can be used to interrupt the execution.
+   * Returns a `ICancellable` that can be used to interrupt the execution.
    */
   public static unsafeExecuteWith<E, A>(
     io: IO<E, A>,

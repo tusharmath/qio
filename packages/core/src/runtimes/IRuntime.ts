@@ -20,7 +20,7 @@ export interface IRuntime {
 
   /**
    * Executes the provided [[FIO]] expression.
-   * Returns a [[ICancellable]] that can be used to interrupt the execution.
+   * Returns a `ICancellable` that can be used to interrupt the execution.
    */
   unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
 }

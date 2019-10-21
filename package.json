@@ -42,6 +42,7 @@
     "travis-deploy-once": "^5.0.11",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.15.0",
     "typescript": "^3.6.4",
     "typescript-tslint-plugin": "^0.5.4",
     "typings-checker": "^2.0.0"

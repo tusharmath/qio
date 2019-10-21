@@ -291,7 +291,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates an IO from [[Either]]
+   * Creates an IO from `Either`
    */
   public static fromEither<E, A>(exit: Either<E, A>): IO<E, A> {
     return exit.fold<IO<E, A>>(FIO.never(), FIO.reject, FIO.of)
