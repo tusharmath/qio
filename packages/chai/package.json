@@ -31,5 +31,9 @@
     "@types/chai-spies": "^1.0.1",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0"
+  },
+  "dependencies": {
+    "@fio/core": "^0.0.0-development",
+    "@fio/prelude": "^0.0.0"
   }
 }

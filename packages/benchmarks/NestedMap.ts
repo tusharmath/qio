@@ -2,10 +2,9 @@
  * Created by tushar on 2019-05-11
  */
 
+import {FIO} from '@fio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
-
-import {FIO} from '../core/src/main/FIO'
 
 import {inc} from './internals/Inc'
 import {RunSuite} from './internals/RunSuite'
