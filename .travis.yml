@@ -14,7 +14,7 @@ branches:
     - /^v\d+\.\d+\.\d+$/
 script:
   - yarn lint
-  - yarn check-types
+  - yarn workspace @fio/type-test run test
   - yarn tsc -b
   - yarn test
   - yarn create-docs

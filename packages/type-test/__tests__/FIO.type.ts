@@ -2,7 +2,7 @@
  * Created by tushar on 2019-04-24
  */
 
-import {defaultRuntime, FIO} from '../'
+import {defaultRuntime, FIO} from '@fio/core'
 
 //#region ASYNC
 // $ExpectType FIO<never, never, unknown>
