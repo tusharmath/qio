@@ -1,14 +1,11 @@
-# FIO Example
+# `@fio/example`
 
-## Running
+> TODO: description
 
-```bash
-git clone https://github.com/tusharmath/fearless-io.git
-yarn install
-yarn tsc
-yarn run example
+## Usage
+
 ```
+const example = require('@fio/example');
 
-## Review Unit Tests
-
-The test code is inside the `test/Program.test.ts` file.
+// TODO: DEMONSTRATE API
+```
