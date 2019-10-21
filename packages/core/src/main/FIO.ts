@@ -2,13 +2,13 @@
  * Created by tushar on 2019-05-20
  */
 
+import {Id} from '@fio/prelude/Id'
 import {debug} from 'debug'
 import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {Fiber} from '../internals/Fiber'
-import {Id} from '../internals/Id'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'

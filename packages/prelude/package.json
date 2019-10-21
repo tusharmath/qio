@@ -1,12 +1,10 @@
 {
   "name": "@fio/prelude",
   "version": "0.0.0",
-  "private": true,
-  "description": "> TODO: description",
+  "description": "helper utilities for FIO and its sister project",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/fearless-io#readme",
   "license": "ISC",
-  "main": "lib/prelude.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tusharmath/fearless-io.git"

@@ -2,11 +2,11 @@
  * Created by tushar on 2019-05-24
  */
 
+import {Id} from '@fio/prelude/Id'
 import {Either, Option} from 'standard-data-structures'
 import {ITestSchedulerOptions} from 'ts-scheduler/src/main/ITestSchedulerOptions'
 import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
-import {Id} from '../internals/Id'
 import {FIO, IO} from '../main/FIO'
 
 import {BaseRuntime} from './BaseRuntime'

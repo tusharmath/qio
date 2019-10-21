@@ -20,7 +20,8 @@
     "debug": "^4.1.1",
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
-    "ts-scheduler": "^8.0.1"
+    "ts-scheduler": "^8.0.1",
+    "@fio/prelude": "*"
   },
   "devDependencies": {
     "@types/chai": "^4.2.3",

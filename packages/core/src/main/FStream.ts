@@ -1,7 +1,6 @@
+import {T} from '@fio/prelude/T'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
-
-import {T} from '../internals/T'
 
 import {FIO, NoEnv, UIO} from './FIO'
 import {Managed, UManaged} from './Managed'

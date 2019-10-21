@@ -1,6 +1,6 @@
+import {T} from '@fio/prelude/T'
 import {assert, spy} from 'chai'
 
-import {T} from '../src/internals/T'
 import {FIO} from '../src/main/FIO'
 import {FStream} from '../src/main/FStream'
 import {testRuntime} from '../src/runtimes/TestRuntime'

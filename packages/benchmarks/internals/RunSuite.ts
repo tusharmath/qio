@@ -1,8 +1,8 @@
 /* tslint:disable: no-unbound-method */
+import {noop} from '@fio/prelude/Noop'
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
-import {noop} from '../../core/src/internals/Noop'
 import {UIO} from '../../core/src/main/FIO'
 import {defaultRuntime} from '../../core/src/runtimes/DefaultRuntime'
 
