@@ -3,7 +3,7 @@
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "./node_modules/cz-lerna-changelog"
     }
   },
   "description": "A type-safe functional module that solves practical IO problems for node and the browser.",
@@ -23,7 +23,7 @@
     "lint": "tslint --project .",
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
-    "semantic-release": "semantic-release",
+    "semantic-release": "lerna-semantic-release pre && lerna-semantic-release perform && lerna-semantic-release post",
     "test": "mocha",
     "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "cd packages/website; yarn build; cd ..; cd ..; typedoc;",
@@ -46,7 +46,7 @@
     "bluebird": "^3.7.0",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "cz-conventional-changelog": "^3.0.2",
+    "cz-lerna-changelog": "^2.0.2",
     "debug": "^4.1.1",
     "docusaurus": "^1.13.0",
     "fluture": "^11.0.3",
