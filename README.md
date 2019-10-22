@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/tusharmath/fearless-io.svg?branch=master)](https://travis-ci.com/tusharmath/fearless-io)
-![npm](https://img.shields.io/npm/v/fearless-io.svg)
+[![Build Status](https://travis-ci.com/tusharmath/fio/core.svg?branch=master)](https://travis-ci.com/tusharmath/fio/core)
+![npm](https://img.shields.io/npm/v/@fio/core.svg)
 
 A type-safe, functional, performant, lawful, composable data structure that solves practical problems of effect-full code in node and browser.
 
@@ -8,23 +8,23 @@ A type-safe, functional, performant, lawful, composable data structure that solv
 - [Installation](#installation)
 - [Usage](#usage)
 - [Getting Started](#getting-started)
-- [Documentation](https://tusharmath.com/fearless-io)
-- [Example](https://github.com/tusharmath/fearless-io/blob/master/example/README.md)
-- [Benchmarks](https://github.com/tusharmath/fearless-io/blob/master/benchmarks/README.md)
+- [Documentation](https://tusharmath.com/@fio/core)
+- [Example](https://github.com/tusharmath/fio/blob/master/example/README.md)
+- [Benchmarks](https://github.com/tusharmath/fio/blob/master/benchmarks/README.md)
 - [Credits](#credits)
 
-[getting started]: https://github.com/tusharmath/fearless-io/blob/master/GETTING_STARTED.md
+[getting started]: https://github.com/tusharmath/fio/blob/master/GETTING_STARTED.md
 
 # Installation
 
 ```bash
-npm i fearless-io
+npm i @fio/core
 ```
 
 # Usage
 
 ```typescript
-import {IO, defaultRuntime} from 'fearless-io'
+import {IO, defaultRuntime} from '@fio/core'
 
 // Create a pure version of `console.log` called `putStrLn`
 const putStrLn = IO.encase((str: string) => console.log(str))
@@ -71,14 +71,14 @@ const GreetIO: FIO<unknown, never, void>
 
 There are multiple ways through which you can create an instance of FIO viz. `FIO.from` or `FIO.encase` etc. Refer to the [API documentation] to learn about all the ways.
 
-[api documentation]: https://tusharmath.com/fearless-io/classes/fio.html
+[api documentation]: https://tusharmath.com/fio/classes/fio.html
 
 Once of the easiest ways to create a FIO is through [FIO.encase].
 
-[fio.encase]: https://tusharmath.com/fearless-io/classes/fio.html#encase
+[fio.encase]: https://tusharmath.com/fio/classes/fio.html#encase
 
 ```patch
-+ import {FIO} from 'fearless-io'
++ import {FIO} from '@fio/core'
 
   const Greet = () => console.log('Hello World!')
 + const GreetIO = FIO.encase(Greet)
@@ -94,11 +94,11 @@ Calling `GreetIO()` returns a pure data structure which represents a side-effect
 
 Execution of FIO happens through a [Runtime].
 
-[runtime]: https://tusharmath.com/fearless-io/classes/runtime.html
+[runtime]: https://tusharmath.com/fio/classes/runtime.html
 
 ```diff
-- import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from '@fio/core'
++ import {FIO, defaultRuntime} from '@fio/core'
 
   const Greet = () => console.log('Hello World!')
   const GreetIO = FIO.encase(Greet)
@@ -110,7 +110,7 @@ Execution of FIO happens through a [Runtime].
 Since these data structures don't specify how or when they are going to be executed, writing them one after the other in procedural style will not guarantee any order of execution, for Eg —
 
 ```diff
-+  import {FIO} from 'fearless-io'
++  import {FIO} from '@fio/core'
 +  const putStrLn = FIO.encase((msg: string) => console.log(msg))
 +
 +  const foo = putStrLn('foo')
@@ -120,7 +120,7 @@ Since these data structures don't specify how or when they are going to be execu
 In the above code either `foo` or `bar` can be printed first depending on internal prioritization and scheduling algorithms that FIO uses. To ensure that `foo` is printed first and `bar` is printed second one must use the [and] operator.
 
 ```diff
-  import {FIO} from 'fearless-io'
+  import {FIO} from '@fio/core'
   const putStrLn = FIO.encase((msg: string) => console.log(msg))
 
   const fooIO = putStrLn('foo')
@@ -132,8 +132,8 @@ In the above code either `foo` or `bar` can be printed first depending on intern
 `fooBar` is a new FIO object of type `FIO<unknown, never, void>`.
 
 ```diff
-- import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from '@fio/core'
++ import {FIO, defaultRuntime} from '@fio/core'
   const putStrLn = FIO.encase((msg: string) => console.log(msg))
 
   const fooIO = putStrLn('foo')
@@ -143,18 +143,18 @@ In the above code either `foo` or `bar` can be printed first depending on intern
 + defaultRuntime().unsafeExecute(fooBar)
 ```
 
-[and]: https://tusharmath.com/fearless-io/classes/fio.html#and
+[and]: https://tusharmath.com/fio/classes/fio.html#and
 
 # Parallel Execution
 
 Similar to the `and` operator, the [par] operator runs the two IOs in parallel. For eg.
 
-[par]: https://tusharmath.com/fearless-io/classes/fio.html#par
+[par]: https://tusharmath.com/fio/classes/fio.html#par
 
 Create the two IOs
 
 ```diff
-+  import {FIO} from 'fearless-io'
++  import {FIO} from '@fio/core'
 +
 +  const foo = FIO.timeout('foo', 1000)
 +  const bar = FIO.timeout('bar', 1500)
@@ -163,7 +163,7 @@ Create the two IOs
 Combine them using [par]
 
 ```diff
-- import {FIO} from 'fearless-io'
+- import {FIO} from '@fio/core'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
@@ -173,8 +173,8 @@ Combine them using [par]
 Execute the created IO
 
 ```diff
-- import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from '@fio/core'
++ import {FIO, defaultRuntime} from '@fio/core'
 
   const foo = FIO.timeout('foo', 1000)
   const bar = FIO.timeout('bar', 1500)
@@ -187,7 +187,7 @@ The program `fooBar` will complete in `1500`ms because both are executed in para
 
 Other more powerful operators can be found at [API Documentation].
 
-[api documentation]: https://tusharmath.com/fearless-io/classes/fio.html
+[api documentation]: https://tusharmath.com/fio/classes/fio.html
 
 # Cancellation
 
@@ -196,15 +196,15 @@ Executing an IO returns a cancel callback. Essentially a function that when call
 Create an IO
 
 ```diff
-+ import {FIO} from 'fearless-io'
++ import {FIO} from '@fio/core'
 + const delayIO = FIO.timeout('Hello World', 1000)
 ```
 
 Execute by passing it to `defaultRuntime`
 
 ```diff
-- import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from '@fio/core'
++ import {FIO, defaultRuntime} from '@fio/core'
   const delayIO = FIO.timeout('Hello World', 1000)
 + const cancel = defaultRuntime().unsafeExecute(delayIO)
 ```
@@ -212,7 +212,7 @@ Execute by passing it to `defaultRuntime`
 Calling the cancelling callback.
 
 ```diff
-  import {FIO, defaultRuntime} from 'fearless-io'
+  import {FIO, defaultRuntime} from '@fio/core'
   const delayIO = FIO.timeout('Hello World', 1000)
   const cancel = defaultRuntime().execute(delayIO)
 + cancel()
@@ -252,7 +252,7 @@ Next we create an Environment that returns a `config` —
 We add `getPort` which picks the `port` and `putStrLn` which is a wrapper over `console.log` to make it pure.
 
 ```diff
-+ import {FIO} from 'fearless-io'
++ import {FIO} from '@fio/core'
   interface Config {
     port: number
   }
@@ -267,10 +267,10 @@ We add `getPort` which picks the `port` and `putStrLn` which is a wrapper over `
 
 Using the [chain] operator one can now chain them one after the other —
 
-[chain]: https://tusharmath.com/fearless-io/classes/fio.html#chain
+[chain]: https://tusharmath.com/fio/classes/fio.html#chain
 
 ```diff
-  import {FIO} from 'fearless-io'
+  import {FIO} from '@fio/core'
   interface Config {
     port: number
   }
@@ -288,7 +288,7 @@ Using the [chain] operator one can now chain them one after the other —
 You can provide the env directly to a FIO instance without executing it using the [provide] method.
 
 ```diff
-  import {FIO} from 'fearless-io'
+  import {FIO} from '@fio/core'
 + import config from 'node-config'
   interface Config {
     port: number
@@ -307,15 +307,15 @@ You can provide the env directly to a FIO instance without executing it using th
 + const program0 = program.provide(env)
 ```
 
-[provide]: https://tusharmath.com/fearless-io/classes/fio.html#provide
+[provide]: https://tusharmath.com/fio/classes/fio.html#provide
 
 ## Running the program
 
 Running the program can be done by using the runtime.
 
 ```diff
-- import {FIO} from 'fearless-io'
-+ import {FIO, defaultRuntime} from 'fearless-io'
+- import {FIO} from '@fio/core'
++ import {FIO, defaultRuntime} from '@fio/core'
   import config from 'node-config'
   interface Config {
     port: number
@@ -335,11 +335,11 @@ Running the program can be done by using the runtime.
 + defaultRuntime().unsafeExecute(program0)
 ```
 
-[provide]: https://tusharmath.com/fearless-io/classes/fio.html#provide
+[provide]: https://tusharmath.com/fio/classes/fio.html#provide
 
 ## Next Steps
 
-Checkout a fully functional example [here](https://github.com/tusharmath/fearless-io/tree/master/example).
+Checkout a fully functional example [here](https://github.com/tusharmath/fio/tree/master/example).
 
 # Credits
 

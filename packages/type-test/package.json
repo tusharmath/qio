@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "tests for typings",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fearless-io#readme",
+  "homepage": "https://github.com/tusharmath/fio#readme",
   "license": "ISC",
   "main": "index.js",
   "directories": {
@@ -19,13 +19,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fearless-io.git"
+    "url": "git+https://github.com/tusharmath/fio.git"
   },
   "scripts": {
     "test": "typings-checker --allow-expect-error --project ../../tsconfig.json ./__tests__/*.ts"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fearless-io/issues"
+    "url": "https://github.com/tusharmath/fio/issues"
   },
   "devDependencies": {
     "typings-checker": "^2.0.0"

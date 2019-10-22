@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fearless-io#readme",
+  "homepage": "https://github.com/tusharmath/fio#readme",
   "license": "ISC",
   "main": "lib/example.js",
   "directories": {
@@ -19,13 +19,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fearless-io.git"
+    "url": "git+https://github.com/tusharmath/fio.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fearless-io/issues"
+    "url": "https://github.com/tusharmath/fio/issues"
   },
   "devDependencies": {
     "@types/chai": "^4.2.3",

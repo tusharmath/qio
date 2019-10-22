@@ -24,7 +24,7 @@ export type Stream<A1> = FStream<never, A1, NoEnv>
  *
  * **Example:**
  * ```ts
- * import {FStream} from 'fearless-io'
+ * import {FStream} from '@fio/core'
  *
  *
  * const s = FStream.of(1, 2, 3).reduce(0, (a, b) => a + b)

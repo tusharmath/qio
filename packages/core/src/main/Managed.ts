@@ -15,7 +15,7 @@ export type UManaged<A1> = Managed<never, A1, NoEnv>
  * **Example:**
  * ```ts
  * import * as fs from 'fs'
- * import {FIO, Managed} from 'fearless-io'
+ * import {FIO, Managed} from '@fio/core'
  *
  * // Utility Functions
  * const fsOpen = (name: string) => FIO.node(cb => fs.open(name, cb))
