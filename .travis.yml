@@ -8,7 +8,7 @@ notifications:
 node_js:
   - 'stable'
 after_success:
-  - npm run travis-deploy-once "npm run semantic-release"
+  - ./scripts/deploy.sh
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
