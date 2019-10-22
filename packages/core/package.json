@@ -16,12 +16,12 @@
   },
   "version": "0.0.0-development",
   "dependencies": {
+    "@fio/prelude": "0.0.0",
     "checked-exceptions": "^1.2.0",
     "debug": "^4.1.1",
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
-    "ts-scheduler": "^8.0.1",
-    "@fio/prelude": "*"
+    "ts-scheduler": "^8.0.2"
   },
   "devDependencies": {
     "@types/chai": "^4.2.3",

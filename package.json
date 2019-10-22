@@ -33,10 +33,10 @@
   "version": "0.0.0-development",
   "devDependencies": {
     "cz-lerna-changelog": "^2.0.2",
-    "lerna": "^3.8.0",
-    "mocha": "^6.2.1",
+    "lerna": "^3.18.2",
+    "mocha": "^6.2.2",
     "prettier": "^1.18.2",
-    "semantic-release": "^15.13.24",
+    "semantic-release": "^15.13.27",
     "travis-deploy-once": "^5.0.11",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
