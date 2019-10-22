@@ -1,5 +1,6 @@
 {
   "name": "@fio/prelude",
+  "private": true,
   "version": "0.0.0",
   "description": "helper utilities for FIO and its sister project",
   "author": "Tushar Mathur <tusharmath@gmail.com>",

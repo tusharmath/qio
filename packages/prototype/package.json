@@ -1,6 +1,7 @@
 {
   "name": "@fio/prototype",
   "version": "0.0.0",
+  "private": true,
   "description": "Prototypes for that are based on FIO but are not a part of the core package.",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/fio#readme",
