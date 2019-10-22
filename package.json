@@ -23,10 +23,8 @@
     "lint": "tslint --project .",
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
-    "semantic-release": "lerna-semantic-release pre && lerna-semantic-release perform && lerna-semantic-release post",
     "test": "mocha --opts=packages/chai/mocha.opts",
     "lerna:publish": "lerna publish from-git --yes",
-    "travis-deploy-once": "travis-deploy-once --pro",
     "create-docs": "cd packages/website && yarn build && cd .. && cd .. && typedoc;",
     "update-benchmarks": "packages/benchmarks/run.sh",
     "example": "node packages/example/guess-the-number/src/Run"
@@ -35,11 +33,8 @@
   "devDependencies": {
     "cz-lerna-changelog": "^2.0.2",
     "lerna": "^3.18.2",
-    "lerna-semantic-release": "^9.1.0",
     "mocha": "^6.2.2",
     "prettier": "^1.18.2",
-    "semantic-release": "^15.13.27",
-    "travis-deploy-once": "^5.0.11",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.15.0",
