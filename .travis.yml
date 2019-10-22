@@ -18,7 +18,8 @@ script:
   - yarn tsc -b
   - yarn test
   - yarn create-docs
-
+before_deploy:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null
 deploy:
   provider: pages
   skip_cleanup: true
