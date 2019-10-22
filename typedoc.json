@@ -5,7 +5,7 @@
   "excludeProtected": true,
   "hideGenerator": true,
   "mode": "file",
-  "out": "website/build/test-site/api",
+  "out": "packages/website/build/api",
   "exclude": ["test/**", "example/**", "benchmarks/**"],
   "listInvalidSymbolLinks": true,
   "toc": [

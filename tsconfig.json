@@ -11,5 +11,5 @@
     "removeComments": true,
     "tsBuildInfoFile": "tsconfig.tsbuildinfo"
   },
-  "exclude": ["type-test"]
+  "exclude": ["packages/type-test"]
 }

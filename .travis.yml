@@ -14,7 +14,7 @@ branches:
     - /^v\d+\.\d+\.\d+$/
 script:
   - yarn lint
-  - yarn check-types
+  - yarn workspace @fio/type-test run test
   - yarn tsc -b
   - yarn test
   - yarn create-docs
@@ -24,7 +24,7 @@ deploy:
   skip_cleanup: true
   github_token: $GH_TOKEN # Set in the settings page of your repository, as a secure variable
   keep_history: false
-  local_dir: website/build
+  local_dir: packages/website/build
   on:
     branch: master
 before_install: yarn global add greenkeeper-lockfile@1

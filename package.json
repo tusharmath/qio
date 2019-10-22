@@ -1,8 +1,9 @@
 {
+  "private": true,
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "./node_modules/cz-lerna-changelog"
     }
   },
   "description": "A type-safe functional module that solves practical IO problems for node and the browser.",
@@ -14,8 +15,6 @@
     "promise"
   ],
   "license": "ISC",
-  "main": "index.js",
-  "name": "fearless-io",
   "repository": {
     "type": "git",
     "url": "https://github.com/tusharmath/fearless-io.git"
@@ -24,49 +23,29 @@
     "lint": "tslint --project .",
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
-    "semantic-release": "semantic-release",
-    "test": "mocha",
+    "semantic-release": "lerna-semantic-release pre && lerna-semantic-release perform && lerna-semantic-release post",
+    "test": "mocha --opts=packages/chai/mocha.opts",
     "travis-deploy-once": "travis-deploy-once --pro",
-    "create-docs": "cd website; yarn build; cd ..; typedoc;",
-    "update-benchmarks": "benchmarks/run.sh",
-    "check-types": "typings-checker --allow-expect-error type-test/*.ts",
-    "typings-checker": "typings-checker",
-    "example": "node example/guess-the-number/src/Run"
+    "create-docs": "cd packages/website && yarn build && cd .. && cd .. && typedoc;",
+    "update-benchmarks": "packages/benchmarks/run.sh",
+    "example": "node packages/example/guess-the-number/src/Run"
   },
   "version": "0.0.0-development",
   "devDependencies": {
-    "@tusharmathur/typedoc": "^1.0.0",
-    "@types/benchmark": "^1.0.31",
-    "@types/bluebird": "^3.5.27",
-    "@types/chai": "^4.2.3",
-    "@types/chai-spies": "^1.0.1",
-    "@types/debug": "^4.1.5",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.12",
-    "benchmark": "^2.1.4",
-    "bluebird": "^3.7.0",
-    "chai": "^4.2.0",
-    "chai-spies": "^1.0.0",
-    "cz-conventional-changelog": "^3.0.2",
-    "debug": "^4.1.1",
-    "docusaurus": "^1.13.0",
-    "fluture": "^11.0.3",
-    "mocha": "^6.2.1",
+    "cz-lerna-changelog": "^2.0.2",
+    "lerna": "^3.18.2",
+    "mocha": "^6.2.2",
     "prettier": "^1.18.2",
-    "semantic-release": "^15.13.24",
-    "source-map-support": "^0.5.13",
+    "semantic-release": "^15.13.27",
     "travis-deploy-once": "^5.0.11",
-    "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.15.0",
     "typescript": "^3.6.4",
-    "typescript-tslint-plugin": "^0.5.4",
-    "typings-checker": "^2.0.0"
+    "typescript-tslint-plugin": "^0.5.4"
   },
-  "dependencies": {
-    "checked-exceptions": "^1.2.0",
-    "in-node": "^1.0.0",
-    "standard-data-structures": "^4.0.0",
-    "ts-scheduler": "^8.0.1"
-  }
+  "workspaces": [
+    "packages/*"
+  ],
+  "name": "fearless-io"
 }
