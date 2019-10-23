@@ -1,6 +1,6 @@
 {
   "name": "@fio/prototype",
-  "version": "16.2.2",
+  "version": "16.2.3",
   "private": true,
   "description": "Prototypes for that are based on FIO but are not a part of the core package.",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
@@ -28,6 +28,6 @@
     "url": "https://github.com/tusharmath/fio/issues"
   },
   "dependencies": {
-    "@fio/core": "^16.2.2"
+    "@fio/core": "^16.2.3"
   }
 }

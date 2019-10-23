@@ -1,6 +1,6 @@
 {
   "name": "@fio/chai",
-  "version": "16.2.2",
+  "version": "16.2.3",
   "private": true,
   "description": "Chai setup for FIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
@@ -34,7 +34,7 @@
     "chai-spies": "^1.0.0"
   },
   "dependencies": {
-    "@fio/core": "^16.2.2",
+    "@fio/core": "^16.2.3",
     "@fio/prelude": "^16.2.2"
   }
 }

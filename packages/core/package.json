@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/tusharmath/fio.git"
   },
-  "version": "16.2.2",
+  "version": "16.2.3",
   "dependencies": {
     "@fio/prelude": "^16.2.2",
     "checked-exceptions": "^1.2.0",
