@@ -8,8 +8,7 @@ notifications:
 node_js:
   - 'stable'
 after_success:
-  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null
-  - yarn lerna:publish
+  - scripts/deploy.sh
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
