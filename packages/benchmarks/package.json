@@ -1,7 +1,7 @@
 {
   "name": "@fio/benchmarks",
   "private": true,
-  "version": "0.0.0",
+  "version": "16.2.2",
   "description": "> TODO: description",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/fio#readme",
@@ -35,7 +35,7 @@
     "fluture": "^11.0.3"
   },
   "dependencies": {
-    "@fio/core": "^0.0.0-development",
-    "@fio/prelude": "^0.0.0"
+    "@fio/core": "^16.2.2",
+    "@fio/prelude": "^16.2.2"
   }
 }

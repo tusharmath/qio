@@ -1,7 +1,7 @@
 {
   "name": "@fio/prelude",
   "private": true,
-  "version": "0.0.0",
+  "version": "16.2.2",
   "description": "helper utilities for FIO and its sister project",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/fio#readme",
@@ -15,6 +15,5 @@
   },
   "bugs": {
     "url": "https://github.com/tusharmath/fio/issues"
-  },
-  "dependencies": {}
+  }
 }
