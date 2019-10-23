@@ -7,8 +7,6 @@ notifications:
   email: false
 node_js:
   - 'stable'
-after_success:
-  - scripts/deploy.sh
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
@@ -17,15 +15,6 @@ script:
   - yarn workspace @fio/type-test run test
   - yarn tsc -b
   - yarn test
-  - yarn create-docs
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GH_TOKEN # Set in the settings page of your repository, as a secure variable
-  keep_history: false
-  local_dir: packages/website/build
-  on:
-    branch: master
 before_install: yarn global add greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
 after_script: greenkeeper-lockfile-upload

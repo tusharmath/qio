@@ -24,7 +24,6 @@
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
     "test": "mocha --opts=packages/chai/mocha.opts",
-    "lerna:publish": "lerna publish from-git --yes",
     "create-docs": "cd packages/website && yarn build && cd .. && cd .. && typedoc;",
     "update-benchmarks": "packages/benchmarks/run.sh",
     "example": "node packages/example/guess-the-number/src/Run"
