@@ -1,7 +1,7 @@
 {
   "generator-kips": {
     "promptValues": {
-      "projectName": "fio",
+      "projectName": "qio",
       "projectDescription": "A typesafe functional module that solves practical IO problems for node and the browser.",
       "keywords": "io functional typescript pure promise"
     }
