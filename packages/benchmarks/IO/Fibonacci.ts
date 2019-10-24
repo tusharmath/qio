@@ -4,7 +4,7 @@ import {QIO, UIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
-import {RunSuite} from './internals/RunSuite'
+import {RunSuite} from '../internals/RunSuite'
 
 /**
  * Normal Fibonacci Implementation

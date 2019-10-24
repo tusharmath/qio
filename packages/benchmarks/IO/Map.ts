@@ -5,8 +5,8 @@ import {QIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
-import {inc} from './internals/Inc'
-import {RunSuite} from './internals/RunSuite'
+import {inc} from '../internals/Inc'
+import {RunSuite} from '../internals/RunSuite'
 
 RunSuite('Map', {
   bluebird: () => Promise.resolve(BigInt(10)).then(inc),

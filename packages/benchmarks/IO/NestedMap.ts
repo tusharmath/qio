@@ -1,20 +1,21 @@
+/**
+ * Created by tushar on 2019-05-11
+ */
+
 import {QIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
-import {RunSuite} from './internals/RunSuite'
+import {inc} from '../internals/Inc'
+import {RunSuite} from '../internals/RunSuite'
 
-const MAX = 1e4
+const MAX = 1e3
 
-const flutureMapper = (_: bigint) => Fluture.of(_ + BigInt(1))
-const bluebirdMapper = (_: bigint) => Promise.resolve(_ + BigInt(1))
-const qioMapper = (_: bigint) => QIO.of(_ + BigInt(1))
-
-RunSuite(`NestedChain ${MAX}`, {
+RunSuite(`NestedMap ${MAX}`, {
   bluebird: () => {
     let bird = Promise.resolve(BigInt(0))
     for (let i = 0; i < MAX; i++) {
-      bird = bird.then(bluebirdMapper)
+      bird = bird.then(inc)
     }
 
     return bird
@@ -22,7 +23,7 @@ RunSuite(`NestedChain ${MAX}`, {
   fluture: () => {
     let fluture = Fluture.of(BigInt(0))
     for (let i = 0; i < MAX; i++) {
-      fluture = fluture.chain(flutureMapper)
+      fluture = fluture.map(inc)
     }
 
     return fluture
@@ -30,7 +31,7 @@ RunSuite(`NestedChain ${MAX}`, {
   qio: () => {
     let qio = QIO.of(BigInt(0))
     for (let i = 0; i < MAX; i++) {
-      qio = qio.chain(qioMapper)
+      qio = qio.map(inc)
     }
 
     return qio

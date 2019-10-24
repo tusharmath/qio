@@ -2,13 +2,11 @@
  * Created by tushar on 09/09/19
  */
 
-/* tslint:disable */
+import {QIO, UIO} from '@qio/core'
 import {Suite} from 'benchmark'
 
-import {QIO, UIO} from '@qio/core'
-
-import {PrintLn} from './internals/PrintLn'
-import {qioRuntime} from './internals/RunSuite'
+import {PrintLn} from '../internals/PrintLn'
+import {qioRuntime} from '../internals/RunSuite'
 
 const suite = new Suite('Stream')
 
@@ -28,12 +26,9 @@ const qioIteration = QIO.encase((numbers: number[]) => {
   return sum
 })
 
-function qioRecursion(numbers: number[]) {
-  function itar(i: number, sum: number): UIO<number> {
-    return i === numbers.length
-      ? QIO.of(sum)
-      : QIO.call(itar, i + 1, sum + numbers[i])
-  }
+const qioRecursion = (numbers: number[]) => {
+  const itar = (i: number, sum: number): UIO<number> =>
+    i === numbers.length ? QIO.of(sum) : QIO.call(itar, i + 1, sum + numbers[i])
 
   return itar(0, 0)
 }

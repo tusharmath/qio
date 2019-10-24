@@ -22,7 +22,7 @@
     "url": "git+https://github.com/tusharmath/qio.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test:io": "./run.sh IO"
   },
   "bugs": {
     "url": "https://github.com/tusharmath/qio/issues"
