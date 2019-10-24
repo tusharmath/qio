@@ -8,7 +8,7 @@ import {Suite} from 'benchmark'
 import {QIO, UIO} from '@qio/core'
 
 import {PrintLn} from './internals/PrintLn'
-import {fioRuntime} from './internals/RunSuite'
+import {qioRuntime} from './internals/RunSuite'
 
 const suite = new Suite('Stream')
 
@@ -19,7 +19,7 @@ for (let i = 0; i < count; i++) {
   arr.push(i)
 }
 
-const fioIteration = QIO.encase((numbers: number[]) => {
+const qioIteration = QIO.encase((numbers: number[]) => {
   let sum = 0
   for (let i = 0; i < numbers.length; i++) {
     sum += numbers[i]
@@ -28,7 +28,7 @@ const fioIteration = QIO.encase((numbers: number[]) => {
   return sum
 })
 
-function fioRecursion(numbers: number[]) {
+function qioRecursion(numbers: number[]) {
   function itar(i: number, sum: number): UIO<number> {
     return i === numbers.length
       ? QIO.of(sum)
@@ -43,14 +43,14 @@ suite
   .add(
     'Recursion',
     (cb: IDefer) =>
-      fioRuntime.unsafeExecute(fioRecursion(arr), () => cb.resolve()),
+      qioRuntime.unsafeExecute(qioRecursion(arr), () => cb.resolve()),
     {defer: true}
   )
 
   .add(
     'Iterative',
     (cb: IDefer) =>
-      fioRuntime.unsafeExecute(fioIteration(arr), () => cb.resolve()),
+      qioRuntime.unsafeExecute(qioIteration(arr), () => cb.resolve()),
     {defer: true}
   )
 

@@ -6,7 +6,7 @@ import {FutureInstance} from 'fluture'
 
 import {PrintLn} from './PrintLn'
 
-export const fioRuntime = defaultRuntime()
+export const qioRuntime = defaultRuntime()
 
 export const RunSuite = (
   name: string,
@@ -30,7 +30,7 @@ export const RunSuite = (
   suite
     .add(
       'QIO',
-      (cb: IDefer) => fioRuntime.unsafeExecute(test.qio(), () => cb.resolve()),
+      (cb: IDefer) => qioRuntime.unsafeExecute(test.qio(), () => cb.resolve()),
       {defer: true}
     )
     .add(

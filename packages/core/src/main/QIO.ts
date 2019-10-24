@@ -19,7 +19,7 @@ const D = debug('qio:core')
 export type NoEnv = unknown
 
 /**
- * IO represents a [[QIO]] that doesn't need any environment to execute
+ * IO represents a [[FIO]] that doesn't need any environment to execute
  */
 export type IO<E, A> = QIO<E, A>
 export const IO = <E = never, A = unknown>(fn: () => A): IO<E, A> =>
@@ -38,7 +38,7 @@ export type TaskR<A, R> = QIO<Error, A, R>
 export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => QIO.access(fn)
 
 /**
- * UIO represents a QIO that doesn't require any environment and doesn't ever fail.
+ * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
  */
 export type UIO<A> = IO<never, A>
 export const UIO = <A>(fn: () => A): UIO<A> => QIO.resume(fn)
@@ -97,21 +97,21 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Ignores the result of the QIO instance
+   * Ignores the result of the FIO instance
    */
   public get void(): QIO<E1, void, R1> {
     return this.const(undefined)
   }
 
   /**
-   * Creates a new QIO instance with the provided environment
+   * Creates a new FIO instance with the provided environment
    */
   public static access<R, A>(cb: (R: R) => A): QIO<never, A, R> {
     return new QIO(Tag.Access, cb)
   }
 
   /**
-   * Effectfully creates a new QIO instance with the provided environment
+   * Effectfully creates a new FIO instance with the provided environment
    */
   public static accessM<E1, A1, R1, R2>(
     cb: (R: R1) => QIO<E1, A1, R2>
@@ -120,7 +120,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a new QIO instance with the provided environment by invoking a promise returning function.
+   * Creates a new FIO instance with the provided environment by invoking a promise returning function.
    */
   public static accessP<A1, R1>(
     cb: (R: R1) => Promise<A1>
@@ -129,7 +129,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Converts a [[QIO]] of a function into a [[QIO]] of a value.
+   * Converts a [[FIO]] of a function into a [[FIO]] of a value.
    */
   public static ap<E1, A1, R1, A2>(
     qio: QIO<E1, (a: A1) => A2, R1>,
@@ -195,7 +195,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a [[QIO]] using a callback function.
+   * Creates a [[FIO]] using a callback function.
    */
   public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
     return QIO.runtime().chain(RTM =>
@@ -204,7 +204,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Serially executes one QIO after another.
+   * Serially executes one FIO after another.
    */
   public static chain<E1, A1, R1, E2, A2, R2>(
     fa: QIO<E1, A1, R1>,
@@ -241,14 +241,14 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a [[QIO]] that needs an environment and when resolved outputs the same environment
+   * Creates a [[FIO]] that needs an environment and when resolved outputs the same environment
    */
   public static env<R1 = never>(): QIO<never, R1, R1> {
     return QIO.access<R1, R1>(Id)
   }
 
   /**
-   * Unwraps a QIO
+   * Unwraps a FIO
    */
   public static flatten<E1, A1, R1, E2, A2, R2>(
     qio: QIO<E1, QIO<E2, A2, R2>, R1>
@@ -257,21 +257,21 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Takes in a effect-ful function that return a QIO and unwraps it.
-   * This is an alias to `QIO.flatten(UIO(fn))`
+   * Takes in a effect-ful function that return a FIO and unwraps it.
+   * This is an alias to `FIO.flatten(UIO(fn))`
    *
    * ```ts
-   * // An impure function that creates mutable state but also returns a QIO.
+   * // An impure function that creates mutable state but also returns a FIO.
    * const FN = () => {
    *   let count = 0
    *
-   *   return QIO.try(() => count++)
+   *   return FIO.try(() => count++)
    * }
    * // Using flatten
-   * QIO.flatten(UIO(FN))
+   * FIO.flatten(UIO(FN))
    *
    * // Using flattenM
-   * QIO.flattenM(FN)
+   * FIO.flattenM(FN)
    * ```
    */
   public static flattenM<E1, A1, R1>(
@@ -309,7 +309,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * A different flavour of [[QIO.if]] that takes in functions instead of QIO instances.
+   * A different flavour of [[FIO.if]] that takes in functions instead of FIO instances.
    */
   public static if0<T extends unknown[]>(
     ...args: T
@@ -345,8 +345,8 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    *
    * **Example:**
    * ```ts
-   * // QIO<NodeJS.ErrnoException, number, unknown>
-   * const fsOpen = QIO.node(cb => fs.open('./data.txt', cb))
+   * // FIO<NodeJS.ErrnoException, number, unknown>
+   * const fsOpen = FIO.node(cb => fs.open('./data.txt', cb))
    * ```
    */
   public static node<A = never>(
@@ -373,7 +373,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Runs multiple IOs in parallel. Checkout [[QIO.seq]] to run IOs in sequence.
+   * Runs multiple IOs in parallel. Checkout [[FIO.seq]] to run IOs in sequence.
    */
   public static par<E1, A1, R1>(
     ios: Array<QIO<E1, A1, R1>>
@@ -387,7 +387,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Runs at max N IOs in parallel. Checkout [[QIO.par]] to run any number of [[QIO]]s in parallel
+   * Runs at max N IOs in parallel. Checkout [[FIO.par]] to run any number of [[FIO]]s in parallel
    */
   public static parN<E1, A1, R1>(
     N: number,
@@ -406,7 +406,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Takes in a function that returns a QIO
+   * Takes in a function that returns a FIO
    * and converts it to a function that returns an IO by providing it the
    * given env.
    */
@@ -418,7 +418,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a QIO that rejects with the provided error
+   * Creates a FIO that rejects with the provided error
    */
   public static reject<E1>(error: E1): QIO<E1, never> {
     return new QIO(Tag.Reject, error)
@@ -447,7 +447,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
   /**
    * Executes the provided IOs in sequences and returns their intermediatory results as an Array.
-   * Checkout [[QIO.par]] to run multiple IOs in parallel.
+   * Checkout [[FIO.par]] to run multiple IOs in parallel.
    */
   public static seq<E1, A1, R1>(
     ios: Array<QIO<E1, A1, R1>>
@@ -535,7 +535,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Runs the QIO instances one by one
+   * Runs the FIO instances one by one
    */
   public and<E2, A2, R2>(aFb: QIO<E2, A2, R2>): QIO<E1 | E2, A2, R1 & R2> {
     // TODO: can improve PERF by add a new instruction type
@@ -552,7 +552,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Chains one [[QIO]] after another.
+   * Chains one [[FIO]] after another.
    */
   public chain<E2, A2, R2>(
     aFb: (a: A1) => QIO<E2, A2, R2>
@@ -561,28 +561,28 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Ignores the original value of the QIO and resolves with the provided value
+   * Ignores the original value of the FIO and resolves with the provided value
    */
   public const<A2>(a: A2): QIO<E1, A2, R1> {
     return this.and(QIO.of(a))
   }
 
   /**
-   * Delays the execution of the [[QIO]] by the provided time.
+   * Delays the execution of the [[FIO]] by the provided time.
    */
   public delay(duration: number): QIO<E1, A1, R1> {
     return QIO.timeout(this, duration).chain(Id)
   }
 
   /**
-   * Like [[QIO.tap]] but takes in an IO instead of a callback.
+   * Like [[FIO.tap]] but takes in an IO instead of a callback.
    */
   public do<E2, R2>(io: QIO<E2, unknown, R2>): QIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io.const(_))
   }
 
   /**
-   * Calls the effect-full function on success of the current QIO instance.
+   * Calls the effect-full function on success of the current FIO instance.
    */
   public encase<E2 = never, A2 = unknown>(
     fn: (A1: A1) => A2
@@ -598,7 +598,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Applies transformation on the success value of the QIO.
+   * Applies transformation on the success value of the FIO.
    */
   public map<A2>(ab: (a: A1) => A2): QIO<E1, A2, R1> {
     return QIO.map(this, ab)
@@ -614,14 +614,14 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Provides the current instance of QIO the required env.
+   * Provides the current instance of FIO the required env.
    */
   public provide(r1: R1): IO<E1, A1> {
     return new QIO(Tag.Provide, this, r1)
   }
 
   /**
-   * Provides the current instance of QIO the required env that is accessed effect-fully.
+   * Provides the current instance of FIO the required env that is accessed effect-fully.
    */
   public provideM<E2, R2>(io: QIO<E2, R1, R2>): QIO<E1 | E2, A1, R2> {
     return io.chain(ENV => this.provide(ENV))
@@ -655,7 +655,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Executes two QIO instances in parallel and resolves with the one that finishes first and cancels the other.
+   * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
    */
   public raceWith<E2, A2, R2, E3, A3, E4, A4>(
     that: QIO<E2, A2, R2>,
@@ -695,7 +695,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Combine the result of two QIOs sequentially and return a Tuple
+   * Combine the result of two FIOs sequentially and return a Tuple
    */
   public zip<E2, A2, R2>(
     that: QIO<E2, A2, R2>
@@ -704,7 +704,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Combines the result of two QIOs and uses a combine function to combine their result
+   * Combines the result of two FIOs and uses a combine function to combine their result
    */
   public zipWith<E2, A2, R2, C>(
     that: QIO<E2, A2, R2>,
@@ -714,7 +714,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Combines the result of two QIOs and uses a combine function that returns a QIO
+   * Combines the result of two FIOs and uses a combine function that returns a FIO
    */
   public zipWithM<E2, A2, R2, E3, A3, R3>(
     that: QIO<E2, A2, R2>,
@@ -724,7 +724,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Combine two QIO instances in parallel and use the combine function to combine the result.
+   * Combine two FIO instances in parallel and use the combine function to combine the result.
    */
   public zipWithPar<E2, A2, R2, C>(
     that: QIO<E2, A2, R2>,
