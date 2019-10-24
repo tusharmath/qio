@@ -1,19 +1,19 @@
 {
-  "name": "@fio/prelude",
+  "name": "@qio/prelude",
   "private": true,
   "version": "16.2.2",
-  "description": "helper utilities for FIO and its sister project",
+  "description": "helper utilities for QIO and its sister project",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fio#readme",
+  "homepage": "https://github.com/tusharmath/qio#readme",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fio.git"
+    "url": "git+https://github.com/tusharmath/qio.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fio/issues"
+    "url": "https://github.com/tusharmath/qio/issues"
   }
 }

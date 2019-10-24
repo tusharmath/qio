@@ -1,10 +1,10 @@
 {
-  "name": "@fio/type-test",
+  "name": "@qio/type-test",
   "private": true,
   "version": "16.2.2",
   "description": "tests for typings",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fio#readme",
+  "homepage": "https://github.com/tusharmath/qio#readme",
   "license": "ISC",
   "main": "index.js",
   "directories": {
@@ -19,13 +19,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fio.git"
+    "url": "git+https://github.com/tusharmath/qio.git"
   },
   "scripts": {
     "test": "typings-checker --allow-expect-error --project ../../tsconfig.json ./__tests__/*.ts"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fio/issues"
+    "url": "https://github.com/tusharmath/qio/issues"
   },
   "devDependencies": {
     "typings-checker": "^2.0.0"

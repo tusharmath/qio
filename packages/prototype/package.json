@@ -1,10 +1,10 @@
 {
-  "name": "@fio/prototype",
+  "name": "@qio/prototype",
   "version": "16.2.3",
   "private": true,
-  "description": "Prototypes for that are based on FIO but are not a part of the core package.",
+  "description": "Prototypes for that are based on QIO but are not a part of the core package.",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fio#readme",
+  "homepage": "https://github.com/tusharmath/qio#readme",
   "license": "ISC",
   "main": "index.js",
   "directories": {
@@ -19,15 +19,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fio.git"
+    "url": "git+https://github.com/tusharmath/qio.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fio/issues"
+    "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "@fio/core": "^16.2.3"
+    "@qio/core": "^16.2.3"
   }
 }

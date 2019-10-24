@@ -9,7 +9,7 @@
   "exclude": ["test/**", "example/**", "benchmarks/**"],
   "listInvalidSymbolLinks": true,
   "toc": [
-    "FIO",
+    "QIO",
     "UIO",
     "IO",
     "Task",
