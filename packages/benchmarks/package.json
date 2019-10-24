@@ -1,10 +1,10 @@
 {
-  "name": "@fio/benchmarks",
+  "name": "@qio/benchmarks",
   "private": true,
   "version": "16.2.3",
   "description": "> TODO: description",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fio#readme",
+  "homepage": "https://github.com/tusharmath/qio#readme",
   "license": "ISC",
   "main": "lib/benchmarks.js",
   "directories": {
@@ -19,13 +19,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fio.git"
+    "url": "git+https://github.com/tusharmath/qio.git"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fio/issues"
+    "url": "https://github.com/tusharmath/qio/issues"
   },
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
@@ -35,7 +35,7 @@
     "fluture": "^11.0.3"
   },
   "dependencies": {
-    "@fio/core": "^16.2.3",
-    "@fio/prelude": "^16.2.2"
+    "@qio/core": "^16.2.3",
+    "@qio/prelude": "^16.2.2"
   }
 }

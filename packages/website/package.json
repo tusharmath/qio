@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@fio/website",
+  "name": "@qio/website",
   "version": "16.2.2",
   "scripts": {
     "examples": "docusaurus-examples",
@@ -13,7 +13,7 @@
   },
   "description": "> TODO: description",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
-  "homepage": "https://github.com/tusharmath/fio#readme",
+  "homepage": "https://github.com/tusharmath/qio#readme",
   "license": "ISC",
   "main": "lib/website.js",
   "directories": {
@@ -28,10 +28,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tusharmath/fio.git"
+    "url": "git+https://github.com/tusharmath/qio.git"
   },
   "bugs": {
-    "url": "https://github.com/tusharmath/fio/issues"
+    "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
     "docusaurus": "^1.14.0"
