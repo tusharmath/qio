@@ -4,5 +4,10 @@
   ],
   "version": "18.0.0",
   "npmClient": "yarn",
-  "useWorkspaces": true
+  "useWorkspaces": true,
+  "command": {
+    "version": {
+      "message": "chore(release): publish `%s` [ci skip]"
+    }
+  }
 }
