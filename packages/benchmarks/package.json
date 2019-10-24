@@ -22,7 +22,7 @@
     "url": "git+https://github.com/tusharmath/qio.git"
   },
   "scripts": {
-    "test:io": "./run.sh IO"
+    "test:io": "./run.sh IO ../docs/benchmarks.md"
   },
   "bugs": {
     "url": "https://github.com/tusharmath/qio/issues"
