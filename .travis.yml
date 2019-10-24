@@ -15,6 +15,7 @@ script:
   - yarn workspace @qio/type-test run test
   - yarn tsc -b
   - yarn test
+  - yarn create-docs
 before_install: yarn global add greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
 after_script: greenkeeper-lockfile-upload
@@ -27,6 +28,6 @@ deploy:
   skip_cleanup: true
   github_token: $GH_TOKEN # Set in the settings page of your repository, as a secure variable
   keep_history: false
+  local_dir: packages/website/build
   on:
     branch: master
-  local_dir: packages/website/build
