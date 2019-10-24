@@ -19,9 +19,13 @@ before_install: yarn global add greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
 after_script: greenkeeper-lockfile-upload
 
+after_success:
+  - ./scripts/publish.sh
+
 deploy:
-  provider: script
-  script: "./scripts/deploy.sh"
+  provider: pages
   skip_cleanup: true
+  github_token: $GH_TOKEN # Set in the settings page of your repository, as a secure variable
+  keep_history: false
   on:
     branch: master
