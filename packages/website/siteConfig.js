@@ -11,23 +11,22 @@
 const webSiteName = 'web'
 const projectName = 'qio'
 
-
 // List of projects/orgs using your project for the users page.
 const users = [
   {
-    caption: 'User1',
+    // caption: 'User1',
     // You will need to prepend the image path with your baseUrl
     // if it is not '/', like: '/${name}/img/image.jpg'.
-    image: `/${projectName}/${webSiteName}/img/undraw_open_source.svg`,
-    infoLink: 'https://www.facebook.com',
-    pinned: true
+    // image: `/${projectName}/${webSiteName}/img/undraw_open_source.svg`,
+    // infoLink: 'https://www.facebook.com',
+    // pinned: true
   }
 ]
 
 const siteConfig = {
   title: 'QIO', // Title for your website.
-  tagline: 'A website for testing',
-  url: 'https://tusharmath.com/${projectName}', // Your website URL
+  tagline: 'An effect management library',
+  url: `https://tusharmath.com/${projectName}`, // Your website URL
   baseUrl: `/${projectName}/${webSiteName}/`, // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -42,23 +41,24 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'doc1', label: 'Docs'},
-    {doc: 'doc4', label: 'API'},
-    {page: 'help', label: 'Help'},
-    {blog: true, label: 'Blog'}
+    // {doc: 'doc1', label: 'Docs'},
+    // {doc: 'doc4', label: 'API'},
+    // {page: 'help', label: 'Help'},
+    {blog: true, label: 'Blog'},
+    {href: 'https://github.com/tusharmath/qio', label: 'Github'}
   ],
 
   // If you have users set above, you add it here:
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/favicon.ico',
+  // headerIcon: 'img/favicon.ico',
   footerIcon: 'img/favicon.ico',
   favicon: 'img/favicon.ico',
 
   /* Colors for website */
   colors: {
-    primaryColor: '#0f5944',
+    primaryColor: '#444bb1',
     secondaryColor: '#0a3e2f'
   },
 
@@ -76,8 +76,12 @@ const siteConfig = {
   },
   */
 
+  fonts: {
+    myFont: ['Lora', 'Serif']
+  },
+
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
-  copyright: `Copyright © ${new Date().getFullYear()} Your Name or Your Company Name`,
+  copyright: `Copyright © ${new Date().getFullYear()} tusharmath.com`,
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
@@ -94,7 +98,7 @@ const siteConfig = {
 
   // Open Graph and Twitter card images.
   ogImage: 'img/undraw_online.svg',
-  twitterImage: 'img/undraw_tweetstorm.svg'
+  twitterImage: 'img/undraw_tweetstorm.svg',
 
   // For sites with a sizable amount of content, set collapsible to true.
   // Expand/collapse the links and subcategories under categories.
@@ -109,6 +113,10 @@ const siteConfig = {
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
   //   repoUrl: 'https://github.com/facebook/${name}',
+
+  stylesheets: [
+    'https://fonts.googleapis.com/css?family=Lora:400,700&display=swap'
+  ]
 }
 
 module.exports = siteConfig

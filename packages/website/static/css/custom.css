@@ -14,3 +14,11 @@
 
 @media only screen and (min-width: 1500px) {
 }
+
+body {
+  font-family: $myFont;
+}
+
+.fixedHeaderContainer {
+  box-shadow: 0px 4px 10px 0px #000000;
+}
