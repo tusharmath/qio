@@ -1,11 +1,11 @@
-# `@fio/benchmarks`
+# `@qio/benchmarks`
 
 > TODO: description
 
 ## Usage
 
 ```
-const benchmarks = require('@fio/benchmarks');
+const benchmarks = require('@qio/benchmarks');
 
 // TODO: DEMONSTRATE API
 ```

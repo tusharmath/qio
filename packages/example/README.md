@@ -1,11 +1,11 @@
-# `@fio/example`
+# `@qio/example`
 
 > TODO: description
 
 ## Usage
 
 ```
-const example = require('@fio/example');
+const example = require('@qio/example');
 
 // TODO: DEMONSTRATE API
 ```
