@@ -64,7 +64,9 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="docs/getting-started/introduction">Getting Started</Button>
+            <Button href="docs/getting-started/introduction">
+              Getting Started
+            </Button>
             {/*<Button href={docUrl('doc1.html')}>Example Link</Button>*/}
             {/*<Button href={docUrl('doc2.html')}>Example Link 2</Button>*/}
           </PromoSection>
@@ -175,7 +177,7 @@ class Index extends React.Component {
           {
             content:
               'Write applications without manually handling resource leaks.',
-            title: 'Resource Safety'
+            title: 'Resource Safe'
           },
 
           {
