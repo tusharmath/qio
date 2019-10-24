@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 
 import {canContinue, program} from '../../example/guess-the-number/src/Program'
-import {FIO, UIO} from '../src/main/FIO'
+import {QIO, UIO} from '../src/main/QIO'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 describe('Program', () => {
@@ -22,7 +22,7 @@ describe('Program', () => {
 
     return {
       getStrLn: (question: string) =>
-        FIO.flattenM(() => {
+        QIO.flattenM(() => {
           const popped = input.hasOwnProperty(question)
             ? input[question].shift()
             : undefined
@@ -30,12 +30,12 @@ describe('Program', () => {
           if (popped === undefined) {
             stdout.push(question)
 
-            return FIO.never()
+            return QIO.never()
           }
 
           stdout.push(question + popped)
 
-          return FIO.of(popped)
+          return QIO.of(popped)
         }),
       putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
       stdout

@@ -1,6 +1,6 @@
 import {check} from 'checked-exceptions'
 
-import {FIO, IO, UIO} from './FIO'
+import {IO, QIO, UIO} from './QIO'
 
 export const NoSuchElement = check('NoSuchElement')
 
@@ -19,7 +19,7 @@ export class FMap<K, V> {
 
   public get(key: K): IO<typeof NoSuchElement.info, V> {
     return UIO(() => this.cache.get(key)).chain(_ =>
-      _ === undefined ? FIO.reject(NoSuchElement.of()) : FIO.of(_)
+      _ === undefined ? QIO.reject(NoSuchElement.of()) : QIO.of(_)
     )
   }
 
@@ -28,8 +28,8 @@ export class FMap<K, V> {
   }
 
   public memoize<E1, R1>(
-    fn: (a: K) => FIO<E1, V, R1>
-  ): (a: K) => FIO<E1, V, R1> {
+    fn: (a: K) => QIO<E1, V, R1>
+  ): (a: K) => QIO<E1, V, R1> {
     return (a: K) => this.get(a).catch(() => fn(a).chain(r => this.set(a, r)))
   }
 

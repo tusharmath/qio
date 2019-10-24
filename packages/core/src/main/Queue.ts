@@ -1,8 +1,8 @@
 import {DoublyLinkedList, List, Option} from 'standard-data-structures'
 
 import {Await} from './Await'
-import {FIO, NoEnv, UIO} from './FIO'
 import {FStream} from './FStream'
+import {NoEnv, QIO, UIO} from './QIO'
 
 /**
  * Queue Data Structure
@@ -26,16 +26,16 @@ export class Queue<A = never> {
    * Pulls an item from the queue
    */
   public get take(): UIO<A> {
-    return FIO.flattenM(() => {
+    return QIO.flattenM(() => {
       const sz = this.Q.shift()
 
       if (Option.isSome(sz)) {
-        return FIO.of(sz.value)
+        return QIO.of(sz.value)
       }
 
-      return FIO.flatten(
+      return QIO.flatten(
         Await.of<never, A>().chain(
-          FIO.encase(await => {
+          QIO.encase(await => {
             this.T.add(await)
 
             return await.get
@@ -67,23 +67,23 @@ export class Queue<A = never> {
    * Inserts an item into the queue
    */
   public offer(a: A): UIO<void> {
-    return FIO.flattenM(
+    return QIO.flattenM(
       (): UIO<void> => {
         if (this.T.length === 0) {
           this.Q.add(a)
 
-          return FIO.void()
+          return QIO.void()
         }
 
         const io = new Array<UIO<boolean>>()
         while (this.T.length !== 0) {
           const item = this.T.shift()
           if (Option.isSome(item)) {
-            io.push(item.value.set(FIO.of(a)))
+            io.push(item.value.set(QIO.of(a)))
           }
         }
 
-        return FIO.seq(io).void
+        return QIO.seq(io).void
       }
     )
   }
@@ -92,7 +92,7 @@ export class Queue<A = never> {
    * Adds all the provided items into the queue
    */
   public offerAll(...a: A[]): UIO<void> {
-    return FIO.seq(a.map(_ => this.offer(_))).void
+    return QIO.seq(a.map(_ => this.offer(_))).void
   }
 
   /**
@@ -100,9 +100,9 @@ export class Queue<A = never> {
    */
   public takeN(n: number): UIO<A[]> {
     const itar = (i: number, list: List<A>): UIO<List<A>> =>
-      FIO.if0()(
+      QIO.if0()(
         () => i === n,
-        () => FIO.of(list),
+        () => QIO.of(list),
         () => this.take.chain(_ => itar(i + 1, list.prepend(_)))
       )
 

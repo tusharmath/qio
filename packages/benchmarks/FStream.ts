@@ -5,7 +5,7 @@
 /* tslint:disable */
 import {Suite} from 'benchmark'
 
-import {FIO, UIO} from '@fio/core'
+import {QIO, UIO} from '@qio/core'
 
 import {PrintLn} from './internals/PrintLn'
 import {fioRuntime} from './internals/RunSuite'
@@ -19,7 +19,7 @@ for (let i = 0; i < count; i++) {
   arr.push(i)
 }
 
-const fioIteration = FIO.encase((numbers: number[]) => {
+const fioIteration = QIO.encase((numbers: number[]) => {
   let sum = 0
   for (let i = 0; i < numbers.length; i++) {
     sum += numbers[i]
@@ -31,8 +31,8 @@ const fioIteration = FIO.encase((numbers: number[]) => {
 function fioRecursion(numbers: number[]) {
   function itar(i: number, sum: number): UIO<number> {
     return i === numbers.length
-      ? FIO.of(sum)
-      : FIO.call(itar, i + 1, sum + numbers[i])
+      ? QIO.of(sum)
+      : QIO.call(itar, i + 1, sum + numbers[i])
   }
 
   return itar(0, 0)

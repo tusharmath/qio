@@ -1,4 +1,4 @@
-import {UIO} from '@fio/core'
+import {UIO} from '@qio/core'
 import {Interface} from 'readline'
 import ReadStream = NodeJS.ReadStream
 import WriteStream = NodeJS.WriteStream

@@ -1,6 +1,6 @@
 import {List} from 'standard-data-structures'
 
-import {FIO, NoEnv} from './FIO'
+import {NoEnv, QIO} from './QIO'
 import {Ref} from './Ref'
 import {Reservation} from './Reservation'
 
@@ -15,12 +15,12 @@ export type UManaged<A1> = Managed<never, A1, NoEnv>
  * **Example:**
  * ```ts
  * import * as fs from 'fs'
- * import {FIO, Managed} from '@fio/core'
+ * import {QIO, Managed} from '@qio/core'
  *
  * // Utility Functions
- * const fsOpen = (name: string) => FIO.node(cb => fs.open(name, cb))
- * const fsClose = (fd: number) => FIO.try(() => fs.close(fd))
- * const fsWrite = (fd: number, text: string) => FIO.node((cb) => fs.write(fd, text, cb))
+ * const fsOpen = (name: string) => QIO.node(cb => fs.open(name, cb))
+ * const fsClose = (fd: number) => QIO.try(() => fs.close(fd))
+ * const fsWrite = (fd: number, text: string) => QIO.node((cb) => fs.write(fd, text, cb))
  *
  * // Create a managed File Descriptor resource
  * const fdManaged = (name: string) => Managed.make(fsOpen(name), fsClose)
@@ -33,20 +33,20 @@ export type UManaged<A1> = Managed<never, A1, NoEnv>
  */
 export class Managed<E1, A1, R1> {
   public static make<E1, A1, R1, R2>(
-    acquire: FIO<E1, A1, R1>,
-    release: (a: A1) => FIO<never, void, R2>
+    acquire: QIO<E1, A1, R1>,
+    release: (a: A1) => QIO<never, void, R2>
   ): Managed<E1, A1, R1 & R2> {
     return Managed.of<E1, A1, R1 & R2>(
       acquire.chain(a1 =>
         release(a1).once.map(r =>
-          Reservation.of(FIO.of(a1).addEnv<R1>(), r.addEnv<R2>())
+          Reservation.of(QIO.of(a1).addEnv<R1>(), r.addEnv<R2>())
         )
       )
     )
   }
 
   public static of<E1, A1, R1>(
-    reservation: FIO<E1, Reservation<E1, A1, R1>, R1>
+    reservation: QIO<E1, Reservation<E1, A1, R1>, R1>
   ): Managed<E1, A1, R1> {
     return new Managed(reservation)
   }
@@ -58,20 +58,20 @@ export class Managed<E1, A1, R1> {
       .reduce(
         (a: Managed<E1, List<A1>, R1>, b: Managed<E1, A1, R1>) =>
           a.zipWith(b, (x, y) => x.prepend(y)),
-        Managed.make(FIO.of(List.empty<A1>()).addEnv<R1>(), FIO.void)
+        Managed.make(QIO.of(List.empty<A1>()).addEnv<R1>(), QIO.void)
       )
       .map(_ => _.asArray)
   }
 
   private constructor(
-    private readonly reservation: FIO<E1, Reservation<E1, A1, R1>, R1>
+    private readonly reservation: QIO<E1, Reservation<E1, A1, R1>, R1>
   ) {}
 
   public chain<E2, A2, R2>(
     fn: (a: A1) => Managed<E2, A2, R2>
   ): Managed<E1 | E2, A2, R1 & R2> {
     return Managed.of(
-      Ref.of(FIO.void().addEnv<R1 & R2>())
+      Ref.of(QIO.void().addEnv<R1 & R2>())
         .addEnv<R1 & R2>()
         .map(F =>
           Reservation.of(
@@ -84,7 +84,7 @@ export class Managed<E1, A1, R1> {
                 )
               )
             ),
-            FIO.flatten(F.read)
+            QIO.flatten(F.read)
           )
         )
     )
@@ -97,12 +97,12 @@ export class Managed<E1, A1, R1> {
   }
 
   public use<E2, A2, R2>(
-    fn: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A2, R1 & R2> {
-    return this.reservation.zipWithM(FIO.env<R1 & R2>(), (R, ENV) =>
+    fn: (a: A1) => QIO<E2, A2, R2>
+  ): QIO<E1 | E2, A2, R1 & R2> {
+    return this.reservation.zipWithM(QIO.env<R1 & R2>(), (R, ENV) =>
       R.acquire
         .chain(fn)
-        .catch(e12 => R.release.and(FIO.reject(e12)))
+        .catch(e12 => R.release.and(QIO.reject(e12)))
         .chain(a2 => R.release.const(a2))
         .fork.chain(F => F.release(R.release.provide(ENV)).and(F.join))
     )

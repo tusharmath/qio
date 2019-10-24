@@ -4,10 +4,10 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
-import {FIO} from '../main/FIO'
+import {QIO} from '../main/QIO'
 
 /**
- * Base runtime that is used to execute any [[FIO]].
+ * Base runtime that is used to execute any [[QIO]].
  *
  * Runtime internally manages scheduling of jobs and their prioritization.
  * Depends on [ts-scheduler](https://github.com/tusharmath/ts-scheduler) of internal job scheduling.
@@ -19,8 +19,8 @@ export interface IRuntime {
   setMaxInstructionCount(maxInstructionCount: number): IRuntime
 
   /**
-   * Executes the provided [[FIO]] expression.
+   * Executes the provided [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
-  unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable
+  unsafeExecute<E, A>(io: QIO<E, A>, cb?: CBOption<E, A>): ICancellable
 }

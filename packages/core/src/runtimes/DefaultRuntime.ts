@@ -1,6 +1,6 @@
 import {scheduler} from 'ts-scheduler'
 
-import {FIO} from '../main/FIO'
+import {QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
@@ -18,7 +18,7 @@ export class DefaultRuntime extends BaseRuntime {
     return new DefaultRuntime(maxInstructionCount)
   }
 
-  public async unsafeExecutePromise<E, A>(io: FIO<E, A>): Promise<A> {
+  public async unsafeExecutePromise<E, A>(io: QIO<E, A>): Promise<A> {
     return new Promise((res, rej) => {
       this.unsafeExecute(io, O => O.map(_ => _.reduce(rej, res)))
     })

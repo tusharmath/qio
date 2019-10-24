@@ -1,4 +1,4 @@
-import {FIO, FStream} from '@fio/core'
+import {FStream, QIO} from '@qio/core'
 
 import {IMath, ITextTerminal} from './Env'
 
@@ -9,18 +9,18 @@ const MIN_NUMBER = 1
  * Takes input from the player through the stdin stream.
  */
 const getStrLn = (question: string) =>
-  FIO.accessM((_: ITextTerminal) => _.tty.getStrLn(question))
+  QIO.accessM((_: ITextTerminal) => _.tty.getStrLn(question))
 
 /**
  * Outputs anything passed as arguments to the stdout stream
  */
 const putStrLn = (...t: unknown[]) =>
-  FIO.accessM((_: ITextTerminal) => _.tty.putStrLn(...t))
+  QIO.accessM((_: ITextTerminal) => _.tty.putStrLn(...t))
 
 /**
  * Generates a random number.
  */
-const randomNumber = FIO.access((env: IMath) => env.math.random())
+const randomNumber = QIO.access((env: IMath) => env.math.random())
 
 /**
  * Returns a random number within the provide range.

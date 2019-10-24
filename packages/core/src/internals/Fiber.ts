@@ -10,14 +10,14 @@ import {
 } from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
-import {FIO, IO, UIO} from '../main/FIO'
 import {Instruction, Tag} from '../main/Instructions'
+import {IO, QIO, UIO} from '../main/QIO'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
 
-const D = debug('fio:fiber')
+const D = debug('qio:fiber')
 
 const InvalidInstruction = check(
   'InvalidInstruction',
@@ -42,7 +42,7 @@ let FIBER_ID = 0
  */
 export abstract class Fiber<E, A> {
   /**
-   * Uses a shared runtime to evaluate a [[FIO]] expression.
+   * Uses a shared runtime to evaluate a [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
   public static unsafeExecuteWith<E, A>(
@@ -55,15 +55,15 @@ export abstract class Fiber<E, A> {
   public abstract abort: UIO<void>
   public abstract await: UIO<Option<Either<E, A>>>
   public readonly id = FIBER_ID++
-  public abstract join: FIO<E, A>
+  public abstract join: QIO<E, A>
   public abstract runtime: IRuntime
   public abstract release(p: UIO<void>): UIO<void>
 }
 
 /**
- * FiberContext actually evaluates the FIO expression.
+ * FiberContext actually evaluates the QIO expression.
  * Its creation is effectful.
- * As soon as its created it starts to evaluate the FIO expression.
+ * As soon as its created it starts to evaluate the QIO expression.
  * It provides public APIs to [[Fiber]] to consume.
  */
 export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
@@ -73,14 +73,14 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
   public get await(): UIO<Option<Either<E, A>>> {
     D(this.id, 'await')
 
-    return FIO.asyncUIO(cb => {
+    return QIO.asyncUIO(cb => {
       D(this.id, 'unsafe observe')
 
       return this.unsafeObserve(cb)
     })
   }
-  public get join(): FIO<E, A> {
-    return FIO.asyncIO<E, A>((rej, res) =>
+  public get join(): QIO<E, A> {
+    return QIO.asyncIO<E, A>((rej, res) =>
       this.unsafeObserve(ob => ob.map(_ => _.reduce(rej, res)))
     )
   }
@@ -229,7 +229,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
             break
 
           case Tag.Map:
-            this.stackA.push(FIO.resume(j.i1).asInstruction)
+            this.stackA.push(QIO.resume(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
@@ -237,12 +237,12 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
             break
 
           case Tag.Chain:
-            this.stackA.push(FIO.resumeM(j.i1).asInstruction)
+            this.stackA.push(QIO.resumeM(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
           case Tag.Catch:
-            this.stackA.push(FIO.capture(j.i1).asInstruction)
+            this.stackA.push(QIO.capture(j.i1).asInstruction)
             this.stackA.push(j.i0)
             break
 
@@ -262,7 +262,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
 
           case Tag.Provide:
             this.stackA.push(
-              FIO.resume(i => {
+              QIO.resume(i => {
                 this.stackEnv.pop()
 
                 return i
@@ -282,12 +282,12 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
               j.i0(
                 err => {
                   this.cancellationList.remove(id)
-                  this.stackA.push(FIO.reject(err).asInstruction)
+                  this.stackA.push(QIO.reject(err).asInstruction)
                   this.unsafeEvaluate()
                 },
                 val => {
                   this.cancellationList.remove(id)
-                  this.stackA.push(FIO.of(val).asInstruction)
+                  this.stackA.push(QIO.of(val).asInstruction)
                   this.unsafeEvaluate()
                 }
               )
@@ -297,11 +297,11 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
 
           default:
             this.stackA.push(
-              FIO.reject(new InvalidInstruction(j)).asInstruction
+              QIO.reject(new InvalidInstruction(j)).asInstruction
             )
         }
       } catch (e) {
-        this.stackA.push(FIO.reject(e).asInstruction)
+        this.stackA.push(QIO.reject(e).asInstruction)
       }
       count++
     }

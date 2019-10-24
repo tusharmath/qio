@@ -1,6 +1,6 @@
 /* tslint:disable: no-unbound-method */
-import {defaultRuntime, UIO} from '@fio/core'
-import {noop} from '@fio/prelude/Noop'
+import {defaultRuntime, UIO} from '@qio/core'
+import {noop} from '@qio/prelude/Noop'
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 
@@ -12,9 +12,9 @@ export const RunSuite = (
   name: string,
   test: {
     bluebird(): PromiseLike<unknown>
-    fio(): UIO<unknown>
     fluture(): FutureInstance<unknown, unknown>
     native?(): void
+    qio(): UIO<unknown>
   }
 ) => {
   PrintLn('##', name)
@@ -29,8 +29,8 @@ export const RunSuite = (
 
   suite
     .add(
-      'FIO',
-      (cb: IDefer) => fioRuntime.unsafeExecute(test.fio(), () => cb.resolve()),
+      'QIO',
+      (cb: IDefer) => fioRuntime.unsafeExecute(test.qio(), () => cb.resolve()),
       {defer: true}
     )
     .add(

@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 2019-05-09
  */
-import {FIO} from '@fio/core'
+import {QIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
@@ -10,6 +10,6 @@ import {RunSuite} from './internals/RunSuite'
 
 RunSuite('Map', {
   bluebird: () => Promise.resolve(BigInt(10)).then(inc),
-  fio: () => FIO.of(BigInt(10)).map(inc),
-  fluture: () => Fluture.of(BigInt(10)).map(inc)
+  fluture: () => Fluture.of(BigInt(10)).map(inc),
+  qio: () => QIO.of(BigInt(10)).map(inc)
 })

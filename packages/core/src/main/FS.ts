@@ -4,9 +4,9 @@
 
 import {promises} from 'fs'
 
-import {FIO} from './FIO'
+import {QIO} from './QIO'
 
-export const read = FIO.encaseP(promises.read)
-export const readFile = FIO.encaseP(promises.readFile)
-export const write = FIO.encaseP(promises.write)
-export const writeFile = FIO.encaseP(promises.writeFile)
+export const read = QIO.encaseP(promises.read)
+export const readFile = QIO.encaseP(promises.readFile)
+export const write = QIO.encaseP(promises.write)
+export const writeFile = QIO.encaseP(promises.writeFile)

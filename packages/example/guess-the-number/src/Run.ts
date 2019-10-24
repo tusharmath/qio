@@ -6,7 +6,7 @@
 
 import * as readline from 'readline'
 import 'source-map-support/register'
-import {defaultRuntime, FIO} from '@fio/core'
+import {defaultRuntime, QIO} from '@qio/core'
 import {getStrLn} from './GetStrLn'
 
 import {program} from './Program'
@@ -17,8 +17,8 @@ runtime.unsafeExecute(
   program.provide({
     math: Math,
     tty: {
-      getStrLn: FIO.pipeEnv(getStrLn, {process, readline}),
-      putStrLn: FIO.pipeEnv(putStrLn, {console})
+      getStrLn: QIO.pipeEnv(getStrLn, {process, readline}),
+      putStrLn: QIO.pipeEnv(putStrLn, {console})
     }
   })
 )

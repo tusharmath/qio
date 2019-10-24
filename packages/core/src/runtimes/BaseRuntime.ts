@@ -5,7 +5,7 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
 import {Fiber} from '../internals/Fiber'
-import {FIO} from '../main/FIO'
+import {QIO} from '../main/QIO'
 
 import {IRuntime} from './IRuntime'
 
@@ -19,7 +19,7 @@ export abstract class BaseRuntime implements IRuntime {
     )
   }
   public abstract setMaxInstructionCount(maxInstructionCount: number): IRuntime
-  public unsafeExecute<E, A>(io: FIO<E, A>, cb?: CBOption<E, A>): ICancellable {
+  public unsafeExecute<E, A>(io: QIO<E, A>, cb?: CBOption<E, A>): ICancellable {
     return Fiber.unsafeExecuteWith(io, this, cb)
   }
 }
