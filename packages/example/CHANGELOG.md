@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [18.0.0](https://github.com/tusharmath/qio/compare/v16.2.3...v18.0.0) (2019-10-24)
+
+
+### Bug Fixes
+
+* **package:** update dependencies ([38bbfca](https://github.com/tusharmath/qio/commit/38bbfca0e57aebbd384cbf7e0b64469e5d927f34))
+
+
+### Code Refactoring
+
+* **package:** rename FIO to QIO due to package name's unavailability. ([0b8fa3f](https://github.com/tusharmath/qio/commit/0b8fa3fbb7b9aea52bedaf6571f70f3d5b16032f))
+
+
+### BREAKING CHANGES
+
+* **package:** Renaming package.
+
+
+
+
+
 # [17.0.0](https://github.com/tusharmath/qio/compare/v16.2.3...v17.0.0) (2019-10-24)
 
 

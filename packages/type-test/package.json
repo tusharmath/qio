@@ -1,7 +1,7 @@
 {
   "name": "@qio/type-test",
   "private": true,
-  "version": "17.0.0",
+  "version": "18.0.0",
   "description": "tests for typings",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
