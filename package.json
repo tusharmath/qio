@@ -25,7 +25,7 @@
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
     "test": "mocha --opts=packages/chai/mocha.opts",
     "doc": "./scripts/docs.sh",
-    "doc:typedoc": "yarn typedoc --plugin typedoc-plugin-markdown --theme docusaurus",
+    "doc:typedoc": "yarn typedoc --plugin typedoc-plugin-markdown",
     "update-benchmarks": "packages/benchmarks/run.sh",
     "example": "node packages/example/guess-the-number/src/Run"
   },
