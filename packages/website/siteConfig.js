@@ -25,7 +25,7 @@ const users = [
 ]
 
 const siteConfig = {
-  title: 'FIO', // Title for your website.
+  title: 'QIO', // Title for your website.
   tagline: 'A website for testing',
   url: 'https://tusharmath.com/${projectName}', // Your website URL
   baseUrl: `/${projectName}/${webSiteName}/`, // Base URL for your project */
