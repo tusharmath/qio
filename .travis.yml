@@ -18,3 +18,10 @@ script:
 before_install: yarn global add greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
 after_script: greenkeeper-lockfile-upload
+
+deploy:
+  provider: script
+  script: "./scripts/deploy.sh"
+  skip_cleanup: true
+  on:
+    branch: master
