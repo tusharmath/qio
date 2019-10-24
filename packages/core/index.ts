@@ -2,7 +2,7 @@
 export {Await} from './src/main/Await'
 export {defaultRuntime} from './src/runtimes/DefaultRuntime'
 export {Fiber} from './src/internals/Fiber'
-export {FIO, IO, Task, TaskR, UIO} from './src/main/FIO'
+export {QIO, IO, Task, TaskR, UIO} from './src/main/QIO'
 export {FMap} from './src/main/FMap'
 export {FStream, Stream} from './src/main/FStream'
 export {IRuntime} from './src/runtimes/IRuntime'

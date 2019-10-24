@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-20
  */
 
-import {Id} from '@fio/prelude/Id'
+import {Id} from '@qio/prelude/Id'
 import {debug} from 'debug'
 import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
@@ -14,34 +14,34 @@ import {IRuntime} from '../runtimes/IRuntime'
 import {Await} from './Await'
 import {Instruction, Tag} from './Instructions'
 
-const D = debug('fio:core')
+const D = debug('qio:core')
 
 export type NoEnv = unknown
 
 /**
- * IO represents a [[FIO]] that doesn't need any environment to execute
+ * IO represents a [[c]] that doesn't need any environment to execute
  */
-export type IO<E, A> = FIO<E, A>
+export type IO<E, A> = QIO<E, A>
 export const IO = <E = never, A = unknown>(fn: () => A): IO<E, A> =>
-  FIO.resume(fn)
+  QIO.resume(fn)
 
 /**
  * Task represents an [[IO]] that fails with a general failure.
  */
 export type Task<A> = IO<Error, A>
-export const Task = <A>(fn: () => A): Task<A> => FIO.try(fn)
+export const Task = <A>(fn: () => A): Task<A> => QIO.try(fn)
 
 /**
  * A [[Task]] that also requires an environment to run.
  */
-export type TaskR<A, R> = FIO<Error, A, R>
-export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => FIO.access(fn)
+export type TaskR<A, R> = QIO<Error, A, R>
+export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => QIO.access(fn)
 
 /**
- * UIO represents a FIO that doesn't require any environment and doesn't ever fail.
+ * UIO represents a c that doesn't require any environment and doesn't ever fail.
  */
 export type UIO<A> = IO<never, A>
-export const UIO = <A>(fn: () => A): UIO<A> => FIO.resume(fn)
+export const UIO = <A>(fn: () => A): UIO<A> => QIO.resume(fn)
 
 /**
  * Callback function used in node.js to handle async operations.
@@ -57,12 +57,12 @@ export type NodeJSCallback<A> = (
  * @typeparam A1 The output of the running the program successfully.
  * @typeparam R1 Environment needed to execute this instance.
  */
-export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
+export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Safely converts an interuptable IO to non-interuptable one.
    */
-  public get asEither(): FIO<never, Either<E1, A1>, R1> {
-    return this.map(Either.right).catch(_ => FIO.of(Either.left(_)))
+  public get asEither(): QIO<never, Either<E1, A1>, R1> {
+    return this.map(Either.right).catch(_ => QIO.of(Either.left(_)))
   }
   /**
    * @ignore
@@ -74,68 +74,68 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Purely access the environment provided to the program.
    */
-  public get env(): FIO<never, R1, R1> {
-    return FIO.access(Id)
+  public get env(): QIO<never, R1, R1> {
+    return QIO.access(Id)
   }
 
   /**
    * Returns a [[Fiber]]
    */
-  public get fork(): FIO<never, Fiber<E1, A1>, R1> {
-    return FIO.env<R1>().zipWithM(FIO.runtime(), (ENV, RTM) =>
-      FIO.fork(this.provide(ENV), RTM)
+  public get fork(): QIO<never, Fiber<E1, A1>, R1> {
+    return QIO.env<R1>().zipWithM(QIO.runtime(), (ENV, RTM) =>
+      QIO.fork(this.provide(ENV), RTM)
     )
   }
 
   /**
    * Memorizes the result and executes the IO only once
    */
-  public get once(): FIO<never, IO<E1, A1>, R1> {
+  public get once(): QIO<never, IO<E1, A1>, R1> {
     return this.env.chain(env =>
       Await.of<E1, A1>().map(AWT => AWT.set(this.provide(env)).and(AWT.get))
     )
   }
 
   /**
-   * Ignores the result of the FIO instance
+   * Ignores the result of the c instance
    */
-  public get void(): FIO<E1, void, R1> {
+  public get void(): QIO<E1, void, R1> {
     return this.const(undefined)
   }
 
   /**
-   * Creates a new FIO instance with the provided environment
+   * Creates a new c instance with the provided environment
    */
-  public static access<R, A>(cb: (R: R) => A): FIO<never, A, R> {
-    return new FIO(Tag.Access, cb)
+  public static access<R, A>(cb: (R: R) => A): QIO<never, A, R> {
+    return new QIO(Tag.Access, cb)
   }
 
   /**
-   * Effectfully creates a new FIO instance with the provided environment
+   * Effectfully creates a new c instance with the provided environment
    */
   public static accessM<E1, A1, R1, R2>(
-    cb: (R: R1) => FIO<E1, A1, R2>
-  ): FIO<E1, A1, R1 & R2> {
-    return FIO.flatten(FIO.access(cb))
+    cb: (R: R1) => QIO<E1, A1, R2>
+  ): QIO<E1, A1, R1 & R2> {
+    return QIO.flatten(QIO.access(cb))
   }
 
   /**
-   * Creates a new FIO instance with the provided environment by invoking a promise returning function.
+   * Creates a new c instance with the provided environment by invoking a promise returning function.
    */
   public static accessP<A1, R1>(
     cb: (R: R1) => Promise<A1>
-  ): FIO<Error, A1, R1> {
-    return FIO.env<R1>().chain(FIO.encaseP(cb))
+  ): QIO<Error, A1, R1> {
+    return QIO.env<R1>().chain(QIO.encaseP(cb))
   }
 
   /**
-   * Converts a [[FIO]] of a function into a [[FIO]] of a value.
+   * Converts a [[c]] of a function into a [[c]] of a value.
    */
   public static ap<E1, A1, R1, A2>(
-    fio: FIO<E1, (a: A1) => A2, R1>,
+    qio: QIO<E1, (a: A1) => A2, R1>,
     input: A1
-  ): FIO<E1, A2, R1> {
-    return fio.map(ab => ab(input))
+  ): QIO<E1, A2, R1> {
+    return qio.map(ab => ab(input))
   }
 
   /**
@@ -145,7 +145,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>) => ICancellable
   ): IO<E1, A1> {
-    return new FIO(Tag.Async, cb)
+    return new QIO(Tag.Async, cb)
   }
 
   /**
@@ -154,7 +154,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static asyncTask<A1 = never>(
     cb: (rej: CB<Error>, res: CB<A1>) => ICancellable
   ): Task<A1> {
-    return FIO.asyncIO(cb)
+    return QIO.asyncIO(cb)
   }
 
   /**
@@ -163,7 +163,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>) => ICancellable
   ): UIO<A1> {
-    return FIO.asyncIO((rej, res) => cb(res))
+    return QIO.asyncIO((rej, res) => cb(res))
   }
 
   /**
@@ -171,46 +171,46 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Useful particularly when calling a recursive function with stack safety.
    */
   public static call<E1, A1, R1, T extends unknown[]>(
-    fn: (...t: T) => FIO<E1, A1, R1>,
+    fn: (...t: T) => QIO<E1, A1, R1>,
     ...args: T
-  ): FIO<E1, A1, R1> {
-    return new FIO<E1, A1, R1>(Tag.Call, fn, args)
+  ): QIO<E1, A1, R1> {
+    return new QIO<E1, A1, R1>(Tag.Call, fn, args)
   }
 
   /**
    * @ignore
    */
-  public static capture<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
-    return new FIO(Tag.Capture, cb)
+  public static capture<E1, A1, A2>(cb: (A: A1) => Instruction): QIO<E1, A2> {
+    return new QIO(Tag.Capture, cb)
   }
 
   /**
    * @ignore
    */
   public static catch<E1, A1, R1, E2, A2, R2>(
-    fa: FIO<E1, A1, R1>,
-    aFe: (e: E1) => FIO<E2, A2, R2>
-  ): FIO<E2, A2, R1 & R2> {
-    return new FIO(Tag.Catch, fa, aFe)
+    fa: QIO<E1, A1, R1>,
+    aFe: (e: E1) => QIO<E2, A2, R2>
+  ): QIO<E2, A2, R1 & R2> {
+    return new QIO(Tag.Catch, fa, aFe)
   }
 
   /**
-   * Creates a [[FIO]] using a callback function.
+   * Creates a [[c]] using a callback function.
    */
   public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
-    return FIO.runtime().chain(RTM =>
-      FIO.asyncUIO<A1>(res => RTM.scheduler.asap(fn, res))
+    return QIO.runtime().chain(RTM =>
+      QIO.asyncUIO<A1>(res => RTM.scheduler.asap(fn, res))
     )
   }
 
   /**
-   * Serially executes one FIO after another.
+   * Serially executes one c after another.
    */
   public static chain<E1, A1, R1, E2, A2, R2>(
-    fa: FIO<E1, A1, R1>,
-    aFb: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A2, R1 & R2> {
-    return new FIO(Tag.Chain, fa, aFb)
+    fa: QIO<E1, A1, R1>,
+    aFb: (a: A1) => QIO<E2, A2, R2>
+  ): QIO<E1 | E2, A2, R1 & R2> {
+    return new QIO(Tag.Chain, fa, aFb)
   }
 
   /**
@@ -227,10 +227,10 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static encaseP<A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
-  ): (...t: T) => FIO<Error, A> {
+  ): (...t: T) => QIO<Error, A> {
     return (...t) =>
-      FIO.runtime().chain(RTM =>
-        FIO.asyncIO((rej, res) =>
+      QIO.runtime().chain(RTM =>
+        QIO.asyncIO((rej, res) =>
           RTM.scheduler.asap(() => {
             void cb(...t)
               .then(res)
@@ -241,43 +241,43 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a [[FIO]] that needs an environment and when resolved outputs the same environment
+   * Creates a [[c]] that needs an environment and when resolved outputs the same environment
    */
-  public static env<R1 = never>(): FIO<never, R1, R1> {
-    return FIO.access<R1, R1>(Id)
+  public static env<R1 = never>(): QIO<never, R1, R1> {
+    return QIO.access<R1, R1>(Id)
   }
 
   /**
-   * Unwraps a FIO
+   * Unwraps a c
    */
   public static flatten<E1, A1, R1, E2, A2, R2>(
-    fio: FIO<E1, FIO<E2, A2, R2>, R1>
-  ): FIO<E1 | E2, A2, R1 & R2> {
-    return fio.chain(Id)
+    qio: QIO<E1, QIO<E2, A2, R2>, R1>
+  ): QIO<E1 | E2, A2, R1 & R2> {
+    return qio.chain(Id)
   }
 
   /**
-   * Takes in a effect-ful function that return a FIO and unwraps it.
-   * This is an alias to `FIO.flatten(UIO(fn))`
+   * Takes in a effect-ful function that return a c and unwraps it.
+   * This is an alias to `c.flatten(UIO(fn))`
    *
    * ```ts
-   * // An impure function that creates mutable state but also returns a FIO.
+   * // An impure function that creates mutable state but also returns a c.
    * const FN = () => {
    *   let count = 0
    *
-   *   return FIO.try(() => count++)
+   *   return c.try(() => count++)
    * }
    * // Using flatten
-   * FIO.flatten(UIO(FN))
+   * c.flatten(UIO(FN))
    *
    * // Using flattenM
-   * FIO.flattenM(FN)
+   * c.flattenM(FN)
    * ```
    */
   public static flattenM<E1, A1, R1>(
-    fio: () => FIO<E1, A1, R1>
-  ): FIO<E1, A1, R1> {
-    return FIO.flatten(UIO(fio))
+    qio: () => QIO<E1, A1, R1>
+  ): QIO<E1, A1, R1> {
+    return QIO.flatten(UIO(qio))
   }
 
   /**
@@ -287,14 +287,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
     io: IO<E1, A1>,
     runtime: IRuntime
   ): UIO<Fiber<E1, A1>> {
-    return new FIO(Tag.Fork, io, runtime)
+    return new QIO(Tag.Fork, io, runtime)
   }
 
   /**
    * Creates an IO from `Either`
    */
   public static fromEither<E, A>(exit: Either<E, A>): IO<E, A> {
-    return exit.fold<IO<E, A>>(FIO.never(), FIO.reject, FIO.of)
+    return exit.fold<IO<E, A>>(QIO.never(), QIO.reject, QIO.of)
   }
 
   /**
@@ -302,22 +302,22 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    */
   public static if<E1, R1, E2, R2, A>(
     cond: boolean,
-    left: FIO<E1, A, R1>,
-    right: FIO<E2, A, R2>
-  ): FIO<E1 | E2, A, R1 & R2> {
-    return ((cond ? left : right) as unknown) as FIO<E1 | E2, A, R1 & R2>
+    left: QIO<E1, A, R1>,
+    right: QIO<E2, A, R2>
+  ): QIO<E1 | E2, A, R1 & R2> {
+    return ((cond ? left : right) as unknown) as QIO<E1 | E2, A, R1 & R2>
   }
 
   /**
-   * A different flavour of [[FIO.if]] that takes in functions instead of FIO instances.
+   * A different flavour of [[c.if]] that takes in functions instead of c instances.
    */
   public static if0<T extends unknown[]>(
     ...args: T
   ): <E1, R1, E2, R2, A>(
     cond: (...args: T) => boolean,
-    left: (...args: T) => FIO<E1, A, R1>,
-    right: (...args: T) => FIO<E2, A, R2>
-  ) => FIO<E1 | E2, A, R1 & R2> {
+    left: (...args: T) => QIO<E1, A, R1>,
+    right: (...args: T) => QIO<E2, A, R2>
+  ) => QIO<E1 | E2, A, R1 & R2> {
     return (cond, left, right) =>
       // tslint:disable-next-line: no-any
       cond(...args) ? left(...args) : (right(...args) as any)
@@ -327,17 +327,17 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Transforms the success value using the specified function
    */
   public static map<E1, A1, R1, A2>(
-    fa: FIO<E1, A1, R1>,
+    fa: QIO<E1, A1, R1>,
     ab: (a: A1) => A2
-  ): FIO<E1, A2, R1> {
-    return new FIO(Tag.Map, fa, ab)
+  ): QIO<E1, A2, R1> {
+    return new QIO(Tag.Map, fa, ab)
   }
 
   /**
    * Returns a [[UIO]] that never resolves.
    */
   public static never(): UIO<never> {
-    return new FIO(Tag.Never, undefined)
+    return new QIO(Tag.Never, undefined)
   }
 
   /**
@@ -345,15 +345,15 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    *
    * **Example:**
    * ```ts
-   * // FIO<NodeJS.ErrnoException, number, unknown>
-   * const fsOpen = FIO.node(cb => fs.open('./data.txt', cb))
+   * // c<NodeJS.ErrnoException, number, unknown>
+   * const fsOpen = c.node(cb => fs.open('./data.txt', cb))
    * ```
    */
   public static node<A = never>(
     fn: (cb: NodeJSCallback<A>) => void
-  ): FIO<NodeJS.ErrnoException, A | undefined> {
-    return FIO.runtime().chain(RTM =>
-      FIO.asyncIO<NodeJS.ErrnoException, A | undefined>((rej, res) =>
+  ): QIO<NodeJS.ErrnoException, A | undefined> {
+    return QIO.runtime().chain(RTM =>
+      QIO.asyncIO<NodeJS.ErrnoException, A | undefined>((rej, res) =>
         RTM.scheduler.asap(() => {
           try {
             fn((err, result) => (err === null ? res(result) : rej(err)))
@@ -369,35 +369,35 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Represents a constant value
    */
   public static of<A1>(value: A1): UIO<A1> {
-    return new FIO(Tag.Constant, value)
+    return new QIO(Tag.Constant, value)
   }
 
   /**
-   * Runs multiple IOs in parallel. Checkout [[FIO.seq]] to run IOs in sequence.
+   * Runs multiple IOs in parallel. Checkout [[c.seq]] to run IOs in sequence.
    */
   public static par<E1, A1, R1>(
-    ios: Array<FIO<E1, A1, R1>>
-  ): FIO<E1, A1[], R1> {
+    ios: Array<QIO<E1, A1, R1>>
+  ): QIO<E1, A1[], R1> {
     return ios
       .reduce(
         (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
-        FIO.env<R1>().and(IO<E1, List<A1>>(() => List.empty<A1>()))
+        QIO.env<R1>().and(IO<E1, List<A1>>(() => List.empty<A1>()))
       )
       .map(_ => _.asArray.reverse())
   }
 
   /**
-   * Runs at max N IOs in parallel. Checkout [[FIO.par]] to run any number of [[FIO]]s in parallel
+   * Runs at max N IOs in parallel. Checkout [[c.par]] to run any number of [[c]]s in parallel
    */
   public static parN<E1, A1, R1>(
     N: number,
-    ios: Array<FIO<E1, A1, R1>>
-  ): FIO<E1, A1[], R1> {
-    const itar = (list: Array<FIO<E1, A1, R1>>): FIO<E1, A1[], R1> =>
-      FIO.if(
+    ios: Array<QIO<E1, A1, R1>>
+  ): QIO<E1, A1[], R1> {
+    const itar = (list: Array<QIO<E1, A1, R1>>): QIO<E1, A1[], R1> =>
+      QIO.if(
         list.length === 0,
-        FIO.of([]),
-        FIO.par(list.slice(0, N)).chain(l1 =>
+        QIO.of([]),
+        QIO.par(list.slice(0, N)).chain(l1 =>
           itar(list.slice(N, list.length)).map(l2 => l1.concat(l2))
         )
       )
@@ -406,52 +406,52 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Takes in a function that returns a FIO
+   * Takes in a function that returns a c
    * and converts it to a function that returns an IO by providing it the
    * given env.
    */
   public static pipeEnv<T extends unknown[], E1, A1, R1>(
-    fn: (..._: T) => FIO<E1, A1, R1>,
+    fn: (..._: T) => QIO<E1, A1, R1>,
     R: R1
   ): (..._: T) => IO<E1, A1> {
     return (...T0: T) => fn(...T0).provide(R)
   }
 
   /**
-   * Creates a FIO that rejects with the provided error
+   * Creates a c that rejects with the provided error
    */
-  public static reject<E1>(error: E1): FIO<E1, never> {
-    return new FIO(Tag.Reject, error)
+  public static reject<E1>(error: E1): QIO<E1, never> {
+    return new QIO(Tag.Reject, error)
   }
 
   /**
    * @ignore
    */
   public static resume<A1, A2>(cb: (A: A1) => A2): UIO<A2> {
-    return new FIO(Tag.Try, cb)
+    return new QIO(Tag.Try, cb)
   }
 
   /**
    * @ignore
    */
-  public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): FIO<E1, A2> {
-    return new FIO(Tag.TryM, cb)
+  public static resumeM<E1, A1, A2>(cb: (A: A1) => Instruction): QIO<E1, A2> {
+    return new QIO(Tag.TryM, cb)
   }
 
   /**
    * Returns the current runtime in a pure way.
    */
   public static runtime(): UIO<IRuntime> {
-    return new FIO(Tag.Runtime)
+    return new QIO(Tag.Runtime)
   }
 
   /**
    * Executes the provided IOs in sequences and returns their intermediatory results as an Array.
-   * Checkout [[FIO.par]] to run multiple IOs in parallel.
+   * Checkout [[c.par]] to run multiple IOs in parallel.
    */
   public static seq<E1, A1, R1>(
-    ios: Array<FIO<E1, A1, R1>>
-  ): FIO<E1, A1[], R1> {
+    ios: Array<QIO<E1, A1, R1>>
+  ): QIO<E1, A1[], R1> {
     return ios
       .reduce(
         (fList, f) => fList.chain(list => f.map(value => list.prepend(value))),
@@ -463,9 +463,9 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Resolves with the provided value after the given time
    */
-  public static timeout<A>(value: A, duration: number): FIO<never, A> {
-    return FIO.runtime().chain(RTM =>
-      FIO.asyncUIO(res => RTM.scheduler.delay(res, duration, value))
+  public static timeout<A>(value: A, duration: number): QIO<never, A> {
+    return QIO.runtime().chain(RTM =>
+      QIO.asyncUIO(res => RTM.scheduler.delay(res, duration, value))
     )
   }
 
@@ -480,7 +480,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Tries to run an function that returns a promise.
    */
   public static tryP<A>(cb: () => Promise<A>): Task<A> {
-    return FIO.encaseP(cb)()
+    return QIO.encaseP(cb)()
   }
 
   /**
@@ -490,8 +490,8 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   public static uninterruptibleIO<E1 = never, A1 = never>(
     fn: (rej: CB<E1>, res: CB<A1>) => unknown
   ): IO<E1, A1> {
-    return FIO.runtime().chain(RTM =>
-      FIO.asyncIO<E1, A1>((rej, res) => RTM.scheduler.asap(fn, rej, res))
+    return QIO.runtime().chain(RTM =>
+      QIO.asyncIO<E1, A1>((rej, res) => RTM.scheduler.asap(fn, rej, res))
     )
   }
 
@@ -499,7 +499,7 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Returns a [[UIO]] of void.
    */
   public static void(): UIO<void> {
-    return FIO.of(void 0)
+    return QIO.of(void 0)
   }
 
   /**
@@ -530,14 +530,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   /**
    * Gives access to additional env
    */
-  public addEnv<R2>(): FIO<E1, A1, R1 & R2> {
-    return FIO.env<R2>().and(this)
+  public addEnv<R2>(): QIO<E1, A1, R1 & R2> {
+    return QIO.env<R2>().and(this)
   }
 
   /**
-   * Runs the FIO instances one by one
+   * Runs the c instances one by one
    */
-  public and<E2, A2, R2>(aFb: FIO<E2, A2, R2>): FIO<E1 | E2, A2, R1 & R2> {
+  public and<E2, A2, R2>(aFb: QIO<E2, A2, R2>): QIO<E1 | E2, A2, R1 & R2> {
     // TODO: can improve PERF by add a new instruction type
     return this.chain(() => aFb)
   }
@@ -546,122 +546,122 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Captures the exception thrown by the IO and
    */
   public catch<E2, A2, R2>(
-    aFb: (e: E1) => FIO<E2, A2, R2>
-  ): FIO<E2, A1 | A2, R1 & R2> {
-    return FIO.catch(this, aFb)
+    aFb: (e: E1) => QIO<E2, A2, R2>
+  ): QIO<E2, A1 | A2, R1 & R2> {
+    return QIO.catch(this, aFb)
   }
 
   /**
-   * Chains one [[FIO]] after another.
+   * Chains one [[c]] after another.
    */
   public chain<E2, A2, R2>(
-    aFb: (a: A1) => FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A2, R1 & R2> {
-    return FIO.chain(this, aFb)
+    aFb: (a: A1) => QIO<E2, A2, R2>
+  ): QIO<E1 | E2, A2, R1 & R2> {
+    return QIO.chain(this, aFb)
   }
 
   /**
-   * Ignores the original value of the FIO and resolves with the provided value
+   * Ignores the original value of the c and resolves with the provided value
    */
-  public const<A2>(a: A2): FIO<E1, A2, R1> {
-    return this.and(FIO.of(a))
+  public const<A2>(a: A2): QIO<E1, A2, R1> {
+    return this.and(QIO.of(a))
   }
 
   /**
-   * Delays the execution of the [[FIO]] by the provided time.
+   * Delays the execution of the [[c]] by the provided time.
    */
-  public delay(duration: number): FIO<E1, A1, R1> {
-    return FIO.timeout(this, duration).chain(Id)
+  public delay(duration: number): QIO<E1, A1, R1> {
+    return QIO.timeout(this, duration).chain(Id)
   }
 
   /**
-   * Like [[FIO.tap]] but takes in an IO instead of a callback.
+   * Like [[c.tap]] but takes in an IO instead of a callback.
    */
-  public do<E2, R2>(io: FIO<E2, unknown, R2>): FIO<E1 | E2, A1, R1 & R2> {
+  public do<E2, R2>(io: QIO<E2, unknown, R2>): QIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io.const(_))
   }
 
   /**
-   * Calls the effect-full function on success of the current FIO instance.
+   * Calls the effect-full function on success of the current c instance.
    */
   public encase<E2 = never, A2 = unknown>(
     fn: (A1: A1) => A2
-  ): FIO<E1 | E2, A2, R1> {
-    return this.chain(FIO.encase(fn))
+  ): QIO<E1 | E2, A2, R1> {
+    return this.chain(QIO.encase(fn))
   }
 
   /**
    * Creates a separate [[Fiber]] with a different [[IRuntime]].
    */
-  public forkWith(runtime: IRuntime): FIO<never, Fiber<E1, A1>, R1> {
-    return FIO.env<R1>().chain(ENV => FIO.fork(this.provide(ENV), runtime))
+  public forkWith(runtime: IRuntime): QIO<never, Fiber<E1, A1>, R1> {
+    return QIO.env<R1>().chain(ENV => QIO.fork(this.provide(ENV), runtime))
   }
 
   /**
-   * Applies transformation on the success value of the FIO.
+   * Applies transformation on the success value of the c.
    */
-  public map<A2>(ab: (a: A1) => A2): FIO<E1, A2, R1> {
-    return FIO.map(this, ab)
+  public map<A2>(ab: (a: A1) => A2): QIO<E1, A2, R1> {
+    return QIO.map(this, ab)
   }
 
   /**
    * Runs the current IO with the provided IO in parallel.
    */
   public par<E2, A2, R2>(
-    that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, [A1, A2], R1 & R2> {
+    that: QIO<E2, A2, R2>
+  ): QIO<E1 | E2, [A1, A2], R1 & R2> {
     return this.zipWithPar(that, (a, b) => [a, b])
   }
 
   /**
-   * Provides the current instance of FIO the required env.
+   * Provides the current instance of c the required env.
    */
   public provide(r1: R1): IO<E1, A1> {
-    return new FIO(Tag.Provide, this, r1)
+    return new QIO(Tag.Provide, this, r1)
   }
 
   /**
-   * Provides the current instance of FIO the required env that is accessed effect-fully.
+   * Provides the current instance of c the required env that is accessed effect-fully.
    */
-  public provideM<E2, R2>(io: FIO<E2, R1, R2>): FIO<E1 | E2, A1, R2> {
+  public provideM<E2, R2>(io: QIO<E2, R1, R2>): QIO<E1 | E2, A1, R2> {
     return io.chain(ENV => this.provide(ENV))
   }
 
   /**
    * Provide only some of the environment
    */
-  public provideSome<R0>(fn: (R2: R0) => R1): FIO<E1, A1, R0> {
-    return FIO.accessM((r0: R0) => this.provide(fn(r0)))
+  public provideSome<R0>(fn: (R2: R0) => R1): QIO<E1, A1, R0> {
+    return QIO.accessM((r0: R0) => this.provide(fn(r0)))
   }
 
   /**
    * Provide only some of the environment using an effect
    */
-  public provideSomeM<E2, R0>(fio: FIO<E2, R1, R0>): FIO<E1 | E2, A1, R0> {
-    return fio.chain(_ => this.provide(_))
+  public provideSomeM<E2, R0>(qio: QIO<E2, R1, R0>): QIO<E1 | E2, A1, R0> {
+    return qio.chain(_ => this.provide(_))
   }
 
   /**
    * Runs two IOs in parallel in returns the result of the first one.
    */
   public race<E2, A2, R2>(
-    that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, A1 | A2, R1 & R2> {
+    that: QIO<E2, A2, R2>
+  ): QIO<E1 | E2, A1 | A2, R1 & R2> {
     return this.raceWith(
       that,
       (E, F) => F.abort.const(E),
       (E, F) => F.abort.const(E)
-    ).chain(E => FIO.fromEither<E1 | E2, A1 | A2>(E))
+    ).chain(E => QIO.fromEither<E1 | E2, A1 | A2>(E))
   }
 
   /**
-   * Executes two FIO instances in parallel and resolves with the one that finishes first and cancels the other.
+   * Executes two c instances in parallel and resolves with the one that finishes first and cancels the other.
    */
   public raceWith<E2, A2, R2, E3, A3, E4, A4>(
-    that: FIO<E2, A2, R2>,
+    that: QIO<E2, A2, R2>,
     cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => IO<E3, A3>,
     cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => IO<E4, A4>
-  ): FIO<E3 | E4, A3 | A4, R1 & R2> {
+  ): QIO<E3 | E4, A3 | A4, R1 & R2> {
     return Await.of<E3 | E4, A3 | A4>().chain(done =>
       this.fork.zip(that.fork).chain(([L, R]) => {
         D('zip', 'fiber L', L.id, '& fiber R', R.id)
@@ -670,14 +670,14 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
           return Option.isSome(exit)
             ? done.set(cb1(exit.value, R))
-            : FIO.of(true)
+            : QIO.of(true)
         })
         const resume2 = R.await.chain(exit => {
           D('zip', 'R cb')
 
           return Option.isSome(exit)
             ? done.set(cb2(exit.value, L))
-            : FIO.of(true)
+            : QIO.of(true)
         })
 
         return resume1.fork.and(resume2.fork).and(done.get)
@@ -689,57 +689,57 @@ export class FIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
    * Used to perform side-effects but ignore their values
    */
   public tap<E2, R2>(
-    io: (A1: A1) => FIO<E2, unknown, R2>
-  ): FIO<E1 | E2, A1, R1 & R2> {
+    io: (A1: A1) => QIO<E2, unknown, R2>
+  ): QIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io(_).const(_))
   }
 
   /**
-   * Combine the result of two FIOs sequentially and return a Tuple
+   * Combine the result of two cs sequentially and return a Tuple
    */
   public zip<E2, A2, R2>(
-    that: FIO<E2, A2, R2>
-  ): FIO<E1 | E2, [A1, A2], R1 & R2> {
+    that: QIO<E2, A2, R2>
+  ): QIO<E1 | E2, [A1, A2], R1 & R2> {
     return this.zipWith(that, (a, b) => [a, b])
   }
 
   /**
-   * Combines the result of two FIOs and uses a combine function to combine their result
+   * Combines the result of two cs and uses a combine function to combine their result
    */
   public zipWith<E2, A2, R2, C>(
-    that: FIO<E2, A2, R2>,
+    that: QIO<E2, A2, R2>,
     c: (a1: A1, a2: A2) => C
-  ): FIO<E1 | E2, C, R1 & R2> {
+  ): QIO<E1 | E2, C, R1 & R2> {
     return this.chain(a1 => that.map(a2 => c(a1, a2)))
   }
 
   /**
-   * Combines the result of two FIOs and uses a combine function that returns a FIO
+   * Combines the result of two cs and uses a combine function that returns a c
    */
   public zipWithM<E2, A2, R2, E3, A3, R3>(
-    that: FIO<E2, A2, R2>,
-    c: (a1: A1, a2: A2) => FIO<E3, A3, R3>
-  ): FIO<E1 | E2 | E3, A3, R1 & R2 & R3> {
-    return FIO.flatten(this.zipWith(that, c))
+    that: QIO<E2, A2, R2>,
+    c: (a1: A1, a2: A2) => QIO<E3, A3, R3>
+  ): QIO<E1 | E2 | E3, A3, R1 & R2 & R3> {
+    return QIO.flatten(this.zipWith(that, c))
   }
 
   /**
-   * Combine two FIO instances in parallel and use the combine function to combine the result.
+   * Combine two c instances in parallel and use the combine function to combine the result.
    */
   public zipWithPar<E2, A2, R2, C>(
-    that: FIO<E2, A2, R2>,
+    that: QIO<E2, A2, R2>,
     c: (e1: A1, e2: A2) => C
-  ): FIO<E1 | E2, C, R1 & R2> {
+  ): QIO<E1 | E2, C, R1 & R2> {
     return this.raceWith(
       that,
       (E, F) =>
         E.biMap(
-          cause => F.abort.and(FIO.reject(cause)),
+          cause => F.abort.and(QIO.reject(cause)),
           a1 => F.join.map(a2 => c(a1, a2))
         ).reduce<IO<E1 | E2, C>>(Id, Id),
       (E, F) =>
         E.biMap(
-          cause => F.abort.and(FIO.reject(cause)),
+          cause => F.abort.and(QIO.reject(cause)),
           a2 => F.join.map(a1 => c(a1, a2))
         ).reduce<IO<E1 | E2, C>>(Id, Id)
     )

@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 
-import {FIO, UIO} from '../src/main/FIO'
 import {Managed} from '../src/main/Managed'
+import {QIO, UIO} from '../src/main/QIO'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 describe('Managed', () => {
@@ -10,7 +10,7 @@ describe('Managed', () => {
 
     return {
       acquire: UIO(() => i++),
-      release: FIO.encase(() => void i--),
+      release: QIO.encase(() => void i--),
       get count(): number {
         return i
       },
@@ -23,7 +23,7 @@ describe('Managed', () => {
   it('should release resource on exception', () => {
     const r = Resource()
     testRuntime().unsafeExecuteSync(
-      Managed.make(r.acquire, r.release).use(() => FIO.reject('Failure'))
+      Managed.make(r.acquire, r.release).use(() => QIO.reject('Failure'))
     )
     assert.strictEqual(r.count, 0)
   })
@@ -32,7 +32,7 @@ describe('Managed', () => {
     const r = Resource()
     const actual = testRuntime().unsafeExecuteSync(
       Managed.make(r.acquire, r.release).use(() =>
-        FIO.reject<'Failure'>('Failure')
+        QIO.reject<'Failure'>('Failure')
       )
     )
     assert.strictEqual(actual, 'Failure')
@@ -41,7 +41,7 @@ describe('Managed', () => {
   it('should release resource on completion', () => {
     const r = Resource()
     testRuntime().unsafeExecuteSync(
-      Managed.make(r.acquire, r.release).use(() => FIO.void())
+      Managed.make(r.acquire, r.release).use(() => QIO.void())
     )
     assert.strictEqual(r.count, 0)
   })
@@ -49,7 +49,7 @@ describe('Managed', () => {
   it('should acquire the resource', () => {
     const r = Resource()
     testRuntime().unsafeExecuteSync(
-      Managed.make(r.acquire, FIO.void).use(FIO.void)
+      Managed.make(r.acquire, QIO.void).use(QIO.void)
     )
 
     assert.strictEqual(r.count, 1)
@@ -61,7 +61,7 @@ describe('Managed', () => {
 
     runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
-        .use(() => FIO.timeout(0, 1000))
+        .use(() => QIO.timeout(0, 1000))
         .fork.chain(F => F.abort.delay(500))
     )
 
@@ -74,7 +74,7 @@ describe('Managed', () => {
 
     runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
-        .use(() => FIO.timeout(0, 1000))
+        .use(() => QIO.timeout(0, 1000))
         .fork.chain(F => F.join.and(F.abort))
     )
 

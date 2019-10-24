@@ -4,7 +4,7 @@ import {
   Option
 } from 'standard-data-structures'
 
-import {FIO, IO, UIO} from '../main/FIO'
+import {IO, QIO, UIO} from '../main/QIO'
 
 /**
  * A pure version of a mutable doubly linked list
@@ -36,7 +36,7 @@ export class PureMutableList<A> {
     const itar = (): IO<E1, void> =>
       this.shift.chain(_ =>
         _.map(f)
-          .getOrElse(FIO.void())
+          .getOrElse(QIO.void())
           .chain(itar)
       )
 

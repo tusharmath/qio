@@ -2,7 +2,7 @@ import {DoublyLinkedList, Either, Option} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
-import {FIO, IO, UIO} from './FIO'
+import {IO, QIO, UIO} from './QIO'
 
 /**
  * A special data structure that can be set only once.
@@ -20,9 +20,9 @@ export class Await<E, A> {
   private result: Option<Either<E, A>> = Option.none()
 
   public get get(): IO<E, A> {
-    return FIO.flattenM(() =>
+    return QIO.flattenM(() =>
       this.result
-        .map(S => S.reduce<IO<E, A>>(FIO.reject, XX => FIO.of(XX)))
+        .map(S => S.reduce<IO<E, A>>(QIO.reject, XX => QIO.of(XX)))
         .getOrElse(this.wait)
     )
   }
@@ -32,9 +32,9 @@ export class Await<E, A> {
   }
 
   public set(io: IO<E, A>): UIO<boolean> {
-    return FIO.flattenM(() => {
+    return QIO.flattenM(() => {
       if (this.flag) {
-        return FIO.of(false)
+        return QIO.of(false)
       }
       this.flag = true
 
@@ -54,7 +54,7 @@ export class Await<E, A> {
   }
 
   private get wait(): IO<E, A> {
-    return FIO.asyncIO((rej, res) => {
+    return QIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 
       return {

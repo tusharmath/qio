@@ -1,6 +1,6 @@
 /* tslint:disable: promise-function-async strict-comparisons */
 
-import {FIO, UIO} from '@fio/core'
+import {QIO, UIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
@@ -31,14 +31,14 @@ export const fibFluture = (
 }
 
 /**
- * FIO based implementation
+ * QIO based implementation
  */
-export const fibFIO = (n: bigint): UIO<bigint> => {
+export const fibQIO = (n: bigint): UIO<bigint> => {
   if (n < 2n) {
-    return FIO.of(1n)
+    return QIO.of(1n)
   }
 
-  return fibFIO(n - 1n).chain(a => fibFIO(n - 2n).map(b => a + b))
+  return fibQIO(n - 1n).chain(a => fibQIO(n - 2n).map(b => a + b))
 }
 
 /**
@@ -55,7 +55,7 @@ export const fibBird = (n: bigint): Promise<bigint> => {
 const count = 20n
 RunSuite(`Fibonacci: ${String(count)}`, {
   bluebird: () => fibBird(count),
-  fio: () => fibFIO(count),
   fluture: () => fibFluture(count),
-  native: () => fib(count)
+  native: () => fib(count),
+  qio: () => fibQIO(count)
 })

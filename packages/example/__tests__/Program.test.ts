@@ -1,4 +1,4 @@
-import {FIO, testRuntime, UIO} from '@fio/core'
+import {QIO, testRuntime, UIO} from '@qio/core'
 import {assert} from 'chai'
 
 import {canContinue, program} from '../guess-the-number/src/Program'
@@ -21,7 +21,7 @@ describe('Program', () => {
 
     return {
       getStrLn: (question: string) =>
-        FIO.flattenM(() => {
+        QIO.flattenM(() => {
           const popped = input.hasOwnProperty(question)
             ? input[question].shift()
             : undefined
@@ -29,12 +29,12 @@ describe('Program', () => {
           if (popped === undefined) {
             stdout.push(question)
 
-            return FIO.never()
+            return QIO.never()
           }
 
           stdout.push(question + popped)
 
-          return FIO.of(popped)
+          return QIO.of(popped)
         }),
       putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
       stdout

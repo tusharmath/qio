@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 2019-05-25
  */
-import {UIO} from './FIO'
+import {UIO} from './QIO'
 
 /**
  * A pure implementation of a state.

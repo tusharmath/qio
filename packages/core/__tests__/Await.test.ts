@@ -2,7 +2,7 @@ import {assert, spy} from 'chai'
 import {Either, Option} from 'standard-data-structures'
 
 import {Await} from '../src/main/Await'
-import {FIO} from '../src/main/FIO'
+import {QIO} from '../src/main/QIO'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
@@ -18,7 +18,7 @@ describe('Await', () => {
   describe('set', () => {
     it('should return true', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<never, string>().chain(await => await.set(FIO.of('Hi')))
+        Await.of<never, string>().chain(await => await.set(QIO.of('Hi')))
       )
       assert.ok(actual)
     })
@@ -27,8 +27,8 @@ describe('Await', () => {
       const actual = runtime.unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
           await
-            .set(FIO.of('Hi'))
-            .and(await.set(FIO.of('Bye')))
+            .set(QIO.of('Hi'))
+            .and(await.set(QIO.of('Bye')))
             .and(await.get)
         )
       )
@@ -85,7 +85,7 @@ describe('Await', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
-          await.set(FIO.of('Hi')).and(await.set(FIO.of('Bye')))
+          await.set(QIO.of('Hi')).and(await.set(QIO.of('Bye')))
         )
       )
       assert.notOk(actual)
@@ -96,7 +96,7 @@ describe('Await', () => {
     it('should return the IO value', () => {
       const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, string>().chain(await =>
-          await.set(FIO.of('Hi')).and(await.get)
+          await.set(QIO.of('Hi')).and(await.get)
         )
       )
       assert.strictEqual(actual, 'Hi')
@@ -116,7 +116,7 @@ describe('Await', () => {
       ) as Await<never, string>
       const res = spy()
       runtime.unsafeExecute(await.get, res)
-      runtime.unsafeExecute(await.set(FIO.timeout('Hey', 1000)))
+      runtime.unsafeExecute(await.set(QIO.timeout('Hey', 1000)))
 
       res.should.not.be.called()
       runtime.scheduler.run()
@@ -136,7 +136,7 @@ describe('Await', () => {
     it('should return true after setting', () => {
       const actual = testRuntime().unsafeExecuteSync(
         Await.of<never, number>().chain(await =>
-          await.set(FIO.of(100)).and(await.isSet)
+          await.set(QIO.of(100)).and(await.isSet)
         )
       )
 

@@ -1,4 +1,4 @@
-import {FIO} from '@fio/core'
+import {QIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
@@ -8,7 +8,7 @@ const MAX = 1e4
 
 const flutureMapper = (_: bigint) => Fluture.of(_ + BigInt(1))
 const bluebirdMapper = (_: bigint) => Promise.resolve(_ + BigInt(1))
-const fioMapper = (_: bigint) => FIO.of(_ + BigInt(1))
+const qioMapper = (_: bigint) => QIO.of(_ + BigInt(1))
 
 RunSuite(`NestedChain ${MAX}`, {
   bluebird: () => {
@@ -19,14 +19,6 @@ RunSuite(`NestedChain ${MAX}`, {
 
     return bird
   },
-  fio: () => {
-    let fio = FIO.of(BigInt(0))
-    for (let i = 0; i < MAX; i++) {
-      fio = fio.chain(fioMapper)
-    }
-
-    return fio
-  },
   fluture: () => {
     let fluture = Fluture.of(BigInt(0))
     for (let i = 0; i < MAX; i++) {
@@ -34,5 +26,13 @@ RunSuite(`NestedChain ${MAX}`, {
     }
 
     return fluture
+  },
+  qio: () => {
+    let qio = QIO.of(BigInt(0))
+    for (let i = 0; i < MAX; i++) {
+      qio = qio.chain(qioMapper)
+    }
+
+    return qio
   }
 })

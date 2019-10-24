@@ -1,47 +1,47 @@
-import {defaultRuntime, FIO, IRuntime, Managed, UIO} from '@fio/core'
+import {defaultRuntime, IRuntime, Managed, QIO, UIO} from '@qio/core'
 import * as http from 'http'
 
-const Exit = FIO.encase((message: Error) => {
+const Exit = QIO.encase((message: Error) => {
   process.exit(1)
 })
 
-interface IFIOServerOptions {
+interface IQIOServerOptions {
   mounted: {[k: string]: (req: http.IncomingMessage) => UIO<string>}
   port: number
 }
 
-class FIOServerBuilder {
+class QIOServerBuilder {
   public get serve(): UIO<never> {
     return Managed.make(
-      FIO.runtime().encase(RTM => new FIOServer(RTM, this.options)),
+      QIO.runtime().encase(RTM => new QIOServer(RTM, this.options)),
       server => server.close
-    ).use(FIO.never)
+    ).use(QIO.never)
   }
-  public static of(): FIOServerBuilder {
-    return new FIOServerBuilder({port: 0, mounted: {}})
+  public static of(): QIOServerBuilder {
+    return new QIOServerBuilder({port: 0, mounted: {}})
   }
-  private constructor(private readonly options: IFIOServerOptions) {}
+  private constructor(private readonly options: IQIOServerOptions) {}
 
-  public bind(port: number): FIOServerBuilder {
-    return new FIOServerBuilder({...this.options, port})
+  public bind(port: number): QIOServerBuilder {
+    return new QIOServerBuilder({...this.options, port})
   }
 
   public mount(
     path: string,
     fn: (req: http.IncomingMessage) => UIO<string>
-  ): FIOServerBuilder {
-    return new FIOServerBuilder({
+  ): QIOServerBuilder {
+    return new QIOServerBuilder({
       ...this.options,
       mounted: {...this.options.mounted, [path]: fn}
     })
   }
 }
 
-class FIOServer {
+class QIOServer {
   private readonly server: http.Server
   public constructor(
     private readonly RTM: IRuntime,
-    private readonly options: IFIOServerOptions
+    private readonly options: IQIOServerOptions
   ) {
     this.server = http.createServer(this.onRequest).listen(this.options.port)
   }
@@ -58,7 +58,7 @@ class FIOServer {
   }
 
   public get close(): UIO<void> {
-    return FIO.uninterruptibleIO<Error, void>((rej, res) => () =>
+    return QIO.uninterruptibleIO<Error, void>((rej, res) => () =>
       this.server.close(E => (E !== undefined ? rej(E) : res()))
     ).catch(Exit)
   }
@@ -66,5 +66,5 @@ class FIOServer {
 
 const runtime = defaultRuntime()
 runtime.unsafeExecute(
-  FIOServerBuilder.of().mount('/greet', () => FIO.of('Hello World!')).serve
+  QIOServerBuilder.of().mount('/greet', () => QIO.of('Hello World!')).serve
 )

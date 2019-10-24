@@ -2,12 +2,12 @@
  * Created by tushar on 2019-05-24
  */
 
-import {Id} from '@fio/prelude/Id'
+import {Id} from '@qio/prelude/Id'
 import {Either, Option} from 'standard-data-structures'
 import {ITestSchedulerOptions} from 'ts-scheduler/src/main/ITestSchedulerOptions'
 import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
-import {FIO, IO} from '../main/FIO'
+import {IO, QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
@@ -28,7 +28,7 @@ export class TestRuntime extends BaseRuntime {
       .map(_ => _.reduce<A | E | undefined>(Id, Id))
       .getOrElse(undefined)
   }
-  public unsafeExecuteSync0<E, A>(io: FIO<E, A>): Option<Either<E, A>> {
+  public unsafeExecuteSync0<E, A>(io: QIO<E, A>): Option<Either<E, A>> {
     let result: Option<Either<E, A>> = Option.none()
     this.unsafeExecute(io, _ => (result = _))
     this.scheduler.run()

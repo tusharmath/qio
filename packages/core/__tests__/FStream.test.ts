@@ -1,8 +1,8 @@
-import {T} from '@fio/prelude/T'
+import {T} from '@qio/prelude/T'
 import {assert, spy} from 'chai'
 
-import {FIO} from '../src/main/FIO'
 import {FStream} from '../src/main/FStream'
+import {QIO} from '../src/main/QIO'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Snapshot} from './internals/Snapshot'
@@ -27,7 +27,7 @@ describe('FStream', () => {
   describe('forEachWhile', () => {
     it('should emit while true', () => {
       const actual = new Array<number>()
-      const push = FIO.encase((I: number) => actual.push(I))
+      const push = QIO.encase((I: number) => actual.push(I))
       testRuntime().unsafeExecuteSync(
         FStream.of(1, 2, 3).forEachWhile(_ => push(_).const(true))
       )
@@ -46,7 +46,7 @@ describe('FStream', () => {
     })
 
     it('should call next 4 times', () => {
-      const ID = spy(<TT>(_: TT) => FIO.of(_))
+      const ID = spy(<TT>(_: TT) => QIO.of(_))
       testRuntime().unsafeExecuteSync(FStream.range(100, 103).fold(true, T, ID))
 
       ID.should.be.called.exactly(4)
@@ -70,7 +70,7 @@ describe('FStream', () => {
     context('lower maxInstructionCount', () => {
       it('should interleave values from two ranges', () => {
         const actual = new Array<number>()
-        const insert = FIO.encase((_: number) => void actual.push(_))
+        const insert = QIO.encase((_: number) => void actual.push(_))
         const MAX_INSTRUCTION_COUNT = 5
         const runtime = testRuntime({
           maxInstructionCount: MAX_INSTRUCTION_COUNT
