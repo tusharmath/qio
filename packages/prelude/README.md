@@ -1,3 +1,3 @@
-# `@fio/prelude`
+# `@qio/prelude`
 
 Used internally to make things work.
