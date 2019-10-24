@@ -24,7 +24,7 @@
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
     "test": "mocha --opts=packages/chai/mocha.opts",
-    "create-docs": "cd packages/website && yarn build && cd .. && cd .. && typedoc;",
+    "create-docs": "./scripts/docs.sh",
     "update-benchmarks": "packages/benchmarks/run.sh",
     "example": "node packages/example/guess-the-number/src/Run"
   },
@@ -38,6 +38,8 @@
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.15.0",
+    "typedoc-plugin-docusaurus": "^1.0.14",
+    "typedoc-plugin-markdown": "^2.2.11",
     "typescript": "^3.6.4",
     "typescript-tslint-plugin": "^0.5.4"
   },

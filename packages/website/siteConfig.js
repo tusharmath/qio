@@ -44,6 +44,7 @@ const siteConfig = {
     // {doc: 'getting-started', label: 'Getting Started'},
     // {doc: 'doc4', label: 'API'},
     // {page: 'help', label: 'Help'},
+    {doc: 'api/globals', label: 'API'},
     {doc: 'benchmarks', label: 'Benchmarks'},
     {href: 'https://github.com/tusharmath/qio', label: 'Github'}
   ],
