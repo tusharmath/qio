@@ -14,7 +14,7 @@ script:
   - yarn lint
   - yarn workspace @qio/type-test run test
   - yarn tsc -b
-  - yarn test
+  - yarn test -R=min
   - yarn create-docs
 before_install: yarn global add greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
