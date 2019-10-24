@@ -12,7 +12,7 @@ branches:
     - /^v\d+\.\d+\.\d+$/
 script:
   - yarn lint
-  - yarn workspace @fio/type-test run test
+  - yarn workspace @qio/type-test run test
   - yarn tsc -b
   - yarn test
 before_install: yarn global add greenkeeper-lockfile@1

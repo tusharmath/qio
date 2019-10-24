@@ -9,7 +9,7 @@
 // site configuration options.
 
 const webSiteName = 'web'
-const projectName = 'fio'
+const projectName = 'qio'
 
 
 // List of projects/orgs using your project for the users page.
