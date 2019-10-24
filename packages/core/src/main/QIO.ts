@@ -19,7 +19,7 @@ const D = debug('qio:core')
 export type NoEnv = unknown
 
 /**
- * IO represents a [[c]] that doesn't need any environment to execute
+ * IO represents a [[QIO]] that doesn't need any environment to execute
  */
 export type IO<E, A> = QIO<E, A>
 export const IO = <E = never, A = unknown>(fn: () => A): IO<E, A> =>
@@ -129,7 +129,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Converts a [[c]] of a function into a [[c]] of a value.
+   * Converts a [[QIO]] of a function into a [[QIO]] of a value.
    */
   public static ap<E1, A1, R1, A2>(
     qio: QIO<E1, (a: A1) => A2, R1>,
@@ -195,7 +195,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a [[c]] using a callback function.
+   * Creates a [[QIO]] using a callback function.
    */
   public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
     return QIO.runtime().chain(RTM =>
@@ -241,7 +241,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Creates a [[c]] that needs an environment and when resolved outputs the same environment
+   * Creates a [[QIO]] that needs an environment and when resolved outputs the same environment
    */
   public static env<R1 = never>(): QIO<never, R1, R1> {
     return QIO.access<R1, R1>(Id)
@@ -309,7 +309,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * A different flavour of [[c.if]] that takes in functions instead of c instances.
+   * A different flavour of qio.if]] that takes in functions instead of c instances.
    */
   public static if0<T extends unknown[]>(
     ...args: T
@@ -373,7 +373,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Runs multiple IOs in parallel. Checkout [[c.seq]] to run IOs in sequence.
+   * Runs multiple IOs in parallel. Checkout [[QIO.seq]] to run IOs in sequence.
    */
   public static par<E1, A1, R1>(
     ios: Array<QIO<E1, A1, R1>>
@@ -387,7 +387,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Runs at max N IOs in parallel. Checkout [[c.par]] to run any number of [[c]]s in parallel
+   * Runs at max N IOs in parallel. Checkout [[QIO.par]] to run any number of [[QIO]]s in parallel
    */
   public static parN<E1, A1, R1>(
     N: number,
@@ -447,7 +447,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
 
   /**
    * Executes the provided IOs in sequences and returns their intermediatory results as an Array.
-   * Checkout [[c.par]] to run multiple IOs in parallel.
+   * Checkout [[QIO.par]] to run multiple IOs in parallel.
    */
   public static seq<E1, A1, R1>(
     ios: Array<QIO<E1, A1, R1>>
@@ -552,7 +552,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Chains one [[c]] after another.
+   * Chains one [[QIO]] after another.
    */
   public chain<E2, A2, R2>(
     aFb: (a: A1) => QIO<E2, A2, R2>
@@ -568,14 +568,14 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
   }
 
   /**
-   * Delays the execution of the [[c]] by the provided time.
+   * Delays the execution of the [[QIO]] by the provided time.
    */
   public delay(duration: number): QIO<E1, A1, R1> {
     return QIO.timeout(this, duration).chain(Id)
   }
 
   /**
-   * Like [[c.tap]] but takes in an IO instead of a callback.
+   * Like [[QIO.tap]] but takes in an IO instead of a callback.
    */
   public do<E2, R2>(io: QIO<E2, unknown, R2>): QIO<E1 | E2, A1, R1 & R2> {
     return this.chain(_ => io.const(_))

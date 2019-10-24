@@ -29,3 +29,4 @@ deploy:
   keep_history: false
   on:
     branch: master
+  local_dir: packages/website/build
