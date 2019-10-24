@@ -1,10 +1,13 @@
 ---
 id: benchmarks
 title: Benchmarks
-sidebar_label: Benchmarks
+sidebar_label: IO
 ---
 
-# Benchmarks
+Comparison is done between [Fluture] and [Bluebird].
+
+[fluture]: https://github.com/fluture-js/Fluture
+[bluebird]: https://github.com/petkaantonov/bluebird
 
 ## Constant
 
@@ -60,3 +63,5 @@ Fluture x 4,230 ops/sec ±1.56% (75 runs sampled)
 bluebird x 5,367 ops/sec ±1.59% (76 runs sampled)
 Fastest is QIO
 ```
+
+**Note:** These are micro benchmarks and don't represent a real world scenario. It's possible that in a practical scenario all the above libraries perform similarly.
