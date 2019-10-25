@@ -1,15 +1,13 @@
 {
   "docs": {
     "Getting Started": [
-      "getting-started/introduction",
-      "getting-started/installation",
-      "getting-started/create-qio",
-      "getting-started/execute-qio",
-      "getting-started/serial-execution",
-      "getting-started/parallel-execution",
-      "getting-started/cancellation",
-      "getting-started/custom-env"
+      "introduction",
+      "installation",
+      "using-qio",
+      "execute-qio"
     ],
-    "Benchmarks": ["benchmarks"]
-  }
+    "Concurrency": ["serial-execution", "parallel-execution", "concurrent"],
+    "Advanced": ["cancellation", "custom-env", "fiber"]
+  },
+  "docs2": {"Benchmarks": ["benchmarks"]}
 }

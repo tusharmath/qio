@@ -1,6 +1,5 @@
 ---
-title: Parallel Execution
-sidebar_label: Parallel Execution
+title: Parallel
 ---
 
 Similar to the `and` operator, the [par] operator runs the two IOs in parallel. For eg.

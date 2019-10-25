@@ -1,6 +1,6 @@
 ---
-title: Creating a QIO
-sidebar_label: Create
+title: Usage
+sidebar_label: Usage
 ---
 
 There are multiple ways through which you can create an instance of QIO viz. `QIO.from` or `QIO.encase` etc. Refer to the [API documentation] to learn about all the ways.

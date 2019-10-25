@@ -4,20 +4,6 @@ title: Introduction
 
 QIO is a library that solve practical problems of effectful code.
 
-## Usage
-
-```typescript
-import {IO, defaultRuntime} from '@qio/core'
-
-// Create a pure version of `console.log` called `putStrLn`
-const putStrLn = IO.encase((str: string) => console.log(str))
-
-const hello = putStrLn('Hello World!')
-
-const runtime = defaultRuntime()
-runtime.unsafeExecute(hello)
-```
-
 ## Type Signature
 
 ```ts
@@ -48,7 +34,7 @@ To represent `Greet` —
 const GreetIO: QIO<unknown, never, void>
 ```
 
-# Credits
+## Credits
 
 QIO is heavily inspired by the following libraries —
 

@@ -1,6 +1,5 @@
 ---
-title: Serial Execution
-sidebar_label: Serial Execution
+title: Serial
 ---
 
 Since these data structures don't specify how or when they are going to be executed, writing them one after the other in procedural style will not guarantee any order of execution, for Eg —
