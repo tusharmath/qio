@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@qio/website",
-  "version": "18.0.6",
+  "version": "18.0.7",
   "scripts": {
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
