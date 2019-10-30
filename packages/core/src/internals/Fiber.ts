@@ -55,9 +55,10 @@ export abstract class Fiber<E, A> {
   public abstract abort: UIO<void>
   public abstract await: UIO<Option<Either<E, A>>>
   public readonly id = FIBER_ID++
-  public abstract join: QIO<E, A>
+  public get join(): IO<E, A> {
+    return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
+  }
   public abstract runtime: IRuntime
-  public abstract release(p: UIO<void>): UIO<void>
 }
 
 /**
@@ -70,19 +71,18 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
   public get abort(): UIO<void> {
     return UIO(() => this.cancel())
   }
+
+  /**
+   * Aborting the IO produced by await should abort the complete IO.
+   */
   public get await(): UIO<Option<Either<E, A>>> {
-    D(this.id, 'await')
+    D(this.id, 'this.await()')
 
     return QIO.asyncUIO(cb => {
-      D(this.id, 'unsafe observe')
+      this.unsafeObserve(cb)
 
-      return this.unsafeObserve(cb)
+      return this
     })
-  }
-  public get join(): QIO<E, A> {
-    return QIO.asyncIO<E, A>((rej, res) =>
-      this.unsafeObserve(ob => ob.map(_ => _.reduce(rej, res)))
-    )
   }
 
   /**
@@ -121,25 +121,28 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
     public readonly runtime: IRuntime
   ) {
     super()
-    D(this.id, 'created')
+    D(this.id, 'this.constructor()')
     this.stackA.push(instruction)
     this.init()
   }
 
   public cancel(): void {
+    D(this.id, 'this.cancel()')
+    D(this.id, 'this.observers.length == ', this.observers.length)
     this.status = FiberStatus.CANCELLED
+    D(this.id, 'this.status ==', FiberStatus[this.status])
     this.cancellationList.cancel()
 
     this.observers.map(_ => _(Option.none()))
   }
 
-  public release(p: UIO<void>): UIO<void> {
-    return UIO(() => this.unsafeRelease(p))
-  }
-
+  /**
+   * The `ICancellable` returned when called will only remove the passed on callback.
+   * It will never cancel the complete Fiber.
+   * To cancel the Fiber one must call the [[FiberContext.cancel]] method.
+   */
   public unsafeObserve(cb: CBOption<E, A>): ICancellable {
-    D(this.id, 'unsafe observe')
-
+    D(this.id, 'this.unsafeObserve()')
     if (this.status === FiberStatus.CANCELLED) {
       return this.runtime.scheduler.asap(
         FiberContext.dispatchResult,
@@ -156,8 +159,18 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
     }
 
     const node = this.observers.add(cb)
+    D(this.id, 'this.status ==', FiberStatus[this.status])
+    D(this.id, 'this.observers.add()')
+    D(this.id, 'this.observers.length == ', this.observers.length)
 
-    return {cancel: () => this.observers.remove(node)}
+    return {
+      cancel: () => {
+        D(this.id, 'this.observers.length == ', this.observers.length)
+        this.observers.remove(node)
+        D(this.id, 'this.observer.remove()')
+        D(this.id, 'this.observers.length == ', this.observers.length)
+      }
+    }
   }
 
   private dispatchResult(result: Either<E, A>): void {
@@ -305,11 +318,5 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
       }
       count++
     }
-  }
-
-  private unsafeRelease(p: UIO<void>): void {
-    this.cancellationList.push({
-      cancel: () => Fiber.unsafeExecuteWith(p, this.runtime)
-    })
   }
 }

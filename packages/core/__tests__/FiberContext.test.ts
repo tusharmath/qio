@@ -177,7 +177,21 @@ describe('FiberContext', () => {
       })
     })
     context('on cancellation', () => {
-      it.skip('should return none')
+      it('should resolve with None', () => {
+        const snapshot = new Snapshot<Option<Either<never, string | number>>>()
+        const runtime = testRuntime()
+
+        FiberContext.unsafeExecuteWith(
+          QIO.timeout(0, 1000)
+            .fork.chain(F => F.await.chain(_ => snapshot.mark(_)))
+            .fork.chain(F => F.abort.delay(500)),
+          runtime
+        )
+
+        runtime.scheduler.run()
+
+        assert.deepStrictEqual(snapshot.timelineData, [[Option.none(), 501]])
+      })
     })
   })
 
