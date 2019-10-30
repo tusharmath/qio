@@ -27,7 +27,8 @@
     "doc": "./scripts/docs.sh",
     "doc:typedoc": "yarn typedoc --plugin typedoc-plugin-markdown",
     "update-benchmarks": "packages/benchmarks/run.sh",
-    "example": "node packages/example/guess-the-number/src/Run"
+    "example": "node packages/example/guess-the-number/src/Run",
+    "start": "yarn workspace @qio/website start"
   },
   "version": "0.0.0-development",
   "devDependencies": {
