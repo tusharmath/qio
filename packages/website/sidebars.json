@@ -2,6 +2,7 @@
   "docs": {
     "Getting Started": [
       "introduction",
+      "pure-functions",
       "installation",
       "using-qio",
       "execute-qio"
