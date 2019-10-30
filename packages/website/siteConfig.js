@@ -25,7 +25,7 @@ const users = [
 
 const siteConfig = {
   title: 'QIO', // Title for your website.
-  tagline: 'An effect management library',
+  tagline: 'QIO is a library that solves practical problems of a real world program.',
   url: `https://tusharmath.com/${projectName}`, // Your website URL
   baseUrl: `/${projectName}/${webSiteName}/`, // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
