@@ -64,9 +64,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href="docs/introduction">
-              Getting Started
-            </Button>
+            <Button href="docs/introduction">Getting Started</Button>
             {/*<Button href={docUrl('doc1.html')}>Example Link</Button>*/}
             {/*<Button href={docUrl('doc2.html')}>Example Link 2</Button>*/}
           </PromoSection>
@@ -153,31 +151,26 @@ class Index extends React.Component {
       <Block layout="fourColumn">
         {[
           {
-            content: 'Beats most IO libraries in terms of performance.',
+            content:
+              'The library is designed to build high performance applications without a significant abstraction overhead.',
             // image: `${baseUrl}img/undraw_react.svg`,
             // imageAlign: 'top',
             title: 'High Performance'
           },
           {
             content:
-              'Provides solid type-safety, exploiting the typescript compiler.',
-            title: 'Type-Safe'
+              'Provides solid type-safety that can help catch bugs sooner, at compile time.',
+            title: 'Type-Safety'
           },
           {
             content:
-              'Perform CPU bound tasks concurrently in a single threaded environment.',
-            title: 'Concurrent'
+              'Allows devs to perform CPU bound tasks concurrently in a single threaded environment.',
+            title: 'Concurrency'
           },
           {
             content:
-              'Write sequential code that looks the same whether it’s asynchronous or synchronous.',
-            title: 'Asynchronous'
-          },
-
-          {
-            content:
-              'Write applications without manually handling resource leaks.',
-            title: 'Resource Safe'
+              'Helps in writing applications without manually managing resource leaks.',
+            title: 'Resource Safety'
           },
 
           {
@@ -187,14 +180,19 @@ class Index extends React.Component {
 
           {
             content:
-              "Write programs that provide type safety around errors and don't ever lose them.",
+              "It helps in writing programs that provide type safety around errors and doesn't lose them ever.",
             title: 'Resilient'
           },
 
           {
             content:
-              'Highly functional and lawful abstractions that helps in providing easy composition and refactoring capabilities.',
+              'It is highly functional and has lawful abstractions that helps in providing easy composition and refactoring capabilities.',
             title: 'Functional'
+          },
+
+          {
+            content: 'Provides out of the box streaming capabilities.',
+            title: 'Streaming'
           }
           // {
           //   content: 'The content of my second feature',
