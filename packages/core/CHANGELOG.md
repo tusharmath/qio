@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [19.0.0](https://github.com/tusharmath/qio/compare/v18.0.7...v19.0.0) (2019-10-30)
+
+
+### Bug Fixes
+
+* **fiber:** handle cancellation callbacks while using await ([a74924d](https://github.com/tusharmath/qio/commit/a74924dff119d4f4041c2946c9d961a87436066a))
+
+
+### BREAKING CHANGES
+
+* **fiber:** remove \`Fiber.release\`
+
+
+
+
+
 ## [18.0.1](https://github.com/tusharmath/qio/compare/v18.0.0...v18.0.1) (2019-10-24)
 
 **Note:** Version bump only for package @qio/core

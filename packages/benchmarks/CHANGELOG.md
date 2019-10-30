@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [19.0.0](https://github.com/tusharmath/qio/compare/v18.0.7...v19.0.0) (2019-10-30)
+
+**Note:** Version bump only for package @qio/benchmarks
+
+
+
+
+
 ## [18.0.3](https://github.com/tusharmath/qio/compare/v18.0.2...v18.0.3) (2019-10-24)
 
 **Note:** Version bump only for package @qio/benchmarks
