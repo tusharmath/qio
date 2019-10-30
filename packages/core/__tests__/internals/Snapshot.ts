@@ -4,11 +4,14 @@
 import {QIO, UIO} from '../../src/main/QIO'
 
 export class Snapshot<T = string | number> {
-  public readonly timeline = new Array<string>()
+  public get timeline(): string[] {
+    return this.timelineData.map(_ => _.join('@'))
+  }
+  public readonly timelineData = new Array<[T, number]>()
   public mark(value: T): UIO<T> {
     return QIO.runtime().chain(RTM =>
       UIO(
-        () => void this.timeline.push(value + '@' + RTM.scheduler.now())
+        () => void this.timelineData.push([value, RTM.scheduler.now()])
       ).const(value)
     )
   }
