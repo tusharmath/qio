@@ -3,7 +3,7 @@ import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
 import {Managed, UManaged} from './Managed'
-import {NoEnv, QIO, UIO} from './QIO'
+import {QIO, UIO} from './QIO'
 import {Queue} from './Queue'
 import {Ref} from './Ref'
 
@@ -14,7 +14,7 @@ const Id = <A>(a: A) => a
 /**
  * Represents a [[FStream]] that never fails and doesn't need any env to run.
  */
-export type Stream<A1> = FStream<never, A1, NoEnv>
+export type Stream<A1> = FStream<never, A1, unknown>
 
 /**
  * Represents a sequence of values that are emitted over time.
@@ -178,7 +178,7 @@ export class FStream<E1, A1, R1> {
     )
   }
 
-  public static reject<E1>(err: E1): FStream<E1, never, NoEnv> {
+  public static reject<E1>(err: E1): FStream<E1, never, unknown> {
     return FStream.fromEffect(QIO.reject(err))
   }
 

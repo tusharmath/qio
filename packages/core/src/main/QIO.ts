@@ -16,8 +16,6 @@ import {Instruction, Tag} from './Instructions'
 
 const D = debug('qio:core')
 
-export type NoEnv = unknown
-
 /**
  * IO represents a [[QIO]] that doesn't need any environment to execute
  */
@@ -57,7 +55,7 @@ export type NodeJSCallback<A> = (
  * @typeparam A1 The output of the running the program successfully.
  * @typeparam R1 Environment needed to execute this instance.
  */
-export class QIO<E1 = unknown, A1 = unknown, R1 = NoEnv> {
+export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Safely converts an interuptable IO to non-interuptable one.
    */

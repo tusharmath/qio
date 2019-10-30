@@ -2,7 +2,7 @@ import {DoublyLinkedList, List, Option} from 'standard-data-structures'
 
 import {Await} from './Await'
 import {FStream} from './FStream'
-import {NoEnv, QIO, UIO} from './QIO'
+import {QIO, UIO} from './QIO'
 
 /**
  * Queue Data Structure
@@ -112,7 +112,7 @@ export class Queue<A = never> {
   /**
    * Converts a queue into a [[FStream]]
    */
-  public get asStream(): FStream<never, A, NoEnv> {
+  public get asStream(): FStream<never, A, unknown> {
     return FStream.produce(this.take)
   }
 }
