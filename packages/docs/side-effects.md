@@ -1,5 +1,5 @@
 ---
-title: Side effects
+title: Side Effects
 ---
 
 Side effects are changes that your program performs to the outside world, for eg.:
