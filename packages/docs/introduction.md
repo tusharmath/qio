@@ -1,5 +1,5 @@
 ---
-title: Introduction to Functional Programming
+title: Introduction
 sidebar_label: Introduction
 ---
 
