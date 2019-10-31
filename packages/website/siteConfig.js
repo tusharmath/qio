@@ -78,7 +78,8 @@ const siteConfig = {
   */
 
   fonts: {
-    myFont: ['Lora', 'Serif']
+    defaultFont: ['Lora', 'Serif'],
+    monospaceFont: ['Fira Code', 'monospace']
   },
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
@@ -116,7 +117,8 @@ const siteConfig = {
   //   repoUrl: 'https://github.com/facebook/${name}',
 
   stylesheets: [
-    'https://fonts.googleapis.com/css?family=Lora:400,700&display=swap'
+    'https://fonts.googleapis.com/css?family=Lora:400,700&display=swap',
+    'https://fonts.googleapis.com/css?family=Fira+Code:500|Lora&display=swap'
   ]
 }
 

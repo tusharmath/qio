@@ -16,7 +16,11 @@
 }
 
 body {
-  font-family: $myFont;
+  font-family: $defaultFont;
+}
+
+code {
+  font-family: $monospaceFont;
 }
 
 .fixedHeaderContainer {
