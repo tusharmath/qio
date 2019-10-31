@@ -5,11 +5,11 @@
 import {assert, spy} from 'chai'
 import {Either} from 'standard-data-structures'
 
-import {FiberContext} from '../src/internals/Fiber'
-import {QIO, UIO} from '../src/main/QIO'
-import {Snapshot} from '../src/main/Snapshot'
-import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
-import {testRuntime} from '../src/runtimes/TestRuntime'
+import {FiberContext} from '../lib/internals/Fiber'
+import {QIO, UIO} from '../lib/main/QIO'
+import {Snapshot} from '../lib/main/Snapshot'
+import {defaultRuntime} from '../lib/runtimes/DefaultRuntime'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 

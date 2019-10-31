@@ -1,4 +1,4 @@
-import {UIO} from '../../src/main/QIO'
+import {UIO} from '../../lib/main/QIO'
 
 export class Counter {
   public count = 0

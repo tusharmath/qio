@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 
-import {testRuntime} from '../src/runtimes/TestRuntime'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('runtime', () => {
   context('instruction count is Infinite', () => {

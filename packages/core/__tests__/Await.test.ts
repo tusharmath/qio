@@ -1,9 +1,9 @@
 import {assert, spy} from 'chai'
 import {Either, Option} from 'standard-data-structures'
 
-import {Await} from '../src/main/Await'
-import {QIO} from '../src/main/QIO'
-import {testRuntime} from '../src/runtimes/TestRuntime'
+import {Await} from '../lib/main/Await'
+import {QIO} from '../lib/main/QIO'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 

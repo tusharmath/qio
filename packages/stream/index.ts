@@ -3,5 +3,4 @@
  * Created by tushar on 31/10/19
  */
 
-
-export {Stream} from './src/Stream'
+export {Stream} from './lib/Stream'

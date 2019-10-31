@@ -1,10 +1,10 @@
 import {assert, spy} from 'chai'
 import {Either, Option} from 'standard-data-structures'
 
-import {FiberContext} from '../src/internals/Fiber'
-import {QIO} from '../src/main/QIO'
-import {Snapshot} from '../src/main/Snapshot'
-import {testRuntime} from '../src/runtimes/TestRuntime'
+import {FiberContext} from '../lib/internals/Fiber'
+import {QIO} from '../lib/main/QIO'
+import {Snapshot} from '../lib/main/Snapshot'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
 

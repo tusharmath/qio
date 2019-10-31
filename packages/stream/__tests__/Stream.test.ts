@@ -2,14 +2,12 @@ import {QIO, Snapshot, testRuntime} from '@qio/core'
 import {T} from '@qio/prelude/T'
 import {assert, spy} from 'chai'
 
-import {Stream} from '../src/Stream'
+import {Stream} from '../lib/Stream'
 
 describe('Stream', () => {
   describe('of', () => {
     it('should emit provided values', () => {
-      const actual = testRuntime().unsafeExecuteSync(
-        Stream.of(1, 2, 3).asArray
-      )
+      const actual = testRuntime().unsafeExecuteSync(Stream.of(1, 2, 3).asArray)
       const expected = [1, 2, 3]
       assert.deepStrictEqual(actual, expected)
     })

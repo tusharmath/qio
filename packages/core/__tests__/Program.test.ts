@@ -1,8 +1,8 @@
 import {assert} from 'chai'
 
 import {canContinue, program} from '../../example/guess-the-number/src/Program'
-import {QIO, UIO} from '../src/main/QIO'
-import {testRuntime} from '../src/runtimes/TestRuntime'
+import {QIO, UIO} from '../lib/main/QIO'
+import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('Program', () => {
   /**
