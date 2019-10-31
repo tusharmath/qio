@@ -1,11 +1,7 @@
+import {Managed, QIO, Queue, Ref, UIO, UManaged} from '@qio/core'
 import {T} from '@qio/prelude/T'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
-
-import {Managed, UManaged} from './Managed'
-import {QIO, UIO} from './QIO'
-import {Queue} from './Queue'
-import {Ref} from './Ref'
 
 const FTrue = QIO.of(true)
 const FTrueCb = () => FTrue
@@ -92,7 +88,7 @@ export class FStream<E1, A1, R1> {
       const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
       return Managed.make(
-        UIO(() => ev.addListener(name, onEvent)).const(Q.asStream),
+        UIO(() => ev.addListener(name, onEvent)).const(FStream.fromQueue(Q)),
         QIO.encase(() => void ev.off(name, onEvent))
       )
     })

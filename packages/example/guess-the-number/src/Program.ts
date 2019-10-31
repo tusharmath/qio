@@ -1,4 +1,5 @@
-import {FStream, QIO} from '@qio/core'
+import {QIO} from '@qio/core'
+import {FStream} from '@qio/stream'
 
 import {IMath, ITextTerminal} from './Env'
 

@@ -1,7 +1,7 @@
 /**
  * Created by tushar on 07/09/19
  */
-import {QIO, UIO} from '../../src/main/QIO'
+import {QIO, UIO} from './QIO'
 
 export class Snapshot<T = string | number> {
   public get timeline(): string[] {

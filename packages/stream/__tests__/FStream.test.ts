@@ -1,11 +1,8 @@
+import {QIO, Snapshot, testRuntime} from '@qio/core'
 import {T} from '@qio/prelude/T'
 import {assert, spy} from 'chai'
 
-import {FStream} from '../src/main/FStream'
-import {QIO} from '../src/main/QIO'
-import {testRuntime} from '../src/runtimes/TestRuntime'
-
-import {Snapshot} from './internals/Snapshot'
+import {FStream} from '../src/FStream'
 
 describe('FStream', () => {
   describe('of', () => {

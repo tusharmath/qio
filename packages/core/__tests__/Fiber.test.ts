@@ -3,10 +3,10 @@ import {Either, Option} from 'standard-data-structures'
 
 import {FiberContext} from '../src/internals/Fiber'
 import {QIO} from '../src/main/QIO'
+import {Snapshot} from '../src/main/Snapshot'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
-import {Snapshot} from './internals/Snapshot'
 
 describe('FiberContext', () => {
   context('on creation', () => {

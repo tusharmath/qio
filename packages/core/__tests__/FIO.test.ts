@@ -7,11 +7,11 @@ import {Either} from 'standard-data-structures'
 
 import {FiberContext} from '../src/internals/Fiber'
 import {QIO, UIO} from '../src/main/QIO'
+import {Snapshot} from '../src/main/Snapshot'
 import {defaultRuntime} from '../src/runtimes/DefaultRuntime'
 import {testRuntime} from '../src/runtimes/TestRuntime'
 
 import {Counter} from './internals/Counter'
-import {Snapshot} from './internals/Snapshot'
 
 describe('QIO', () => {
   describe('of', () => {
