@@ -7,26 +7,30 @@ Executing an IO returns a cancel callback. Essentially a function that when call
 
 Create an IO
 
-```diff
+```ts
 + import {QIO} from '@qio/core'
++
 + const delayIO = QIO.timeout('Hello World', 1000)
 ```
 
 Execute by passing it to `defaultRuntime`
 
-```diff
+```ts
 - import {QIO} from '@qio/core'
 + import {QIO, defaultRuntime} from '@qio/core'
+
   const delayIO = QIO.timeout('Hello World', 1000)
 + const cancel = defaultRuntime().unsafeExecute(delayIO)
 ```
 
 Calling the cancelling callback.
 
-```diff
+```ts
   import {QIO, defaultRuntime} from '@qio/core'
+
   const delayIO = QIO.timeout('Hello World', 1000)
   const cancel = defaultRuntime().execute(delayIO)
+
 + cancel()
 ```
 

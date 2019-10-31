@@ -3,23 +3,22 @@ title: Usage
 sidebar_label: Usage
 ---
 
-There are multiple ways through which you can create an instance of QIO viz. `QIO.from` or `QIO.encase` etc. Refer to the [API documentation] to learn about all the ways.
+There are multiple ways through which you can create an instance of QIO viz. Refer to the [API documentation] to learn about all the ways.
 
-[api documentation]: https://tusharmath.com/qio/classes/qio.html
+[api documentation]: /web/docs/api/globals
 
-Once of the easiest ways to create a QIO is through [QIO.encase].
+One of the easiest ways to create a QIO is through [QIO.encase].
 
-[qio.encase]: https://tusharmath.com/qio/classes/qio.html#encase
+[qio.encase]: /web/docs/api/classes/qio#encase
 
-```patch
-+ import {QIO} from '@qio/core'
+```ts
+import {QIO} from '@qio/core'
 
-  const Greet = () => console.log('Hello World!')
-+ const GreetIO = QIO.encase(Greet)
+// Converts an impure function to a pure one
+const putStrLn = QIO.encase(console.log)
+
+// Creates a new QIO data structure
+const greet = putStrLn('Hello World')
 ```
 
-Calling `GreetIO()` returns a pure data structure which represents a side-effect, that —
-
-1. Can execute in any environment without any special needs.
-2. Never fails.
-3. Resolves with a `void`.
+Here `putStrLn` is a pure implementation of `console.log`. Calling the function doesn't actually print on the screen rather, it creates a data structure of type `QIO<never, void, unknown>` which is then assigned to the `greet` variable.

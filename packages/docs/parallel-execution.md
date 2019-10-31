@@ -8,7 +8,7 @@ Similar to the `and` operator, the [par] operator runs the two IOs in parallel. 
 
 Create the two IOs
 
-```diff
+```ts
 +  import {QIO} from '@qio/core'
 +
 +  const foo = QIO.timeout('foo', 1000)
@@ -17,22 +17,24 @@ Create the two IOs
 
 Combine them using [par]
 
-```diff
-- import {QIO} from '@qio/core'
+```ts
+  import {QIO} from '@qio/core'
 
   const foo = QIO.timeout('foo', 1000)
   const bar = QIO.timeout('bar', 1500)
+
 + const fooBar = foo.par(bar)
 ```
 
 Execute the created IO
 
-```diff
+```ts
 - import {QIO} from '@qio/core'
 + import {QIO, defaultRuntime} from '@qio/core'
 
   const foo = QIO.timeout('foo', 1000)
   const bar = QIO.timeout('bar', 1500)
+
   const fooBar = foo.zip(bar)
 
 + defaultRuntime().unsafeExecute(fooBar)

@@ -36,12 +36,12 @@ class Right<R> {
 type Either<L, R> = Left<L> | Right<A>
 ```
 
-And update the return type with `Either<DivisionByZero, number>`. This means that the return value of the function is either a failure of type `DivisionByZero` or a success of type `number.
+And update the return type with `Either<DivisionByZero, number>`. This means that the return value of the function is either a failure of type `DivisionByZero` or a success of type `number`.
 
 ```ts
 class DivisionByZero extends Error {}
 
-const division = (a: number, b: number): Option<DivisionByZero, number> => {
+const division = (a: number, b: number): Either<DivisionByZero, number> => {
   return b === 0 ? new Left(new DivisionByZero()) : new Right(a / b)
 }
 ```

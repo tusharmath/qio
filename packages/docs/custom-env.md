@@ -9,7 +9,7 @@ By default any QIO instance would not need any env. This can be customized based
 
 Say we already have a `Config` interface, with only one property —
 
-```diff
+```ts
 + interface Config {
 +   port: number
 + }
@@ -19,7 +19,7 @@ Say we already have a `Config` interface, with only one property —
 
 Next we create an Environment that returns a `config` —
 
-```diff
+```ts
   interface Config {
     port: number
   }
@@ -32,7 +32,7 @@ Next we create an Environment that returns a `config` —
 
 We add `getPort` which picks the `port` and `putStrLn` which is a wrapper over `console.log` to make it pure.
 
-```diff
+```ts
 + import {QIO} from '@qio/core'
   interface Config {
     port: number
@@ -50,7 +50,7 @@ Using the [chain] operator one can now chain them one after the other —
 
 [chain]: https://tusharmath.com/qio/classes/qio.html#chain
 
-```diff
+```ts
   import {QIO} from '@qio/core'
   interface Config {
     port: number
@@ -68,7 +68,7 @@ Using the [chain] operator one can now chain them one after the other —
 
 You can provide the env directly to a QIO instance without executing it using the [provide] method.
 
-```diff
+```ts
   import {QIO} from '@qio/core'
 + import config from 'node-config'
   interface Config {
@@ -94,7 +94,7 @@ You can provide the env directly to a QIO instance without executing it using th
 
 Running the program can be done by using the runtime.
 
-```diff
+```ts
 - import {QIO} from '@qio/core'
 + import {QIO, defaultRuntime} from '@qio/core'
   import config from 'node-config'
