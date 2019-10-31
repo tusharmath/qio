@@ -1,7 +1,6 @@
 import {DoublyLinkedList, List, Option} from 'standard-data-structures'
 
 import {Await} from './Await'
-import {FStream} from './FStream'
 import {QIO, UIO} from './QIO'
 
 /**
@@ -107,12 +106,5 @@ export class Queue<A = never> {
       )
 
     return itar(0, List.empty<A>()).map(_ => _.asArray)
-  }
-
-  /**
-   * Converts a queue into a [[FStream]]
-   */
-  public get asStream(): FStream<never, A, unknown> {
-    return FStream.produce(this.take)
   }
 }
