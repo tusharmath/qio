@@ -37,4 +37,4 @@ const div = (a: number, b: number): number => a / b
 
 If you observe closely you will see a problem with `div`. The function `div` is defined over a limited set of values for `b`. Passing `b` as `0` will return `Infinity` which is technically not a `number` thus producing an anomaly in the program at runtime. Ideally you would like to handle the above problem at compile time.
 
-The above three problems are common to most real world programs and unfortunately Javascript doesn't provide us with a first class support to handle them. **QIO** provides solid abstractions that can help solve these problems elegantly.
+The above three problems are common to most real world programs and unfortunately apart from handling exceptions, Javascript doesn't provide us with a first class support to handle non-determinism and side-effects. **QIO** provides solid type-safe abstractions that can help solve these problems elegantly.
