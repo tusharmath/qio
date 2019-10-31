@@ -13,3 +13,7 @@ In functional programing functions that are **effect-free**, **deterministic** &
 Pure functions are referentially transparent. This means in a program the function calls may be replaced by its value (or anything having the same value) without changing the behavior of the program.
 
 This is a powerful guarantee which allows devs to refactor code much more easily.
+
+---
+
+Continue reading by going over to [usage](/qio/web/docs/using-qio). 
