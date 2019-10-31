@@ -1,5 +1,5 @@
 import {QIO} from '@qio/core'
-import {FStream} from '@qio/stream'
+import {Stream} from '@qio/stream'
 
 import {IMath, ITextTerminal} from './Env'
 
@@ -32,7 +32,7 @@ const randomInt = (min: number, max: number) =>
 /**
  * Keeps taking a numeric input from the player.
  */
-const inputNumber = FStream.produce(
+const inputNumber = Stream.produce(
   getStrLn(`Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}: `)
 )
   .map(_ => parseInt(_, 10))

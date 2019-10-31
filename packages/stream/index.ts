@@ -4,4 +4,4 @@
  */
 
 
-export {FStream} from './src/FStream'
+export {Stream} from './src/Stream'

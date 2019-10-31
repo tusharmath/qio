@@ -2,20 +2,20 @@ import {QIO, Snapshot, testRuntime} from '@qio/core'
 import {T} from '@qio/prelude/T'
 import {assert, spy} from 'chai'
 
-import {FStream} from '../src/FStream'
+import {Stream} from '../src/Stream'
 
-describe('FStream', () => {
+describe('Stream', () => {
   describe('of', () => {
     it('should emit provided values', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        FStream.of(1, 2, 3).asArray
+        Stream.of(1, 2, 3).asArray
       )
       const expected = [1, 2, 3]
       assert.deepStrictEqual(actual, expected)
     })
 
     it('should one value', () => {
-      const actual = testRuntime().unsafeExecuteSync(FStream.of(999).asArray)
+      const actual = testRuntime().unsafeExecuteSync(Stream.of(999).asArray)
       const expected = [999]
       assert.deepStrictEqual(actual, expected)
     })
@@ -26,7 +26,7 @@ describe('FStream', () => {
       const actual = new Array<number>()
       const push = QIO.encase((I: number) => actual.push(I))
       testRuntime().unsafeExecuteSync(
-        FStream.of(1, 2, 3).forEachWhile(_ => push(_).const(true))
+        Stream.of(1, 2, 3).forEachWhile(_ => push(_).const(true))
       )
       const expected = [1, 2, 3]
       assert.deepStrictEqual(actual, expected)
@@ -36,7 +36,7 @@ describe('FStream', () => {
   describe('range', () => {
     it('should emit values in range', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        FStream.range(100, 103).asArray
+        Stream.range(100, 103).asArray
       )
       const expected = [100, 101, 102, 103]
       assert.deepStrictEqual(actual, expected)
@@ -44,7 +44,7 @@ describe('FStream', () => {
 
     it('should call next 4 times', () => {
       const ID = spy(<TT>(_: TT) => QIO.of(_))
-      testRuntime().unsafeExecuteSync(FStream.range(100, 103).fold(true, T, ID))
+      testRuntime().unsafeExecuteSync(Stream.range(100, 103).fold(true, T, ID))
 
       ID.should.be.called.exactly(4)
     })
@@ -56,8 +56,8 @@ describe('FStream', () => {
       const runtime = testRuntime()
 
       runtime.unsafeExecuteSync(
-        FStream.of('A')
-          .merge(FStream.of('B'))
+        Stream.of('A')
+          .merge(Stream.of('B'))
           .forEach(_ => actual.mark(_))
       )
 
@@ -74,8 +74,8 @@ describe('FStream', () => {
         })
 
         runtime.unsafeExecuteSync(
-          FStream.range(101, 103)
-            .merge(FStream.range(901, 903))
+          Stream.range(101, 103)
+            .merge(Stream.range(901, 903))
             .mapM(insert).drain
         )
 
@@ -91,7 +91,7 @@ describe('FStream', () => {
   describe('take', () => {
     it('should take first 2 elements', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        FStream.of(1, 2, 3).take(2).asArray
+        Stream.of(1, 2, 3).take(2).asArray
       )
       const expected = [1, 2]
       assert.deepStrictEqual(actual, expected)
