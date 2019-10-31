@@ -1,15 +1,31 @@
 {
-  "docs": {
+  "fp": {
     "Getting Started": [
-      "introduction",
-      "side-effects",
-      "non-determinism",
-      "exceptions-anomalies",
-      "pure-functions"
+      "fp/introduction",
+      "fp/side-effects",
+      "fp/non-determinism",
+      "fp/exceptions-anomalies",
+      "fp/pure-functions"
+    ]
+  },
+  "core": {
+    "Usage": [
+      "core/installation",
+      "core/type-signature",
+      "core/using-qio",
+      "core/execute-qio",
+      "core/cancellation",
+      "core/custom-env",
+      "core/concurrency"
     ],
-    "Usage": ["installation", "type-signature", "using-qio", "execute-qio"],
-    "Concurrency": ["serial-execution", "parallel-execution"],
-    "Advanced": ["cancellation", "custom-env", "fiber"]
+    "Runtime": ["core/runtime"],
+    "Unit Testing": ["unit-testing/installation"],
+    "Fiber": ["core/fiber"],
+    "Stream": ["stream/installation"],
+    "Ref": ["core/ref"],
+    "Await": ["core/await"],
+    "Managed": ["core/managed"],
+    "Queue": ["core/queue"]
   },
   "docs2": {"Benchmarks": ["benchmarks"]}
 }
