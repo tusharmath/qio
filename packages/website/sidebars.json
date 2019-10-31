@@ -5,12 +5,10 @@
       "side-effects",
       "non-determinism",
       "exceptions-anomalies",
-      "pure-functions",
-      "installation",
-      "using-qio",
-      "execute-qio"
+      "pure-functions"
     ],
-    "Concurrency": ["serial-execution", "parallel-execution", "concurrent"],
+    "Usage": ["installation", "type-signature", "using-qio", "execute-qio"],
+    "Concurrency": ["serial-execution", "parallel-execution"],
     "Advanced": ["cancellation", "custom-env", "fiber"]
   },
   "docs2": {"Benchmarks": ["benchmarks"]}
