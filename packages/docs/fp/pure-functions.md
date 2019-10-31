@@ -16,4 +16,4 @@ This is a powerful guarantee which allows devs to refactor code much more easily
 
 ---
 
-Continue reading by going over to [usage](/qio/web/docs/using-qio). 
+Continue reading the [tutorial](../core/installation) to understand how QIO can be used to solve these problems.
