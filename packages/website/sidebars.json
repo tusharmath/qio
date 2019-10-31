@@ -9,15 +9,7 @@
     ]
   },
   "core": {
-    "Usage": [
-      "core/installation",
-      "core/type-signature",
-      "core/using-qio",
-      "core/execute-qio",
-      "core/cancellation",
-      "core/custom-env",
-      "core/concurrency"
-    ],
+    "Tutorial": ["core/installation", "core/type-signature", "core/usage"],
     "Runtime": ["core/runtime"],
     "Unit Testing": ["unit-testing/installation"],
     "Fiber": ["core/fiber"],

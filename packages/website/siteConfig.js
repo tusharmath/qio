@@ -45,7 +45,7 @@ const siteConfig = {
     // {doc: 'doc4', label: 'API'},
     // {page: 'help', label: 'Help'},
     {doc: 'fp/introduction', label: 'Getting Started'},
-    {doc: 'core/using-qio', label: 'Usage'},
+    {doc: 'core/installation', label: 'Tutorial'},
     {doc: 'api/globals', label: 'API'},
     {doc: 'others/ecosystem', label: 'Ecosystem'},
     {doc: 'others/benchmarks', label: 'Benchmarks'},
