@@ -1,7 +1,7 @@
 {
   "name": "@qio/benchmarks",
   "private": true,
-  "version": "19.0.0",
+  "version": "19.0.2",
   "description": "> TODO: description",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
@@ -35,7 +35,7 @@
     "fluture": "^11.0.3"
   },
   "dependencies": {
-    "@qio/core": "^19.0.0",
+    "@qio/core": "^19.0.2",
     "@qio/prelude": "^19.0.0"
   }
 }
