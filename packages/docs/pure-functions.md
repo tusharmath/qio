@@ -1,46 +1,14 @@
 ---
 title: Pure Functions
-sidebar_label: Pure Functions
 ---
 
-In the world of functional programming, programs are written using **pure functions**. Pure functions are —
+A recap of what we have learnt so far —
 
 1. **Effect Free:** The function never performs changes to the outside world.
 2. **Deterministic:** Given the same input, a pure function will always return the same output.
-3. **Total:** It is defined over the complete set of possible input values (doesn't throw exceptions).
+3. **Total:** It is defined over the complete set of possible input values (doesn't throw exceptions or produce an anomaly).
 
-Consider a simple example of a `division` function.
-
-```ts
-const division = (a: number, b: number): number => {
-  return a / b
-}
-```
-
-
-We know the function is not defined for `b == 0`. So the return type for this function needs to capture that information. One could use a standard-data-structure called `Option` to represent the return type more clearly.
-
-```ts
-class Some<A> {
-  constructor(readonly value: A) {}
-}
-
-class None {}
-
-type Option<A> = None | Some<A>
-
-const division = (a: number, b: number): Option<number> => {
-  return b === 0 ? new None() : new Some(a / b)
-}
-```
-
-## Pure Functions
-
-Pure functions are functions that are deterministic
-
-```ts
-const mul = (a: number, b: number) => a * b
-```
+In functional programing functions that are **effect-free**, **deterministic** & **total** are called as **pure functions**.
 
 ## Type Signature
 
