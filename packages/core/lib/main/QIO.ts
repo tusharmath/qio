@@ -29,12 +29,6 @@ export type TaskR<A, R> = QIO<Error, A, R>
 export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => QIO.access(fn)
 
 /**
- * UIO represents a c that doesn't require any environment and doesn't ever fail.
- */
-export type UIO<A> = QIO<never, A>
-export const UIO = <A>(fn: () => A): UIO<A> => QIO.lift(fn)
-
-/**
  * Callback function used in node.js to handle async operations.
  * @ignore
  */
@@ -149,11 +143,11 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   }
 
   /**
-   * Creates a [[UIO]] using a callback
+   * Creates a [[QIO]] using a callback
    */
   public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>) => ICancellable
-  ): UIO<A1> {
+  ): QIO<never, A1> {
     return QIO.asyncIO((rej, res) => cb(res))
   }
 
@@ -188,7 +182,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Creates a [[QIO]] using a callback function.
    */
-  public static cb<A1>(fn: (cb: (A1: A1) => void) => void): UIO<A1> {
+  public static cb<A1>(fn: (cb: (A1: A1) => void) => void): QIO<never, A1> {
     return QIO.runtime().chain(RTM =>
       QIO.asyncUIO<A1>(res => RTM.scheduler.asap(fn, res))
     )
@@ -249,7 +243,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
 
   /**
    * Takes in a effect-ful function that return a c and unwraps it.
-   * This is an alias to `c.flatten(UIO(fn))`
+   * This is an alias to `c.flatten(QIO.lift(fn))`
    *
    * ```ts
    * // An impure function that creates mutable state but also returns a c.
@@ -259,7 +253,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    *   return c.try(() => count++)
    * }
    * // Using flatten
-   * c.flatten(UIO(FN))
+   * c.flatten(QIO.lift(FN))
    *
    * // Using flattenM
    * c.flattenM(FN)
@@ -268,7 +262,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   public static flattenM<E1, A1, R1>(
     qio: () => QIO<E1, A1, R1>
   ): QIO<E1, A1, R1> {
-    return QIO.flatten(UIO(qio))
+    return QIO.flatten(QIO.lift(qio))
   }
 
   /**
@@ -277,7 +271,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   public static fork<E1, A1>(
     io: QIO<E1, A1>,
     runtime: IRuntime
-  ): UIO<Fiber<E1, A1>> {
+  ): QIO<never, Fiber<E1, A1>> {
     return new QIO(Tag.Fork, io, runtime)
   }
 
@@ -314,6 +308,9 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
       cond(...args) ? left(...args) : (right(...args) as any)
   }
 
+  /**
+   * Lifts an effectful hunk of code into a QIO.
+   */
   public static lift<E1 = never, A1 = unknown>(cb: () => A1): QIO<E1, A1> {
     return QIO.resume(cb)
   }
@@ -329,9 +326,9 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   }
 
   /**
-   * Returns a [[UIO]] that never resolves.
+   * Returns a [[QIO]] that never resolves.
    */
-  public static never(): UIO<never> {
+  public static never(): QIO<never, never> {
     return new QIO(Tag.Never, undefined)
   }
 
@@ -363,7 +360,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Represents a constant value
    */
-  public static of<A1>(value: A1): UIO<A1> {
+  public static of<A1>(value: A1): QIO<never, A1> {
     return new QIO(Tag.Constant, value)
   }
 
@@ -422,7 +419,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * @ignore
    */
-  public static resume<A1, A2>(cb: (A: A1) => A2): UIO<A2> {
+  public static resume<A1, A2>(cb: (A: A1) => A2): QIO<never, A2> {
     return new QIO(Tag.Try, cb)
   }
 
@@ -436,7 +433,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Returns the current runtime in a pure way.
    */
-  public static runtime(): UIO<IRuntime> {
+  public static runtime(): QIO<never, IRuntime> {
     return new QIO(Tag.Runtime)
   }
 
@@ -491,9 +488,9 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   }
 
   /**
-   * Returns a [[UIO]] of void.
+   * Returns a [[QIO]] of void.
    */
-  public static void(): UIO<void> {
+  public static void(): QIO<never, void> {
     return QIO.of(void 0)
   }
 

@@ -2,7 +2,7 @@
 export {Await} from './lib/main/Await'
 export {defaultRuntime} from './lib/runtimes/DefaultRuntime'
 export {Fiber} from './lib/internals/Fiber'
-export {QIO, Task, TaskR, UIO} from './lib/main/QIO'
+export {Task, TaskR, QIO} from './lib/main/QIO'
 export {FMap} from './lib/main/FMap'
 export {IRuntime} from './lib/runtimes/IRuntime'
 export {Managed, UManaged} from './lib/main/Managed'

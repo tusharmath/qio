@@ -1,6 +1,6 @@
 /* tslint:disable: promise-function-async strict-comparisons */
 
-import {QIO, UIO} from '@qio/core'
+import {QIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
 
@@ -33,7 +33,7 @@ export const fibFluture = (
 /**
  * QIO based implementation
  */
-export const fibQIO = (n: bigint): UIO<bigint> => {
+export const fibQIO = (n: bigint): QIO<never, bigint> => {
   if (n < 2n) {
     return QIO.of(1n)
   }

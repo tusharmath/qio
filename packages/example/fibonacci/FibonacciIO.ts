@@ -1,12 +1,11 @@
 /* tslint:disable: no-use-before-declare no-console no-unbound-method strict-comparisons */
 
-import {defaultRuntime, FMap, UIO} from '@qio/core'
-import {QIO} from '@qio/core/index'
+import {defaultRuntime, FMap, QIO} from '@qio/core'
 
 const fib = (N: bigint) =>
   FMap.of<bigint, bigint>().chain(cache => {
     const itar = cache.memoize(
-      (n: bigint): UIO<bigint> => {
+      (n: bigint): QIO<never, bigint> => {
         if (n <= 2n) {
           return QIO.of(n)
         }

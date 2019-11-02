@@ -11,7 +11,7 @@ import {
 import {ICancellable} from 'ts-scheduler'
 
 import {Instruction, Tag} from '../main/Instructions'
-import {QIO, UIO} from '../main/QIO'
+import {QIO} from '../main/QIO'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
@@ -52,8 +52,8 @@ export abstract class Fiber<E, A> {
   ): ICancellable {
     return FiberContext.unsafeExecuteWith<E, A>(io, runtime, cb)
   }
-  public abstract abort: UIO<void>
-  public abstract await: UIO<Option<Either<E, A>>>
+  public abstract abort: QIO<never, void>
+  public abstract await: QIO<never, Option<Either<E, A>>>
   public readonly id = FIBER_ID++
   public get join(): QIO<E, A> {
     return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
@@ -68,14 +68,14 @@ export abstract class Fiber<E, A> {
  * It provides public APIs to [[Fiber]] to consume.
  */
 export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
-  public get abort(): UIO<void> {
-    return UIO(() => this.cancel())
+  public get abort(): QIO<never, void> {
+    return QIO.lift(() => this.cancel())
   }
 
   /**
    * Aborting the IO produced by await should abort the complete IO.
    */
-  public get await(): UIO<Option<Either<E, A>>> {
+  public get await(): QIO<never, Option<Either<E, A>>> {
     D(this.id, 'this.await()')
 
     return QIO.asyncUIO(cb => {
