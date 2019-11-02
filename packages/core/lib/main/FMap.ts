@@ -1,6 +1,6 @@
 import {check} from 'checked-exceptions'
 
-import {QIO, UIO} from './QIO'
+import {QIO} from './QIO'
 
 export const NoSuchElement = check('NoSuchElement')
 
@@ -11,20 +11,20 @@ export const NoSuchElement = check('NoSuchElement')
  * [immutable Map]: https://immutable-js.github.io/immutable-js/docs/#/Map
  */
 export class FMap<K, V> {
-  public static of<K = never, V = never>(): UIO<FMap<K, V>> {
-    return UIO(() => new FMap())
+  public static of<K = never, V = never>(): QIO<never, FMap<K, V>> {
+    return QIO.lift(() => new FMap())
   }
   private readonly cache = new Map<K, V>()
   private constructor() {}
 
   public get(key: K): QIO<typeof NoSuchElement.info, V> {
-    return UIO(() => this.cache.get(key)).chain(_ =>
+    return QIO.lift(() => this.cache.get(key)).chain(_ =>
       _ === undefined ? QIO.reject(NoSuchElement.of()) : QIO.of(_)
     )
   }
 
-  public has(key: K): UIO<boolean> {
-    return UIO(() => this.cache.has(key))
+  public has(key: K): QIO<never, boolean> {
+    return QIO.lift(() => this.cache.has(key))
   }
 
   public memoize<E1, R1>(
@@ -33,7 +33,7 @@ export class FMap<K, V> {
     return (a: K) => this.get(a).catch(() => fn(a).chain(r => this.set(a, r)))
   }
 
-  public set(key: K, value: V): UIO<V> {
-    return UIO(() => void this.cache.set(key, value)).const(value)
+  public set(key: K, value: V): QIO<never, V> {
+    return QIO.lift(() => void this.cache.set(key, value)).const(value)
   }
 }

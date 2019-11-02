@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 
 import {Managed} from '../lib/main/Managed'
-import {QIO, UIO} from '../lib/main/QIO'
+import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('Managed', () => {
@@ -9,7 +9,7 @@ describe('Managed', () => {
     let i = 0
 
     return {
-      acquire: UIO(() => i++),
+      acquire: QIO.lift(() => i++),
       release: QIO.encase(() => void i--),
       get count(): number {
         return i

@@ -2,7 +2,7 @@ import {DoublyLinkedList, Either, Option} from 'standard-data-structures'
 
 import {CB} from '../internals/CB'
 
-import {QIO, UIO} from './QIO'
+import {QIO} from './QIO'
 
 /**
  * A special data structure that can be set only once.
@@ -12,8 +12,8 @@ import {QIO, UIO} from './QIO'
  * @typeparam A Success value
  */
 export class Await<E, A> {
-  public static of<E = never, A = never>(): UIO<Await<E, A>> {
-    return UIO(() => new Await())
+  public static of<E = never, A = never>(): QIO<never, Await<E, A>> {
+    return QIO.lift(() => new Await())
   }
   private flag = false
   private readonly Q = DoublyLinkedList.of<[CB<E>, CB<A>]>()
@@ -27,11 +27,11 @@ export class Await<E, A> {
     )
   }
 
-  public get isSet(): UIO<boolean> {
-    return UIO(() => this.flag)
+  public get isSet(): QIO<never, boolean> {
+    return QIO.lift(() => this.flag)
   }
 
-  public set(io: QIO<E, A>): UIO<boolean> {
+  public set(io: QIO<E, A>): QIO<never, boolean> {
     return QIO.flattenM(() => {
       if (this.flag) {
         return QIO.of(false)

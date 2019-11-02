@@ -1,4 +1,4 @@
-import {Managed, QIO, Queue, Ref, UIO, UManaged} from '@qio/core'
+import {Managed, QIO, Queue, Ref, UManaged} from '@qio/core'
 import {T} from '@qio/prelude/T'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
@@ -83,12 +83,14 @@ export class Stream<E1, A1, R1> {
   public static fromEventEmitter<A = unknown>(
     ev: EventEmitter,
     name: string
-  ): UIO<UManaged<UStream<A>>> {
+  ): QIO<never, UManaged<UStream<A>>> {
     return QIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
       const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
       return Managed.make(
-        UIO(() => ev.addListener(name, onEvent)).const(Stream.fromQueue(Q)),
+        QIO.lift(() => ev.addListener(name, onEvent)).const(
+          Stream.fromQueue(Q)
+        ),
         QIO.encase(() => void ev.off(name, onEvent))
       )
     })
