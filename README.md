@@ -15,4 +15,4 @@ const program = putStrLn('Hello World')
 defaultRuntime().unsafeExecute(program)
 ```
 
-For more complex use cases checkout the [website](https://tusharmath.com/qio/web/).
+For more complex use cases checkout the [website](https://qio.netlify.com).
