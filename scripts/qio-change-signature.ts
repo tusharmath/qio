@@ -8,7 +8,14 @@ export default class QIOChangeSignature extends Transformation {
     if (
       ts.isTypeReferenceNode(node) &&
       ts.isIdentifier(node.typeName) &&
-      node.typeName.text === 'QIO' &&
+      [
+        'Fiber',
+        'FiberContext',
+        'Await',
+        'Managed',
+        'Stream',
+        'Reservation'
+      ].indexOf(node.typeName.text) > -1 &&
       node.typeArguments !== undefined
     ) {
       //

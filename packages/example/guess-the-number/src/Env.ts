@@ -55,7 +55,7 @@ export interface IProcess {
  */
 export interface ITextTerminal {
   tty: {
-    getStrLn(question: string): QIO<never, string>
-    putStrLn(...t: unknown[]): QIO<never, void>
+    getStrLn(question: string): QIO<string>
+    putStrLn(...t: unknown[]): QIO<void>
   }
 }

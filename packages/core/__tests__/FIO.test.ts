@@ -103,7 +103,7 @@ describe('QIO', () => {
     it('should evaluate asynchronously', async () => {
       const runtime = defaultRuntime()
       const actual = await runtime.unsafeExecutePromise(
-        QIO.asyncIO((rej, res) => {
+        QIO.asyncIO((res, rej) => {
           const id = setTimeout(res, 100, 1000)
 
           return {cancel: () => clearTimeout(id)}
@@ -291,9 +291,9 @@ describe('QIO', () => {
     it('should capture async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptibleIO<Error>(rej => rej(new Error('Bye'))).catch(err =>
-          QIO.of(err.message)
-        )
+        QIO.uninterruptibleIO<never, Error>((res, rej) =>
+          rej(new Error('Bye'))
+        ).catch(err => QIO.of(err.message))
       )
       const expected = 'Bye'
       assert.strictEqual(actual, expected)
@@ -302,7 +302,7 @@ describe('QIO', () => {
     it('should capture nested async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptibleIO<Error>((rej, res) => rej(new Error('A')))
+        QIO.uninterruptibleIO<never, Error>((res, rej) => rej(new Error('A')))
           .catch(err => QIO.reject(new Error(err.message + 'B')))
           .catch(err => QIO.reject(new Error(err.message + 'C')))
           .catch(err => QIO.reject(new Error(err.message + 'D')))
@@ -344,18 +344,14 @@ describe('QIO', () => {
       const counter = new Counter()
       const runtime = testRuntime()
       const memoized = runtime.unsafeExecuteSync(counter.inc().delay(100).once)
-
       // Schedule first run at 10ms
       runtime.scheduler.runTo(10)
-      runtime.unsafeExecute(memoized as QIO<never, number>)
-
+      runtime.unsafeExecute(memoized as QIO<number>)
       // Schedule second run at 50ms
       // Trying to execute the IO the second time before the first one completes
       runtime.scheduler.runTo(50)
-      runtime.unsafeExecute(memoized as QIO<never, number>)
-
+      runtime.unsafeExecute(memoized as QIO<number>)
       runtime.scheduler.run()
-
       const actual = counter.count
       const expected = 1
       assert.strictEqual(actual, expected)
@@ -778,7 +774,10 @@ describe('QIO', () => {
           .fork.chain(f =>
             f.join.map(
               // FIXME: remove type-casting and use a proper test.
-              () => ((f as unknown) as {[k: string]: []}).stackEnv.length
+              () =>
+                ((f as unknown) as {
+                  [k: string]: []
+                }).stackEnv.length
             )
           )
       )

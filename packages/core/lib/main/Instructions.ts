@@ -61,9 +61,10 @@ export interface ICatch<E = unknown> {
   tag: Tag.Catch
   i1(E: E): Instruction
 }
-export interface IAsync<E = unknown, A = unknown> {
+export interface IAsync<A = unknown, E = unknown> {
   tag: Tag.Async
-  i0(rej: CB<E>, res: CB<A>): ICancellable
+
+  i0(res: CB<A>, rej: CB<E>): ICancellable
 }
 export interface INever {
   tag: Tag.Never

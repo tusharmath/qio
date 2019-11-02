@@ -5,7 +5,6 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
 import {QIO} from '../main/QIO'
-
 /**
  * Base runtime that is used to execute any [[QIO]].
  *
@@ -17,10 +16,9 @@ export interface IRuntime {
   maxInstructionCount: number
   scheduler: IScheduler
   setMaxInstructionCount(maxInstructionCount: number): IRuntime
-
   /**
    * Executes the provided [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
-  unsafeExecute<E, A>(io: QIO<E, A>, cb?: CBOption<E, A>): ICancellable
+  unsafeExecute<A, E>(io: QIO<A, E>, cb?: CBOption<A, E>): ICancellable
 }

@@ -33,7 +33,7 @@ export const fibFluture = (
 /**
  * QIO based implementation
  */
-export const fibQIO = (n: bigint): QIO<never, bigint> => {
+export const fibQIO = (n: bigint): QIO<bigint> => {
   if (n < 2n) {
     return QIO.of(1n)
   }

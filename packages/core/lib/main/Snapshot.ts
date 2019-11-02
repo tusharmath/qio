@@ -8,7 +8,7 @@ export class Snapshot<T = string | number> {
     return this.timelineData.map(_ => _.join('@'))
   }
   public readonly timelineData = new Array<[T, number]>()
-  public mark(value: T): QIO<never, T> {
+  public mark(value: T): QIO<T> {
     return QIO.runtime().chain(RTM =>
       QIO.lift(
         () => void this.timelineData.push([value, RTM.scheduler.now()])
