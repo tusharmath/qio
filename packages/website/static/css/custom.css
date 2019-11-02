@@ -19,7 +19,8 @@ body {
   font-family: $defaultFont;
 }
 
-code {
+code,
+pre code {
   font-family: $monospaceFont;
 }
 

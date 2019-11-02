@@ -1,13 +1,5 @@
 {
-  "fp": {
-    "Getting Started": [
-      "fp/introduction",
-      "fp/side-effects",
-      "fp/non-determinism",
-      "fp/exceptions-anomalies",
-      "fp/pure-functions"
-    ]
-  },
+  "fp": {},
   "core": {
     "Tutorial": ["core/installation", "core/type-signature", "core/usage"],
     "Runtime": ["core/runtime"],
