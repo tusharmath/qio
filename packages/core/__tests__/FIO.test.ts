@@ -6,7 +6,7 @@ import {assert, spy} from 'chai'
 import {Either} from 'standard-data-structures'
 
 import {FiberContext} from '../lib/internals/Fiber'
-import {QIO, UIO} from '../lib/main/QIO'
+import {QIO} from '../lib/main/QIO'
 import {Snapshot} from '../lib/main/Snapshot'
 import {defaultRuntime} from '../lib/runtimes/DefaultRuntime'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
@@ -347,12 +347,12 @@ describe('QIO', () => {
 
       // Schedule first run at 10ms
       runtime.scheduler.runTo(10)
-      runtime.unsafeExecute(memoized as UIO<number>)
+      runtime.unsafeExecute(memoized as QIO<never, number>)
 
       // Schedule second run at 50ms
       // Trying to execute the IO the second time before the first one completes
       runtime.scheduler.runTo(50)
-      runtime.unsafeExecute(memoized as UIO<number>)
+      runtime.unsafeExecute(memoized as QIO<never, number>)
 
       runtime.scheduler.run()
 

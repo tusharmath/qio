@@ -1,4 +1,4 @@
-import {UIO} from '@qio/core'
+import {QIO} from '@qio/core'
 import {Interface} from 'readline'
 import ReadStream = NodeJS.ReadStream
 import WriteStream = NodeJS.WriteStream
@@ -55,7 +55,7 @@ export interface IProcess {
  */
 export interface ITextTerminal {
   tty: {
-    getStrLn(question: string): UIO<string>
-    putStrLn(...t: unknown[]): UIO<void>
+    getStrLn(question: string): QIO<never, string>
+    putStrLn(...t: unknown[]): QIO<never, void>
   }
 }

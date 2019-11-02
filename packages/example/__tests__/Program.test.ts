@@ -1,4 +1,4 @@
-import {QIO, testRuntime, UIO} from '@qio/core'
+import {QIO, testRuntime} from '@qio/core'
 import {assert} from 'chai'
 
 import {canContinue, program} from '../guess-the-number/src/Program'
@@ -36,7 +36,8 @@ describe('Program', () => {
 
           return QIO.of(popped)
         }),
-      putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
+      putStrLn: (...t: unknown[]) =>
+        QIO.lift(() => void stdout.push(t.join(', '))),
       stdout
     }
   }
