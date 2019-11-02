@@ -17,16 +17,9 @@ import {Instruction, Tag} from './Instructions'
 const D = debug('qio:core')
 
 /**
- * IO represents a [[QIO]] that doesn't need any environment to execute
- */
-export type IO<E, A> = QIO<E, A>
-export const IO = <E = never, A = unknown>(fn: () => A): IO<E, A> =>
-  QIO.resume(fn)
-
-/**
  * Task represents an [[IO]] that fails with a general failure.
  */
-export type Task<A> = IO<Error, A>
+export type Task<A> = QIO<Error, A>
 export const Task = <A>(fn: () => A): Task<A> => QIO.try(fn)
 
 /**
@@ -38,8 +31,8 @@ export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => QIO.access(fn)
 /**
  * UIO represents a c that doesn't require any environment and doesn't ever fail.
  */
-export type UIO<A> = IO<never, A>
-export const UIO = <A>(fn: () => A): UIO<A> => QIO.resume(fn)
+export type UIO<A> = QIO<never, A>
+export const UIO = <A>(fn: () => A): UIO<A> => QIO.lift(fn)
 
 /**
  * Callback function used in node.js to handle async operations.
@@ -88,7 +81,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Memorizes the result and executes the IO only once
    */
-  public get once(): QIO<never, IO<E1, A1>, R1> {
+  public get once(): QIO<never, QIO<E1, A1>, R1> {
     return this.env.chain(env =>
       Await.of<E1, A1>().map(AWT => AWT.set(this.provide(env)).and(AWT.get))
     )
@@ -142,7 +135,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    */
   public static asyncIO<E1 = never, A1 = never>(
     cb: (rej: CB<E1>, res: CB<A1>) => ICancellable
-  ): IO<E1, A1> {
+  ): QIO<E1, A1> {
     return new QIO(Tag.Async, cb)
   }
 
@@ -216,8 +209,8 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    */
   public static encase<E = never, A = never, T extends unknown[] = unknown[]>(
     cb: (...t: T) => A
-  ): (...t: T) => IO<E, A> {
-    return (...t) => IO(() => cb(...t))
+  ): (...t: T) => QIO<E, A> {
+    return (...t) => QIO.lift(() => cb(...t))
   }
 
   /**
@@ -282,7 +275,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    * Creates a new [[Fiber]] to run the given [[IO]].
    */
   public static fork<E1, A1>(
-    io: IO<E1, A1>,
+    io: QIO<E1, A1>,
     runtime: IRuntime
   ): UIO<Fiber<E1, A1>> {
     return new QIO(Tag.Fork, io, runtime)
@@ -291,8 +284,8 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Creates an IO from `Either`
    */
-  public static fromEither<E, A>(exit: Either<E, A>): IO<E, A> {
-    return exit.fold<IO<E, A>>(QIO.never(), QIO.reject, QIO.of)
+  public static fromEither<E, A>(exit: Either<E, A>): QIO<E, A> {
+    return exit.fold<QIO<E, A>>(QIO.never(), QIO.reject, QIO.of)
   }
 
   /**
@@ -319,6 +312,10 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
     return (cond, left, right) =>
       // tslint:disable-next-line: no-any
       cond(...args) ? left(...args) : (right(...args) as any)
+  }
+
+  public static lift<E1 = never, A1 = unknown>(cb: () => A1): QIO<E1, A1> {
+    return QIO.resume(cb)
   }
 
   /**
@@ -379,7 +376,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
     return ios
       .reduce(
         (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
-        QIO.env<R1>().and(IO<E1, List<A1>>(() => List.empty<A1>()))
+        QIO.env<R1>().and(QIO.lift<E1, List<A1>>(() => List.empty<A1>()))
       )
       .map(_ => _.asArray.reverse())
   }
@@ -411,7 +408,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   public static pipeEnv<T extends unknown[], E1, A1, R1>(
     fn: (..._: T) => QIO<E1, A1, R1>,
     R: R1
-  ): (..._: T) => IO<E1, A1> {
+  ): (..._: T) => QIO<E1, A1> {
     return (...T0: T) => fn(...T0).provide(R)
   }
 
@@ -453,7 +450,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
     return ios
       .reduce(
         (fList, f) => fList.chain(list => f.map(value => list.prepend(value))),
-        IO<E1, List<A1>>(() => List.empty<A1>()).addEnv<R1>()
+        QIO.lift<E1, List<A1>>(() => List.empty<A1>()).addEnv<R1>()
       )
       .map(_ => _.asArray)
   }
@@ -471,7 +468,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    * Tries to run an effect-full synchronous function and returns a [[Task]] that resolves with the return value of that function
    */
   public static try<A>(cb: () => A): Task<A> {
-    return IO(cb)
+    return QIO.lift(cb)
   }
 
   /**
@@ -487,7 +484,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    */
   public static uninterruptibleIO<E1 = never, A1 = never>(
     fn: (rej: CB<E1>, res: CB<A1>) => unknown
-  ): IO<E1, A1> {
+  ): QIO<E1, A1> {
     return QIO.runtime().chain(RTM =>
       QIO.asyncIO<E1, A1>((rej, res) => RTM.scheduler.asap(fn, rej, res))
     )
@@ -614,7 +611,7 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   /**
    * Provides the current instance of c the required env.
    */
-  public provide(r1: R1): IO<E1, A1> {
+  public provide(r1: R1): QIO<E1, A1> {
     return new QIO(Tag.Provide, this, r1)
   }
 
@@ -657,8 +654,8 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
    */
   public raceWith<E2, A2, R2, E3, A3, E4, A4>(
     that: QIO<E2, A2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => IO<E3, A3>,
-    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => IO<E4, A4>
+    cb1: (exit: Either<E1, A1>, fiber: Fiber<E2, A2>) => QIO<E3, A3>,
+    cb2: (exit: Either<E2, A2>, fiber: Fiber<E1, A1>) => QIO<E4, A4>
   ): QIO<E3 | E4, A3 | A4, R1 & R2> {
     return Await.of<E3 | E4, A3 | A4>().chain(done =>
       this.fork.zip(that.fork).chain(([L, R]) => {
@@ -734,12 +731,12 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
         E.biMap(
           cause => F.abort.and(QIO.reject(cause)),
           a1 => F.join.map(a2 => c(a1, a2))
-        ).reduce<IO<E1 | E2, C>>(Id, Id),
+        ).reduce<QIO<E1 | E2, C>>(Id, Id),
       (E, F) =>
         E.biMap(
           cause => F.abort.and(QIO.reject(cause)),
           a2 => F.join.map(a1 => c(a1, a2))
-        ).reduce<IO<E1 | E2, C>>(Id, Id)
+        ).reduce<QIO<E1 | E2, C>>(Id, Id)
     )
   }
 }
