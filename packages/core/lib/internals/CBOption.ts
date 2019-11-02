@@ -1,3 +1,3 @@
 import {Either, Option} from 'standard-data-structures'
 
-export type CBOption<E, A> = (E: Option<Either<E, A>>) => void
+export type CBOption<A, E> = (O: Option<Either<E, A>>) => void

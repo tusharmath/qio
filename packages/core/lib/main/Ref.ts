@@ -8,18 +8,17 @@ import {QIO} from './QIO'
  * @typeparam A Type of state to be maintained
  */
 export class Ref<A> {
-  public static of<A>(a: A): QIO<never, Ref<A>> {
+  public static of<A>(a: A): QIO<Ref<A>> {
     return QIO.lift(() => new Ref(a))
   }
   private constructor(private value: A) {}
-
-  public get read(): QIO<never, A> {
+  public get read(): QIO<A> {
     return QIO.lift(() => this.value)
   }
-  public set(a: A): QIO<never, A> {
+  public set(a: A): QIO<A> {
     return QIO.lift(() => (this.value = a))
   }
-  public update(ab: (a: A) => A): QIO<never, A> {
+  public update(ab: (a: A) => A): QIO<A> {
     return QIO.lift(() => (this.value = ab(this.value)))
   }
 }

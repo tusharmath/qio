@@ -11,27 +11,24 @@ import {QIO} from './QIO'
  * @typeparam E Errors thrown
  * @typeparam A Success value
  */
-export class Await<E, A> {
-  public static of<E = never, A = never>(): QIO<never, Await<E, A>> {
+export class Await<A, E> {
+  public static of<A = never, E = never>(): QIO<Await<A, E>> {
     return QIO.lift(() => new Await())
   }
   private flag = false
   private readonly Q = DoublyLinkedList.of<[CB<E>, CB<A>]>()
   private result: Option<Either<E, A>> = Option.none()
-
-  public get get(): QIO<E, A> {
+  public get get(): QIO<A, E> {
     return QIO.flattenM(() =>
       this.result
-        .map(S => S.reduce<QIO<E, A>>(QIO.reject, XX => QIO.of(XX)))
+        .map(S => S.reduce<QIO<A, E>>(QIO.reject, XX => QIO.of(XX)))
         .getOrElse(this.wait)
     )
   }
-
-  public get isSet(): QIO<never, boolean> {
+  public get isSet(): QIO<boolean> {
     return QIO.lift(() => this.flag)
   }
-
-  public set(io: QIO<E, A>): QIO<never, boolean> {
+  public set(io: QIO<A, E>): QIO<boolean> {
     return QIO.flattenM(() => {
       if (this.flag) {
         return QIO.of(false)
@@ -52,8 +49,7 @@ export class Await<E, A> {
       })
     })
   }
-
-  private get wait(): QIO<E, A> {
+  private get wait(): QIO<A, E> {
     return QIO.asyncIO((rej, res) => {
       const id = this.Q.add([rej, res])
 

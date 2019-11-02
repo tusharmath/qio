@@ -17,8 +17,7 @@ export class DefaultRuntime extends BaseRuntime {
   public setMaxInstructionCount(maxInstructionCount: number): DefaultRuntime {
     return new DefaultRuntime(maxInstructionCount)
   }
-
-  public async unsafeExecutePromise<E, A>(io: QIO<E, A>): Promise<A> {
+  public async unsafeExecutePromise<A, E>(io: QIO<A, E>): Promise<A> {
     return new Promise((res, rej) => {
       this.unsafeExecute(io, O => O.map(_ => _.reduce(rej, res)))
     })

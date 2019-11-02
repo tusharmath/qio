@@ -18,14 +18,14 @@ describe('Await', () => {
   describe('set', () => {
     it('should return true', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<never, string>().chain(await => await.set(QIO.of('Hi')))
+        Await.of<string>().chain(await => await.set(QIO.of('Hi')))
       )
       assert.ok(actual)
     })
     it('should set only once', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Await.of<never, string>().chain(await =>
+        Await.of<string>().chain(await =>
           await
             .set(QIO.of('Hi'))
             .and(await.set(QIO.of('Bye')))
@@ -38,7 +38,7 @@ describe('Await', () => {
     it('should evaluate the IO only once', () => {
       const counter = new Counter()
       testRuntime().unsafeExecuteSync(
-        Await.of<never, number>().chain(await =>
+        Await.of<number>().chain(await =>
           await
             .set(counter.inc())
             .and(await.set(counter.inc()))
@@ -55,20 +55,16 @@ describe('Await', () => {
     it('should run only for long running IOs', () => {
       const runtime = testRuntime()
       // Create Await instance
-      const AWT = runtime.unsafeExecuteSync(Await.of<never, number>()) as Await<
-        never,
-        number
+      const AWT = runtime.unsafeExecuteSync(Await.of<number>()) as Await<
+        number,
+        never
       >
-
       // Counter
       const counter = new Counter()
-
       // Create an IO that takes a second to run
       runtime.unsafeExecuteSync(AWT.set(counter.inc().delay(1000)))
-
       // Run till 500 (half time for the original IO
       runtime.scheduler.runTo(500)
-
       // Again try setting another IO
       // This time the IO shouldn't execute
       runtime.unsafeExecute(AWT.set(counter.inc()))
@@ -84,7 +80,7 @@ describe('Await', () => {
     it('should return false if its not set', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Await.of<never, string>().chain(await =>
+        Await.of<string>().chain(await =>
           await.set(QIO.of('Hi')).and(await.set(QIO.of('Bye')))
         )
       )
@@ -95,25 +91,24 @@ describe('Await', () => {
   describe('get', () => {
     it('should return the IO value', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<never, string>().chain(await =>
+        Await.of<string>().chain(await =>
           await.set(QIO.of('Hi')).and(await.get)
         )
       )
       assert.strictEqual(actual, 'Hi')
     })
-
     it('should not resolve unless set', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<never, string>().chain(await => await.get)
+        Await.of<string>().chain(await => await.get)
       )
       assert.isUndefined(actual)
     })
-
     it('should not return', () => {
       const runtime = testRuntime()
-      const await = runtime.unsafeExecuteSync(
-        Await.of<never, string>()
-      ) as Await<never, string>
+      const await = runtime.unsafeExecuteSync(Await.of<string>()) as Await<
+        string,
+        never
+      >
       const res = spy()
       runtime.unsafeExecute(await.get, res)
       runtime.unsafeExecute(await.set(QIO.timeout('Hey', 1000)))
@@ -127,15 +122,13 @@ describe('Await', () => {
   describe('isSet', () => {
     it('should return false initially', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<never, string>().chain(await => await.isSet)
+        Await.of<string>().chain(await => await.isSet)
       )
-
       assert.notOk(actual)
     })
-
     it('should return true after setting', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<never, number>().chain(await =>
+        Await.of<number>().chain(await =>
           await.set(QIO.of(100)).and(await.isSet)
         )
       )

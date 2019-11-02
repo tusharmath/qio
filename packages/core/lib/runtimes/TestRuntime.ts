@@ -10,9 +10,10 @@ import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 import {QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
-
 type TestRuntimeOptions = Partial<
-  ITestSchedulerOptions & {maxInstructionCount: number}
+  ITestSchedulerOptions & {
+    maxInstructionCount: number
+  }
 >
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler: TestScheduler
@@ -23,12 +24,12 @@ export class TestRuntime extends BaseRuntime {
   public setMaxInstructionCount(maxInstructionCount: number): TestRuntime {
     return new TestRuntime({...this.options, maxInstructionCount})
   }
-  public unsafeExecuteSync<E, A>(io: QIO<E, A>): A | E | undefined {
+  public unsafeExecuteSync<A, E>(io: QIO<A, E>): A | E | undefined {
     return this.unsafeExecuteSync0(io)
       .map(_ => _.reduce<A | E | undefined>(Id, Id))
       .getOrElse(undefined)
   }
-  public unsafeExecuteSync0<E, A>(io: QIO<E, A>): Option<Either<E, A>> {
+  public unsafeExecuteSync0<A, E>(io: QIO<A, E>): Option<Either<E, A>> {
     let result: Option<Either<E, A>> = Option.none()
     this.unsafeExecute(io, _ => (result = _))
     this.scheduler.run()
