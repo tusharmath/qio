@@ -2,7 +2,7 @@
  * Created by tushar on 09/09/19
  */
 
-import {QIO, UIO} from '@qio/core'
+import {QIO} from '@qio/core'
 import {Suite} from 'benchmark'
 
 import {PrintLn} from '../internals/PrintLn'
@@ -27,7 +27,7 @@ const qioIteration = QIO.encase((numbers: number[]) => {
 })
 
 const qioRecursion = (numbers: number[]) => {
-  const itar = (i: number, sum: number): UIO<number> =>
+  const itar = (i: number, sum: number): QIO<never, number> =>
     i === numbers.length ? QIO.of(sum) : QIO.call(itar, i + 1, sum + numbers[i])
 
   return itar(0, 0)

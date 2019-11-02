@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 
 import {canContinue, program} from '../../example/guess-the-number/src/Program'
-import {QIO, UIO} from '../lib/main/QIO'
+import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('Program', () => {
@@ -37,7 +37,8 @@ describe('Program', () => {
 
           return QIO.of(popped)
         }),
-      putStrLn: (...t: unknown[]) => UIO(() => void stdout.push(t.join(', '))),
+      putStrLn: (...t: unknown[]) =>
+        QIO.lift(() => void stdout.push(t.join(', '))),
       stdout
     }
   }

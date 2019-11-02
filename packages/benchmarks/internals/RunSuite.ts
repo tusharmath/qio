@@ -1,5 +1,5 @@
 /* tslint:disable: no-unbound-method */
-import {defaultRuntime, UIO} from '@qio/core'
+import {defaultRuntime, QIO} from '@qio/core'
 import {noop} from '@qio/prelude/Noop'
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
@@ -14,7 +14,7 @@ export const RunSuite = (
     bluebird(): PromiseLike<unknown>
     fluture(): FutureInstance<unknown, unknown>
     native?(): void
-    qio(): UIO<unknown>
+    qio(): QIO<never>
   }
 ) => {
   PrintLn('##', name)

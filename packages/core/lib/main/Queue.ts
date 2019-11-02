@@ -1,7 +1,7 @@
 import {DoublyLinkedList, List, Option} from 'standard-data-structures'
 
 import {Await} from './Await'
-import {QIO, UIO} from './QIO'
+import {QIO} from './QIO'
 
 /**
  * Queue Data Structure
@@ -10,21 +10,21 @@ export class Queue<A = never> {
   /**
    * Returns the Queue as an array
    */
-  public get asArray(): UIO<A[]> {
-    return UIO(() => this.Q.asArray)
+  public get asArray(): QIO<never, A[]> {
+    return QIO.lift(() => this.Q.asArray)
   }
 
   /**
    * Returns the number of elements in the queue
    */
-  public get length(): UIO<number> {
-    return UIO(() => this.Q.length)
+  public get length(): QIO<never, number> {
+    return QIO.lift(() => this.Q.length)
   }
 
   /**
    * Pulls an item from the queue
    */
-  public get take(): UIO<A> {
+  public get take(): QIO<never, A> {
     return QIO.flattenM(() => {
       const sz = this.Q.shift()
 
@@ -47,14 +47,14 @@ export class Queue<A = never> {
   /**
    * Creates a new bounded Queue
    */
-  public static bounded<A>(capacity: number): UIO<Queue<A>> {
-    return UIO(() => new Queue(capacity))
+  public static bounded<A>(capacity: number): QIO<never, Queue<A>> {
+    return QIO.lift(() => new Queue(capacity))
   }
 
   /**
    * Creates a queue which is theoretically unbounded.
    */
-  public static unbounded<A>(): UIO<Queue<A>> {
+  public static unbounded<A>(): QIO<never, Queue<A>> {
     return Queue.bounded(Number.MAX_SAFE_INTEGER)
   }
 
@@ -65,16 +65,16 @@ export class Queue<A = never> {
   /**
    * Inserts an item into the queue
    */
-  public offer(a: A): UIO<void> {
+  public offer(a: A): QIO<never, void> {
     return QIO.flattenM(
-      (): UIO<void> => {
+      (): QIO<never, void> => {
         if (this.T.length === 0) {
           this.Q.add(a)
 
           return QIO.void()
         }
 
-        const io = new Array<UIO<boolean>>()
+        const io = new Array<QIO<never, boolean>>()
         while (this.T.length !== 0) {
           const item = this.T.shift()
           if (Option.isSome(item)) {
@@ -90,15 +90,15 @@ export class Queue<A = never> {
   /**
    * Adds all the provided items into the queue
    */
-  public offerAll(...a: A[]): UIO<void> {
+  public offerAll(...a: A[]): QIO<never, void> {
     return QIO.seq(a.map(_ => this.offer(_))).void
   }
 
   /**
    * Resolves after `n` items are available in the queue.
    */
-  public takeN(n: number): UIO<A[]> {
-    const itar = (i: number, list: List<A>): UIO<List<A>> =>
+  public takeN(n: number): QIO<never, A[]> {
+    const itar = (i: number, list: List<A>): QIO<never, List<A>> =>
       QIO.if0()(
         () => i === n,
         () => QIO.of(list),
