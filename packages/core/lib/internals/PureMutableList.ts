@@ -10,30 +10,28 @@ import {QIO} from '../main/QIO'
  * A pure version of a mutable doubly linked list
  */
 export class PureMutableList<A> {
-  public get asArray(): QIO<never, A[]> {
+  public get asArray(): QIO<A[]> {
     return QIO.lift(() => this.list.asArray)
   }
-  public get isEmpty(): QIO<never, boolean> {
+  public get isEmpty(): QIO<boolean> {
     return QIO.lift(() => this.list.isEmpty)
   }
-  public get length(): QIO<never, number> {
+  public get length(): QIO<number> {
     return QIO.lift(() => this.list.length)
   }
-  public get shift(): QIO<never, Option<A>> {
+  public get shift(): QIO<Option<A>> {
     return QIO.lift(() => this.list.shift())
   }
-
-  public static of<A = never>(): QIO<never, PureMutableList<A>> {
+  public static of<A = never>(): QIO<PureMutableList<A>> {
     return QIO.lift(() => new PureMutableList())
   }
   private readonly list = DoublyLinkedList.of<A>()
-
   private constructor() {}
-  public add(element: A): QIO<never, LinkedListNode<A>> {
+  public add(element: A): QIO<LinkedListNode<A>> {
     return QIO.lift(() => this.list.add(element))
   }
-  public forEach<E1>(f: (a: A) => QIO<E1, void>): QIO<E1, void> {
-    const itar = (): QIO<E1, void> =>
+  public forEach<E1>(f: (a: A) => QIO<void, E1>): QIO<void, E1> {
+    const itar = (): QIO<void, E1> =>
       this.shift.chain(_ =>
         _.map(f)
           .getOrElse(QIO.void())
@@ -42,7 +40,7 @@ export class PureMutableList<A> {
 
     return itar()
   }
-  public remove(node: LinkedListNode<A>): QIO<never, void> {
+  public remove(node: LinkedListNode<A>): QIO<void> {
     return QIO.lift(() => this.list.remove(node))
   }
 }

@@ -4,14 +4,14 @@ import * as http from 'http'
 const Exit = QIO.encase((message: Error) => {
   process.exit(1)
 })
-
 interface IQIOServerOptions {
-  mounted: {[k: string]: (req: http.IncomingMessage) => QIO<never, string>}
+  mounted: {
+    [k: string]: (req: http.IncomingMessage) => QIO<string>
+  }
   port: number
 }
-
 class QIOServerBuilder {
-  public get serve(): QIO<never, never> {
+  public get serve(): QIO<never> {
     return Managed.make(
       QIO.runtime().encase(RTM => new QIOServer(RTM, this.options)),
       server => server.close
@@ -25,10 +25,9 @@ class QIOServerBuilder {
   public bind(port: number): QIOServerBuilder {
     return new QIOServerBuilder({...this.options, port})
   }
-
   public mount(
     path: string,
-    fn: (req: http.IncomingMessage) => QIO<never, string>
+    fn: (req: http.IncomingMessage) => QIO<string>
   ): QIOServerBuilder {
     return new QIOServerBuilder({
       ...this.options,
@@ -56,9 +55,8 @@ class QIOServer {
       )
     }
   }
-
-  public get close(): QIO<never, void> {
-    return QIO.uninterruptibleIO<Error, void>((rej, res) => () =>
+  public get close(): QIO<void> {
+    return QIO.uninterruptibleIO<void, Error>((res, rej) => () =>
       this.server.close(E => (E !== undefined ? rej(E) : res()))
     ).catch(Exit)
   }

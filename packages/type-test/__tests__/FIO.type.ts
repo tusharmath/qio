@@ -6,20 +6,20 @@ import {defaultRuntime, QIO} from '@qio/core'
 
 //#region ASYNC
 // $ExpectType QIO<never, never, unknown>
-QIO.asyncIO((rej, res) => res(10))
+QIO.asyncIO((res, rej) => res(10))
 
 // $ExpectType QIO<never, never, unknown>
-QIO.asyncIO((rej, res, runtime) => {
+QIO.asyncIO((res, rej, runtime) => {
   const cancel = runtime.delay(() => {}, 10)
 
   return {cancel: () => cancel.cancel()}
 })
 
 // $ExpectType QIO<never, never, unknown>
-QIO.asyncIO((rej, res) => res(10))
+QIO.asyncIO((res, rej) => res(10))
 
 // $ExpectType QIO<never, string, unknown>
-QIO.asyncIO<never, string>((rej, res) => res(10))
+QIO.asyncIO<string>((res, rej) => res(10))
 //#endregion
 
 //#region Operators
@@ -75,10 +75,20 @@ interface IE1 {
 interface IE2 {
   e: 'e2'
 }
-
-declare const a: QIO<IE1, number, {console: Console}>
-declare const b: QIO<IE2, string, {process: NodeJS.Process}>
-
+declare const a: QIO<
+  number,
+  IE1,
+  {
+    console: Console
+  }
+>
+declare const b: QIO<
+  string,
+  IE2,
+  {
+    process: NodeJS.Process
+  }
+>
 // $ExpectType QIO<IE1 | IE2, string, { console: Console; } & { process: Process; }>
 a.chain(() => b)
 //#endregion

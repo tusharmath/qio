@@ -1,15 +1,14 @@
 import {QIO} from './QIO'
 
-export class Reservation<E1, A1, R1> {
-  public static of<E1, A1, R1, R2>(
-    acquire: QIO<E1, A1, R1>,
-    release: QIO<never, void, R2>
-  ): Reservation<E1, A1, R1 & R2> {
+export class Reservation<A1, E1, R1> {
+  public static of<A1, E1, R1, R2>(
+    acquire: QIO<A1, E1, R1>,
+    release: QIO<void, never, R2>
+  ): Reservation<A1, E1, R1 & R2> {
     return new Reservation(acquire.addEnv(), release.addEnv())
   }
-
   private constructor(
-    public readonly acquire: QIO<E1, A1, R1>,
-    public readonly release: QIO<never, void, R1>
+    public readonly acquire: QIO<A1, E1, R1>,
+    public readonly release: QIO<void, never, R1>
   ) {}
 }
