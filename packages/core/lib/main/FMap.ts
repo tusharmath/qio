@@ -1,6 +1,6 @@
 import {check} from 'checked-exceptions'
 
-import {IO, QIO, UIO} from './QIO'
+import {QIO, UIO} from './QIO'
 
 export const NoSuchElement = check('NoSuchElement')
 
@@ -17,7 +17,7 @@ export class FMap<K, V> {
   private readonly cache = new Map<K, V>()
   private constructor() {}
 
-  public get(key: K): IO<typeof NoSuchElement.info, V> {
+  public get(key: K): QIO<typeof NoSuchElement.info, V> {
     return UIO(() => this.cache.get(key)).chain(_ =>
       _ === undefined ? QIO.reject(NoSuchElement.of()) : QIO.of(_)
     )

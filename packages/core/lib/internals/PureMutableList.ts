@@ -4,7 +4,7 @@ import {
   Option
 } from 'standard-data-structures'
 
-import {IO, QIO, UIO} from '../main/QIO'
+import {QIO, UIO} from '../main/QIO'
 
 /**
  * A pure version of a mutable doubly linked list
@@ -32,8 +32,8 @@ export class PureMutableList<A> {
   public add(element: A): UIO<LinkedListNode<A>> {
     return UIO(() => this.list.add(element))
   }
-  public forEach<E1>(f: (a: A) => IO<E1, void>): IO<E1, void> {
-    const itar = (): IO<E1, void> =>
+  public forEach<E1>(f: (a: A) => QIO<E1, void>): QIO<E1, void> {
+    const itar = (): QIO<E1, void> =>
       this.shift.chain(_ =>
         _.map(f)
           .getOrElse(QIO.void())

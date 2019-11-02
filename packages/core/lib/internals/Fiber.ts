@@ -11,7 +11,7 @@ import {
 import {ICancellable} from 'ts-scheduler'
 
 import {Instruction, Tag} from '../main/Instructions'
-import {IO, QIO, UIO} from '../main/QIO'
+import {QIO, UIO} from '../main/QIO'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
@@ -46,7 +46,7 @@ export abstract class Fiber<E, A> {
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
   public static unsafeExecuteWith<E, A>(
-    io: IO<E, A>,
+    io: QIO<E, A>,
     runtime: IRuntime,
     cb?: CBOption<E, A>
   ): ICancellable {
@@ -55,7 +55,7 @@ export abstract class Fiber<E, A> {
   public abstract abort: UIO<void>
   public abstract await: UIO<Option<Either<E, A>>>
   public readonly id = FIBER_ID++
-  public get join(): IO<E, A> {
+  public get join(): QIO<E, A> {
     return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
   }
   public abstract runtime: IRuntime
@@ -89,7 +89,7 @@ export class FiberContext<E, A> extends Fiber<E, A> implements ICancellable {
    * Evaluates an IO using the provided scheduler
    */
   public static unsafeExecuteWith<E, A>(
-    io: IO<E, A>,
+    io: QIO<E, A>,
     runtime: IRuntime,
     cb?: CBOption<E, A>
   ): FiberContext<E, A> {
