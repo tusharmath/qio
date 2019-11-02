@@ -17,18 +17,6 @@ import {Instruction, Tag} from './Instructions'
 const D = debug('qio:core')
 
 /**
- * Task represents an [[IO]] that fails with a general failure.
- */
-export type Task<A> = QIO<Error, A>
-export const Task = <A>(fn: () => A): Task<A> => QIO.try(fn)
-
-/**
- * A [[Task]] that also requires an environment to run.
- */
-export type TaskR<A, R> = QIO<Error, A, R>
-export const TaskR = <A, R>(fn: (R: R) => A): TaskR<A, R> => QIO.access(fn)
-
-/**
  * Callback function used in node.js to handle async operations.
  * @ignore
  */
@@ -131,15 +119,6 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
     cb: (rej: CB<E1>, res: CB<A1>) => ICancellable
   ): QIO<E1, A1> {
     return new QIO(Tag.Async, cb)
-  }
-
-  /**
-   * Creates a new async [[Task]]
-   */
-  public static asyncTask<A1 = never>(
-    cb: (rej: CB<Error>, res: CB<A1>) => ICancellable
-  ): Task<A1> {
-    return QIO.asyncIO(cb)
   }
 
   /**
@@ -462,16 +441,17 @@ export class QIO<E1 = unknown, A1 = unknown, R1 = unknown> {
   }
 
   /**
-   * Tries to run an effect-full synchronous function and returns a [[Task]] that resolves with the return value of that function
+   * Tries to run an effect-full synchronous function and returns a [[QIO]] that resolves with the return value of that function
+   * and fails with an Error.
    */
-  public static try<A>(cb: () => A): Task<A> {
+  public static try<A>(cb: () => A): QIO<Error, A> {
     return QIO.lift(cb)
   }
 
   /**
    * Tries to run an function that returns a promise.
    */
-  public static tryP<A>(cb: () => Promise<A>): Task<A> {
+  public static tryP<A>(cb: () => Promise<A>): QIO<Error, A> {
     return QIO.encaseP(cb)()
   }
 
