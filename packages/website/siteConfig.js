@@ -8,7 +8,6 @@
 // See https://docusaurus.io/docs/site-config for all the possible
 // site configuration options.
 
-const webSiteName = 'web'
 const projectName = 'qio'
 
 // List of projects/orgs using your project for the users page.
@@ -26,14 +25,14 @@ const users = [
 const siteConfig = {
   title: 'QIO', // Title for your website.
   tagline: 'A high performance effect management library.',
-  url: `https://tusharmath.com/${projectName}`, // Your website URL
-  baseUrl: `/${projectName}/${webSiteName}/`, // Base URL for your project */
+  url: `https://${projectName}.netlify.com`, // Your website URL
+  baseUrl: `/`, // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/${name}/',
 
   // Used for publishing and more
-  projectName: `${webSiteName}`,
+  projectName: `${projectName}`,
   organizationName: 'tusharmath',
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
