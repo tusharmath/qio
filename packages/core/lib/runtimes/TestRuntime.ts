@@ -7,7 +7,7 @@ import {Either, Option} from 'standard-data-structures'
 import {ITestSchedulerOptions} from 'ts-scheduler/src/main/ITestSchedulerOptions'
 import {TestScheduler, testScheduler} from 'ts-scheduler/test'
 
-import {IO, QIO} from '../main/QIO'
+import {QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
@@ -23,7 +23,7 @@ export class TestRuntime extends BaseRuntime {
   public setMaxInstructionCount(maxInstructionCount: number): TestRuntime {
     return new TestRuntime({...this.options, maxInstructionCount})
   }
-  public unsafeExecuteSync<E, A>(io: IO<E, A>): A | E | undefined {
+  public unsafeExecuteSync<E, A>(io: QIO<E, A>): A | E | undefined {
     return this.unsafeExecuteSync0(io)
       .map(_ => _.reduce<A | E | undefined>(Id, Id))
       .getOrElse(undefined)
