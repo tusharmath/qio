@@ -14,7 +14,7 @@ export const RunSuite = (
     bluebird(): PromiseLike<unknown>
     fluture(): FutureInstance<unknown, unknown>
     native?(): void
-    qio(): QIO<never>
+    qio(): QIO
   }
 ) => {
   PrintLn('##', name)

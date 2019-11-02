@@ -8,7 +8,6 @@ import {Fiber} from '../internals/Fiber'
 import {QIO} from '../main/QIO'
 
 import {IRuntime} from './IRuntime'
-
 export abstract class BaseRuntime implements IRuntime {
   public readonly maxInstructionCount: number
   public abstract readonly scheduler: IScheduler
@@ -19,7 +18,7 @@ export abstract class BaseRuntime implements IRuntime {
     )
   }
   public abstract setMaxInstructionCount(maxInstructionCount: number): IRuntime
-  public unsafeExecute<E, A>(io: QIO<E, A>, cb?: CBOption<E, A>): ICancellable {
+  public unsafeExecute<A, E>(io: QIO<A, E>, cb?: CBOption<A, E>): ICancellable {
     return Fiber.unsafeExecuteWith(io, this, cb)
   }
 }

@@ -25,9 +25,8 @@ const qioIteration = QIO.encase((numbers: number[]) => {
 
   return sum
 })
-
 const qioRecursion = (numbers: number[]) => {
-  const itar = (i: number, sum: number): QIO<never, number> =>
+  const itar = (i: number, sum: number): QIO<number> =>
     i === numbers.length ? QIO.of(sum) : QIO.call(itar, i + 1, sum + numbers[i])
 
   return itar(0, 0)
