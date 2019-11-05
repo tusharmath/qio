@@ -152,46 +152,46 @@ class Index extends React.Component {
         {[
           {
             content:
-              'The library is designed to build high performance applications without a significant abstraction overhead.',
+              'Build high performance applications without significant abstraction overhead.',
             // image: `${baseUrl}img/undraw_react.svg`,
             // imageAlign: 'top',
             title: 'High Performance'
           },
           {
             content:
-              'Provides solid type-safety that can help catch bugs sooner, at compile time.',
+              'Provides solid type-safety that can help catch bugs at compile time.',
             title: 'Type-Safety'
           },
           {
             content:
-              'Allows devs to perform CPU bound tasks concurrently in a single threaded environment.',
+              'Write programs that perform CPU bound tasks concurrently.',
             title: 'Concurrency'
           },
           {
             content:
-              'Helps in writing applications without manually managing resource leaks.',
+              'Writing applications without manually managing resource leaks.',
             title: 'Resource Safety'
           },
 
           {
-            content: 'Helps you write programs with test dependencies easily.',
+            content: 'Write programs that are extremely easy to test.',
             title: 'Testable'
           },
 
           {
             content:
-              "It helps in writing programs that provide type safety around errors and doesn't lose them ever.",
+              "Write programs that provide type safety around errors and doesn't lose them ever.",
             title: 'Resilient'
           },
 
           {
             content:
-              'It is highly functional and has lawful abstractions that helps in providing easy composition and refactoring capabilities.',
+              'Highly functional and lawful abstractions that provide easy composition and refactoring capabilities.',
             title: 'Functional'
           },
 
           {
-            content: 'Provides out of the box streaming capabilities.',
+            content: 'Interop between effects and streams easily.',
             title: 'Streaming'
           }
           // {
