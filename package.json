@@ -29,7 +29,8 @@
     "update-benchmarks": "packages/benchmarks/run.sh",
     "example": "node packages/example/guess-the-number/src/Run",
     "start": "yarn workspace @qio/website start",
-    "doc:commit": "git add packages/docs && git commit -m 'docs(*): update docs \n\naffects: @qio/docs'"
+    "doc:commit": "git add packages/docs && git commit -m 'docs(*): update docs \n\naffects: @qio/docs'",
+    "website:commit": "git add packages/website && git commit -m 'website(*): update website \n\naffects: @qio/website'"
   },
   "version": "0.0.0-development",
   "devDependencies": {
