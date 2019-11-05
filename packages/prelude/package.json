@@ -14,5 +14,8 @@
   },
   "bugs": {
     "url": "https://github.com/tusharmath/qio/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
