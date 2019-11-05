@@ -103,7 +103,7 @@ describe('QIO', () => {
     it('should evaluate asynchronously', async () => {
       const runtime = defaultRuntime()
       const actual = await runtime.unsafeExecutePromise(
-        QIO.asyncIO((rej, res) => {
+        QIO.asyncIO((res, rej) => {
           const id = setTimeout(res, 100, 1000)
 
           return {cancel: () => clearTimeout(id)}
@@ -291,9 +291,9 @@ describe('QIO', () => {
     it('should capture async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptibleIO<never, Error>(rej => rej(new Error('Bye'))).catch(
-          err => QIO.of(err.message)
-        )
+        QIO.uninterruptibleIO<never, Error>((res, rej) =>
+          rej(new Error('Bye'))
+        ).catch(err => QIO.of(err.message))
       )
       const expected = 'Bye'
       assert.strictEqual(actual, expected)
@@ -302,7 +302,7 @@ describe('QIO', () => {
     it('should capture nested async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptibleIO<never, Error>((rej, res) => rej(new Error('A')))
+        QIO.uninterruptibleIO<never, Error>((res, rej) => rej(new Error('A')))
           .catch(err => QIO.reject(new Error(err.message + 'B')))
           .catch(err => QIO.reject(new Error(err.message + 'C')))
           .catch(err => QIO.reject(new Error(err.message + 'D')))

@@ -109,7 +109,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Using `never` will give users compile time error always while using.
    */
   public static asyncIO<A1 = never, E1 = never>(
-    cb: (rej: CB<E1>, res: CB<A1>) => ICancellable
+    cb: (res: CB<A1>, rej: CB<E1>) => ICancellable
   ): QIO<A1, E1> {
     return new QIO(Tag.Async, cb)
   }
@@ -119,7 +119,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static asyncUIO<A1 = never>(
     cb: (res: CB<A1>) => ICancellable
   ): QIO<A1> {
-    return QIO.asyncIO((rej, res) => cb(res))
+    return QIO.asyncIO((res, rej) => cb(res))
   }
   /**
    * Calls the provided Effect-full function with the provided arguments.
@@ -180,7 +180,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): (...t: T) => QIO<A, Error> {
     return (...t) =>
       QIO.runtime().chain(RTM =>
-        QIO.asyncIO((rej, res) =>
+        QIO.asyncIO((res, rej) =>
           RTM.scheduler.asap(() => {
             void cb(...t)
               .then(res)
@@ -301,7 +301,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fn: (cb: NodeJSCallback<A>) => void
   ): QIO<A | undefined, NodeJS.ErrnoException> {
     return QIO.runtime().chain(RTM =>
-      QIO.asyncIO<A | undefined, NodeJS.ErrnoException>((rej, res) =>
+      QIO.asyncIO<A | undefined, NodeJS.ErrnoException>((res, rej) =>
         RTM.scheduler.asap(() => {
           try {
             fn((err, result) => (err === null ? res(result) : rej(err)))
@@ -429,10 +429,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * It tries to make it cancellable by delaying the function call.
    */
   public static uninterruptibleIO<A1 = never, E1 = never>(
-    fn: (rej: CB<E1>, res: CB<A1>) => unknown
+    fn: (res: CB<A1>, rej: CB<E1>) => unknown
   ): QIO<A1, E1> {
     return QIO.runtime().chain(RTM =>
-      QIO.asyncIO<A1, E1>((rej, res) => RTM.scheduler.asap(fn, rej, res))
+      QIO.asyncIO<A1, E1>((res, rej) => RTM.scheduler.asap(fn, res, rej))
     )
   }
 

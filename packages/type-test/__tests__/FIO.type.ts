@@ -6,16 +6,16 @@ import {defaultRuntime, QIO} from '@qio/core'
 
 //#region ASYNC
 // $ExpectType QIO<never, never, unknown>
-QIO.asyncIO((rej, res) => res(10))
+QIO.asyncIO((res, rej) => res(10))
 
 // $ExpectType QIO<never, never, unknown>
-QIO.asyncIO((rej, res, runtime) => runtime.delay(() => {}, 10))
+QIO.asyncIO((res, rej, runtime) => runtime.delay(() => {}, 10))
 
 // $ExpectType QIO<never, never, unknown>
-QIO.asyncIO((rej, res) => res(10))
+QIO.asyncIO((res, rej) => res(10))
 
 // $ExpectType QIO<string, never, unknown>
-QIO.asyncIO<string>((rej, res) => ({cancel: () => {}}))
+QIO.asyncIO<string>((res, rej) => ({cancel: () => {}}))
 //#endregion
 
 //#region Operators

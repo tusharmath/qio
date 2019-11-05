@@ -16,7 +16,7 @@ export class Await<A, E> {
     return QIO.lift(() => new Await())
   }
   private flag = false
-  private readonly Q = DoublyLinkedList.of<[CB<E>, CB<A>]>()
+  private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
   private result: Option<Either<E, A>> = Option.none()
   public get get(): QIO<A, E> {
     return QIO.flattenM(() =>
@@ -41,7 +41,7 @@ export class Await<A, E> {
           const node = this.Q.shift()
 
           if (Option.isSome(node)) {
-            either.reduce(...node.value)
+            either.reduce(node.value[1], node.value[0])
           }
         }
 
@@ -50,8 +50,8 @@ export class Await<A, E> {
     })
   }
   private get wait(): QIO<A, E> {
-    return QIO.asyncIO((rej, res) => {
-      const id = this.Q.add([rej, res])
+    return QIO.asyncIO((res, rej) => {
+      const id = this.Q.add([res, rej])
 
       return {
         cancel: () => this.Q.remove(id)
