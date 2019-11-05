@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [20.0.4](https://github.com/tusharmath/qio/compare/v20.0.3...v20.0.4) (2019-11-05)
+
+
+### Bug Fixes
+
+* **package:** add publish config ([64aa080](https://github.com/tusharmath/qio/commit/64aa080bd78dafdca44a38e38d428af015dc3539))
+
+
+
+
+
 ## [20.0.3](https://github.com/tusharmath/qio/compare/v20.0.2...v20.0.3) (2019-11-03)
 
 
