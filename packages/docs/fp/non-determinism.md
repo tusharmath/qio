@@ -103,5 +103,6 @@ Adding more external environment dependencies doesn't require you to change the 
 QIO will automatically compose these environments for you so that you can provide it the final env at the time of evaluation.
 
 ```ts
+main() // QIO<number, never, DateEnv & MathEnv>
 main().provide({Math, Date}) // QIO<number>
 ```
