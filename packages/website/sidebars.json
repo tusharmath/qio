@@ -3,8 +3,8 @@
     "Getting Started": [
       "fp/introduction",
       "fp/side-effects",
-      "fp/non-determinism",
       "fp/exceptions-anomalies",
+      "fp/non-determinism",
       "fp/pure-functions"
     ]
   },
