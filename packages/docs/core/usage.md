@@ -17,14 +17,14 @@ Once of the easiest ways to create a QIO is through [QIO.encase].
 + import {QIO} from '@qio/core'
 +
 + const Greet = () => console.log('Hello World!')
-+ const GreetIO = QIO.encase(Greet)
++ const GreetIO = QIO.lift(Greet)
 ```
 
-Calling `GreetIO()` returns a pure data structure which represents a side-effect, that —
+`GreetIO` returns a pure data structure of the type `QIO<void, never, unknown>` which represents a side-effect, that:
 
-1. Can execute in any environment without any special needs.
+1. Resolves with a `void`.
 2. Never fails.
-3. Resolves with a `void`.
+3. Can execute in any environment without any special needs.
 
 ## Executing QIO
 
@@ -38,7 +38,7 @@ Execution of QIO happens through a [Runtime].
 
   const Greet = () => console.log('Hello World!')
   const GreetIO = QIO.encase(Greet)
-+ defaultRuntime().unsafeExecute(GreetIO())
++ defaultRuntime().unsafeExecute(GreetIO)
 ```
 
 ## Serial Execution
