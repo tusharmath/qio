@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [20.0.5](https://github.com/tusharmath/qio/compare/v20.0.4...v20.0.5) (2019-11-05)
+
+**Note:** Version bump only for package @qio/website
+
+
+
+
+
 ## [20.0.2](https://github.com/tusharmath/qio/compare/v20.0.1...v20.0.2) (2019-11-02)
 
 **Note:** Version bump only for package @qio/website
