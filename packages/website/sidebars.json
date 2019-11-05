@@ -1,5 +1,5 @@
 {
-  "fp": {
+  "getting-started": {
     "Getting Started": [
       "fp/introduction",
       "fp/side-effects",
@@ -9,15 +9,24 @@
     ]
   },
   "core": {
-    "Tutorial": ["core/installation", "core/type-signature", "core/usage"],
-    "Runtime": ["core/runtime"],
-    "Unit Testing": ["unit-testing/installation"],
-    "Fiber": ["core/fiber"],
-    "Stream": ["stream/installation"],
-    "Ref": ["core/ref"],
-    "Await": ["core/await"],
-    "Managed": ["core/managed"],
-    "Queue": ["core/queue"]
+    "Tutorial": [
+      "core/installation",
+      "core/type-signature",
+      "core/usage",
+      "core/unit-testing",
+      "core/stack-safety"
+    ]
   },
-  "docs2": {"Benchmarks": ["benchmarks"]}
+  "entities": {
+    "Entities": [
+      "core/managed",
+      "core/runtime",
+      "core/fiber",
+      "core/stream",
+      "core/ref",
+      "core/await",
+      "core/queue"
+    ]
+  },
+  "benchmarks": {"Benchmarks": ["benchmarks"]}
 }
