@@ -3,275 +3,81 @@ title: Usage
 sidebar_label: Usage
 ---
 
+QIO is merely a data structure that represents a side-effect. It doesn't actually perform the side effect itself. The effect is performed by the QIO Runtime lazily. It helps convert [impure functions] to [pure functions].
+
+[impure functions]: impure-functions
+[pure functions]: pure-functions
+
+`QIO` uses three type params to represent an effect safely:
+
+```ts
+interface QIO<A, E, R> {
+  // ...
+}
+```
+
+| Parameter |                                                                             |
+| :-------: | --------------------------------------------------------------------------- |
+|    `A`    | The type of the success value that will be emitted by the IO on completion. |
+|    `E`    | The error types that can be emitted while this IO is executing.             |
+|    `R`    | Represents the type of environment needed to execute this IO.               |
+
+Using these three type params you can fairly represent any side-effect. For eg. consider `console.log`
+
+```ts
+const greet = () => console.log('Hello World!') // void
+```
+
+`greet` can be represented using QIO as:
+
+```ts
+QIO<never, void, unknown>
+```
+
+| Parameter | Value     |                                               |
+| --------- | --------- | --------------------------------------------- |
+| `A`       | `void`    | The output of running the program is nothing. |
+| `E`       | `never`   | Printing anything on console never fails.     |
+| `R`       | `unknown` | since `console.log` works everywhere.         |
+
+```ts
+const greetIO = greet() // QIO<never, void, unknown>
+```
+
 ## Creating a QIO
 
-There are multiple ways through which you can create an instance of QIO. Refer to the [API documentation] to learn about all the ways.
+There are multiple ways through which you can create an instance of QIO.
 
 [api documentation]: api/classes/qio.md
 
-Once of the easiest ways to create a QIO is through [QIO.encase].
+One of the easiest ways to create a QIO is through [QIO.encase].
 
 [qio.encase]: api/classes/qio.md#encase
 
 ```ts
 + import {QIO} from '@qio/core'
 +
-+ const Greet = () => console.log('Hello World!')
-+ const GreetIO = QIO.lift(Greet)
++ const putStrLn = QIO.encase(console.log)
++ const greet = putStrLn('Hello World')
 ```
 
-`GreetIO` returns a pure data structure of the type `QIO<void, never, unknown>` which represents a side-effect, that:
+`greet` returns a pure data structure of the type `QIO<void, never, unknown>` which represents a side-effect, that:
 
-1. Resolves with a `void`.
-2. Never fails.
-3. Can execute in any environment without any special needs.
+1. Resolves with a value of type _void_.
+2. It _never_ fails.
+3. Can execute in any _unknown_ environment.
 
 ## Executing QIO
 
 Execution of QIO happens through a [Runtime].
 
-[runtime]: api/classes/runtime.html
+[runtime]: ../api/globals#const-defaultruntime
 
 ```ts
 - import {QIO} from '@qio/core'
 + import {QIO, defaultRuntime} from '@qio/core'
 
-  const Greet = () => console.log('Hello World!')
-  const GreetIO = QIO.encase(Greet)
-+ defaultRuntime().unsafeExecute(GreetIO)
+  const putStrLn = QIO.encase(console.log)
+  const greet = putStrLn('Hello World')
++ defaultRuntime().unsafeExecute(greet)
 ```
-
-## Serial Execution
-
-Since these data structures don't specify how or when they are going to be executed, writing them one after the other in procedural style will not guarantee any order of execution, for Eg —
-
-```ts
-+  import {QIO} from '@qio/core'
-+  const putStrLn = QIO.encase((msg: string) => console.log(msg))
-+
-+  const foo = putStrLn('foo')
-+  const bar = putStrLn('bar')
-```
-
-In the above code either `foo` or `bar` can be printed first depending on internal prioritization and scheduling algorithms that QIO uses. To ensure that `foo` is printed first and `bar` is printed second one must use the [and] operator.
-
-```ts
-  import {QIO} from '@qio/core'
-  const putStrLn = QIO.encase((msg: string) => console.log(msg))
-
-  const fooIO = putStrLn('foo')
-  const barIO = putStrLn('bar')
-
-+ const fooBar = fooIO.and(barIO)
-```
-
-`fooBar` is a new QIO object of type `QIO<unknown, never, void>`.
-
-```ts
-- import {QIO} from '@qio/core'
-+ import {QIO, defaultRuntime} from '@qio/core'
-  const putStrLn = QIO.encase((msg: string) => console.log(msg))
-
-  const fooIO = putStrLn('foo')
-  const barIO = putStrLn('bar')
-
-  const fooBar = fooIO.and(barIO)
-+ defaultRuntime().unsafeExecute(fooBar)
-```
-
-[and]: api/classes/qio.md#and
-
-## Parallel Execution
-
-Similar to the `and` operator, the [par] operator runs the two IOs in parallel. For eg.
-
-[par]: api/classes/qio.md#par
-
-Create the two IOs
-
-```ts
-+  import {QIO} from '@qio/core'
-+
-+  const foo = QIO.timeout('foo', 1000)
-+  const bar = QIO.timeout('bar', 1500)
-```
-
-Combine them using [par]
-
-```ts
-- import {QIO} from '@qio/core'
-
-  const foo = QIO.timeout('foo', 1000)
-  const bar = QIO.timeout('bar', 1500)
-+ const fooBar = foo.par(bar)
-```
-
-Execute the created IO
-
-```ts
-- import {QIO} from '@qio/core'
-+ import {QIO, defaultRuntime} from '@qio/core'
-
-  const foo = QIO.timeout('foo', 1000)
-  const bar = QIO.timeout('bar', 1500)
-  const fooBar = foo.zip(bar)
-
-+ defaultRuntime().unsafeExecute(fooBar)
-```
-
-The program `fooBar` will complete in `1500`ms because both are executed in parallel.
-
-Other more powerful operators can be found at [API Documentation].
-
-[api documentation]: api/classes/qio.md
-
-## Cancellation
-
-Executing an IO returns a cancel callback. Essentially a function that when called, aborts the IO from any further execution and synchronously releases all the acquired resources.
-
-Create an IO
-
-```ts
-+ import {QIO} from '@qio/core'
-+ const delayIO = QIO.timeout('Hello World', 1000)
-```
-
-Execute by passing it to `defaultRuntime`
-
-```ts
-- import {QIO} from '@qio/core'
-+ import {QIO, defaultRuntime} from '@qio/core'
-  const delayIO = QIO.timeout('Hello World', 1000)
-+ const cancel = defaultRuntime().unsafeExecute(delayIO)
-```
-
-Calling the cancelling callback.
-
-```ts
-import {QIO, defaultRuntime} from '@qio/core'
-const delayIO = QIO.timeout('Hello World', 1000)
-const cancel = defaultRuntime().execute(delayIO) + cancel()
-```
-
-As soon as `cancel` is called internally the timeout is cancelled.
-
-## Custom Environment
-
-By default any QIO instance would not need any env. This can be customized based on what the program needs to perform. For example, if a program needs to read a `config` and print out the `port` set in it one could do something like this —
-
-### Config
-
-Say we already have a `Config` interface, with only one property —
-
-```ts
-+ interface Config {
-+   port: number
-+ }
-```
-
-### ConfigEnv
-
-Next we create an Environment that returns a `config` —
-
-```ts
-  interface Config {
-    port: number
-  }
-+ interface ConfigEnv {
-+   config: Config
-+ }
-```
-
-### Helper functions
-
-We add `getPort` which picks the `port` and `putStrLn` which is a wrapper over `console.log` to make it pure.
-
-```ts
-+ import {QIO} from '@qio/core'
-  interface Config {
-    port: number
-  }
-  interface ConfigEnv {
-    config: Config
-  }
-+ const getPort = QIO.access((config: Config) => config.port)
-+ const putStrLn = QIO.encase((message: string) => console.log(message))
-```
-
-### Create program
-
-Using the [chain] operator one can now chain them one after the other —
-
-[chain]: api/classes/qio.md#chain
-
-```ts
-  import {QIO} from '@qio/core'
-  interface Config {
-    port: number
-  }
-  interface ConfigEnv {
-    config: Config
-  }
-  const getPort = QIO.access((config: Config) => config.port)
-  const putStrLn = QIO.encase((message: string) => console.log(message))
-
-+ const program = getPort().chain(putStrLn)
-```
-
-### Provide Env
-
-You can provide the env directly to a QIO instance without executing it using the [provide] method.
-
-```ts
-  import {QIO} from '@qio/core'
-+ import config from 'node-config'
-  interface Config {
-    port: number
-  }
-  interface ConfigEnv {
-    config: Config
-  }
-  const getPort = QIO.access((config: Config) => config.port)
-  const putStrLn = QIO.encase((message: string) => console.log(message))
-
-  const program = getPort().chain(putStrLn)
-
-+ const env = {
-+   config: config
-+ }
-+ const program0 = program.provide(env)
-```
-
-[provide]: api/classes/qio.md#provide
-
-### Running the program
-
-Running the program can be done by using the runtime.
-
-```ts
-- import {QIO} from '@qio/core'
-+ import {QIO, defaultRuntime} from '@qio/core'
-  import config from 'node-config'
-  interface Config {
-    port: number
-  }
-  interface ConfigEnv {
-    config: Config
-  }
-  const getPort = QIO.access((config: Config) => config.port)
-  const putStrLn = QIO.encase((message: string) => console.log(message))
-
-  const program = getPort().chain(putStrLn)
-
-  const env = {
-    config: config
-  }
-  const program0 = program.provide(env)
-+ defaultRuntime().unsafeExecute(program0)
-```
-
-[provide]: api/classes/qio.md#provide
-
-### Next Steps
-
-Checkout a fully functional example [here](https://github.com/tusharmath/qio/tree/master/packages/example).

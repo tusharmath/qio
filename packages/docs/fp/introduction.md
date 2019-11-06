@@ -1,6 +1,5 @@
 ---
 title: Introduction
-sidebar_label: Introduction
 ---
 
 A _real world_ program needs to deal with **side-effects**, **non determinism** and **exceptions**. Unfortunately apart Javascript doesn't provide us with a first class support to handle any of these problems fairly. **QIO** provides a set of solid type-safe abstraction that can help solve these problems elegantly.

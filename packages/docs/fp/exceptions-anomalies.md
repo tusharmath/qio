@@ -1,5 +1,5 @@
 ---
-title: Exception & Anomalies
+title: Exception and Anomalies
 ---
 
 Consider a simple deterministic function such as `division` that takes in two numbers and returns the result by dividing one over the other:
