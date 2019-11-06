@@ -1,7 +1,7 @@
 {
   "name": "@qio/docs",
   "private": true,
-  "version": "20.0.6",
+  "version": "21.0.0",
   "description": "Documentation files for QIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",

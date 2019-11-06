@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [21.0.0](https://github.com/tusharmath/qio/compare/v20.0.6...v21.0.0) (2019-11-06)
+
+
+### Code Refactoring
+
+* **qio:** change type param arguments for QIO ([966852f](https://github.com/tusharmath/qio/commit/966852fbe0bdc59a5cc4bb34c8b47cc56a197d01))
+* **qio:** deprecate UIO ([ed20d26](https://github.com/tusharmath/qio/commit/ed20d269d0bcc6dca839b05c8f468b76d4919fe1))
+
+
+### BREAKING CHANGES
+
+* **qio:** QIO type params have been changed to \`A, E, R\` instead of earlier \`E, A, R\`
+* **qio:** UIO have been deprecated. Use QIO.lift() instead.
+
+
+
+
+
 ## [20.0.4](https://github.com/tusharmath/qio/compare/v20.0.3...v20.0.4) (2019-11-05)
 
 **Note:** Version bump only for package @qio/stream

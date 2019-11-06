@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [21.0.0](https://github.com/tusharmath/qio/compare/v20.0.6...v21.0.0) (2019-11-06)
+
+
+### Code Refactoring
+
+* **qio:** change type param arguments for QIO ([966852f](https://github.com/tusharmath/qio/commit/966852fbe0bdc59a5cc4bb34c8b47cc56a197d01))
+* **qio:** deprecate IO ([481cdaf](https://github.com/tusharmath/qio/commit/481cdaf0abb5b528c05a54d1f83bcec529920bf1))
+* **qio:** deprecate Task and TaskR ([794a163](https://github.com/tusharmath/qio/commit/794a163c9a55d00838ff1a7a55d68014adef002d))
+* **qio:** deprecate UIO ([ed20d26](https://github.com/tusharmath/qio/commit/ed20d269d0bcc6dca839b05c8f468b76d4919fe1))
+
+
+### BREAKING CHANGES
+
+* **qio:** QIO type params have been changed to \`A, E, R\` instead of earlier \`E, A, R\`
+* **qio:** deprecate Task and TaskR
+* **qio:** UIO have been deprecated. Use QIO.lift() instead.
+* **qio:** Deprecating \`IO\` type use \`QIO\` type directly.
+
+
+
+
+
 ## [20.0.4](https://github.com/tusharmath/qio/compare/v20.0.3...v20.0.4) (2019-11-05)
 
 **Note:** Version bump only for package @qio/core
