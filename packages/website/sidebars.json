@@ -18,7 +18,9 @@
       "core/environment",
       "core/unit-testing",
       "core/stack-safety"
-    ],
+    ]
+  },
+  "entities": {
     "Entities": [
       "core/managed",
       "core/runtime",
