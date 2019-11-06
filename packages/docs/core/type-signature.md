@@ -12,7 +12,7 @@ interface QIO<A, E, R> {
 
 1. `A` The type of the success value that will be emitted by the IO on completion.
 2. `E` The error types that can be emitted while this IO is executing.
-3. `R` Represents the type of environment needed to execute this IO ([more](#custom-environment)).
+3. `R` Represents the type of environment needed to execute this IO.
 
 Using these three type params you can fairly represent any side-effect. For example lets say there is function `Greet` which simply prints "Hello World" —
 

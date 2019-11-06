@@ -1,5 +1,5 @@
 ---
-title: Side Effects
+title: Side-Effects
 ---
 
 Side effects are changes that your program performs to the outside world, for eg.:
@@ -18,6 +18,10 @@ Side-effects are useful, but they are extremely hard to refactor. Consider the f
 ### Case 1
 
 ```ts
+const foo = (n: number): number => {
+  // ...
+}
+
 const main = (): number => {
   return foo(10) + foo(10)
 }
@@ -28,6 +32,10 @@ const main = (): number => {
 ### Case 2 (after refactoring)
 
 ```ts
+const foo = (n: number): number => {
+  // ...
+}
+
 const main = (): number => {
   const bar = foo(10)
   return bar + bar
@@ -49,6 +57,10 @@ If `foo` was returning a `QIO<number>` instead of `number` we could do such refa
 ```ts
 import {QIO} from '@qio/core'
 
+const foo = (n: number): QIO<number> => {
+  // ...
+}
+
 const main = (): QIO<number> => {
   return foo(10).zipWith(foo(10), (a, b) => a + b)
 }
@@ -64,3 +76,5 @@ const main = (): QIO<number> => {
   return bar.zipWith(bar, (a, b) => a + b)
 }
 ```
+
+If `foo` was implemented using QIO and instead of returning a `number` it returns `QIO<number>` it can provide guarantees while refactoring.
