@@ -43,7 +43,7 @@ const siteConfig = {
     // {doc: 'getting-started', label: 'Getting Started'},
     // {doc: 'doc4', label: 'API'},
     // {page: 'help', label: 'Help'},
-    {doc: 'fp/introduction', label: 'Getting Started'},
+    {doc: 'concepts/introduction', label: 'Concepts'},
     {doc: 'core/installation', label: 'Tutorial'},
     {doc: 'core/managed', label: 'Entities'},
     {doc: 'api/globals', label: 'API'},

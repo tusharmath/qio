@@ -1,24 +1,24 @@
 {
-  "getting-started": {
-    "Getting Started": [
-      "fp/introduction",
-      "fp/side-effects",
-      "fp/exceptions-anomalies",
-      "fp/non-determinism",
-      "fp/pure-functions",
-      "fp/referential-transparency"
+  "concepts": {
+    "Concepts": [
+      "concepts/introduction",
+      "concepts/side-effects",
+      "concepts/exceptions-anomalies",
+      "concepts/non-determinism",
+      "concepts/pure-functions",
+      "concepts/referential-transparency"
     ]
   },
   "core": {
     "Tutorial": [
       "core/installation",
-      "core/type-signature",
       "core/usage",
+      "core/concurrency",
+      "core/cancellation",
+      "core/environment",
       "core/unit-testing",
       "core/stack-safety"
-    ]
-  },
-  "entities": {
+    ],
     "Entities": [
       "core/managed",
       "core/runtime",
