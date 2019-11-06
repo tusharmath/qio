@@ -1,5 +1,5 @@
 ---
-title: Exception and Anomalies
+title: Exception  Anomalies
 ---
 
 Consider a simple deterministic function such as `division` that takes in two numbers and returns the result by dividing one over the other:
@@ -20,7 +20,7 @@ In functional programming, such functions that are not defined over the complete
 
 Functions that are defined over the complete range of input values are called as **total functions**.
 
-## Enriching Return Type
+<!-- ## Enriching Return Type
 
 Using QIO we can represent the function more clearly:
 
@@ -32,4 +32,4 @@ const division = (a: number, b: number): QIO<number, DivisionByZero> => {
 }
 ```
 
-`QIO<number, DivisionByZero>` is a much better representation than just `number`, because it clearly represents how it can succeed and how it can fail.
+`QIO<number, DivisionByZero>` is a much better representation than just `number`, because it clearly represents how it can succeed and how it can fail. -->

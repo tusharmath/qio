@@ -1,5 +1,5 @@
 ---
-title: Side-effects
+title: Side Effects
 ---
 
 Side effects are changes that your program performs to the outside world, for eg.:
@@ -42,15 +42,12 @@ const main = (): number => {
 }
 ```
 
-`foo` is assigned to a variable and is effectively called only once.
+This could be a dangerous change if `foo` causes a side-effect because after the refactor `foo` is called only once which changes the behavior of the program.
 
-This is a very common refactor, where a function call is assigned to a variable and then used. These kind of refactors can change the behavior of the `main` program if `foo` causes a side-effect.
 
-For example if `foo` updates a global counter then the `main` function will update the counter only **once** in case 1 and **twice** in case 2.
+<!-- ## Solving using QIO
 
-## Solving using QIO
-
-If `foo` was returning a `QIO<number>` instead of `number` we could do such refactors far more easily.
+Updating `foo` was returning a `QIO<number>` instead of `number` we could do such refactors far more easily.
 
 ### Case 1
 
@@ -77,4 +74,4 @@ const main = (): QIO<number> => {
 }
 ```
 
-If `foo` was implemented using QIO and instead of returning a `number` it returns `QIO<number>` it can provide guarantees while refactoring.
+If `foo` was implemented using QIO and instead of returning a `number` it returns `QIO<number>` it can provide guarantees while refactoring. -->
