@@ -35,11 +35,11 @@ class Footer extends React.Component {
           {/*    />*/}
           {/*  )}*/}
           {/*</a>*/}
-          <div>
+          {/* <div>
             <h5>Docs</h5>
             <a href={this.docUrl('introduction.html')}>Getting Started</a>
             <a href={this.docUrl('api/globals')}>API Reference</a>
-          </div>
+          </div> */}
           {/* <div>
             <h5>Community</h5>
             <a href={this.pageUrl('users.html', this.props.language)}>
