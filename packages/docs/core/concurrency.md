@@ -20,7 +20,7 @@ export const main = (): QIO<void, never, unknown> => {
 }
 ```
 
-**Using previous effect's output**
+### Using previous effect's output
 
 Sometimes its necessary to use the response of the previous result before running the next. This can be done using the `chain` operator:
 
@@ -34,7 +34,7 @@ export const main = (): QIO<void, never, unknown> => {
 
 ## Parallel Execution
 
-Similar to the `and` operator, the [par] operator runs the two IOs in parallel. For eg.
+Similar to the `and` operator, the `par` operator helps run the two effects in parallel. For eg.:
 
 ```ts
 import {QIO} from '@qio/core'
