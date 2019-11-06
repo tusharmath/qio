@@ -10,7 +10,7 @@ const division = (a: number, b: number): number => {
 }
 ```
 
-If you observe closely you will see a problem with `division`. The function `division` is defined over a limited set of values for `b`. Passing `b` as `0` will return `Infinity` which is technically not a `number` thus producing an anomaly in the program at runtime. Ideally you would like to handle the above problem at compile time.
+The function `division` is defined over a limited set of values for `b`. Passing `b` as `0` will return `Infinity` which is not a `number` thus producing an anomaly in the program at runtime.
 
 ## Partial Functions
 
@@ -20,28 +20,16 @@ In functional programming, such functions that are not defined over the complete
 
 Functions that are defined over the complete range of input values are called as **total functions**.
 
-## Improving Return Types
+## Enriching Return Type
 
-To make the above `division` function **total**, we can use an `Either` data structure to represent the function's return type more clearly.
-
-```ts
-class Left<L> {
-  constructor(readonly value: L) {}
-}
-
-class Right<R> {
-  constructor(readonly value: R) {}
-}
-
-type Either<L, R> = Left<L> | Right<A>
-```
-
-And update the return type with `Either<DivisionByZero, number>`. This means that the return value of the function is either a failure of type `DivisionByZero` or a success of type `number`.
+Using QIO we can represent the function more clearly:
 
 ```ts
 class DivisionByZero extends Error {}
 
-const division = (a: number, b: number): Either<DivisionByZero, number> => {
-  return b === 0 ? new Left(new DivisionByZero()) : new Right(a / b)
+const division = (a: number, b: number): QIO<number, DivisionByZero> => {
+  return b === 0 ? QIO.reject(new DivisionByZero()) : QIO.of(a / b)
 }
 ```
+
+`QIO<number, DivisionByZero>` is a much better representation than just `number`, because it clearly represents how it can succeed and how it can fail.
