@@ -33,7 +33,7 @@ interface IConsoleEnv {
   }
 }
 
-interface ITextTerminalEnv {
+export interface ITextTerminalEnv {
   tty: ITextTerminal
 }
 
