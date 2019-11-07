@@ -1,22 +1,18 @@
+import {getStrLn, putStrLn} from '@qio/console'
 import {QIO} from '@qio/core'
 import {Stream} from '@qio/stream'
-
-import {IMath, ITextTerminal} from './Env'
 
 const MAX_NUMBER = 6
 const MIN_NUMBER = 1
 
 /**
- * Takes input from the player through the stdin stream.
+ * Provides access to the Math env
  */
-const getStrLn = (question: string) =>
-  QIO.accessM((_: ITextTerminal) => _.tty.getStrLn(question))
-
-/**
- * Outputs anything passed as arguments to the stdout stream
- */
-const putStrLn = (...t: unknown[]) =>
-  QIO.accessM((_: ITextTerminal) => _.tty.putStrLn(...t))
+export interface IMath {
+  math: {
+    random(): number
+  }
+}
 
 /**
  * Generates a random number.

@@ -35,6 +35,7 @@
     "source-map-support": "^0.5.16"
   },
   "dependencies": {
+    "@qio/console": "^21.0.2",
     "@qio/core": "^21.0.0",
     "@qio/prelude": "^21.0.0",
     "@qio/stream": "^21.0.0"

@@ -1,50 +1,22 @@
-import {QIO, testRuntime} from '@qio/core'
+import {testTTY} from '@qio/console'
+import {testRuntime} from '@qio/core'
 import {assert} from 'chai'
 
 import {canContinue, program} from '../guess-the-number/src/Program'
 
 describe('Program', () => {
   /**
-   * Mock implementation for everything insde JS's native math utility
+   * Mock implementation for everything inside JS's native math utility
    */
-  const MockMath = (...a: number[]) => ({
+  const mockMath = (...a: number[]) => ({
     random(): number {
       return a.shift() as number
     }
   })
 
-  /**
-   * Mock implementation of ITextTerminal
-   */
-  const MockTTY = (input: {[k: string]: string[]}) => {
-    const stdout = new Array<unknown>()
-
-    return {
-      getStrLn: (question: string) =>
-        QIO.flattenM(() => {
-          const popped = input.hasOwnProperty(question)
-            ? input[question].shift()
-            : undefined
-
-          if (popped === undefined) {
-            stdout.push(question)
-
-            return QIO.never()
-          }
-
-          stdout.push(question + popped)
-
-          return QIO.of(popped)
-        }),
-      putStrLn: (...t: unknown[]) =>
-        QIO.lift(() => void stdout.push(t.join(', '))),
-      stdout
-    }
-  }
-
   it('should greet', () => {
-    const math = MockMath()
-    const tty = MockTTY({})
+    const math = mockMath()
+    const tty = testTTY({})
     const runtime = testRuntime()
     runtime.unsafeExecuteSync(program.provide({math, tty}))
 
@@ -52,8 +24,8 @@ describe('Program', () => {
   })
 
   it('should ask user for a number', () => {
-    const math = MockMath()
-    const tty = MockTTY({
+    const math = mockMath()
+    const tty = testTTY({
       'Enter your name: ': ['John']
     })
     const runtime = testRuntime()
@@ -68,8 +40,8 @@ describe('Program', () => {
   })
 
   it('should check match guess with random', () => {
-    const math = MockMath(0.1, 0.5, 0.7)
-    const tty = MockTTY({
+    const math = mockMath(0.1, 0.5, 0.7)
+    const tty = testTTY({
       'Enter a number between 1 & 6: ': ['1'],
       'Enter your name: ': ['John']
     })
@@ -88,8 +60,8 @@ describe('Program', () => {
   })
 
   it('should encourage user on correct answer', () => {
-    const math = MockMath(0.1, 0.5, 0.7)
-    const tty = MockTTY({
+    const math = mockMath(0.1, 0.5, 0.7)
+    const tty = testTTY({
       'Enter a number between 1 & 6: ': ['2'],
       'Enter your name: ': ['John']
     })
@@ -108,8 +80,8 @@ describe('Program', () => {
   })
 
   it('should continue on pressing enter', () => {
-    const math = MockMath(0.1, 0.1, 0.1)
-    const tty = MockTTY({
+    const math = mockMath(0.1, 0.1, 0.1)
+    const tty = testTTY({
       'Enter a number between 1 & 6: ': ['2', '3'],
       'Enter your name: ': ['John'],
       'Press ⏎  to continue (or will exit in 3sec): ': ['', '']
@@ -134,7 +106,7 @@ describe('Program', () => {
   describe('canContinue', () => {
     context('when newline is provided', () => {
       it('should return true', () => {
-        const tty = MockTTY({
+        const tty = testTTY({
           'Press ⏎  to continue (or will exit in 3sec): ': ['']
         })
         const runtime = testRuntime()
@@ -145,14 +117,14 @@ describe('Program', () => {
     })
     context('when no input is provided', () => {
       it('should return false', () => {
-        const tty = MockTTY({})
+        const tty = testTTY({})
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(canContinue.provide({tty}))
 
         assert.isFalse(actual)
       })
       it('should output goodbye', () => {
-        const tty = MockTTY({})
+        const tty = testTTY({})
         const runtime = testRuntime()
         runtime.unsafeExecuteSync(canContinue.provide({tty}))
 
