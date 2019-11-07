@@ -38,13 +38,13 @@
     "lerna": "^3.18.3",
     "mocha": "^6.2.2",
     "prettier": "^1.18.2",
-    "semantic-release": "^15.13.27",
+    "semantic-release": "^15.13.30",
     "ts-codemod": "^4.0.3",
-    "tslint": "^5.20.0",
+    "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.15.0",
     "typedoc-plugin-markdown": "^2.2.11",
-    "typescript": "^3.6.4",
+    "typescript": "^3.7.2",
     "typescript-tslint-plugin": "^0.5.4"
   },
   "workspaces": [
