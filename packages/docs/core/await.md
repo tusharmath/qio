@@ -2,6 +2,4 @@
 title: Await
 ---
 
-
-
-# Coming Soon ...
+# Coming soon ...
