@@ -21,7 +21,8 @@
     ]
   },
   "entities": {
-    "Entities": [
+    "Core": [
+      "core/qio",
       "core/managed",
       "core/runtime",
       "core/fiber",
