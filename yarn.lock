@@ -10960,10 +10960,10 @@ truncate-html@^1.0.2:
     "@types/cheerio" "^0.22.8"
     cheerio "0.22.0"
 
-ts-codemod@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/ts-codemod/-/ts-codemod-4.0.3.tgz#fd9b18d657d24176e4c1a136adab992604fd235e"
-  integrity sha512-ccY0LNsWqN6NxIQWzMFmGciRTN0CjQy0Pv6if37e491d2OzpRW9+Dw7bCvARMXkAyytuKoOdSzc6ic8vQS95zQ==
+ts-codemod@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/ts-codemod/-/ts-codemod-4.0.4.tgz#af57f625ee7a6548d4fd07f927f19665e697874b"
+  integrity sha512-Jw6aaKsUozk8zalfiFRP5CtP3F4JSVE70ocLLEEYvDwoebOWfGU+V3Usf2Lcs59h9Az/D2IHKx6D0AW2gU6vuA==
   dependencies:
     chalk "^2.4.2"
     debug "^4.1.1"
@@ -10972,7 +10972,7 @@ ts-codemod@^4.0.3:
     ramda "^0.26.1"
     ts-curry "^1.0.4"
     ts-node "^8.4.1"
-    typescript "^3.6.4"
+    typescript "^3.7.2"
     yargs "^14.2.0"
 
 ts-curry@^1.0.4:
@@ -11138,11 +11138,6 @@ typescript@3.5.x:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
   integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
-
-typescript@^3.6.4:
-  version "3.6.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.4.tgz#b18752bb3792bc1a0281335f7f6ebf1bbfc5b91d"
-  integrity sha512-unoCll1+l+YK4i4F8f22TaNVPRHcD9PA3yCuZ8g5e0qGqlVlJ/8FSateOLLSagn+Yg5+ZwuPkL8LFUc0Jcvksg==
 
 typescript@^3.7.2:
   version "3.7.2"
