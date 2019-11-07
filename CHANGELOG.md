@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [21.1.0](https://github.com/tusharmath/qio/compare/v21.0.2...v21.1.0) (2019-11-07)
+
+
+### Bug Fixes
+
+* **package:** update dependencies ([e71f2ce](https://github.com/tusharmath/qio/commit/e71f2ced710a3790a7b898b1de895bb61b32a934))
+* **package:** update dependencies ([486d8bb](https://github.com/tusharmath/qio/commit/486d8bb864e14ea9d9150ac5da5d79e0ed334600))
+
+
+### Features
+
+* create @qio/console ([95402f7](https://github.com/tusharmath/qio/commit/95402f71fbe57edbe0eb3ae2955d4fb79013fecb))
+
+
+
+
+
 ## [21.0.2](https://github.com/tusharmath/qio/compare/v21.0.1...v21.0.2) (2019-11-06)
 
 **Note:** Version bump only for package qio

@@ -1,6 +1,6 @@
 {
   "name": "@qio/console",
-  "version": "21.0.2",
+  "version": "21.1.0",
   "description": "Console API using QIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
