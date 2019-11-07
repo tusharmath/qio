@@ -25,11 +25,12 @@
       "core/managed",
       "core/runtime",
       "core/fiber",
-      "core/stream",
       "core/ref",
       "core/await",
       "core/queue"
-    ]
+    ],
+    "Stream": ["stream/installation", "stream/stream"],
+    "Console": ["console/installation", "console/console"]
   },
   "benchmarks": {"Benchmarks": ["benchmarks"]}
 }
