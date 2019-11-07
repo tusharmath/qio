@@ -1,0 +1,42 @@
+{
+  "name": "@qio/console",
+  "version": "21.0.2",
+  "description": "Console API using QIO",
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "homepage": "https://github.com/tusharmath/qio#readme",
+  "license": "ISC",
+  "main": "lib/Console.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tusharmath/qio.git"
+  },
+  "keywords": [
+    "functional",
+    "console",
+    "qio",
+    "putStrLn",
+    "getStrLn"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/tusharmath/qio/issues"
+  },
+  "dependencies": {
+    "@qio/core": "^21.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0"
+  }
+}
