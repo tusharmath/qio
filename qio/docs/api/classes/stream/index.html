@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>api/classes/stream · QIO</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="[qio](/docs/api/README) › [Globals](/docs/api/globals) › [Stream](/docs/api/classes/stream)"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="api/classes/stream · QIO"/><meta property="og:type" content="website"/><meta property="og:url" content="https://qio.netlify.com/"/><meta property="og:description" content="[qio](/docs/api/README) › [Globals](/docs/api/globals) › [Stream](/docs/api/classes/stream)"/><meta property="og:image" content="https://qio.netlify.com/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://qio.netlify.com/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700&amp;display=swap"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:500|Lora&amp;display=swap"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><h2 class="headerTitle">QIO</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/concepts/introduction" target="_self">Concepts</a></li><li class=""><a href="/docs/core/installation" target="_self">Tutorial</a></li><li class=""><a href="/docs/core/qio" target="_self">Entities</a></li><li class=""><a href="/docs/api/globals" target="_self">API</a></li><li class=""><a href="/docs/others/ecosystem" target="_self">Ecosystem</a></li><li class=""><a href="/docs/others/benchmarks" target="_self">Benchmarks</a></li><li class=""><a href="https://github.com/tusharmath/qio" target="_self">Github</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">api/classes/stream</h1></header><article><div><span><p><a href="/docs/api/README">qio</a> › <a href="/docs/api/globals">Globals</a> › <a href="/docs/api/classes/stream">Stream</a></p>
+<h1><a class="anchor" aria-hidden="true" id="class-stream-a1-e1-r1"></a><a href="#class-stream-a1-e1-r1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Class: Stream &lt;<strong>A1, E1, R1</strong>&gt;</h1>
+<p>Represents a sequence of values that are emitted over time.</p>
+<h2><a class="anchor" aria-hidden="true" id="type-parameters"></a><a href="#type-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type parameters</h2>
+<p>▪ <strong>A1</strong></p>
+<p>The value that would be emitted by this stream.</p>
+<p>▪ <strong>E1</strong></p>
+<p>Possible errors that could be thrown by the stream.</p>
+<p>▪ <strong>R1</strong></p>
+<p>Environment needed to execute this instance.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">import</span> {Stream} <span class="hljs-keyword">from</span> <span class="hljs-string">'@qio/core'</span>
+
+<span class="hljs-keyword">const</span> s = Stream.of(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>).reduce(<span class="hljs-number">0</span>, <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a + b)
+
+<span class="hljs-keyword">const</span> runtime = defaultRuntime()
+runtime.execute(s.drain, <span class="hljs-built_in">console</span>.log) <span class="hljs-comment">// 6</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="hierarchy"></a><a href="#hierarchy" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hierarchy</h2>
+<ul>
+<li><strong>Stream</strong></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="index"></a><a href="#index" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Index</h2>
+<h3><a class="anchor" aria-hidden="true" id="constructors"></a><a href="#constructors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructors</h3>
+<ul>
+<li><a href="/docs/api/classes/stream#constructor">constructor</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="properties"></a><a href="#properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h3>
+<ul>
+<li><a href="/docs/api/classes/stream#fold">fold</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="accessors"></a><a href="#accessors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Accessors</h3>
+<ul>
+<li><a href="/docs/api/classes/stream#asarray">asArray</a></li>
+<li><a href="/docs/api/classes/stream#drain">drain</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="methods"></a><a href="#methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h3>
+<ul>
+<li><a href="/docs/api/classes/stream#chain">chain</a></li>
+<li><a href="/docs/api/classes/stream#const">const</a></li>
+<li><a href="/docs/api/classes/stream#filter">filter</a></li>
+<li><a href="/docs/api/classes/stream#foldleft">foldLeft</a></li>
+<li><a href="/docs/api/classes/stream#foreach">forEach</a></li>
+<li><a href="/docs/api/classes/stream#foreachwhile">forEachWhile</a></li>
+<li><a href="/docs/api/classes/stream#map">map</a></li>
+<li><a href="/docs/api/classes/stream#mapm">mapM</a></li>
+<li><a href="/docs/api/classes/stream#merge">merge</a></li>
+<li><a href="/docs/api/classes/stream#pipe">pipe</a></li>
+<li><a href="/docs/api/classes/stream#take">take</a></li>
+<li><a href="/docs/api/classes/stream#static-const">const</a></li>
+<li><a href="/docs/api/classes/stream#static-fromarray">fromArray</a></li>
+<li><a href="/docs/api/classes/stream#static-fromeffect">fromEffect</a></li>
+<li><a href="/docs/api/classes/stream#static-fromeventemitter">fromEventEmitter</a></li>
+<li><a href="/docs/api/classes/stream#static-fromqueue">fromQueue</a></li>
+<li><a href="/docs/api/classes/stream#static-interval">interval</a></li>
+<li><a href="/docs/api/classes/stream#static-of">of</a></li>
+<li><a href="/docs/api/classes/stream#static-produce">produce</a></li>
+<li><a href="/docs/api/classes/stream#static-range">range</a></li>
+<li><a href="/docs/api/classes/stream#static-reject">reject</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="constructors-1"></a><a href="#constructors-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructors</h2>
+<h3><a class="anchor" aria-hidden="true" id="constructor"></a><a href="#constructor" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>constructor</h3>
+<p>+ <strong>new Stream</strong>(<code>fold</code>: function): <em><a href="/docs/api/classes/stream">Stream</a></em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L173">packages/stream/lib/Stream.ts:173</a></em></p>
+<p>Constructor to create a new <a href="/docs/api/classes/stream">Stream</a></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>fold</strong>: <em>function</em></p>
+<p>▸ &lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>state</code>: A2, <code>cont</code>: function, <code>next</code>: function): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>state</strong>: <em>A2</em></p>
+<p>▪ <strong>cont</strong>: <em>function</em></p>
+<p>▸ (<code>s</code>: A2): <em>boolean</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>s</code></td><td>A2</td></tr>
+</tbody>
+</table>
+<p>▪ <strong>next</strong>: <em>function</em></p>
+<p>▸ (<code>s</code>: A2, <code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>s</code></td><td>A2</td></tr>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a></em></p>
+<h2><a class="anchor" aria-hidden="true" id="properties-1"></a><a href="#properties-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h2>
+<h3><a class="anchor" aria-hidden="true" id="fold"></a><a href="#fold" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>fold</h3>
+<p>• <strong>fold</strong>: <em>function</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L178">packages/stream/lib/Stream.ts:178</a></em></p>
+<h4><a class="anchor" aria-hidden="true" id="type-declaration"></a><a href="#type-declaration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type declaration:</h4>
+<p>▸ &lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>state</code>: A2, <code>cont</code>: function, <code>next</code>: function): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>state</strong>: <em>A2</em></p>
+<p>▪ <strong>cont</strong>: <em>function</em></p>
+<p>▸ (<code>s</code>: A2): <em>boolean</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>s</code></td><td>A2</td></tr>
+</tbody>
+</table>
+<p>▪ <strong>next</strong>: <em>function</em></p>
+<p>▸ (<code>s</code>: A2, <code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>s</code></td><td>A2</td></tr>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="accessors-1"></a><a href="#accessors-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Accessors</h2>
+<h3><a class="anchor" aria-hidden="true" id="asarray"></a><a href="#asarray" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>asArray</h3>
+<p>• <strong>get asArray</strong>(): <em><a href="/docs/api/classes/qio">QIO</a>‹A1[], E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L308">packages/stream/lib/Stream.ts:308</a></em></p>
+<p>Collects all the values from a stream and returns an Array of those values.</p>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹A1[], E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="drain"></a><a href="#drain" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>drain</h3>
+<p>• <strong>get drain</strong>(): <em><a href="/docs/api/classes/qio">QIO</a>‹void, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L28">packages/stream/lib/Stream.ts:28</a></em></p>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹void, E1, R1›</em></p>
+<h2><a class="anchor" aria-hidden="true" id="methods-1"></a><a href="#methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="chain"></a><a href="#chain" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>chain</h3>
+<p>▸ <strong>chain</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>aFb</code>: function): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L187">packages/stream/lib/Stream.ts:187</a></em></p>
+<p>Flattens the inner stream produced by the each value of the provided stream</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>aFb</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="const"></a><a href="#const" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>const</h3>
+<p>▸ <strong>const</strong>&lt;<strong>A2</strong>&gt;(<code>a</code>: A2): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L198">packages/stream/lib/Stream.ts:198</a></em></p>
+<p>Converts a stream to a constant stream</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A2</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="filter"></a><a href="#filter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>filter</h3>
+<p>▸ <strong>filter</strong>(<code>f</code>: function): <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L204">packages/stream/lib/Stream.ts:204</a></em></p>
+<p>Creates a new streams that emits values, satisfied by the provided filter.</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>f</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em>boolean</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="foldleft"></a><a href="#foldleft" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>foldLeft</h3>
+<p>▸ <strong>foldLeft</strong>&lt;<strong>S2</strong>&gt;(<code>seed</code>: S2, <code>fn</code>: function): <em><a href="/docs/api/classes/qio">QIO</a>‹S2, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L215">packages/stream/lib/Stream.ts:215</a></em></p>
+<p>Folds a stream into a value.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>S2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>seed</strong>: <em>S2</em></p>
+<p>▪ <strong>fn</strong>: <em>function</em></p>
+<p>▸ (<code>s</code>: S2, <code>a</code>: A1): <em>S2</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>s</code></td><td>S2</td></tr>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹S2, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="foreach"></a><a href="#foreach" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>forEach</h3>
+<p>▸ <strong>forEach</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>f</code>: function): <em><a href="/docs/api/classes/qio">QIO</a>‹boolean, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L221">packages/stream/lib/Stream.ts:221</a></em></p>
+<p>Performs the given effect-full function for each value of the stream</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>f</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹boolean, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="foreachwhile"></a><a href="#foreachwhile" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>forEachWhile</h3>
+<p>▸ <strong>forEachWhile</strong>&lt;<strong>E2</strong>, <strong>R2</strong>&gt;(<code>f</code>: function): <em><a href="/docs/api/classes/qio">QIO</a>‹boolean, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L229">packages/stream/lib/Stream.ts:229</a></em></p>
+<p>Keeps consuming the stream until the effect-full function returns a false.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>f</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹boolean, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹boolean, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="map"></a><a href="#map" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>map</h3>
+<p>▸ <strong>map</strong>&lt;<strong>A2</strong>&gt;(<code>ab</code>: function): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L240">packages/stream/lib/Stream.ts:240</a></em></p>
+<p>Transforms the values that are being produced by the stream.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>ab</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em>A2</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="mapm"></a><a href="#mapm" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>mapM</h3>
+<p>▸ <strong>mapM</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>f</code>: function): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L249">packages/stream/lib/Stream.ts:249</a></em></p>
+<p>Performs an effect on each value emitted by the stream.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>f</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E1, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="merge"></a><a href="#merge" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>merge</h3>
+<p>▸ <strong>merge</strong>(<code>that</code>: <a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›): <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L260">packages/stream/lib/Stream.ts:260</a></em></p>
+<p>Merges two streams.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>that</code></td><td><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="pipe"></a><a href="#pipe" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>pipe</h3>
+<p>▸ <strong>pipe</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>fn</code>: function): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E2, R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L287">packages/stream/lib/Stream.ts:287</a></em></p>
+<p>Pipes the current stream through a function that creates a new Stream.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>fn</strong>: <em>function</em></p>
+<p>▸ (<code>a1</code>: <a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›): <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a1</code></td><td><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A2, E2, R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="take"></a><a href="#take" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>take</h3>
+<p>▸ <strong>take</strong>(<code>count</code>: number): <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L295">packages/stream/lib/Stream.ts:295</a></em></p>
+<p>Emits the first N values skipping the rest.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>count</code></td><td>number</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-const"></a><a href="#static-const" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> const</h3>
+<p>▸ <strong>const</strong>&lt;<strong>A1</strong>&gt;(<code>a</code>: A1): <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L34">packages/stream/lib/Stream.ts:34</a></em></p>
+<p>Creates a stream that constantly emits the provided value.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-fromarray"></a><a href="#static-fromarray" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> fromArray</h3>
+<p>▸ <strong>fromArray</strong>&lt;<strong>A1</strong>&gt;(<code>t</code>: A1[]): <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L43">packages/stream/lib/Stream.ts:43</a></em></p>
+<p>Create a stream from an array</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>t</code></td><td>A1[]</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-fromeffect"></a><a href="#static-fromeffect" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> fromEffect</h3>
+<p>▸ <strong>fromEffect</strong>&lt;<strong>A1</strong>, <strong>E1</strong>, <strong>R1</strong>&gt;(<code>io</code>: <a href="/docs/api/classes/qio">QIO</a>‹A1, E1, R1›): <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L61">packages/stream/lib/Stream.ts:61</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p>▪ <strong>R1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>io</code></td><td><a href="/docs/api/classes/qio">QIO</a>‹A1, E1, R1›</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-fromeventemitter"></a><a href="#static-fromeventemitter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> fromEventEmitter</h3>
+<p>▸ <strong>fromEventEmitter</strong>&lt;<strong>A</strong>&gt;(<code>ev</code>: EventEmitter, <code>name</code>: string): <em><a href="/docs/api/classes/qio">QIO</a>‹<a href="/docs/api/classes/managed">Managed</a>‹<a href="/docs/api/classes/stream">Stream</a>‹A›››</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L76">packages/stream/lib/Stream.ts:76</a></em></p>
+<p>Creates a stream of events from an event emitter.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>ev</code></td><td>EventEmitter</td></tr>
+<tr><td><code>name</code></td><td>string</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹<a href="/docs/api/classes/managed">Managed</a>‹<a href="/docs/api/classes/stream">Stream</a>‹A›››</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-fromqueue"></a><a href="#static-fromqueue" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> fromQueue</h3>
+<p>▸ <strong>fromQueue</strong>&lt;<strong>A1</strong>&gt;(<code>Q</code>: <a href="/docs/api/classes/queue">Queue</a>‹A1›): <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L95">packages/stream/lib/Stream.ts:95</a></em></p>
+<p>Creates a stream from a <a href="/docs/api/classes/queue">Queue</a></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Q</code></td><td><a href="/docs/api/classes/queue">Queue</a>‹A1›</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-interval"></a><a href="#static-interval" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> interval</h3>
+<p>▸ <strong>interval</strong>&lt;<strong>A1</strong>&gt;(<code>A1</code>: A1, <code>duration</code>: number): <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L117">packages/stream/lib/Stream.ts:117</a></em></p>
+<p>Creates a stream that emits after every given duration of time.</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A1</code></td><td>A1</td></tr>
+<tr><td><code>duration</code></td><td>number</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-of"></a><a href="#static-of" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> of</h3>
+<p>▸ <strong>of</strong>&lt;<strong>A1</strong>&gt;(...<code>t</code>: A1[]): <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L124">packages/stream/lib/Stream.ts:124</a></em></p>
+<p>Creates a stream from the provided values</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>...t</code></td><td>A1[]</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-produce"></a><a href="#static-produce" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> produce</h3>
+<p>▸ <strong>produce</strong>&lt;<strong>A1</strong>, <strong>E1</strong>, <strong>R1</strong>&gt;(<code>io</code>: <a href="/docs/api/classes/qio">QIO</a>‹A1, E1, R1›): <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L131">packages/stream/lib/Stream.ts:131</a></em></p>
+<p>Creates a stream by continuously executing the provided IO</p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p>▪ <strong>R1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>io</code></td><td><a href="/docs/api/classes/qio">QIO</a>‹A1, E1, R1›</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹A1, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-range"></a><a href="#static-range" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> range</h3>
+<p>▸ <strong>range</strong>(<code>min</code>: number, <code>max</code>: number): <em><a href="/docs/api/classes/stream">Stream</a>‹number›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L153">packages/stream/lib/Stream.ts:153</a></em></p>
+<p>Creates a stream that emits the given ranges of values</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>min</code></td><td>number</td></tr>
+<tr><td><code>max</code></td><td>number</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹number›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-reject"></a><a href="#static-reject" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> reject</h3>
+<p>▸ <strong>reject</strong>&lt;<strong>E1</strong>&gt;(<code>err</code>: E1): <em><a href="/docs/api/classes/stream">Stream</a>‹never, E1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/stream/lib/Stream.ts#L171">packages/stream/lib/Stream.ts:171</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>err</code></td><td>E1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/stream">Stream</a>‹never, E1›</em></p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#type-parameters">Type parameters</a></li><li><a href="#hierarchy">Hierarchy</a></li><li><a href="#index">Index</a><ul class="toc-headings"><li><a href="#constructors">Constructors</a></li><li><a href="#properties">Properties</a></li><li><a href="#accessors">Accessors</a></li><li><a href="#methods">Methods</a></li></ul></li><li><a href="#constructors-1">Constructors</a><ul class="toc-headings"><li><a href="#constructor">constructor</a></li></ul></li><li><a href="#properties-1">Properties</a><ul class="toc-headings"><li><a href="#fold">fold</a></li></ul></li><li><a href="#accessors-1">Accessors</a><ul class="toc-headings"><li><a href="#asarray">asArray</a></li><li><a href="#drain">drain</a></li></ul></li><li><a href="#methods-1">Methods</a><ul class="toc-headings"><li><a href="#chain">chain</a></li><li><a href="#const">const</a></li><li><a href="#filter">filter</a></li><li><a href="#foldleft">foldLeft</a></li><li><a href="#foreach">forEach</a></li><li><a href="#foreachwhile">forEachWhile</a></li><li><a href="#map">map</a></li><li><a href="#mapm">mapM</a></li><li><a href="#merge">merge</a></li><li><a href="#pipe">pipe</a></li><li><a href="#take">take</a></li><li><a href="#static-const"><code>Static</code> const</a></li><li><a href="#static-fromarray"><code>Static</code> fromArray</a></li><li><a href="#static-fromeffect"><code>Static</code> fromEffect</a></li><li><a href="#static-fromeventemitter"><code>Static</code> fromEventEmitter</a></li><li><a href="#static-fromqueue"><code>Static</code> fromQueue</a></li><li><a href="#static-interval"><code>Static</code> interval</a></li><li><a href="#static-of"><code>Static</code> of</a></li><li><a href="#static-produce"><code>Static</code> produce</a></li><li><a href="#static-range"><code>Static</code> range</a></li><li><a href="#static-reject"><code>Static</code> reject</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><h5>More</h5><a href="/docs/credits.html">Credits</a><a class="github-button" data-icon="octicon-star" data-count-href="/tusharmath/qio/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 tusharmath.com</section></footer></div></body></html>

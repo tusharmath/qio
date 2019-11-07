@@ -1,0 +1,183 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>api/classes/managed · QIO</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="[qio](/docs/api/README) › [Globals](/docs/api/globals) › [Managed](/docs/api/classes/managed)"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="api/classes/managed · QIO"/><meta property="og:type" content="website"/><meta property="og:url" content="https://qio.netlify.com/"/><meta property="og:description" content="[qio](/docs/api/README) › [Globals](/docs/api/globals) › [Managed](/docs/api/classes/managed)"/><meta property="og:image" content="https://qio.netlify.com/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://qio.netlify.com/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700&amp;display=swap"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:500|Lora&amp;display=swap"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><h2 class="headerTitle">QIO</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/concepts/introduction" target="_self">Concepts</a></li><li class=""><a href="/docs/core/installation" target="_self">Tutorial</a></li><li class=""><a href="/docs/core/qio" target="_self">Entities</a></li><li class=""><a href="/docs/api/globals" target="_self">API</a></li><li class=""><a href="/docs/others/ecosystem" target="_self">Ecosystem</a></li><li class=""><a href="/docs/others/benchmarks" target="_self">Benchmarks</a></li><li class=""><a href="https://github.com/tusharmath/qio" target="_self">Github</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">api/classes/managed</h1></header><article><div><span><p><a href="/docs/api/README">qio</a> › <a href="/docs/api/globals">Globals</a> › <a href="/docs/api/classes/managed">Managed</a></p>
+<h1><a class="anchor" aria-hidden="true" id="class-managed-a1-e1-r1"></a><a href="#class-managed-a1-e1-r1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Class: Managed &lt;<strong>A1, E1, R1</strong>&gt;</h1>
+<p>Is a special data structures that encapsulates the acquisition and the release of a resource.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">'fs'</span>
+<span class="hljs-keyword">import</span> {QIO, Managed} <span class="hljs-keyword">from</span> <span class="hljs-string">'@qio/core'</span>
+
+<span class="hljs-comment">// Utility Functions</span>
+<span class="hljs-keyword">const</span> fsOpen = <span class="hljs-function">(<span class="hljs-params">name: <span class="hljs-built_in">string</span></span>) =&gt;</span> QIO.node(<span class="hljs-function"><span class="hljs-params">cb</span> =&gt;</span> fs.open(name, cb))
+<span class="hljs-keyword">const</span> fsClose = <span class="hljs-function">(<span class="hljs-params">fd: <span class="hljs-built_in">number</span></span>) =&gt;</span> QIO.try(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> fs.close(fd))
+<span class="hljs-keyword">const</span> fsWrite = <span class="hljs-function">(<span class="hljs-params">fd: <span class="hljs-built_in">number</span>, text: <span class="hljs-built_in">string</span></span>) =&gt;</span> QIO.node(<span class="hljs-function">(<span class="hljs-params">cb</span>) =&gt;</span> fs.write(fd, text, cb))
+
+<span class="hljs-comment">// Create a managed File Descriptor resource</span>
+<span class="hljs-keyword">const</span> fdManaged = <span class="hljs-function">(<span class="hljs-params">name: <span class="hljs-built_in">string</span></span>) =&gt;</span> Managed.make(fsOpen(name), fsClose)
+
+<span class="hljs-comment">// Use the `fdManaged` to write the file.</span>
+fdManaged(<span class="hljs-string">'./data.json'</span>).use(<span class="hljs-function"><span class="hljs-params">fd</span> =&gt;</span> fsWrite(fd, <span class="hljs-string">'HI'</span>))
+</code></pre>
+<p>In the above example as soon as the <code>fsWrite</code> is completed the file descriptor is automatically released.</p>
+<h2><a class="anchor" aria-hidden="true" id="type-parameters"></a><a href="#type-parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type parameters</h2>
+<p>▪ <strong>A1</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p>▪ <strong>R1</strong></p>
+<h2><a class="anchor" aria-hidden="true" id="hierarchy"></a><a href="#hierarchy" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hierarchy</h2>
+<ul>
+<li><strong>Managed</strong></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="index"></a><a href="#index" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Index</h2>
+<h3><a class="anchor" aria-hidden="true" id="methods"></a><a href="#methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h3>
+<ul>
+<li><a href="/docs/api/classes/managed#chain">chain</a></li>
+<li><a href="/docs/api/classes/managed#map">map</a></li>
+<li><a href="/docs/api/classes/managed#use">use</a></li>
+<li><a href="/docs/api/classes/managed#zipwith">zipWith</a></li>
+<li><a href="/docs/api/classes/managed#static-make">make</a></li>
+<li><a href="/docs/api/classes/managed#static-of">of</a></li>
+<li><a href="/docs/api/classes/managed#static-zip">zip</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="methods-1"></a><a href="#methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="chain"></a><a href="#chain" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>chain</h3>
+<p>▸ <strong>chain</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>fn</code>: function): <em><a href="/docs/api/classes/managed">Managed</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L61">packages/core/lib/main/Managed.ts:61</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>fn</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/managed">Managed</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/managed">Managed</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="map"></a><a href="#map" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>map</h3>
+<p>▸ <strong>map</strong>&lt;<strong>A2</strong>&gt;(<code>fn</code>: function): <em><a href="/docs/api/classes/managed">Managed</a>‹A2, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L83">packages/core/lib/main/Managed.ts:83</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>fn</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em>A2</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/managed">Managed</a>‹A2, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="use"></a><a href="#use" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>use</h3>
+<p>▸ <strong>use</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>&gt;(<code>fn</code>: function): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L88">packages/core/lib/main/Managed.ts:88</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>fn</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E2, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/qio">QIO</a>‹A2, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="zipwith"></a><a href="#zipwith" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>zipWith</h3>
+<p>▸ <strong>zipWith</strong>&lt;<strong>A2</strong>, <strong>E2</strong>, <strong>R2</strong>, <strong>X</strong>&gt;(<code>that</code>: <a href="/docs/api/classes/managed">Managed</a>‹A2, E2, R2›, <code>fn</code>: function): <em><a href="/docs/api/classes/managed">Managed</a>‹X, E1 | E2, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L105">packages/core/lib/main/Managed.ts:105</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A2</strong></p>
+<p>▪ <strong>E2</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p>▪ <strong>X</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>that</strong>: <em><a href="/docs/api/classes/managed">Managed</a>‹A2, E2, R2›</em></p>
+<p>▪ <strong>fn</strong>: <em>function</em></p>
+<p>▸ (<code>a1</code>: A1, <code>a2</code>: A2): <em>X</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a1</code></td><td>A1</td></tr>
+<tr><td><code>a2</code></td><td>A2</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/managed">Managed</a>‹X, E1 | E2, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-make"></a><a href="#static-make" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> make</h3>
+<p>▸ <strong>make</strong>&lt;<strong>A1</strong>, <strong>E1</strong>, <strong>R1</strong>, <strong>R2</strong>&gt;(<code>acquire</code>: <a href="/docs/api/classes/qio">QIO</a>‹A1, E1, R1›, <code>release</code>: function): <em><a href="/docs/api/classes/managed">Managed</a>‹A1, E1, R1 &amp; R2›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L30">packages/core/lib/main/Managed.ts:30</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p>▪ <strong>R1</strong></p>
+<p>▪ <strong>R2</strong></p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>acquire</strong>: <em><a href="/docs/api/classes/qio">QIO</a>‹A1, E1, R1›</em></p>
+<p>▪ <strong>release</strong>: <em>function</em></p>
+<p>▸ (<code>a</code>: A1): <em><a href="/docs/api/classes/qio">QIO</a>‹void, never, R2›</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>a</code></td><td>A1</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/managed">Managed</a>‹A1, E1, R1 &amp; R2›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-of"></a><a href="#static-of" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> of</h3>
+<p>▸ <strong>of</strong>&lt;<strong>A1</strong>, <strong>E1</strong>, <strong>R1</strong>&gt;(<code>reservation</code>: <a href="/docs/api/classes/qio">QIO</a>‹<a href="/docs/api/classes/reservation">Reservation</a>‹A1, E1, R1›, E1, R1›): <em><a href="/docs/api/classes/managed">Managed</a>‹A1, E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L42">packages/core/lib/main/Managed.ts:42</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p>▪ <strong>R1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>reservation</code></td><td><a href="/docs/api/classes/qio">QIO</a>‹<a href="/docs/api/classes/reservation">Reservation</a>‹A1, E1, R1›, E1, R1›</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/managed">Managed</a>‹A1, E1, R1›</em></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="static-zip"></a><a href="#static-zip" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>Static</code> zip</h3>
+<p>▸ <strong>zip</strong>&lt;<strong>A1</strong>, <strong>E1</strong>, <strong>R1</strong>&gt;(<code>managed</code>: Array‹<a href="/docs/api/classes/managed">Managed</a>‹A1, E1, R1››): <em><a href="/docs/api/classes/managed">Managed</a>‹A1[], E1, R1›</em></p>
+<p><em>Defined in <a href="https://github.com/tusharmath/qio/blob/eede799/packages/core/lib/main/Managed.ts#L47">packages/core/lib/main/Managed.ts:47</a></em></p>
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>A1</strong></p>
+<p>▪ <strong>E1</strong></p>
+<p>▪ <strong>R1</strong></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th></tr>
+</thead>
+<tbody>
+<tr><td><code>managed</code></td><td>Array‹<a href="/docs/api/classes/managed">Managed</a>‹A1, E1, R1››</td></tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="/docs/api/classes/managed">Managed</a>‹A1[], E1, R1›</em></p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#type-parameters">Type parameters</a></li><li><a href="#hierarchy">Hierarchy</a></li><li><a href="#index">Index</a><ul class="toc-headings"><li><a href="#methods">Methods</a></li></ul></li><li><a href="#methods-1">Methods</a><ul class="toc-headings"><li><a href="#chain">chain</a></li><li><a href="#map">map</a></li><li><a href="#use">use</a></li><li><a href="#zipwith">zipWith</a></li><li><a href="#static-make"><code>Static</code> make</a></li><li><a href="#static-of"><code>Static</code> of</a></li><li><a href="#static-zip"><code>Static</code> zip</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><h5>More</h5><a href="/docs/credits.html">Credits</a><a class="github-button" data-icon="octicon-star" data-count-href="/tusharmath/qio/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 tusharmath.com</section></footer></div></body></html>

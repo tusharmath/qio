@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Type Signature · QIO</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="```ts"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Type Signature · QIO"/><meta property="og:type" content="website"/><meta property="og:url" content="https://qio.netlify.com/"/><meta property="og:description" content="```ts"/><meta property="og:image" content="https://qio.netlify.com/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://qio.netlify.com/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700&amp;display=swap"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:500|Lora&amp;display=swap"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><h2 class="headerTitle">QIO</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/concepts/introduction" target="_self">Concepts</a></li><li class=""><a href="/docs/core/installation" target="_self">Tutorial</a></li><li class=""><a href="/docs/core/qio" target="_self">Entities</a></li><li class=""><a href="/docs/api/globals" target="_self">API</a></li><li class=""><a href="/docs/others/ecosystem" target="_self">Ecosystem</a></li><li class=""><a href="/docs/others/benchmarks" target="_self">Benchmarks</a></li><li class=""><a href="https://github.com/tusharmath/qio" target="_self">Github</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Type Signature</h1></header><article><div><span><pre><code class="hljs css language-ts"><span class="hljs-keyword">interface</span> QIO&lt;A, E, R&gt; {
+  <span class="hljs-comment">// ... Operators</span>
+}
+</code></pre>
+<p><code>QIO</code> takes in three type params viz. —</p>
+<ol>
+<li><code>A</code> The type of the success value that will be emitted by the IO on completion.</li>
+<li><code>E</code> The error types that can be emitted while this IO is executing.</li>
+<li><code>R</code> Represents the type of environment needed to execute this IO.</li>
+</ol>
+<p>Using these three type params you can fairly represent any side-effect. For example lets say there is function <code>Greet</code> which simply prints &quot;Hello World&quot; —</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> Greet = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello World!'</span>)
+</code></pre>
+<p>To represent <code>Greet</code> —</p>
+<ol>
+<li><code>A</code> could be <code>void</code>: The output of running the program is empty.</li>
+<li><code>E</code> could be <code>never</code>: Printing anything on console never fails.</li>
+<li><code>R</code> could be <code>unknown</code>: since <code>console.log</code> works everywhere.</li>
+</ol>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> GreetIO = Greet() <span class="hljs-comment">// QIO&lt;never, void, unknown&gt;</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><h5>More</h5><a href="/docs/credits.html">Credits</a><a class="github-button" data-icon="octicon-star" data-count-href="/tusharmath/qio/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 tusharmath.com</section></footer></div></body></html>

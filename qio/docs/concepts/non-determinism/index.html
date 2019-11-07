@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Non Determinism · QIO</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Another typical problem that a real world program needs to deal with is non-determinism. When the giving the same input to a program produces different results, its called as non-determinism, for eg:"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Non Determinism · QIO"/><meta property="og:type" content="website"/><meta property="og:url" content="https://qio.netlify.com/"/><meta property="og:description" content="Another typical problem that a real world program needs to deal with is non-determinism. When the giving the same input to a program produces different results, its called as non-determinism, for eg:"/><meta property="og:image" content="https://qio.netlify.com/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://qio.netlify.com/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700&amp;display=swap"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:500|Lora&amp;display=swap"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><h2 class="headerTitle">QIO</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/concepts/introduction" target="_self">Concepts</a></li><li class=""><a href="/docs/core/installation" target="_self">Tutorial</a></li><li class=""><a href="/docs/core/qio" target="_self">Entities</a></li><li class=""><a href="/docs/api/globals" target="_self">API</a></li><li class=""><a href="/docs/others/ecosystem" target="_self">Ecosystem</a></li><li class=""><a href="/docs/others/benchmarks" target="_self">Benchmarks</a></li><li class=""><a href="https://github.com/tusharmath/qio" target="_self">Github</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Concepts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Concepts</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/concepts/introduction">Introduction</a></li><li class="navListItem"><a class="navItem" href="/docs/concepts/side-effects">Side Effects</a></li><li class="navListItem"><a class="navItem" href="/docs/concepts/exceptions-anomalies">Exception  Anomalies</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/concepts/non-determinism">Non Determinism</a></li><li class="navListItem"><a class="navItem" href="/docs/concepts/pure-functions">Pure Functions</a></li><li class="navListItem"><a class="navItem" href="/docs/concepts/referential-transparency">Referential Transparency</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Non Determinism</h1></header><article><div><span><p>Another typical problem that a real world program needs to deal with is non-determinism. When the giving the same input to a program produces different results, its called as non-determinism, for eg:</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> elapsedTime = (dob: <span class="hljs-built_in">Date</span>): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> today = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>()
+  <span class="hljs-keyword">return</span> today.getTime() - dob.getTime()
+}
+</code></pre>
+<p>The function <code>calculateAge</code> when given the same input will produce different results as time passes. The program doesn't cause any <a href="side-effects">side-effects</a> but is non-deterministic.</p>
+<h2><a class="anchor" aria-hidden="true" id="problems"></a><a href="#problems" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Problems</h2>
+<p>The problem with non-deterministic functions is that they are extremely hard to test. For eg. to test <code>elapsedTime</code> we would need to inject the today's date from outside:</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> elapsedTime = (dob: <span class="hljs-built_in">Date</span>, today: <span class="hljs-built_in">Date</span>): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> {
+  <span class="hljs-keyword">return</span> today.getTime() - dob.getTime()
+}
+</code></pre>
+<p>This solves the problem locally but it also shifts it up to its caller:</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> elapsedTime = (dob: <span class="hljs-built_in">Date</span>, today: <span class="hljs-built_in">Date</span>): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> {
+  <span class="hljs-keyword">return</span> today.getTime() - dob.getTime()
+}
+
+<span class="hljs-keyword">const</span> main = (today: <span class="hljs-built_in">Date</span>): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> dob = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">1980</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+  <span class="hljs-keyword">return</span> elapsedTime(dob, today)
+}
+</code></pre>
+<p>This isn't scalable because as more dependencies are added or removed, every function between the consumer of the dependency and the root function will have change their signature.</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> foo = (math: <span class="hljs-built_in">Math</span>): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">const</span> main = (today: <span class="hljs-built_in">Date</span>, math: <span class="hljs-built_in">Math</span>): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> dob = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">1980</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+  <span class="hljs-keyword">const</span> bar = foo(math)
+  <span class="hljs-keyword">return</span> elapsedTime(dob, today) + bar
+}
+</code></pre>
+<!--
+## Solving using QIO
+<p>Using QIO, we can solve this problem in a more manageable way.</p>
+<h3><a class="anchor" aria-hidden="true" id="define-environment-dependencies"></a><a href="#define-environment-dependencies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Define Environment Dependencies</h3>
+<p>First we create wrapper types on top of each dependency. It's a simple interface that will provide access to those environments.</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">interface</span> DateEnv = {
+  <span class="hljs-built_in">Date</span>: <span class="hljs-built_in">Date</span>
+}
+
+<span class="hljs-keyword">interface</span> MathEnv = {
+  <span class="hljs-built_in">Math</span>: <span class="hljs-built_in">Math</span>
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="access-the-environment"></a><a href="#access-the-environment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Access the environment</h3>
+<p>We change the implementation for <code>elapsedTime</code> to use the <code>DateEnv</code>:</p>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> elapsedTime = (dob: <span class="hljs-built_in">Date</span>): QIO&lt;<span class="hljs-built_in">number</span>, never, DateEnv&gt; =&gt; {
+  <span class="hljs-keyword">return</span> QIO.access(<span class="hljs-function">(<span class="hljs-params">_: DateEnv</span>) =&gt;</span> _.Date().getTime() - dob)
+}
+
+<span class="hljs-keyword">const</span> foo = (): QIO&lt;<span class="hljs-built_in">number</span>, never, MathEnv&gt; =&gt; {
+  <span class="hljs-comment">// ...</span>
+}
+</code></pre>
+<p>The return type of both the functions now contain information about the specific environment they need.</p>
+<h3><a class="anchor" aria-hidden="true" id="composing-the-environment"></a><a href="#composing-the-environment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Composing the environment</h3>
+<pre><code class="hljs css language-ts"><span class="hljs-keyword">const</span> main = (): QIO&lt;<span class="hljs-built_in">number</span>, never, DateEnv &amp; MathEnv&gt; =&gt; {
+  <span class="hljs-keyword">const</span> dob = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">1980</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+
+  <span class="hljs-keyword">return</span> elapsedTime(dob).zipWith(foo(), <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a + b)
+}
+</code></pre>
+<p>Combining <code>elapsedTime</code> with <code>foo</code> using the <code>zipWith</code> operator ensure that the final environment that is needed is of the type of <code>DateEnv &amp; MathEnv</code>.</p>
+<p>Adding more external environment dependencies doesn't require you to change the signature of function arguments.</p>
+<p>QIO will automatically compose these environments for you so that you can provide it the final env at the time of evaluation.</p>
+<pre><code class="hljs css language-ts">main() <span class="hljs-comment">// QIO&lt;number, never, DateEnv &amp; MathEnv&gt;</span>
+main().provide({<span class="hljs-built_in">Math</span>, <span class="hljs-built_in">Date</span>}) <span class="hljs-comment">// QIO&lt;number&gt;</span>
+<span class="hljs-string">``</span><span class="hljs-string">` --&gt;
+</span></code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/concepts/exceptions-anomalies"><span class="arrow-prev">← </span><span>Exception  Anomalies</span></a><a class="docs-next button" href="/docs/concepts/pure-functions"><span>Pure Functions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#problems">Problems</a></li><li><a href="#solving-using-qio">Solving using QIO</a><ul class="toc-headings"><li><a href="#define-environment-dependencies">Define Environment Dependencies</a></li><li><a href="#access-the-environment">Access the environment</a></li><li><a href="#composing-the-environment">Composing the environment</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><h5>More</h5><a href="/docs/credits.html">Credits</a><a class="github-button" data-icon="octicon-star" data-count-href="/tusharmath/qio/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 tusharmath.com</section></footer></div></body></html>
