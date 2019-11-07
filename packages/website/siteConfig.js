@@ -45,7 +45,7 @@ const siteConfig = {
     // {page: 'help', label: 'Help'},
     {doc: 'concepts/introduction', label: 'Concepts'},
     {doc: 'core/installation', label: 'Tutorial'},
-    {doc: 'core/managed', label: 'Entities'},
+    {doc: 'core/qio', label: 'Entities'},
     {doc: 'api/globals', label: 'API'},
     {doc: 'others/ecosystem', label: 'Ecosystem'},
     {doc: 'others/benchmarks', label: 'Benchmarks'},
