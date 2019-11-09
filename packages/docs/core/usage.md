@@ -3,10 +3,7 @@ title: Usage
 sidebar_label: Usage
 ---
 
-QIO is merely a data structure that represents a side-effect. It doesn't actually perform the side effect itself. The effect is performed by the QIO Runtime lazily. It helps convert [impure functions] to [pure functions].
-
-[impure functions]: impure-functions
-[pure functions]: pure-functions
+QIO is merely a data structure that represents a side-effect. It doesn't actually perform the side effect itself. The effect is performed by the QIO Runtime lazily. It helps convert **impure functions** to **pure functions**.
 
 `QIO` uses three type params to represent an effect safely:
 
