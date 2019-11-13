@@ -1,6 +1,6 @@
 {
   "name": "@qio/http",
-  "version": "21.1.2",
+  "version": "21.2.0",
   "description": "QIO bindings for HTTP",
   "keywords": [
     "http",
