@@ -17,7 +17,7 @@ defaultRuntime().unsafeExecute(program)
 
 For more complex use cases checkout the [website](https://qio.netlify.com).
 
-# Packages
+## Packages
 
 | Package          | Description                                                            | Version                                               |
 | ---------------- | ---------------------------------------------------------------------- | ----------------------------------------------------- |
