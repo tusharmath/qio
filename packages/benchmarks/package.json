@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
-    "@types/bluebird": "^3.5.28",
+    "@types/bluebird": "^3.5.29",
     "benchmark": "^2.1.4",
     "bluebird": "^3.7.1",
     "fluture": "^11.0.3"
