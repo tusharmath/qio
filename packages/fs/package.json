@@ -1,0 +1,44 @@
+{
+  "name": "@qio/fs",
+  "version": "21.2.0",
+  "description": "QIO based bindings for interacting with the file system",
+  "keywords": [
+    "fs",
+    "pure",
+    "immutable",
+    "functional",
+    "programming",
+    "qio"
+  ],
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "homepage": "https://github.com/tusharmath/qio#readme",
+  "license": "ISC",
+  "main": "lib/FS.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tusharmath/qio.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/tusharmath/qio/issues"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.5"
+  },
+  "dependencies": {
+    "@qio/core": "^21.0.0",
+    "chai": "^4.2.0"
+  }
+}

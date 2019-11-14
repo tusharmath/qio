@@ -26,3 +26,4 @@ For more complex use cases checkout the [website](https://qio.netlify.com).
 | **@qio/stream**  | Purely functional streaming capabilities built on top of QIO.          | ![npm](https://img.shields.io/npm/v/@qio/stream.svg)  |
 | **@qio/console** | QIO based bindings to read and write to the terminal.                  | ![npm](https://img.shields.io/npm/v/@qio/console.svg) |
 | **@qio/http**    | QIO based binding to manage HTTP request/responses safely.             | ![npm](https://img.shields.io/npm/v/@qio/http.svg)    |
+| **@qio/fs**      | QIO based binding to manage HTTP request/responses safely.             | ![npm](https://img.shields.io/npm/v/@qio/fs.svg)      |
