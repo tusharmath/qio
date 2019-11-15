@@ -687,7 +687,11 @@ describe('QIO', () => {
 
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        a.raceWith(b, () => QIO.of(10), () => QIO.of(20))
+        a.raceWith(
+          b,
+          () => QIO.of(10),
+          () => QIO.of(20)
+        )
       )
 
       assert.strictEqual(actual, 10)

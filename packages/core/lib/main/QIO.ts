@@ -328,7 +328,9 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return ios
       .reduce(
         (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
-        QIO.env<R1>().and(QIO.lift<List<A1>, E1>(() => List.empty<A1>()))
+        QIO.env<R1>().and(
+          QIO.lift<List<A1>, E1>(() => List.empty<A1>())
+        )
       )
       .map(_ => _.asArray.reverse())
   }

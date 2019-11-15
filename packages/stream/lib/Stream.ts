@@ -33,7 +33,11 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static const<A1>(a: A1): Stream<A1> {
     return new Stream((s, cont, next) =>
-      QIO.if0()(() => cont(s), () => next(s, a), () => QIO.of(s))
+      QIO.if0()(
+        () => cont(s),
+        () => next(s, a),
+        () => QIO.of(s)
+      )
     )
   }
 
@@ -204,7 +208,11 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   public filter(f: (a: A1) => boolean): Stream<A1, E1, R1> {
     return new Stream((state, cont, next) =>
       this.fold(state, cont, (s, a) =>
-        QIO.if0()(() => f(a), () => next(s, a), () => QIO.of(s))
+        QIO.if0()(
+          () => f(a),
+          () => next(s, a),
+          () => QIO.of(s)
+        )
       )
     )
   }
@@ -230,7 +238,11 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
     f: (a: A1) => QIO<boolean, E2, R2>
   ): QIO<boolean, E1 | E2, R1 & R2> {
     return this.fold(true as boolean, Id, (s, a) =>
-      QIO.if0()(() => s, () => f(a), () => QIO.of(s))
+      QIO.if0()(
+        () => s,
+        () => f(a),
+        () => QIO.of(s)
+      )
     )
   }
 
