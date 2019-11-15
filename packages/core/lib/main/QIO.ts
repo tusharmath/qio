@@ -20,9 +20,9 @@ const D = debug('qio:core')
  * Callback function used in node.js to handle async operations.
  * @ignore
  */
-export type NodeJSCallback<A> = (
+export type NodeJSCallback<T extends unknown[]> = (
   err: NodeJS.ErrnoException | null,
-  result?: A
+  ...t: T
 ) => void
 
 /**
@@ -297,14 +297,14 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * const fsOpen = c.node(cb => fs.open('./data.txt', cb))
    * ```
    */
-  public static node<A = never>(
+  public static node<A extends unknown[]>(
     fn: (cb: NodeJSCallback<A>) => void
-  ): QIO<A | undefined, NodeJS.ErrnoException> {
+  ): QIO<A, NodeJS.ErrnoException> {
     return QIO.runtime().chain(RTM =>
-      QIO.asyncIO<A | undefined, NodeJS.ErrnoException>((res, rej) =>
+      QIO.asyncIO<A, NodeJS.ErrnoException>((res, rej) =>
         RTM.scheduler.asap(() => {
           try {
-            fn((err, result) => (err === null ? res(result) : rej(err)))
+            fn((err, ...t) => (err === null ? res(t) : rej(err)))
           } catch (e) {
             rej(e as NodeJS.ErrnoException)
           }

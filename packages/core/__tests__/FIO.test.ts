@@ -910,11 +910,10 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         // tslint:disable-next-line: no-null-keyword
-        QIO.node<number>(cb => cb(null, 1000))
+        QIO.node<[number]>(cb => cb(null, 1000))
       )
-      const expected = 1000
 
-      assert.strictEqual(actual, expected)
+      assert.deepStrictEqual(actual, [1000])
     })
   })
 
