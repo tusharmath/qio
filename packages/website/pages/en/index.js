@@ -80,24 +80,13 @@ class Index extends React.Component {
     const {baseUrl} = siteConfig
 
     const Block = props => (
-      <Container
-        padding={['bottom', 'top']}
-        id={props.id}
-        background={props.background}
-      >
-        <GridBlock
-          align="center"
-          contents={props.children}
-          layout={props.layout}
-        />
+      <Container padding={['bottom', 'top']} id={props.id} background={props.background}>
+        <GridBlock align="center" contents={props.children} layout={props.layout} />
       </Container>
     )
 
     const FeatureCallout = () => (
-      <div
-        className="productShowcaseSection paddingBottom"
-        style={{textAlign: 'center'}}
-      >
+      <div className="productShowcaseSection paddingBottom" style={{textAlign: 'center'}}>
         <h2>Feature Callout</h2>
         <MarkdownBlock>These are features of this project</MarkdownBlock>
       </div>
@@ -123,8 +112,7 @@ class Index extends React.Component {
       <Block background="dark">
         {[
           {
-            content:
-              'This is another description of how this project is useful',
+            content: 'This is another description of how this project is useful',
             image: `${baseUrl}img/undraw_note_list.svg`,
             imageAlign: 'right',
             title: 'Description'
@@ -137,8 +125,7 @@ class Index extends React.Component {
       <Block background="light">
         {[
           {
-            content:
-              'Each new Docusaurus project has **randomly-generated** theme colors.',
+            content: 'Each new Docusaurus project has **randomly-generated** theme colors.',
             image: `${baseUrl}img/undraw_youtube_tutorial.svg`,
             imageAlign: 'right',
             title: 'Randomly Generated Theme Colors'
@@ -151,43 +138,38 @@ class Index extends React.Component {
       <Block layout="fourColumn">
         {[
           {
-            content:
-              'Build high performance applications without significant abstraction overhead.',
+            content: 'Build high performance applications without significant abstraction overhead.',
             // image: `${baseUrl}img/undraw_react.svg`,
             // imageAlign: 'top',
             title: 'High Performance'
           },
           {
-            content:
-              'Provides solid type-safety that can help catch bugs at compile time.',
+            content: 'Provides solid type-safety that can help catch bugs at compile time.',
             title: 'Type-Safety'
           },
           {
-            content:
-              'Write programs that perform CPU bound tasks concurrently.',
+            content: 'Write programs that perform CPU bound tasks concurrently.',
             title: 'Concurrency'
           },
           {
-            content:
-              'Writing applications without manually managing resource leaks.',
+            content: 'Writing applications without manually managing resource leaks.',
             title: 'Resource Safety'
           },
 
           {
             content: 'Write programs that are extremely easy to test.',
-            title: 'Testable'
+            title: 'Testability'
           },
 
           {
-            content:
-              "Write programs that provide type safety around errors and doesn't lose them ever.",
-            title: 'Resilient'
+            content: "Write programs that provide type safety around errors and doesn't lose them ever.",
+            title: 'Resilience'
           },
 
           {
             content:
               'Highly functional and lawful abstractions that provide easy composition and refactoring capabilities.',
-            title: 'Functional'
+            title: 'Functional Effects'
           },
 
           {
