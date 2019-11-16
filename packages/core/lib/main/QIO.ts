@@ -165,7 +165,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return new QIO(Tag.Chain, fa, aFb)
   }
   /**
-   * Converts an effect-full function into a function that returns an [[IO]]
+   * Converts an effect-full function into a function that returns an [[QIO]]
    */
   public static encase<A = never, E = never, T extends unknown[] = unknown[]>(
     cb: (...t: T) => A
@@ -173,7 +173,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return (...t) => QIO.lift(() => cb(...t))
   }
   /**
-   * Converts a function returning a Promise to a function that returns an [[IO]]
+   * Converts a function returning a Promise to a function that returns an [[QIO]]
    */
   public static encaseP<A, T extends unknown[]>(
     cb: (...t: T) => Promise<A>
@@ -228,7 +228,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return QIO.flatten(QIO.lift(qio))
   }
   /**
-   * Creates a new [[Fiber]] to run the given [[IO]].
+   * Creates a new [[Fiber]] to run the given [[QIO]].
    */
   public static fork<A1, E1>(
     io: QIO<A1, E1>,
