@@ -18,7 +18,8 @@
       "core/environment",
       "core/unit-testing",
       "core/stack-safety"
-    ]
+    ],
+    "Comparison": ["comparison/features", "comparison/benchmarks"]
   },
   "entities": {
     "Core": [
@@ -34,6 +35,5 @@
     "Console": ["console/installation", "console/usage"],
     "Http": ["http/installation", "http/usage"],
     "FS": ["fs/installation", "fs/usage"]
-  },
-  "benchmarks": {"Benchmarks": ["benchmarks"]}
+  }
 }

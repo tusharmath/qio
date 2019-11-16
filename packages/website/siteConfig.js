@@ -48,7 +48,7 @@ const siteConfig = {
     {doc: 'core/qio', label: 'Entities'},
     {doc: 'api/globals', label: 'API'},
     {doc: 'others/ecosystem', label: 'Ecosystem'},
-    {doc: 'others/benchmarks', label: 'Benchmarks'},
+    {doc: 'comparison/benchmarks', label: 'Benchmarks'},
     {href: 'https://github.com/tusharmath/qio', label: 'Github'}
   ],
 
