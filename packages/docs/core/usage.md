@@ -28,7 +28,9 @@ const greet = () => console.log('Hello World!') // void
 `greet` can be represented using QIO as:
 
 ```ts
-QIO<never, void, unknown>
+import {QIO} from '@qio/core'
+
+const greetIO = QIO.lift(greet) // QIO<never, void, unknown>
 ```
 
 | Parameter | Value     |                                               |
@@ -36,10 +38,6 @@ QIO<never, void, unknown>
 | `A`       | `void`    | The output of running the program is nothing. |
 | `E`       | `never`   | Printing anything on console never fails.     |
 | `R`       | `unknown` | since `console.log` works everywhere.         |
-
-```ts
-const greetIO = greet() // QIO<never, void, unknown>
-```
 
 ## Creating a QIO
 
