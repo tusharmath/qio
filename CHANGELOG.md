@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [22.0.0](https://github.com/tusharmath/qio/compare/v21.2.1...v22.0.0) (2019-11-16)
+
+
+### Bug Fixes
+
+* update dependencies ([d511865](https://github.com/tusharmath/qio/commit/d511865178030c6fc09cef9f164d7d215bccb91c))
+
+
+### Code Refactoring
+
+* **env:** rename env from axios to http ([e60c72c](https://github.com/tusharmath/qio/commit/e60c72cc951450f3f13104095a1f841526ca6ee1))
+* **qio:** change QIO.node signature ([a1bc4d8](https://github.com/tusharmath/qio/commit/a1bc4d89a7ddfc2fad79083248147ba76939f189))
+
+
+### Features
+
+* **package:** add @qio/fs ([0b995ae](https://github.com/tusharmath/qio/commit/0b995ae14fa7b147cab40f7c5bf78a60cef5d353))
+
+
+### BREAKING CHANGES
+
+* **qio:** QIO.node node returns a TUPLE of values.
+* **env:** renaming \`IAxiosEnv\` to \`IHttpEnv\`
+
+
+
+
+
 ## [21.2.1](https://github.com/tusharmath/qio/compare/v21.2.0...v21.2.1) (2019-11-13)
 
 

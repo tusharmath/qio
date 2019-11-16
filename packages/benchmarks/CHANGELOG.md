@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [22.0.0](https://github.com/tusharmath/qio/compare/v21.2.1...v22.0.0) (2019-11-16)
+
+
+### Bug Fixes
+
+* update dependencies ([d511865](https://github.com/tusharmath/qio/commit/d511865178030c6fc09cef9f164d7d215bccb91c))
+
+
+
+
+
 # [21.0.0](https://github.com/tusharmath/qio/compare/v20.0.6...v21.0.0) (2019-11-06)
 
 
