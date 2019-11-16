@@ -22,7 +22,7 @@
   "scripts": {
     "lint": "tslint --project .",
     "prepublishOnly": "tsc -d",
-    "prettier": "git ls-files | grep '.ts$' | xargs prettier --write --config=.prettierrc",
+    "prettier": "git ls-files | grep -E '.*\\.(ts|md|json)$' | xargs prettier --write --config=.prettierrc",
     "test": "mocha --opts=packages/chai/mocha.opts",
     "doc": "./scripts/docs.sh",
     "doc:typedoc": "yarn typedoc --plugin typedoc-plugin-markdown",

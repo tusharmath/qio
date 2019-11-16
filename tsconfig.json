@@ -4,7 +4,9 @@
     "module": "commonjs",
     "strict": true,
     "noUnusedLocals": true,
-    "plugins": [{"name": "typescript-tslint-plugin", "configFile": "./tslint.json"}],
+    "plugins": [
+      {"name": "typescript-tslint-plugin", "configFile": "./tslint.json"}
+    ],
     "incremental": true,
     "removeComments": true
   },
