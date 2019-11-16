@@ -21,17 +21,11 @@
     ]
   },
   "entities": {
-    "Core": [
-      "core/qio",
-      "core/managed",
-      "core/runtime",
-      "core/fiber",
-      "core/ref",
-      "core/await",
-      "core/queue"
-    ],
+    "Core": ["core/qio", "core/managed", "core/runtime", "core/fiber", "core/ref", "core/await", "core/queue"],
     "Stream": ["stream/installation", "stream/stream"],
-    "Console": ["console/installation", "console/console"]
+    "Console": ["console/installation", "console/usage"],
+    "Http": ["http/installation", "http/usage"],
+    "FS": ["fs/installation", "fs/usage"]
   },
   "benchmarks": {"Benchmarks": ["benchmarks"]}
 }
