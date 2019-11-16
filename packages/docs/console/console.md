@@ -1,5 +1,0 @@
----
-title: Console
----
-
-# Coming soon ...
