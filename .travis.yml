@@ -12,7 +12,6 @@ branches:
     - /^v\d+\.\d+\.\d+$/
 script:
   - yarn lint
-  - yarn workspace @qio/type-test run test
   - yarn tsc -b
   - yarn test -R=min
   - yarn doc
