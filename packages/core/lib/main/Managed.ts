@@ -1,7 +1,6 @@
 import {List} from 'standard-data-structures'
 
 import {QIO} from './QIO'
-import {Ref} from './Ref'
 import {Reservation} from './Reservation'
 
 /**
@@ -27,23 +26,28 @@ import {Reservation} from './Reservation'
  * In the above example as soon as the `fsWrite` is completed the file descriptor is automatically released.
  */
 export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
-  public static make<A1, E1, R1, R2>(
+  public static make<A1, E1, R1, E2, R2>(
     acquire: QIO<A1, E1, R1>,
-    release: (a: A1) => QIO<void, never, R2>
-  ): Managed<A1, E1, R1 & R2> {
-    return Managed.of<A1, E1, R1 & R2>(
+    release: (a: A1) => QIO<void, E2, R2>
+  ): Managed<A1, E1 | E2, R1 & R2> {
+    return Managed.of<A1, E1 | E2, R1 & R2>(
       acquire.chain(a1 =>
-        release(a1).once.map(r =>
-          Reservation.of(QIO.resolve(a1).addEnv<R1>(), r.addEnv<R2>())
+        release(a1).once.map(a2 =>
+          Reservation.of<A1, E1, R1, E2, R2>(
+            QIO.resolve(a1).addEnv(),
+            a2.addEnv()
+          )
         )
       )
     )
   }
+
   public static of<A1, E1, R1>(
     reservation: QIO<Reservation<A1, E1, R1>, E1, R1>
   ): Managed<A1, E1, R1> {
     return new Managed(reservation)
   }
+
   public static zip<A1, E1, R1>(
     managed: Array<Managed<A1, E1, R1>>
   ): Managed<A1[], E1, R1> {
@@ -55,36 +59,31 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
       )
       .map(_ => _.asArray)
   }
+
   private constructor(
     private readonly reservation: QIO<Reservation<A1, E1, R1>, E1, R1>
   ) {}
+
   public chain<A2, E2, R2>(
     fn: (a: A1) => Managed<A2, E2, R2>
   ): Managed<A2, E1 | E2, R1 & R2> {
-    return Managed.of(
-      Ref.of(QIO.void().addEnv<R1 & R2>())
-        .addEnv<R1 & R2>()
-        .map(F =>
-          Reservation.of(
-            this.reservation.chain(r1 =>
-              r1.acquire.chain(a1 =>
-                fn(a1).reservation.chain(r2 =>
-                  r2.acquire.chain(a2 =>
-                    F.set(r1.release.and(r2.release)).const(a2)
-                  )
-                )
-              )
-            ),
-            QIO.flatten(F.read)
-          )
-        )
-    )
+    const a1 = this.reservation.chain(_ => _.acquire)
+    const r1 = this.reservation.chain(_ => _.release)
+
+    const a2 = a1.chain(_ => fn(_).reservation).chain(_ => _.acquire)
+    const r2 = a1.chain(_ => fn(_).reservation).chain(_ => _.release)
+
+    const reservation = Reservation.of(a2, r1.and(r2))
+
+    return Managed.of(QIO.resolve(reservation).addEnv())
   }
+
   public map<A2>(fn: (a: A1) => A2): Managed<A2, E1, R1> {
     return Managed.of(
       this.reservation.map(r1 => Reservation.of(r1.acquire.map(fn), r1.release))
     )
   }
+
   public use<A2, E2, R2>(
     fn: (a: A1) => QIO<A2, E2, R2>
   ): QIO<A2, E1 | E2, R1 & R2> {
@@ -94,11 +93,9 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
         .catch(e12 => R.release.and(QIO.reject(e12)))
         .chain(a2 => R.release.const(a2))
         .fork.chain(F =>
-          F.await.chain(O =>
-            O.map(QIO.void)
-              .getOrElse(R.release.provide(ENV))
-              .and(F.join)
-          )
+          F.await
+            .chain(O => O.map(QIO.fromEither).getOrElse(F.join))
+            .do(R.release.provide(ENV))
         )
     )
   }

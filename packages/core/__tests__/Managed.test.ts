@@ -80,4 +80,16 @@ describe('Managed', () => {
 
     assert.strictEqual(r.count, 0)
   })
+
+  it('should reject if release causes an error', () => {
+    const runtime = testRuntime()
+
+    const actual = runtime.unsafeExecuteSync(
+      Managed.make(QIO.void(), () =>
+        QIO.reject(new Error('FAILURE_ON_CLOSURE'))
+      ).use(QIO.void)
+    )
+
+    assert.deepStrictEqual(actual, new Error('FAILURE_ON_CLOSURE'))
+  })
 })
