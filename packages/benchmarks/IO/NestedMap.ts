@@ -29,7 +29,7 @@ RunSuite(`NestedMap ${MAX}`, {
     return fluture
   },
   qio: () => {
-    let qio = QIO.of(BigInt(0))
+    let qio = QIO.resolve(BigInt(0))
     for (let i = 0; i < MAX; i++) {
       qio = qio.map(inc)
     }

@@ -7,7 +7,7 @@ const fib = (N: bigint) =>
     const itar = cache.memoize(
       (n: bigint): QIO<bigint> => {
         if (n <= 2n) {
-          return QIO.of(n)
+          return QIO.resolve(n)
         }
 
         return itar(n - 1n).zipWith(itar(n - 2n), (a, b) => a + b)

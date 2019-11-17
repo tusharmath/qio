@@ -35,7 +35,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Safely converts an interuptable IO to non-interuptable one.
    */
   public get asEither(): QIO<Either<E1, A1>, never, R1> {
-    return this.map(Either.right).catch(_ => QIO.of(Either.left(_)))
+    return this.map(Either.right).catch(_ => QIO.resolve(Either.left(_)))
   }
   /**
    * @ignore
@@ -240,7 +240,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Creates an IO from `Either`
    */
   public static fromEither<A, E>(exit: Either<E, A>): QIO<A, E> {
-    return exit.fold<QIO<A, E>>(QIO.never(), QIO.reject, QIO.of)
+    return exit.fold<QIO<A, E>>(QIO.never(), QIO.reject, QIO.resolve)
   }
   /**
    * Alternative to ternary operator in typescript that forcefully narrows down the envs
@@ -312,13 +312,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       )
     )
   }
-
-  /**
-   * Represents a constant value
-   */
-  public static of<A1>(value: A1): QIO<A1> {
-    return new QIO(Tag.Constant, value)
-  }
   /**
    * Runs multiple IOs in parallel. Checkout [[QIO.seq]] to run IOs in sequence.
    */
@@ -345,7 +338,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     const itar = (list: Array<QIO<A1, E1, R1>>): QIO<A1[], E1, R1> =>
       QIO.if(
         list.length === 0,
-        QIO.of([]),
+        QIO.resolve([]),
         QIO.par(list.slice(0, N)).chain(l1 =>
           itar(list.slice(N, list.length)).map(l2 => l1.concat(l2))
         )
@@ -370,6 +363,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static reject<E1>(error: E1): QIO<never, E1> {
     return new QIO(Tag.Reject, error)
+  }
+
+  /**
+   * Represents a constant value
+   */
+  public static resolve<A1>(value: A1): QIO<A1> {
+    return new QIO(Tag.Constant, value)
   }
   /**
    * @ignore
@@ -442,7 +442,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Returns a [[QIO]] of void.
    */
   public static void(): QIO<void> {
-    return QIO.of(void 0)
+    return QIO.resolve(void 0)
   }
   /**
    * Hack: The property $R1 is added to enable stricter checks.
@@ -503,7 +503,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Ignores the original value of the c and resolves with the provided value
    */
   public const<A2>(a: A2): QIO<A2, E1, R1> {
-    return this.and(QIO.of(a))
+    return this.and(QIO.resolve(a))
   }
   /**
    * Delays the execution of the [[QIO]] by the provided time.
@@ -598,14 +598,14 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
 
           return Option.isSome(exit)
             ? done.set(cb1(exit.value, R))
-            : QIO.of(true)
+            : QIO.resolve(true)
         })
         const resume2 = R.await.chain(exit => {
           D('zip', 'R cb')
 
           return Option.isSome(exit)
             ? done.set(cb2(exit.value, L))
-            : QIO.of(true)
+            : QIO.resolve(true)
         })
 
         return resume1.fork.and(resume2.fork).and(done.get)

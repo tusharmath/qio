@@ -34,7 +34,7 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     return Managed.of<A1, E1, R1 & R2>(
       acquire.chain(a1 =>
         release(a1).once.map(r =>
-          Reservation.of(QIO.of(a1).addEnv<R1>(), r.addEnv<R2>())
+          Reservation.of(QIO.resolve(a1).addEnv<R1>(), r.addEnv<R2>())
         )
       )
     )
@@ -51,7 +51,7 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
       .reduce(
         (a: Managed<List<A1>, E1, R1>, b: Managed<A1, E1, R1>) =>
           a.zipWith(b, (x, y) => x.prepend(y)),
-        Managed.make(QIO.of(List.empty<A1>()).addEnv<R1>(), QIO.void)
+        Managed.make(QIO.resolve(List.empty<A1>()).addEnv<R1>(), QIO.void)
       )
       .map(_ => _.asArray)
   }

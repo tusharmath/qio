@@ -41,7 +41,7 @@ describe('Stream', () => {
     })
 
     it('should call next 4 times', () => {
-      const ID = spy(<TT>(_: TT) => QIO.of(_))
+      const ID = spy(<TT>(_: TT) => QIO.resolve(_))
       testRuntime().unsafeExecuteSync(Stream.range(100, 103).fold(true, T, ID))
 
       ID.should.be.called.exactly(4)

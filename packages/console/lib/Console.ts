@@ -86,7 +86,7 @@ export const testTTY = (
 
         stdout.push(question + popped)
 
-        return QIO.of(popped)
+        return QIO.resolve(popped)
       }),
     putStrLn: (...t: unknown[]) =>
       QIO.lift(() => void stdout.push(t.join(' '))),

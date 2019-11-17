@@ -18,7 +18,7 @@ describe('Await', () => {
   describe('set', () => {
     it('should return true', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Await.of<string>().chain(await => await.set(QIO.of('Hi')))
+        Await.of<string>().chain(await => await.set(QIO.resolve('Hi')))
       )
       assert.ok(actual)
     })
@@ -27,8 +27,8 @@ describe('Await', () => {
       const actual = runtime.unsafeExecuteSync(
         Await.of<string>().chain(await =>
           await
-            .set(QIO.of('Hi'))
-            .and(await.set(QIO.of('Bye')))
+            .set(QIO.resolve('Hi'))
+            .and(await.set(QIO.resolve('Bye')))
             .and(await.get)
         )
       )
@@ -81,7 +81,7 @@ describe('Await', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         Await.of<string>().chain(await =>
-          await.set(QIO.of('Hi')).and(await.set(QIO.of('Bye')))
+          await.set(QIO.resolve('Hi')).and(await.set(QIO.resolve('Bye')))
         )
       )
       assert.notOk(actual)
@@ -92,7 +92,7 @@ describe('Await', () => {
     it('should return the IO value', () => {
       const actual = testRuntime().unsafeExecuteSync(
         Await.of<string>().chain(await =>
-          await.set(QIO.of('Hi')).and(await.get)
+          await.set(QIO.resolve('Hi')).and(await.get)
         )
       )
       assert.strictEqual(actual, 'Hi')
@@ -129,7 +129,7 @@ describe('Await', () => {
     it('should return true after setting', () => {
       const actual = testRuntime().unsafeExecuteSync(
         Await.of<number>().chain(await =>
-          await.set(QIO.of(100)).and(await.isSet)
+          await.set(QIO.resolve(100)).and(await.isSet)
         )
       )
 

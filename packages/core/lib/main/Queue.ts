@@ -26,7 +26,7 @@ export class Queue<A = never> {
     return QIO.flattenM(() => {
       const sz = this.Q.shift()
       if (Option.isSome(sz)) {
-        return QIO.of(sz.value)
+        return QIO.resolve(sz.value)
       }
 
       return QIO.flatten(
@@ -71,7 +71,7 @@ export class Queue<A = never> {
         while (this.T.length !== 0) {
           const item = this.T.shift()
           if (Option.isSome(item)) {
-            io.push(item.value.set(QIO.of(a)))
+            io.push(item.value.set(QIO.resolve(a)))
           }
         }
 
@@ -93,7 +93,7 @@ export class Queue<A = never> {
     const itar = (i: number, list: List<A>): QIO<List<A>> =>
       QIO.if0()(
         () => i === n,
-        () => QIO.of(list),
+        () => QIO.resolve(list),
         () => this.take.chain(_ => itar(i + 1, list.prepend(_)))
       )
 

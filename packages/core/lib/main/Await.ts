@@ -21,7 +21,7 @@ export class Await<A, E> {
   public get get(): QIO<A, E> {
     return QIO.flattenM(() =>
       this.result
-        .map(S => S.reduce<QIO<A, E>>(QIO.reject, XX => QIO.of(XX)))
+        .map(S => S.reduce<QIO<A, E>>(QIO.reject, XX => QIO.resolve(XX)))
         .getOrElse(this.wait)
     )
   }
@@ -31,7 +31,7 @@ export class Await<A, E> {
   public set(io: QIO<A, E>): QIO<boolean> {
     return QIO.flattenM(() => {
       if (this.flag) {
-        return QIO.of(false)
+        return QIO.resolve(false)
       }
       this.flag = true
 

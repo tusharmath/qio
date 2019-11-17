@@ -18,7 +18,7 @@ export class FMap<K, V> {
   private constructor() {}
   public get(key: K): QIO<V, typeof NoSuchElement.info> {
     return QIO.lift(() => this.cache.get(key)).chain(_ =>
-      _ === undefined ? QIO.reject(NoSuchElement.of()) : QIO.of(_)
+      _ === undefined ? QIO.reject(NoSuchElement.of()) : QIO.resolve(_)
     )
   }
   public has(key: K): QIO<boolean> {

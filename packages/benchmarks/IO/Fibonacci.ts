@@ -35,7 +35,7 @@ export const fibFluture = (
  */
 export const fibQIO = (n: bigint): QIO<bigint> => {
   if (n < 2n) {
-    return QIO.of(1n)
+    return QIO.resolve(1n)
   }
 
   return fibQIO(n - 1n).chain(a => fibQIO(n - 2n).map(b => a + b))

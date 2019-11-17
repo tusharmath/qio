@@ -48,7 +48,7 @@ describe('FiberContext', () => {
       const runtime = testRuntime()
       const cb = spy()
 
-      const context = FiberContext.unsafeExecuteWith(QIO.of(0), runtime)
+      const context = FiberContext.unsafeExecuteWith(QIO.resolve(0), runtime)
       context.unsafeObserve(cb)
       context.cancel()
       runtime.scheduler.run()
@@ -61,7 +61,7 @@ describe('FiberContext', () => {
         const runtime = testRuntime()
         const cb = spy()
 
-        const context = FiberContext.unsafeExecuteWith(QIO.of(0), runtime)
+        const context = FiberContext.unsafeExecuteWith(QIO.resolve(0), runtime)
         context.cancel()
         context.unsafeObserve(cb)
         runtime.scheduler.run()
@@ -76,7 +76,7 @@ describe('FiberContext', () => {
       const runtime = testRuntime()
       const cb = spy()
 
-      FiberContext.unsafeExecuteWith(QIO.of(0), runtime)
+      FiberContext.unsafeExecuteWith(QIO.resolve(0), runtime)
         .unsafeObserve(cb)
         .cancel()
       runtime.scheduler.run()
@@ -102,7 +102,7 @@ describe('FiberContext', () => {
       const runtime = testRuntime()
       const cb = spy()
 
-      FiberContext.unsafeExecuteWith(QIO.of(1), runtime).unsafeObserve(cb)
+      FiberContext.unsafeExecuteWith(QIO.resolve(1), runtime).unsafeObserve(cb)
       runtime.scheduler.run()
 
       cb.should.called.with(Option.some(Either.left(1)))
@@ -114,7 +114,7 @@ describe('FiberContext', () => {
       const runtime = testRuntime()
       const cb = spy()
 
-      const context = FiberContext.unsafeExecuteWith(QIO.of(1), runtime)
+      const context = FiberContext.unsafeExecuteWith(QIO.resolve(1), runtime)
       runtime.scheduler.run()
       context.unsafeObserve(cb)
       runtime.scheduler.run()
@@ -170,7 +170,7 @@ describe('FiberContext', () => {
       it('should return some result', () => {
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(
-          QIO.of(0).fork.chain(_ => _.await)
+          QIO.resolve(0).fork.chain(_ => _.await)
         )
         const expected = Option.some(Either.right(0))
         assert.deepStrictEqual(actual, expected)
@@ -201,13 +201,13 @@ describe('FiberContext', () => {
       const runtime = testRuntime({maxInstructionCount: MAX_INSTRUCTION_COUNT})
       const actual = new Array<number>()
       const insert = QIO.encase((_: number) => void actual.push(_))
-      const longIO = QIO.of(1)
-        .and(QIO.of(2))
-        .and(QIO.of(3))
-        .and(QIO.of(4))
-        .and(QIO.of(5))
+      const longIO = QIO.resolve(1)
+        .and(QIO.resolve(2))
+        .and(QIO.resolve(3))
+        .and(QIO.resolve(4))
+        .and(QIO.resolve(5))
         .chain(insert)
-      const shortIO = QIO.of(1000).chain(insert)
+      const shortIO = QIO.resolve(1000).chain(insert)
 
       FiberContext.unsafeExecuteWith(longIO, runtime)
       FiberContext.unsafeExecuteWith(shortIO, runtime)
@@ -224,7 +224,7 @@ describe('FiberContext', () => {
       const snapshot = new Snapshot()
       const runtime = testRuntime({maxInstructionCount: 0})
       FiberContext.unsafeExecuteWith(
-        QIO.of('A').chain(_ => snapshot.mark(_)),
+        QIO.resolve('A').chain(_ => snapshot.mark(_)),
         runtime
       )
       runtime.scheduler.run()
@@ -238,7 +238,7 @@ describe('FiberContext', () => {
       const snapshot = new Snapshot()
       const runtime = testRuntime({maxInstructionCount: -100})
       FiberContext.unsafeExecuteWith(
-        QIO.of('A').chain(_ => snapshot.mark(_)),
+        QIO.resolve('A').chain(_ => snapshot.mark(_)),
         runtime
       )
       runtime.scheduler.run()

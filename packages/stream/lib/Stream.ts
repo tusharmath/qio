@@ -3,7 +3,7 @@ import {T} from '@qio/prelude/T'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
-const FTrue = QIO.of(true)
+const FTrue = QIO.resolve(true)
 const FTrueCb = () => FTrue
 const Id = <A>(a: A) => a
 
@@ -36,7 +36,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       QIO.if0()(
         () => cont(s),
         () => next(s, a),
-        () => QIO.of(s)
+        () => QIO.resolve(s)
       )
     )
   }
@@ -55,7 +55,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
           QIO.if0()(
             () => cont(s) && i < t.length,
             () => next(s, t[i]).chain(_ => itar(_, i + 1)),
-            () => QIO.of(s)
+            () => QIO.resolve(s)
           )
 
         return itar(state, 0)
@@ -69,7 +69,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       QIO.if0()(
         () => cont(state),
         () => io.chain(a => next(state, a)),
-        () => QIO.of(state)
+        () => QIO.resolve(state)
       )
     )
   }
@@ -107,7 +107,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
           QIO.if0()(
             () => cont(s),
             () => Q.take.chain(a => next(s, a).chain(itar)),
-            () => QIO.of(s)
+            () => QIO.resolve(s)
           )
 
         return itar(state)
@@ -143,7 +143,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
           QIO.if0()(
             () => cont(s),
             () => io.chain(a => next(s, a)).chain(itar),
-            () => QIO.of(s)
+            () => QIO.resolve(s)
           )
 
         return itar(state)
@@ -165,7 +165,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
           QIO.if0()(
             () => i <= max && cont(s),
             () => next(s, i).chain(ss => itar(ss, i + 1)),
-            () => QIO.of(s)
+            () => QIO.resolve(s)
           )
 
         return itar(state, min)
@@ -211,7 +211,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
         QIO.if0()(
           () => f(a),
           () => next(s, a),
-          () => QIO.of(s)
+          () => QIO.resolve(s)
         )
       )
     )
@@ -221,7 +221,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    * Folds a stream into a value.
    */
   public foldLeft<S2>(seed: S2, fn: (s: S2, a: A1) => S2): QIO<S2, E1, R1> {
-    return this.fold(seed, T, (s, a) => QIO.of(fn(s, a)))
+    return this.fold(seed, T, (s, a) => QIO.resolve(fn(s, a)))
   }
   /**
    * Performs the given effect-full function for each value of the stream
@@ -241,7 +241,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       QIO.if0()(
         () => s,
         () => f(a),
-        () => QIO.of(s)
+        () => QIO.resolve(s)
       )
     )
   }
@@ -282,7 +282,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
             QIO.if0()(
               () => cont(SS),
               () => Q.take.chain(a => next(SS, a).chain(itar)),
-              () => canContinue.set(false).and(QIO.of(SS))
+              () => canContinue.set(false).and(QIO.resolve(SS))
             )
 
           return this.forEachWhile(offer)

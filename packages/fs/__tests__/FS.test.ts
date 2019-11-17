@@ -9,7 +9,7 @@ describe('fs', () => {
       it('should read the file', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.readFile('./hello.txt').provide({
-            fs: {readFile: path => QIO.of('DATA:' + path)}
+            fs: {readFile: path => QIO.resolve('DATA:' + path)}
           })
         )
         const expected = 'DATA:./hello.txt'
@@ -19,7 +19,7 @@ describe('fs', () => {
 
     describe('open', () => {
       it('should open the file', () => {
-        const fsOpen = spy(() => QIO.of(10))
+        const fsOpen = spy(() => QIO.resolve(10))
         testRuntime().unsafeExecuteSync(
           FS.open('./hello.txt', '+w').provide({
             fs: {
@@ -34,7 +34,7 @@ describe('fs', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.open('./hello.txt', '+w').provide({
             fs: {
-              open: () => QIO.of(10)
+              open: () => QIO.resolve(10)
             }
           })
         )
@@ -52,7 +52,7 @@ describe('fs', () => {
             .provide({
               fs: {
                 close: QIO.encase(closeSpy),
-                open: () => QIO.of(10)
+                open: () => QIO.resolve(10)
               }
             })
         )

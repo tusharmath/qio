@@ -17,7 +17,7 @@ describe('http', () => {
         request(config).provide({
           http: {
             request: config0 =>
-              QIO.of<AxiosResponse>({...TEST_RESPONSE, config: config0})
+              QIO.resolve<AxiosResponse>({...TEST_RESPONSE, config: config0})
           }
         })
       )

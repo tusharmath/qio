@@ -259,7 +259,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
               j.i0(
                 val => {
                   this.cancellationList.remove(id)
-                  this.stackA.push(QIO.of(val).asInstruction)
+                  this.stackA.push(QIO.resolve(val).asInstruction)
                   this.unsafeEvaluate()
                 },
                 err => {

@@ -28,7 +28,7 @@ Using QIO we can represent the function more clearly:
 class DivisionByZero extends Error {}
 
 const division = (a: number, b: number): QIO<number, DivisionByZero> => {
-  return b === 0 ? QIO.reject(new DivisionByZero()) : QIO.of(a / b)
+  return b === 0 ? QIO.reject(new DivisionByZero()) : QIO.resolve(a / b)
 }
 ```
 

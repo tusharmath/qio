@@ -64,5 +64,5 @@ class QIOServer {
 
 const runtime = defaultRuntime()
 runtime.unsafeExecute(
-  QIOServerBuilder.of().mount('/greet', () => QIO.of('Hello World!')).serve
+  QIOServerBuilder.of().mount('/greet', () => QIO.resolve('Hello World!')).serve
 )
