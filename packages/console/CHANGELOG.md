@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [23.0.0](https://github.com/tusharmath/qio/compare/v22.0.5...v23.0.0) (2019-11-17)
+
+
+### Code Refactoring
+
+* **qio:** rename of() to resolve() ([edb0d14](https://github.com/tusharmath/qio/commit/edb0d148fdbe4115fe1f664e765403288d590aae))
+
+
+### BREAKING CHANGES
+
+* **qio:** renaming \`QIO.of()\` to \`QIO.resolve()\`
+
+
+
+
+
 ## [22.0.2](https://github.com/tusharmath/qio/compare/v22.0.1...v22.0.2) (2019-11-16)
 
 **Note:** Version bump only for package @qio/console
