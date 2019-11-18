@@ -1,4 +1,5 @@
-import * as assert from 'assert'
+import {deepStrictEqual} from 'assert'
+import {assert} from 'chai'
 
 import {Managed} from '../lib/main/Managed'
 import {QIO} from '../lib/main/QIO'
@@ -90,6 +91,7 @@ describe('Managed', () => {
       ).use(QIO.void)
     )
 
-    assert.deepStrictEqual(actual, new Error('FAILURE_ON_CLOSURE'))
+    const expected = new Error('FAILURE_ON_CLOSURE')
+    deepStrictEqual(actual, expected)
   })
 })

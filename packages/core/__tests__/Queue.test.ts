@@ -1,4 +1,4 @@
-import * as assert from 'assert'
+import {assert} from 'chai'
 
 import {Queue} from '../lib/main/Queue'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
