@@ -1,8 +1,9 @@
 /* tslint:disable no-unbound-method no-for-in */
 
 import {QIO} from '@qio/core'
-import * as fs from 'fs'
-export * from 'fs'
+import * as fse from 'fs-extra'
+
+export * from 'fs-extra'
 
 /**
  * A spec object that has keys and values of type function.
@@ -74,20 +75,63 @@ const createFSSpec = <S extends ISpec<Promise<unknown>>>(S: S): iQSpec<S> => {
   return out as iQSpec<S>
 }
 
-const close = async (fd: number): Promise<void> =>
-  new Promise((res, rej) =>
-    // TODO: Add tests
-    // tslint:disable-next-line: no-null-undefined-union
-    fs.close(fd, (err: NodeJS.ErrnoException | undefined | null) =>
-      err !== undefined && err !== null ? rej(err) : res()
-    )
-  )
-const open = (
-  path: string | Buffer,
-  flags: string | number,
-  mode?: number
-): Promise<number> => fs.promises.open(path, flags, mode).then(_ => _.fd)
+/**
+ * Pick only sync APIs
+ */
+const FSPromises = {
+  access: fse.access,
+  appendFile: fse.appendFile,
+  chmod: fse.chmod,
+  chown: fse.chown,
+  close: fse.close,
+  copy: fse.copy,
+  copyFile: fse.copyFile,
+  createFile: fse.createFile,
+  emptyDir: fse.emptyDir,
+  ensureDir: fse.ensureDir,
+  ensureFile: fse.ensureFile,
+  ensureLink: fse.ensureLink,
+  ensureSymlink: fse.ensureSymlink,
+  fchmod: fse.fchmod,
+  fchown: fse.fchown,
+  fdatasync: fse.fdatasync,
+  fstat: fse.fstat,
+  fsync: fse.fsync,
+  ftruncate: fse.ftruncate,
+  futimes: fse.futimes,
+  lchown: fse.lchown,
+  link: fse.link,
+  lstat: fse.lstat,
+  mkdir: fse.mkdir,
+  mkdirp: fse.mkdirp,
+  mkdirs: fse.mkdirs,
+  mkdtemp: fse.mkdtemp,
+  move: fse.move,
+  open: fse.open,
+  outputFile: fse.outputFile,
+  outputJSON: fse.outputJSON,
+  outputJson: fse.outputJson,
+  pathExists: fse.pathExists,
+  read: fse.read,
+  readFile: fse.readFile,
+  readJSON: fse.readJSON,
+  readJson: fse.readJson,
+  readdir: fse.readdir,
+  readlink: fse.readlink,
+  realpath: fse.realpath,
+  remove: fse.remove,
+  rename: fse.rename,
+  rmdir: fse.rmdir,
+  stat: fse.stat,
+  symlink: fse.symlink,
+  truncate: fse.truncate,
+  unlink: fse.unlink,
+  utimes: fse.utimes,
+  write: fse.write,
+  writeFile: fse.writeFile,
+  writeJSON: fse.writeJSON,
+  writeJson: fse.writeJson
+}
 
-const FSPromises = {...fs.promises, open, close}
 export const FS = createFSSpecR(FSPromises)
 export const FSEnv = createFSSpec(FSPromises)

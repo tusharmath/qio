@@ -11,11 +11,11 @@ describe('fs', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.readFile('./hello.txt').provide({
             fs: {
-              readFile: path => QIO.resolve('DATA:' + path)
+              readFile: path => QIO.resolve(Buffer.from('DATA:' + path))
             }
           })
         )
-        const expected = 'DATA:./hello.txt'
+        const expected = Buffer.from('DATA:./hello.txt')
         assert.deepStrictEqual(actual, expected)
       })
     })
@@ -42,7 +42,7 @@ describe('fs', () => {
           })
         )
         const expected = 10
-        assert.strictEqual(actual, expected)
+        assert.deepStrictEqual(actual, expected)
       })
     })
 
@@ -76,6 +76,25 @@ describe('fs', () => {
         )
 
         deepStrictEqual(actual, new Error('INVALID_FILE'))
+      })
+    })
+
+    describe('write', () => {
+      it('should be able to write', () => {
+        const actual = testRuntime().unsafeExecuteSync(
+          FS.open('data.txt', 'w')
+            .chain(H => FS.write(H, 'DATA'))
+            .provide({
+              fs: {
+                open: () => QIO.resolve(10),
+                write: () =>
+                  QIO.resolve({bytesWritten: 100, buffer: Buffer.from('DATA')})
+              }
+            })
+        )
+        const expected = {bytesWritten: 100, buffer: Buffer.from('DATA')}
+
+        assert.deepStrictEqual(actual, expected)
       })
     })
   })
