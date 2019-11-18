@@ -1,4 +1,5 @@
 import {QIO, testRuntime} from '@qio/core'
+import {deepStrictEqual} from 'assert'
 import {assert, spy} from 'chai'
 
 import {FS} from '../lib/FS'
@@ -9,7 +10,9 @@ describe('fs', () => {
       it('should read the file', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.readFile('./hello.txt').provide({
-            fs: {readFile: path => QIO.resolve('DATA:' + path)}
+            fs: {
+              readFile: path => QIO.resolve('DATA:' + path)
+            }
           })
         )
         const expected = 'DATA:./hello.txt'
@@ -58,6 +61,21 @@ describe('fs', () => {
         )
 
         closeSpy.should.be.called.with(10)
+      })
+
+      it('should fail on close()', () => {
+        const actual = testRuntime().unsafeExecuteSync(
+          FS.open('./hello.txt', '+w')
+            .chain(_ => FS.close(_))
+            .provide({
+              fs: {
+                close: () => QIO.reject(new Error('INVALID_FILE')),
+                open: () => QIO.resolve(10)
+              }
+            })
+        )
+
+        deepStrictEqual(actual, new Error('INVALID_FILE'))
       })
     })
   })

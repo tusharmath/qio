@@ -74,7 +74,14 @@ const createFSSpec = <S extends ISpec<Promise<unknown>>>(S: S): iQSpec<S> => {
   return out as iQSpec<S>
 }
 
-const close = async (fd: number) => new Promise(res => fs.close(fd, res))
+const close = async (fd: number): Promise<void> =>
+  new Promise((res, rej) =>
+    // TODO: Add tests
+    // tslint:disable-next-line: no-null-undefined-union
+    fs.close(fd, (err: NodeJS.ErrnoException | undefined | null) =>
+      err !== undefined && err !== null ? rej(err) : res()
+    )
+  )
 const open = (
   path: string | Buffer,
   flags: string | number,
