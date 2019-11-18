@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [24.0.0](https://github.com/tusharmath/qio/compare/v23.0.0...v24.0.0) (2019-11-18)
+
+
+### Code Refactoring
+
+* **reservation:** change type signature ([e17c143](https://github.com/tusharmath/qio/commit/e17c14311e89fc92a16461423d4df174084045ce))
+
+
+### BREAKING CHANGES
+
+* **reservation:** Reservation.release can now throw exceptions
+
+
+
+
+
 # [23.0.0](https://github.com/tusharmath/qio/compare/v22.0.5...v23.0.0) (2019-11-17)
 
 

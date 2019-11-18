@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [24.0.0](https://github.com/tusharmath/qio/compare/v23.0.0...v24.0.0) (2019-11-18)
+
+
+### Bug Fixes
+
+* **close:** handle errors on closing the file ([1f1223e](https://github.com/tusharmath/qio/commit/1f1223e8cae404b302bb864ae3346a86a4cb90e3))
+
+
+
+
+
 # [23.0.0](https://github.com/tusharmath/qio/compare/v22.0.5...v23.0.0) (2019-11-17)
 
 
