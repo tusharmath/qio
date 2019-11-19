@@ -259,7 +259,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    * Performs an effect on each value emitted by the stream.
    */
   public mapM<A2, E2, R2>(
-    f: (a: A1) => QIO<A2, E1, R2>
+    f: (a: A1) => QIO<A2, E2, R2>
   ): Stream<A2, E1 | E2, R1 & R2> {
     return new Stream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
