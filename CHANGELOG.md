@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [25.0.0](https://github.com/tusharmath/qio/compare/v24.0.0...v25.0.0) (2019-11-19)
+
+
+### Bug Fixes
+
+* **stream:** update typings for mapM ([60372d2](https://github.com/tusharmath/qio/commit/60372d261afe334f44c8f0edcbbf65d299766554))
+
+
+### Code Refactoring
+
+* **fs:** use fs-extra instead of fs ([722bbe9](https://github.com/tusharmath/qio/commit/722bbe9f1d2f9de405331329bd2edaf45e733536))
+
+
+### BREAKING CHANGES
+
+* **fs:** \`@qio/fs\`  internally uses \`fs-extra\` instead of relying on the native node.js fs module
+
+
+
+
+
 # [24.0.0](https://github.com/tusharmath/qio/compare/v23.0.0...v24.0.0) (2019-11-18)
 
 

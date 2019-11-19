@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [25.0.0](https://github.com/tusharmath/qio/compare/v24.0.0...v25.0.0) (2019-11-19)
+
+
+### Bug Fixes
+
+* **stream:** update typings for mapM ([60372d2](https://github.com/tusharmath/qio/commit/60372d261afe334f44c8f0edcbbf65d299766554))
+
+
+
+
+
 # [24.0.0](https://github.com/tusharmath/qio/compare/v23.0.0...v24.0.0) (2019-11-18)
 
 **Note:** Version bump only for package @qio/stream
