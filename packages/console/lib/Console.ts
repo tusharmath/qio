@@ -67,27 +67,20 @@ export const TTY: ITextTerminal = {
  * Mock implementation of ITextTerminal
  */
 export const testTTY = (
-  input: {[k: string]: string[]} = {}
+  input: {[k: string]: QIO<string>} = {}
 ): ITextTerminalTest => {
   const stdout = new Array<string>()
+  const log = QIO.encase((str: string) => void stdout.push(str))
+  const append = QIO.encase((str: string) => {
+    const elm = stdout.pop()
+    stdout.push(elm === undefined ? str : elm + str)
+  })
 
   return {
     getStrLn: (question: string) =>
-      QIO.flattenM(() => {
-        const popped = input.hasOwnProperty(question)
-          ? input[question].shift()
-          : undefined
-
-        if (popped === undefined) {
-          stdout.push(question)
-
-          return QIO.never()
-        }
-
-        stdout.push(question + popped)
-
-        return QIO.resolve(popped)
-      }),
+      input.hasOwnProperty(question)
+        ? log(question).and(input[question].tap(append))
+        : log(question).and(QIO.never()),
     putStrLn: (...t: unknown[]) =>
       QIO.lift(() => void stdout.push(t.join(' '))),
     stdout

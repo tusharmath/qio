@@ -2,7 +2,7 @@
  * Created by tushar on 07/11/19
  */
 
-import {testRuntime} from '@qio/core'
+import {QIO, testRuntime} from '@qio/core'
 import {assert} from 'chai'
 
 import {getStrLn, putStrLn, testTTY} from '../lib/Console'
@@ -36,7 +36,7 @@ describe('Console', () => {
 
   describe('getStrLn()', () => {
     it('should read from the provided questions', () => {
-      const tty = testTTY({'name ?': ['QIO']})
+      const tty = testTTY({'name ?': QIO.resolve('QIO')})
 
       const actual = testRuntime().unsafeExecuteSync(
         getStrLn('name ?').provide({tty})
@@ -47,7 +47,7 @@ describe('Console', () => {
     })
 
     it('should print on stdout', () => {
-      const tty = testTTY({'name: ': ['QIO']})
+      const tty = testTTY({'name: ': QIO.resolve('QIO')})
 
       testRuntime().unsafeExecuteSync(getStrLn('name: ').provide({tty}))
 
@@ -59,7 +59,8 @@ describe('Console', () => {
 
     context('no answer provided', () => {
       it('should keep waiting', () => {
-        const tty = testTTY({A: ['P', 'Q']})
+        const input = ['P', 'Q']
+        const tty = testTTY({A: QIO.lift(() => input.pop() as string)})
 
         const actual = testRuntime().unsafeExecuteSync(
           getStrLn('B').provide({tty})
@@ -69,7 +70,18 @@ describe('Console', () => {
       })
 
       it('should print on stdout', () => {
-        const tty = testTTY({'name: ': []})
+        const tty = testTTY({'name: ': QIO.never()})
+
+        testRuntime().unsafeExecuteSync(getStrLn('name: ').provide({tty}))
+
+        const actual = tty.stdout
+        const expected = ['name: ']
+
+        assert.deepStrictEqual(actual, expected)
+      })
+
+      it('should print question', () => {
+        const tty = testTTY({})
 
         testRuntime().unsafeExecuteSync(getStrLn('name: ').provide({tty}))
 
