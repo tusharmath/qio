@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [25.1.0](https://github.com/tusharmath/qio/compare/v25.0.0...v25.1.0) (2019-11-21)
+
+
+### Features
+
+* **qio:** add \`QIO.lazy\` operator ([d39c3ce](https://github.com/tusharmath/qio/commit/d39c3ce59cf64799e44fc2481ed29360de34b74e))
+
+
+
+
+
 # [25.0.0](https://github.com/tusharmath/qio/compare/v24.0.0...v25.0.0) (2019-11-19)
 
 **Note:** Version bump only for package @qio/core
