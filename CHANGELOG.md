@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [26.0.0](https://github.com/tusharmath/qio/compare/v25.1.0...v26.0.0) (2019-11-21)
+
+
+### Code Refactoring
+
+* **testTTY:** update mocking signature ([8a83b7a](https://github.com/tusharmath/qio/commit/8a83b7a7902a3b01e2c0df76e3a8fef6b29270e6))
+
+
+### BREAKING CHANGES
+
+* **testTTY:** testTTY signature updated
+
+
+
+
+
 # [25.1.0](https://github.com/tusharmath/qio/compare/v25.0.0...v25.1.0) (2019-11-21)
 
 
