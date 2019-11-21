@@ -268,6 +268,16 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   /**
+   * Converts a normal function to a lazy function.
+   * A lazy function automatically becomes stack safe.
+   */
+  public static lazy<T extends unknown[], A1, E1, R1>(
+    fn: (...T: T) => QIO<A1, E1, R1>
+  ): (...T: T) => QIO<A1, E1, R1> {
+    return (...T0: T) => QIO.call(fn, ...T0)
+  }
+
+  /**
    * Lifts an effectful hunk of code into a QIO.
    */
   public static lift<A1 = unknown, E1 = never>(cb: () => A1): QIO<A1, E1> {
