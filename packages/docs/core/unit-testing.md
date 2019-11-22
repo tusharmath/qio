@@ -35,7 +35,7 @@ Let's say we have a function `bar`, that's calling `foo`.
   }
 
 + const bar = (): number => {
-+   foo(d1, d2, 10, 20)
++   return foo(d1, d2, 10, 20)
 + }
 ```
 
@@ -52,7 +52,7 @@ Passing `d1` and `d2` to `bar`, makes both `foo` and `bar` testable.
 
 - const bar = (): number => {
 + const bar = (d1: D1, d2: D2): number => {
-    foo(d1, d2, 10, 20)
+    return foo(d1, d2, 10, 20)
   }
 ```
 
@@ -66,7 +66,7 @@ We can apply the same dependency injection idea to `main` to make it testable.
   }
 
   const bar = (d1: D1, d2: D2): number => {
-    foo(d1, d2, 10, 20)
+    return foo(d1, d2, 10, 20)
   }
 
 + const main = (d1: D1, d2: D2): void => {
@@ -87,8 +87,8 @@ Consider a case where `foo` adds a new dependency `d3`.
 
 - const bar = (d1: D1, d2: D2): number => {
 + const bar = (d1: D1, d2: D2, d3: D3): number => {
--   foo(d1, d2, 10, 20)
-+   foo(d1, d2, d3, 10, 20)
+-   return foo(d1, d2, 10, 20)
++   return foo(d1, d2, d3, 10, 20)
   }
 
 - const main = (d1: D1, d2: D2): void => {
@@ -108,4 +108,93 @@ The problem in the above approach is :
 2. Changing dependencies at a lower level, causes changes in functions at higher levels.
 3. `main` or the root function ends up having dependency bloat on its arguments.
 
-# Coming soon...
+We can solve this problem more elegantly using QIO.
+
+### Create Environment
+
+First create environments that have access to each of the dependencies.
+
+```diff
++ interface D1Env {
++   d1: (n: number) => number
++ }
++
++ interface D2Env {
++   d2: (n: number) => number
++ }
++
++ interface D3Env {
++   d3: (n: number, m: number) => number
++ }
+```
+
+To access dependencies we will use `QIO.access`:
+
+```diff
++ import {QIO} from '@qio/core'
+  interface D1Env {
+    d1: (n: number) => number
+  }
+
+  interface D2Env {
+    d2: (n: number) => number
+  }
+
+  interface D3Env {
+    d3: (n: number, m: number) => number
+  }
++
++ const d1 = (n: number) => QIO.access((_: D1Env) => _.d1(n))
++ const d2 = (n: number) => QIO.access((_: D2Env) => _.d1(n))
++ const d3 = (n: number, m: number) => QIO.access((_: D3Env) => _.d3(n, m))
+```
+
+Below are the return types for each of the dependency.
+
+| Instance | Type                        |
+| -------- | --------------------------- |
+| `d1`     | `QIO<number, never, D1Env>` |
+| `d2`     | `QIO<number, never, D2Env>` |
+| `d3`     | `QIO<number, never, D3Env>` |
+
+### Update program
+
+```diff
+  import {QIO} from '@qio/core'
+  interface D1Env {
+    d1: (n: number) => number
+  }
+
+  interface D2Env {
+    d2: (n: number) => number
+  }
+
+  interface D3Env {
+    d3: (n: number, m: number) => number
+  }
+
+  const d1 = (n: number) => QIO.access((_: D1Env) => _.d1(n))
+  const d2 = (n: number) => QIO.access((_: D2Env) => _.d1(n))
+  const d3 = (n: number, m: number) => QIO.access((_: D3Env) => _.d3(n, m))
+
+- const foo = (d1: D1, d2: D2, d3: D3, a: number, b: number): number => {
+-   return d3(d1(a), d2(b))
+- }
++ const foo = (a: number, b: number): QIO<number, never, D1Env & D2Env & D3Env> => {
++   return d1(a).zipWith(d2(b), d3)
++ }
+
+- const bar = (d1: D1, d2: D2, d3: D3): number => {
+-   foo(d1, d2, d3, 10, 20)
+- }
++ const bar = (): QIO<number, never, D1Env & D2Env & D3Env> => {
++   return foo(10, 20)
++ }
+
+- const main = (d1: D1, d2: D2, d3: D3): void => {
+-   bar(d1, d2, d3)
+- }
++ const main = (): QIO<void, never, D1Env & D2Env & D3Env> => {
++   return bar(d1, d2, d3).void
++ }
+```
