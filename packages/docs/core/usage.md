@@ -3,6 +3,10 @@ title: Usage
 sidebar_label: Usage
 ---
 
+> Refer to [concepts] if you are new to functional programming.
+
+[concepts]: ../concepts/introduction
+
 QIO is merely a data structure that represents a side-effect. It doesn't actually perform the side effect itself. The effect is performed by the QIO Runtime lazily. It helps convert **impure functions** to **pure functions**.
 
 `QIO` uses three type params to represent an effect safely:
