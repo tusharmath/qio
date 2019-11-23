@@ -22,7 +22,7 @@ describe('Program', () => {
 
     return {
       getStrLn: (question: string) =>
-        QIO.flattenM(() => {
+        QIO.tryM(() => {
           const popped = input.hasOwnProperty(question)
             ? input[question].shift()
             : undefined

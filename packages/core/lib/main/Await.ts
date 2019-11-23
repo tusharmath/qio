@@ -19,7 +19,7 @@ export class Await<A, E> {
   private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
   private result: Option<Either<E, A>> = Option.none()
   public get get(): QIO<A, E> {
-    return QIO.flattenM(() =>
+    return QIO.tryM(() =>
       this.result
         .map(S => S.reduce<QIO<A, E>>(QIO.reject, XX => QIO.resolve(XX)))
         .getOrElse(this.wait)
@@ -29,7 +29,7 @@ export class Await<A, E> {
     return QIO.lift(() => this.flag)
   }
   public set(io: QIO<A, E>): QIO<boolean> {
-    return QIO.flattenM(() => {
+    return QIO.tryM(() => {
       if (this.flag) {
         return QIO.resolve(false)
       }

@@ -205,29 +205,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return qio.chain(Id)
   }
   /**
-   * Takes in a effect-ful function that return a c and unwraps it.
-   * This is an alias to `c.flatten(QIO.lift(fn))`
-   *
-   * ```ts
-   * // An impure function that creates mutable state but also returns a c.
-   * const FN = () => {
-   *   let count = 0
-   *
-   *   return c.try(() => count++)
-   * }
-   * // Using flatten
-   * c.flatten(QIO.lift(FN))
-   *
-   * // Using flattenM
-   * c.flattenM(FN)
-   * ```
-   */
-  public static flattenM<A1, E1, R1>(
-    qio: () => QIO<A1, E1, R1>
-  ): QIO<A1, E1, R1> {
-    return QIO.flatten(QIO.lift(qio))
-  }
-  /**
    * Creates a new [[Fiber]] to run the given [[QIO]].
    */
   public static fork<A1, E1>(
@@ -429,6 +406,27 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static try<A>(cb: () => A): QIO<A, Error> {
     return QIO.lift(cb)
+  }
+  /**
+   * Takes in a effect-ful function that return a c and unwraps it.
+   * This is an alias to `c.flatten(QIO.lift(fn))`
+   *
+   * ```ts
+   * // An impure function that creates mutable state but also returns a c.
+   * const FN = () => {
+   *   let count = 0
+   *
+   *   return c.try(() => count++)
+   * }
+   * // Using flatten
+   * c.flatten(QIO.lift(FN))
+   *
+   * // Using flattenM
+   * c.tryM(FN)
+   * ```
+   */
+  public static tryM<A1, E1, R1>(qio: () => QIO<A1, E1, R1>): QIO<A1, E1, R1> {
+    return QIO.flatten(QIO.lift(qio))
   }
   /**
    * Tries to run an function that returns a promise.

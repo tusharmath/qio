@@ -6,7 +6,7 @@ import {canContinue, program} from '../guess-the-number/src/Program'
 
 describe('Program', () => {
   const input = <T>(...arr: T[]): QIO<T> =>
-    QIO.flattenM(
+    QIO.tryM(
       (): QIO<T> => {
         const elm = arr.shift()
 

@@ -23,7 +23,7 @@ export class Queue<A = never> {
    * Pulls an item from the queue
    */
   public get take(): QIO<A> {
-    return QIO.flattenM(() => {
+    return QIO.tryM(() => {
       const sz = this.Q.shift()
       if (Option.isSome(sz)) {
         return QIO.resolve(sz.value)
@@ -60,7 +60,7 @@ export class Queue<A = never> {
    * Inserts an item into the queue
    */
   public offer(a: A): QIO<void> {
-    return QIO.flattenM(
+    return QIO.tryM(
       (): QIO<void> => {
         if (this.T.length === 0) {
           this.Q.add(a)
