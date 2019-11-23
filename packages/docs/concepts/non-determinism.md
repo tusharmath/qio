@@ -52,7 +52,6 @@ const main = (today: Date, math: Math): number => {
 }
 ```
 
-<!--
 ## Solving using QIO
 
 Using QIO, we can solve this problem in a more manageable way.
@@ -106,4 +105,4 @@ QIO will automatically compose these environments for you so that you can provid
 ```ts
 main() // QIO<number, never, DateEnv & MathEnv>
 main().provide({Math, Date}) // QIO<number>
-``` -->
+```

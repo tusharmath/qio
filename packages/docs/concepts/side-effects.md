@@ -44,7 +44,7 @@ const main = (): number => {
 
 This could be a dangerous change if `foo` causes a side-effect because after the refactor `foo` is called only once which changes the behavior of the program.
 
-<!-- ## Solving using QIO
+## Solving using QIO
 
 Updating `foo` was returning a `QIO<number>` instead of `number` we could do such refactors far more easily.
 
@@ -73,4 +73,4 @@ const main = (): QIO<number> => {
 }
 ```
 
-If `foo` was implemented using QIO and instead of returning a `number` it returns `QIO<number>` it can provide guarantees while refactoring. -->
+If `foo` was implemented using QIO and instead of returning a `number` it returns `QIO<number>` it can provide guarantees while refactoring.
