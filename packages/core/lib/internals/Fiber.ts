@@ -1,5 +1,4 @@
 /* tslint:disable: no-unbound-method cyclomatic-complexity */
-import {check} from 'checked-exceptions'
 import {debug} from 'debug'
 import {
   DoublyLinkedList,
@@ -15,11 +14,13 @@ import {IRuntime} from '../runtimes/IRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
+
 const D = debug('qio:fiber')
-const InvalidInstruction = check(
-  'InvalidInstruction',
-  (ins: Instruction) => `${Tag[ins.tag]}`
-)
+class InvalidInstruction extends Error {
+  public constructor(ins: Instruction) {
+    super(`${Tag[ins.tag]}`)
+  }
+}
 enum FiberStatus {
   PENDING,
   COMPLETED,

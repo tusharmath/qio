@@ -1,8 +1,6 @@
-import {check} from 'checked-exceptions'
-
 import {QIO} from './QIO'
 
-export const NoSuchElement = check('NoSuchElement')
+export class NoSuchElement extends Error {}
 
 /**
  * A light weight wrapper over the Javascript's mutable Map.
@@ -16,9 +14,9 @@ export class FMap<K, V> {
   }
   private readonly cache = new Map<K, V>()
   private constructor() {}
-  public get(key: K): QIO<V, typeof NoSuchElement.info> {
+  public get(key: K): QIO<V, NoSuchElement> {
     return QIO.lift(() => this.cache.get(key)).chain(_ =>
-      _ === undefined ? QIO.reject(NoSuchElement.of()) : QIO.resolve(_)
+      _ === undefined ? QIO.reject(new NoSuchElement()) : QIO.resolve(_)
     )
   }
   public has(key: K): QIO<boolean> {
