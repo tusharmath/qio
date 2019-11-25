@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [27.0.0](https://github.com/tusharmath/qio/compare/v26.0.5...v27.0.0) (2019-11-25)
+
+
+### Code Refactoring
+
+* **qio:** rename flattenM to tryM ([b5aa169](https://github.com/tusharmath/qio/commit/b5aa169d9042481d1369f37d343894858cd8edd4))
+
+
+### BREAKING CHANGES
+
+* **qio:** rename \`flattenM\` to \`tryM\`
+
+
+
+
+
 # [26.0.0](https://github.com/tusharmath/qio/compare/v25.1.0...v26.0.0) (2019-11-21)
 
 **Note:** Version bump only for package @qio/example
