@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [27.0.3](https://github.com/tusharmath/qio/compare/v27.0.2...v27.0.3) (2019-11-25)
+
+
+### Bug Fixes
+
+* **dependency:** remove \`checked-exception\` as a dep ([b5200df](https://github.com/tusharmath/qio/commit/b5200df3ea52d3e2ef4cfd65a979d579b213b111))
+
+
+
+
+
 ## [27.0.2](https://github.com/tusharmath/qio/compare/v27.0.1...v27.0.2) (2019-11-25)
 
 
