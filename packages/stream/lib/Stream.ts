@@ -1,5 +1,5 @@
 import {Managed, QIO, Queue, Ref} from '@qio/core'
-import {T} from '@qio/prelude/T'
+import {T} from '@qio/prelude'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 

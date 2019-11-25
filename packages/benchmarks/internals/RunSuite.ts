@@ -1,6 +1,6 @@
 /* tslint:disable: no-unbound-method */
 import {defaultRuntime, QIO} from '@qio/core'
-import {noop} from '@qio/prelude/Noop'
+import {noop} from '@qio/prelude'
 import {Suite} from 'benchmark'
 import {FutureInstance} from 'fluture'
 

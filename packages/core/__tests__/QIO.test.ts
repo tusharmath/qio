@@ -897,7 +897,7 @@ describe('QIO', () => {
     it('should capture exceptions from Node API', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.node(cb => cb(new Error('Failed')))
+        QIO.node<[], Error>(cb => cb(new Error('Failed')))
       )
       const expected = new Error('Failed')
 

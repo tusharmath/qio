@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-05
  */
 
-/* tslint:disable: no-import-side-effect ordered-imports */
+/* tslint:disable: no-import-side-effect ordered-imports no-submodule-imports */
 
 import 'source-map-support/register'
 

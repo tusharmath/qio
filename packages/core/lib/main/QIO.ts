@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-20
  */
 
-import {Id} from '@qio/prelude/Id'
+import {Id} from '@qio/prelude'
 import {debug} from 'debug'
 import {Either, List, Option} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
@@ -20,8 +20,9 @@ const D = debug('qio:core')
  * Callback function used in node.js to handle async operations.
  * @ignore
  */
-export type NodeJSCallback<T extends unknown[]> = (
-  err: NodeJS.ErrnoException | null,
+export type NodeJSCallback<T extends unknown[], E> = (
+  // tslint:disable-next-line: no-null-undefined-union
+  err: E | null | undefined,
   ...t: T
 ) => void
 
@@ -284,16 +285,18 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * const fsOpen = c.node(cb => fs.open('./data.txt', cb))
    * ```
    */
-  public static node<A extends unknown[]>(
-    fn: (cb: NodeJSCallback<A>) => void
-  ): QIO<A, NodeJS.ErrnoException> {
+  public static node<A extends unknown[], E = never>(
+    fn: (cb: NodeJSCallback<A, E>) => void
+  ): QIO<A, E> {
     return QIO.runtime().chain(RTM =>
-      QIO.asyncIO<A, NodeJS.ErrnoException>((res, rej) =>
+      QIO.asyncIO<A, E>((res, rej) =>
         RTM.scheduler.asap(() => {
           try {
-            fn((err, ...t) => (err === null ? res(t) : rej(err)))
+            fn((err, ...t) =>
+              err === null || err === undefined ? res(t) : rej(err)
+            )
           } catch (e) {
-            rej(e as NodeJS.ErrnoException)
+            rej(e as E)
           }
         })
       )

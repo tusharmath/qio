@@ -2,7 +2,7 @@
  * Created by tushar on 2019-05-24
  */
 
-import {Id} from '@qio/prelude/Id'
+import {Id} from '@qio/prelude'
 import {Either, Option} from 'standard-data-structures'
 import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler'
 

@@ -1,5 +1,5 @@
 import {QIO, Snapshot, testRuntime} from '@qio/core'
-import {T} from '@qio/prelude/T'
+import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 
 import {Stream} from '../lib/Stream'
