@@ -4,17 +4,14 @@
 
 import {Id} from '@qio/prelude/Id'
 import {Either, Option} from 'standard-data-structures'
-import {ITestSchedulerOptions} from 'ts-scheduler/src/main/ITestSchedulerOptions'
-import {TestScheduler, testScheduler} from 'ts-scheduler/test'
+import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler/test'
 
 import {QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
-type TestRuntimeOptions = Partial<
-  ITestSchedulerOptions & {
-    maxInstructionCount: number
-  }
->
+type TestRuntimeOptions = SchedulerOptions & {
+  maxInstructionCount?: number
+}
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler: TestScheduler
   public constructor(private readonly options: TestRuntimeOptions) {
