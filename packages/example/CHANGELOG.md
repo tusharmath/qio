@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [27.0.4](https://github.com/tusharmath/qio/compare/v27.0.3...v27.0.4) (2019-11-25)
+
+
+### Bug Fixes
+
+* remove submodule dependency ([ca3ba03](https://github.com/tusharmath/qio/commit/ca3ba03616792e93414caeb5b095b9be8a31fb88))
+
+
+
+
+
 ## [27.0.3](https://github.com/tusharmath/qio/compare/v27.0.2...v27.0.3) (2019-11-25)
 
 **Note:** Version bump only for package @qio/example
