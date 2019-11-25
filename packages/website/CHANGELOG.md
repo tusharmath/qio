@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [27.0.2](https://github.com/tusharmath/qio/compare/v27.0.1...v27.0.2) (2019-11-25)
+
+
+### Bug Fixes
+
+* **package:** update dependencies ([726e815](https://github.com/tusharmath/qio/commit/726e815ba73af396712c209b458c214317df15b0))
+
+
+
+
+
 # [27.0.0](https://github.com/tusharmath/qio/compare/v26.0.5...v27.0.0) (2019-11-25)
 
 **Note:** Version bump only for package @qio/website
