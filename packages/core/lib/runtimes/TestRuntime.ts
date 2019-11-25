@@ -4,7 +4,7 @@
 
 import {Id} from '@qio/prelude/Id'
 import {Either, Option} from 'standard-data-structures'
-import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler/test'
+import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler'
 
 import {QIO} from '../main/QIO'
 

@@ -21,7 +21,7 @@
     "debug": "^4.1.1",
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",
-    "ts-scheduler": "^8.0.2"
+    "ts-scheduler": "^8.0.3"
   },
   "devDependencies": {
     "@types/chai": "^4.2.5",
