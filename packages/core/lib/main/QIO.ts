@@ -173,6 +173,18 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): (...t: T) => QIO<A, E> {
     return (...t) => QIO.lift(() => cb(...t))
   }
+
+  /**
+   * Converts an effect-full function return a QIO into a function that returns an [[QIO]]
+   */
+  public static encaseM<
+    A = never,
+    E = never,
+    R = unknown,
+    T extends unknown[] = unknown[]
+  >(cb: (...t: T) => QIO<A, E, R>): (...t: T) => QIO<A, E, R> {
+    return (...t) => QIO.tryM(() => cb(...t))
+  }
   /**
    * Converts a function returning a Promise to a function that returns an [[QIO]]
    */
@@ -528,13 +540,23 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public do<E2, R2>(io: QIO<unknown, E2, R2>): QIO<A1, E1 | E2, R1 & R2> {
     return this.chain(_ => io.const(_))
   }
+
   /**
    * Calls the effect-full function on success of the current c instance.
    */
-  public encase<E2 = never, A2 = unknown>(
+  public encase<A2 = unknown, E2 = never>(
     fn: (A1: A1) => A2
   ): QIO<A2, E1 | E2, R1> {
     return this.chain(QIO.encase(fn))
+  }
+
+  /**
+   * Calls the effect-full function returning a QIO on success of the current instance.
+   */
+  public encaseM<A2 = unknown, E2 = never, R2 = unknown>(
+    fn: (A1: A1) => QIO<A2, E2, R2>
+  ): QIO<A2, E1 | E2, R1 & R2> {
+    return this.chain(QIO.encaseM(fn))
   }
   /**
    * Creates a separate [[Fiber]] with a different [[IRuntime]].
