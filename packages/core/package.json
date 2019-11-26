@@ -1,5 +1,6 @@
 {
   "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "description": "The core QIO API to manage effects",
   "keywords": [
     "io",
     "functional",
