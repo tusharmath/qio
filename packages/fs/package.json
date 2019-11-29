@@ -1,6 +1,6 @@
 {
   "name": "@qio/fs",
-  "version": "27.0.4",
+  "version": "27.1.0",
   "description": "QIO based bindings for interacting with the file system",
   "keywords": [
     "fs",
@@ -39,7 +39,7 @@
     "@types/fs-extra": "^8.0.1"
   },
   "dependencies": {
-    "@qio/core": "^27.0.4",
+    "@qio/core": "^27.1.0",
     "chai": "^4.2.0",
     "fs-extra": "^8.1.0"
   }
