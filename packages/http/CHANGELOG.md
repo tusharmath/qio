@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [27.1.1](https://github.com/tusharmath/qio/compare/v27.1.0...v27.1.1) (2019-11-30)
+
+
+### Bug Fixes
+
+* **http:** handle cancellation via QIO.async API ([1d37e52](https://github.com/tusharmath/qio/commit/1d37e52a61bbd147a17ee4c4789b350ba1be6cec))
+
+
+
+
+
 # [27.1.0](https://github.com/tusharmath/qio/compare/v27.0.5...v27.1.0) (2019-11-29)
 
 **Note:** Version bump only for package @qio/http
