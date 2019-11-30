@@ -1,24 +1,18 @@
 {
   "concepts": {},
   "core": {
-    "Concepts": [
-      "concepts/introduction",
-      "concepts/side-effects",
-      "concepts/exceptions-anomalies",
-      "concepts/non-determinism",
-      "concepts/pure-functions",
-      "concepts/referential-transparency"
-    ],
     "Tutorial": [
       "core/installation",
       "core/usage",
+      "core/effects",
       "core/concurrency",
+      "core/exceptions-anomalies",
       "core/cancellation",
       "core/environment",
       "core/unit-testing",
-      "core/stack-safety"
+      "core/stack-safety",
+      "core/fiber"
     ],
-
     "Comparison": ["comparison/features", "comparison/benchmarks"]
   },
   "entities": {
@@ -26,7 +20,6 @@
       "core/qio",
       "core/managed",
       "core/runtime",
-      "core/fiber",
       "core/ref",
       "core/await",
       "core/queue"
