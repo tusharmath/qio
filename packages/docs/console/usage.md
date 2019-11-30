@@ -4,8 +4,6 @@ title: Usage
 
 `@qio/console` provides a list of testable terminal based utilities such as `getStrLn` and `putStrLn` that abstract out the dependency on `stdin` and `stdout` streams.
 
-> Prerequisite reading: [Getting Started](../core/installation).
-
 ## Printing on the screen
 
 The following `program` would simply print `Welcome` on the screen.
