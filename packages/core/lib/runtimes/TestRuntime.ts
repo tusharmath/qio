@@ -10,9 +10,9 @@ import {Fiber} from '../internals/Fiber'
 import {FiberConfig} from '../internals/FiberYieldStrategy'
 import {QIO} from '../main/QIO'
 
-import {BaseRuntime} from './BaseRuntime'
+import {FiberRuntime} from './FiberRuntime'
 
-export class TestRuntime extends BaseRuntime {
+export class TestRuntime extends FiberRuntime {
   public readonly scheduler: TestScheduler
   public constructor(
     private readonly options: SchedulerOptions,
