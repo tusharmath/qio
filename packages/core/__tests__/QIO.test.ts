@@ -378,14 +378,18 @@ describe('QIO', () => {
   describe('fork', () => {
     it('should return an instance of Fiber', () => {
       const runtime = testRuntime()
-      const actual = runtime.unsafeExecuteSync(QIO.resolve(10).fork)
+      const actual = runtime.unsafeExecuteSync(QIO.resolve(10).fork())
       assert.instanceOf(actual, FiberContext)
     })
 
     it('should complete immediately', () => {
       const runtime = testRuntime()
       const counter = new Counter()
-      runtime.unsafeExecute(QIO.timeout('A', 1000).fork.and(counter.inc()))
+      runtime.unsafeExecute(
+        QIO.timeout('A', 1000)
+          .fork()
+          .and(counter.inc())
+      )
       runtime.scheduler.runTo(10)
       assert.isTrue(counter.increased)
     })
@@ -395,7 +399,10 @@ describe('QIO', () => {
         const runtime = testRuntime()
         const counter = new Counter()
         const actual = runtime.unsafeExecuteSync(
-          counter.inc().fork.chain(QIO.void)
+          counter
+            .inc()
+            .fork()
+            .chain(QIO.void)
         )
 
         assert.isUndefined(actual)
@@ -405,7 +412,9 @@ describe('QIO', () => {
       it('should resume with the io', () => {
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(
-          QIO.resolve(10).fork.chain(fiber => fiber.join)
+          QIO.resolve(10)
+            .fork()
+            .chain(fiber => fiber.join)
         )
 
         const expected = 10
@@ -419,7 +428,8 @@ describe('QIO', () => {
           a
             .inc()
             .delay(1000)
-            .fork.chain(fiber => fiber.join.delay(100))
+            .fork()
+            .chain(fiber => fiber.join.delay(100))
         )
 
         const expected = 1
@@ -433,7 +443,8 @@ describe('QIO', () => {
         runtime.unsafeExecute(
           QIO.resolve(10)
             .delay(100)
-            .fork.chain(fib => fib.join.and(counter.inc()))
+            .fork()
+            .chain(fib => fib.join.and(counter.inc()))
         )
         runtime.scheduler.runTo(50)
 
@@ -448,7 +459,8 @@ describe('QIO', () => {
           const runtime = testRuntime()
           const io = counter
             .inc(10)
-            .fork.chain(F =>
+            .fork()
+            .chain(F =>
               F.join
                 .zipWith(F.join, (a, b): number[] => [a, b])
                 .zipWith(F.join, (a, b): number[] => [...a, b])
@@ -466,7 +478,10 @@ describe('QIO', () => {
         const counter = new Counter()
         const runtime = testRuntime()
         runtime.unsafeExecuteSync(
-          counter.inc().fork.chain(fiber => fiber.abort)
+          counter
+            .inc()
+            .fork()
+            .chain(fiber => fiber.abort)
         )
 
         assert.strictEqual(counter.count, 0)
@@ -478,10 +493,28 @@ describe('QIO', () => {
         runtime.unsafeExecuteSync(
           QIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
-            .fork.chain(fiber => fiber.abort)
+            .fork()
+            .chain(fiber => fiber.abort)
         )
 
         assert.strictEqual(counter.count, 0)
+      })
+    })
+
+    describe('config', () => {
+      it('should context switch after the provided duration', () => {
+        const snapshot = new Snapshot()
+        const fn = QIO.lazy(
+          (a: number): QIO<void> => (a === 0 ? QIO.void() : fn(a - 1).delay(1))
+        )
+        const slow = fn(1000).and(snapshot.mark('SLOW'))
+        const fast = fn(10).and(snapshot.mark('FAST'))
+        const program = slow.par(fast)
+
+        testRuntime().unsafeExecuteSync(program)
+        const actual = snapshot.timeline
+
+        assert.deepStrictEqual(actual, ['FAST@11', 'SLOW@1001'])
       })
     })
   })
@@ -764,7 +797,8 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         QIO.access((_: string) => _.length)
-          .fork.chain(_ => _.join)
+          .fork()
+          .chain(_ => _.join)
           .provide('ABCD')
       )
 
@@ -777,7 +811,8 @@ describe('QIO', () => {
       const actual = runtime.unsafeExecuteSync(
         QIO.access((_: string) => _.length)
           .provide('QIO')
-          .fork.chain(f =>
+          .fork()
+          .chain(f =>
             f.join.map(
               // FIXME: remove type-casting and use a proper test.
               () =>

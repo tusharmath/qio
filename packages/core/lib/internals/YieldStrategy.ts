@@ -1,26 +1,6 @@
-/* tslint:disable: prefer-function-over-method switch-default */
+import { ICancellable, IScheduler } from 'ts-scheduler'
 
-import {ICancellable, IScheduler} from 'ts-scheduler'
-
-/**
- * Tags used to identify the scheduling strategy.
- */
-export enum YieldStrategyTag {
-  INS_COUNT,
-  DURATION
-}
-
-export interface IAsapM {
-  maxInstructionCount?: number
-  tag: YieldStrategyTag.INS_COUNT
-}
-
-export interface IDurationM {
-  maxDuration: number
-  tag: YieldStrategyTag.DURATION
-}
-
-export type FiberConfig = IAsapM | IDurationM
+import { FiberConfig, YieldStrategyTag } from './FiberConfig'
 
 /**
  * Base type Fiber Yield Strategy
@@ -36,9 +16,10 @@ export abstract class YieldStrategy {
         return new YieldCount(scheduler, config.maxInstructionCount)
       case YieldStrategyTag.DURATION:
         return new YieldDuration(scheduler, config.maxDuration)
+      default:
+        return new YieldCount(scheduler)
     }
   }
-
   public abstract canYield(): boolean
   public abstract init(): void
   public insert<T extends unknown[]>(
@@ -54,15 +35,12 @@ export abstract class YieldStrategy {
     ...T: T
   ): ICancellable
 }
-
 /**
  * The strategy signals yielding after a certain number of checks.
  */
 export class YieldCount extends YieldStrategy {
   public readonly maxCount: number
-
   private count = 0
-
   public constructor(
     private readonly scheduler: IScheduler,
     maxCount: number = Number.MAX_SAFE_INTEGER
@@ -76,25 +54,21 @@ export class YieldCount extends YieldStrategy {
 
     return R
   }
-
   public defer<T extends unknown[]>(
     cb: (...T: T) => unknown,
     ...T: T
   ): ICancellable {
     return this.scheduler.asap(cb, ...T)
   }
-
   public init(): void {
     this.count = 0
   }
 }
-
 /**
  * Yields after a quantified amount of time has passed.
  */
 export class YieldDuration extends YieldStrategy {
   private start = this.scheduler.now()
-
   public constructor(
     private readonly scheduler: IScheduler,
     public readonly maxDuration: number
@@ -104,14 +78,12 @@ export class YieldDuration extends YieldStrategy {
   public canYield(): boolean {
     return this.scheduler.now() - this.start >= this.maxDuration
   }
-
   public defer<T extends unknown[]>(
     cb: (...T: T) => unknown,
     ...T: T
   ): ICancellable {
     return this.scheduler.asap(cb, ...T)
   }
-
   public init(): void {
     this.start = this.scheduler.now()
   }

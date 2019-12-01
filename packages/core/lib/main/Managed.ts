@@ -92,7 +92,8 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
         .chain(fn)
         .catch(e12 => R.release.and(QIO.reject(e12)))
         .chain(a2 => R.release.const(a2))
-        .fork.chain(F =>
+        .fork()
+        .chain(F =>
           F.await
             .chain(O => O.map(QIO.fromEither).getOrElse(F.join))
             .do(R.release.provide(ENV))

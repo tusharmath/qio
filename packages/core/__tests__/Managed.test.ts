@@ -63,7 +63,8 @@ describe('Managed', () => {
     runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
         .use(() => QIO.timeout(0, 1000))
-        .fork.chain(F => F.abort.delay(500))
+        .fork()
+        .chain(F => F.abort.delay(500))
     )
 
     assert.ok(r.isReleased)
@@ -76,7 +77,8 @@ describe('Managed', () => {
     runtime.unsafeExecuteSync(
       Managed.make(r.acquire, r.release)
         .use(() => QIO.timeout(0, 1000))
-        .fork.chain(F => F.join.and(F.abort))
+        .fork()
+        .chain(F => F.join.and(F.abort))
     )
 
     assert.strictEqual(r.count, 0)

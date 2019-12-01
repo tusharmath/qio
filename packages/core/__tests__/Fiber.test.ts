@@ -1,7 +1,8 @@
 import {assert, spy} from 'chai'
 import {Either, Option} from 'standard-data-structures'
 
-import {Fiber, FiberContext} from '../lib/internals/Fiber'
+import {FiberContext} from '../lib/internals/Fiber'
+import {FiberConfig} from '../lib/internals/FiberConfig'
 import {QIO} from '../lib/main/QIO'
 import {Snapshot} from '../lib/main/Snapshot'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
@@ -170,7 +171,9 @@ describe('FiberContext', () => {
       it('should return some result', () => {
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(
-          QIO.resolve(0).fork.chain(_ => _.await)
+          QIO.resolve(0)
+            .fork()
+            .chain(_ => _.await)
         )
         const expected = Option.some(Either.right(0))
         assert.deepStrictEqual(actual, expected)
@@ -183,8 +186,10 @@ describe('FiberContext', () => {
 
         FiberContext.unsafeExecuteWith(
           QIO.timeout(0, 1000)
-            .fork.chain(F => F.await.chain(_ => snapshot.mark(_)))
-            .fork.chain(F => F.abort.delay(500)),
+            .fork()
+            .chain(F => F.await.chain(_ => snapshot.mark(_)))
+            .fork()
+            .chain(F => F.abort.delay(500)),
           runtime
         )
 
@@ -199,7 +204,7 @@ describe('FiberContext', () => {
     it('should switch between multiple contexts', () => {
       const MAX_INSTRUCTION_COUNT = 5
       const runtime = testRuntime().configure(
-        Fiber.MAX_INSTRUCTION_COUNT(MAX_INSTRUCTION_COUNT)
+        FiberConfig.MAX_INSTRUCTION_COUNT(MAX_INSTRUCTION_COUNT)
       )
       const actual = new Array<number>()
       const insert = QIO.encase((_: number) => void actual.push(_))
@@ -224,7 +229,9 @@ describe('FiberContext', () => {
   context('instruction count is zero', () => {
     it('should not fail', () => {
       const snapshot = new Snapshot()
-      const runtime = testRuntime().configure(Fiber.MAX_INSTRUCTION_COUNT(0))
+      const runtime = testRuntime().configure(
+        FiberConfig.MAX_INSTRUCTION_COUNT(0)
+      )
       FiberContext.unsafeExecuteWith(
         QIO.resolve('A').chain(_ => snapshot.mark(_)),
         runtime
@@ -238,7 +245,9 @@ describe('FiberContext', () => {
   context('instruction count is negative', () => {
     it('should not fail', () => {
       const snapshot = new Snapshot()
-      const runtime = testRuntime().configure(Fiber.MAX_INSTRUCTION_COUNT(-100))
+      const runtime = testRuntime().configure(
+        FiberConfig.MAX_INSTRUCTION_COUNT(-100)
+      )
       FiberContext.unsafeExecuteWith(
         QIO.resolve('A').chain(_ => snapshot.mark(_)),
         runtime

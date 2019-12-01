@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import {testScheduler} from 'ts-scheduler'
 
-import {YieldCount} from '../lib/internals/FiberYieldStrategy'
+import {YieldCount} from '../lib/internals/YieldStrategy'
 
 describe('YieldASAP', () => {
   context('instruction count is Infinite', () => {

@@ -9,6 +9,7 @@ import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {Fiber} from '../internals/Fiber'
+import {FiberConfig} from '../internals/FiberConfig'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
@@ -50,14 +51,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public get env(): QIO<R1, never, R1> {
     return QIO.access(Id)
-  }
-  /**
-   * Returns a [[Fiber]]
-   */
-  public get fork(): QIO<Fiber<A1, E1>, never, R1> {
-    return QIO.env<R1>().zipWithM(QIO.runtime(), (ENV, RTM) =>
-      QIO.fork(this.provide(ENV), RTM)
-    )
   }
 
   /**
@@ -559,6 +552,17 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return this.chain(QIO.encaseM(fn))
   }
   /**
+   * Returns a [[Fiber]]
+   */
+  public fork(config?: FiberConfig): QIO<Fiber<A1, E1>, never, R1> {
+    return QIO.env<R1>().zipWithM(QIO.runtime(), (ENV, RTM) =>
+      QIO.fork(
+        this.provide(ENV),
+        RTM.configure(config === undefined ? RTM.config : config)
+      )
+    )
+  }
+  /**
    * Creates a separate [[Fiber]] with a different [[IRuntime]].
    */
   public forkWith(runtime: IRuntime): QIO<Fiber<A1, E1>, never, R1> {
@@ -624,25 +628,30 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     cb2: (exit: Either<E2, A2>, fiber: Fiber<A1, E1>) => QIO<A4, E4>
   ): QIO<A3 | A4, E3 | E4, R1 & R2> {
     return Await.of<A3 | A4, E3 | E4>().chain(done =>
-      this.fork.zip(that.fork).chain(([L, R]) => {
-        D('zip', 'fiber L', L.id, '& fiber R', R.id)
-        const resume1 = L.await.chain(exit => {
-          D('zip', 'L cb')
+      this.fork()
+        .zip(that.fork())
+        .chain(([L, R]) => {
+          D('zip', 'fiber L', L.id, '& fiber R', R.id)
+          const resume1 = L.await.chain(exit => {
+            D('zip', 'L cb')
 
-          return Option.isSome(exit)
-            ? done.set(cb1(exit.value, R))
-            : QIO.resolve(true)
+            return Option.isSome(exit)
+              ? done.set(cb1(exit.value, R))
+              : QIO.resolve(true)
+          })
+          const resume2 = R.await.chain(exit => {
+            D('zip', 'R cb')
+
+            return Option.isSome(exit)
+              ? done.set(cb2(exit.value, L))
+              : QIO.resolve(true)
+          })
+
+          return resume1
+            .fork()
+            .and(resume2.fork())
+            .and(done.get)
         })
-        const resume2 = R.await.chain(exit => {
-          D('zip', 'R cb')
-
-          return Option.isSome(exit)
-            ? done.set(cb2(exit.value, L))
-            : QIO.resolve(true)
-        })
-
-        return resume1.fork.and(resume2.fork).and(done.get)
-      })
     )
   }
 
