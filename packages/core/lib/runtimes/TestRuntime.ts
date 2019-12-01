@@ -20,8 +20,8 @@ export class TestRuntime extends FiberRuntime {
     super()
     this.scheduler = testScheduler(options)
   }
-  public configure(yieldInfo: FiberConfig): TestRuntime {
-    return new TestRuntime(this.options, yieldInfo)
+  public configure(config: FiberConfig): TestRuntime {
+    return new TestRuntime(this.options, config)
   }
   public unsafeExecuteSync<A, E>(io: QIO<A, E>): A | E | undefined {
     return this.unsafeExecuteSync0(io)
