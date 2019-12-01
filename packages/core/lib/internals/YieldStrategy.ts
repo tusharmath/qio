@@ -1,6 +1,6 @@
-import { ICancellable, IScheduler } from 'ts-scheduler'
+import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import { FiberConfig, YieldStrategyTag } from './FiberConfig'
+import {FiberConfig, YieldStrategyTag} from './FiberConfig'
 
 /**
  * Base type Fiber Yield Strategy
