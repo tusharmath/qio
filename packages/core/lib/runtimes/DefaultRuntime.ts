@@ -1,22 +1,23 @@
 import {scheduler} from 'ts-scheduler'
 
+import {Fiber} from '../internals/Fiber'
+import {FiberConfig} from '../internals/FiberYieldStrategy'
 import {QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
 
-interface IDefaultRuntimeOptions {
-  maxInstructionCount: number
-}
 export class DefaultRuntime extends BaseRuntime {
-  public scheduler = scheduler
-  public constructor(maxInstructionCount?: number) {
-    super(maxInstructionCount)
+  public readonly scheduler = scheduler
+
+  public constructor(public readonly config: FiberConfig) {
+    super()
   }
 
   // tslint:disable-next-line: prefer-function-over-method
-  public setMaxInstructionCount(maxInstructionCount: number): DefaultRuntime {
-    return new DefaultRuntime(maxInstructionCount)
+  public configure(config: FiberConfig): DefaultRuntime {
+    return new DefaultRuntime(config)
   }
+
   public async unsafeExecutePromise<A, E>(io: QIO<A, E>): Promise<A> {
     return new Promise((res, rej) => {
       this.unsafeExecute(io, O => O.map(_ => _.reduce(rej, res)))
@@ -24,5 +25,4 @@ export class DefaultRuntime extends BaseRuntime {
   }
 }
 
-export const defaultRuntime = (O: Partial<IDefaultRuntimeOptions> = {}) =>
-  new DefaultRuntime(O.maxInstructionCount)
+export const defaultRuntime = () => new DefaultRuntime(Fiber.DEFAULT)

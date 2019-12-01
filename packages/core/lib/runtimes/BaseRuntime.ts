@@ -5,19 +5,16 @@ import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
 import {Fiber} from '../internals/Fiber'
+import {FiberConfig} from '../internals/FiberYieldStrategy'
 import {QIO} from '../main/QIO'
 
 import {IRuntime} from './IRuntime'
+
+// TODO: rename to FiberRuntime
 export abstract class BaseRuntime implements IRuntime {
-  public readonly maxInstructionCount: number
-  public abstract readonly scheduler: IScheduler
-  public constructor(maxInstructionCount: number = Number.MAX_SAFE_INTEGER) {
-    this.maxInstructionCount = Math.min(
-      Math.max(1, maxInstructionCount),
-      Number.MAX_SAFE_INTEGER
-    )
-  }
-  public abstract setMaxInstructionCount(maxInstructionCount: number): IRuntime
+  public abstract config: FiberConfig
+  public abstract scheduler: IScheduler
+  public abstract configure(config: FiberConfig): IRuntime
   public unsafeExecute<A, E>(io: QIO<A, E>, cb?: CBOption<A, E>): ICancellable {
     return Fiber.unsafeExecuteWith(io, this, cb)
   }

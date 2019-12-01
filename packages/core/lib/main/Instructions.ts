@@ -1,7 +1,7 @@
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {IRuntime} from '../runtimes/IRuntime'
+import {BaseRuntime} from '../runtimes/BaseRuntime'
 
 /**
  * @ignore
@@ -71,7 +71,7 @@ export interface INever {
 }
 export interface IFork {
   i0: Instruction
-  i1: IRuntime
+  i1: BaseRuntime
   tag: Tag.Fork
 }
 export interface IAccess<X = unknown, Y = unknown> {

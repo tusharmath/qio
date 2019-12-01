@@ -1,4 +1,4 @@
-import {QIO, Snapshot, testRuntime} from '@qio/core'
+import {Fiber, QIO, Snapshot, testRuntime} from '@qio/core'
 import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 
@@ -67,9 +67,9 @@ describe('Stream', () => {
         const actual = new Array<number>()
         const insert = QIO.encase((_: number) => void actual.push(_))
         const MAX_INSTRUCTION_COUNT = 5
-        const runtime = testRuntime({
-          maxInstructionCount: MAX_INSTRUCTION_COUNT
-        })
+        const runtime = testRuntime().configure(
+          Fiber.MAX_INSTRUCTION_COUNT(MAX_INSTRUCTION_COUNT)
+        )
 
         runtime.unsafeExecuteSync(
           Stream.range(101, 103)
