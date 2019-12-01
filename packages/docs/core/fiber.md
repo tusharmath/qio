@@ -5,7 +5,9 @@ title: Fiber
 Fiber provides a low level API to manage the execution of any QIO expression. It can be accessed via the `fork` operator which is available on all QIO instances.
 
 ```ts
-const program = QIO.resolve(1000).fork.chain(F => F.abort)
+const program = QIO.resolve(1000)
+  .fork()
+  .chain(F => F.abort)
 ```
 
 The value `F` is an instance of `Fiber`.
@@ -35,7 +37,8 @@ import {request} from '@qio/http'
 const putStrLn = QIO.encase(console.log)
 const program = request({url: 'http://www.abc.com'})
   .chain(putStrLn)
-  .fork.chain(F => F.abort.delay(1000))
+  .fork()
+  .chain(F => F.abort.delay(1000))
 
 defaultRuntime().unsafeExecute(program)
 ```
@@ -49,10 +52,10 @@ The `join` operator waits for the execution to complete and resolves with either
 ```ts
 import {QIO} from '@qio/core'
 
-const L = QIO.timeout('L', 1000)
-const R = QIO.timeout('R', 2000)
+const L = QIO.timeout('L', 1000).fork()
+const R = QIO.timeout('R', 2000).fork()
 
-const program = L.fork.zip(R.fork).chain(([FL, FR]) => {
+const program = L.zip(R).chain(([FL, FR]) => {
   return FL.join.zip(FR.join)
 })
 
