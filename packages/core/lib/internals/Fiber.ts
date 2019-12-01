@@ -10,10 +10,16 @@ import {ICancellable} from 'ts-scheduler'
 
 import {Instruction, Tag} from '../main/Instructions'
 import {QIO} from '../main/QIO'
-import {IRuntime} from '../runtimes/IRuntime'
+import {BaseRuntime} from '../runtimes/BaseRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
+import {
+  IAsapM,
+  IDurationM,
+  YieldStrategy,
+  YieldStrategyTag
+} from './FiberYieldStrategy'
 
 const D = debug('qio:fiber')
 class InvalidInstruction extends Error {
@@ -26,6 +32,7 @@ enum FiberStatus {
   COMPLETED,
   CANCELLED
 }
+
 /**
  * Fiber Id is used while debugging
  */
@@ -36,13 +43,26 @@ let FIBER_ID = 0
  * @typeparam A The success value
  */
 export abstract class Fiber<A, E> {
+  public static get DEFAULT(): IAsapM {
+    return Fiber.MAX_INSTRUCTION_COUNT()
+  }
+  public get join(): QIO<A, E> {
+    return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
+  }
+  public static MAX_DURATION(maxDuration: number): IDurationM {
+    return {tag: YieldStrategyTag.DURATION, maxDuration}
+  }
+  public static MAX_INSTRUCTION_COUNT(maxInstructionCount?: number): IAsapM {
+    return {tag: YieldStrategyTag.INS_COUNT, maxInstructionCount}
+  }
+
   /**
    * Uses a shared runtime to evaluate a [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
   public static unsafeExecuteWith<A, E>(
     io: QIO<A, E>,
-    runtime: IRuntime,
+    runtime: BaseRuntime,
     cb?: CBOption<A, E>
   ): ICancellable {
     return FiberContext.unsafeExecuteWith<A, E>(io, runtime, cb)
@@ -50,10 +70,7 @@ export abstract class Fiber<A, E> {
   public abstract abort: QIO<void>
   public abstract await: QIO<Option<Either<E, A>>>
   public readonly id = FIBER_ID++
-  public get join(): QIO<A, E> {
-    return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
-  }
-  public abstract runtime: IRuntime
+  public abstract runtime: BaseRuntime
 }
 /**
  * FiberContext actually evaluates the QIO expression.
@@ -82,7 +99,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
    */
   public static unsafeExecuteWith<A, E>(
     io: QIO<A, E>,
-    runtime: IRuntime,
+    runtime: BaseRuntime,
     cb?: CBOption<A, E>
   ): FiberContext<A, E> {
     const context = new FiberContext<A, E>(io.asInstruction, runtime)
@@ -105,9 +122,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   private readonly stackA = new Array<Instruction>()
   private readonly stackEnv = new Array<unknown>()
   private status = FiberStatus.PENDING
+  private readonly yieldStrategy = YieldStrategy.create(
+    this.runtime.scheduler,
+    this.runtime.config
+  )
   private constructor(
     instruction: Instruction,
-    public readonly runtime: IRuntime
+    public readonly runtime: BaseRuntime
   ) {
     super()
     D(this.id, 'this.constructor()')
@@ -164,7 +185,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   }
   private init(data?: unknown): void {
     this.node = this.cancellationList.push(
-      this.runtime.scheduler.asap(this.unsafeEvaluate.bind(this), data)
+      this.yieldStrategy.insert(this.unsafeEvaluate.bind(this), data)
     )
   }
   private unsafeEvaluate(ddd?: unknown): void {
@@ -173,9 +194,8 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
       this.node = undefined
     }
     let data: unknown = ddd
-    let count = 0
     while (true) {
-      if (count === this.runtime.maxInstructionCount) {
+      if (this.yieldStrategy.canYield()) {
         return this.init(data)
       }
       try {
@@ -280,7 +300,6 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
       } catch (e) {
         this.stackA.push(QIO.reject(e).asInstruction)
       }
-      count++
     }
   }
 }

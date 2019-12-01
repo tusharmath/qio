@@ -6,20 +6,23 @@ import {Id} from '@qio/prelude'
 import {Either, Option} from 'standard-data-structures'
 import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler'
 
+import {Fiber} from '../internals/Fiber'
+import {FiberConfig} from '../internals/FiberYieldStrategy'
 import {QIO} from '../main/QIO'
 
 import {BaseRuntime} from './BaseRuntime'
-type TestRuntimeOptions = SchedulerOptions & {
-  maxInstructionCount?: number
-}
+
 export class TestRuntime extends BaseRuntime {
   public readonly scheduler: TestScheduler
-  public constructor(private readonly options: TestRuntimeOptions) {
-    super(options.maxInstructionCount)
+  public constructor(
+    private readonly options: SchedulerOptions,
+    public readonly config: FiberConfig
+  ) {
+    super()
     this.scheduler = testScheduler(options)
   }
-  public setMaxInstructionCount(maxInstructionCount: number): TestRuntime {
-    return new TestRuntime({...this.options, maxInstructionCount})
+  public configure(yieldInfo: FiberConfig): TestRuntime {
+    return new TestRuntime(this.options, yieldInfo)
   }
   public unsafeExecuteSync<A, E>(io: QIO<A, E>): A | E | undefined {
     return this.unsafeExecuteSync0(io)
@@ -35,4 +38,5 @@ export class TestRuntime extends BaseRuntime {
   }
 }
 
-export const testRuntime = (O: TestRuntimeOptions = {}) => new TestRuntime(O)
+export const testRuntime = (O: SchedulerOptions = {}) =>
+  new TestRuntime(O, Fiber.DEFAULT)
