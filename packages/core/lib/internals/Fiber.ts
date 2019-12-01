@@ -14,12 +14,7 @@ import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
-import {
-  IAsapM,
-  IDurationM,
-  YieldStrategy,
-  YieldStrategyTag
-} from './FiberYieldStrategy'
+import {YieldStrategy} from './YieldStrategy'
 
 const D = debug('qio:fiber')
 class InvalidInstruction extends Error {
@@ -43,17 +38,8 @@ let FIBER_ID = 0
  * @typeparam A The success value
  */
 export abstract class Fiber<A, E> {
-  public static get DEFAULT(): IAsapM {
-    return Fiber.MAX_INSTRUCTION_COUNT()
-  }
   public get join(): QIO<A, E> {
     return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
-  }
-  public static MAX_DURATION(maxDuration: number): IDurationM {
-    return {tag: YieldStrategyTag.DURATION, maxDuration}
-  }
-  public static MAX_INSTRUCTION_COUNT(maxInstructionCount?: number): IAsapM {
-    return {tag: YieldStrategyTag.INS_COUNT, maxInstructionCount}
   }
 
   /**

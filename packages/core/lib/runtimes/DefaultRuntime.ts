@@ -1,7 +1,6 @@
 import {scheduler} from 'ts-scheduler'
 
-import {Fiber} from '../internals/Fiber'
-import {FiberConfig} from '../internals/FiberYieldStrategy'
+import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
 
 import {FiberRuntime} from './FiberRuntime'
@@ -25,4 +24,4 @@ export class DefaultRuntime extends FiberRuntime {
   }
 }
 
-export const defaultRuntime = () => new DefaultRuntime(Fiber.DEFAULT)
+export const defaultRuntime = () => new DefaultRuntime(FiberConfig.DEFAULT)

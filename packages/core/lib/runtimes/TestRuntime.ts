@@ -6,8 +6,7 @@ import {Id} from '@qio/prelude'
 import {Either, Option} from 'standard-data-structures'
 import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler'
 
-import {Fiber} from '../internals/Fiber'
-import {FiberConfig} from '../internals/FiberYieldStrategy'
+import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
 
 import {FiberRuntime} from './FiberRuntime'
@@ -39,4 +38,4 @@ export class TestRuntime extends FiberRuntime {
 }
 
 export const testRuntime = (O: SchedulerOptions = {}) =>
-  new TestRuntime(O, Fiber.DEFAULT)
+  new TestRuntime(O, FiberConfig.DEFAULT)

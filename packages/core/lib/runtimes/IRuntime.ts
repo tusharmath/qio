@@ -4,7 +4,7 @@
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
 import {CBOption} from '../internals/CBOption'
-import {FiberConfig} from '../internals/FiberYieldStrategy'
+import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
 
 /**
