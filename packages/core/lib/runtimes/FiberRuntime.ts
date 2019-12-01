@@ -10,8 +10,7 @@ import {QIO} from '../main/QIO'
 
 import {IRuntime} from './IRuntime'
 
-// TODO: rename to FiberRuntime
-export abstract class BaseRuntime implements IRuntime {
+export abstract class FiberRuntime implements IRuntime {
   public abstract config: FiberConfig
   public abstract scheduler: IScheduler
   public abstract configure(config: FiberConfig): IRuntime

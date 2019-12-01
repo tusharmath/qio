@@ -10,7 +10,7 @@ import {ICancellable} from 'ts-scheduler'
 
 import {Instruction, Tag} from '../main/Instructions'
 import {QIO} from '../main/QIO'
-import {BaseRuntime} from '../runtimes/BaseRuntime'
+import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
@@ -62,7 +62,7 @@ export abstract class Fiber<A, E> {
    */
   public static unsafeExecuteWith<A, E>(
     io: QIO<A, E>,
-    runtime: BaseRuntime,
+    runtime: FiberRuntime,
     cb?: CBOption<A, E>
   ): ICancellable {
     return FiberContext.unsafeExecuteWith<A, E>(io, runtime, cb)
@@ -70,7 +70,7 @@ export abstract class Fiber<A, E> {
   public abstract abort: QIO<void>
   public abstract await: QIO<Option<Either<E, A>>>
   public readonly id = FIBER_ID++
-  public abstract runtime: BaseRuntime
+  public abstract runtime: FiberRuntime
 }
 /**
  * FiberContext actually evaluates the QIO expression.
@@ -99,7 +99,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
    */
   public static unsafeExecuteWith<A, E>(
     io: QIO<A, E>,
-    runtime: BaseRuntime,
+    runtime: FiberRuntime,
     cb?: CBOption<A, E>
   ): FiberContext<A, E> {
     const context = new FiberContext<A, E>(io.asInstruction, runtime)
@@ -128,7 +128,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   )
   private constructor(
     instruction: Instruction,
-    public readonly runtime: BaseRuntime
+    public readonly runtime: FiberRuntime
   ) {
     super()
     D(this.id, 'this.constructor()')
