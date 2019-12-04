@@ -4,7 +4,7 @@
 
 import {Id} from '@qio/prelude'
 import {Either, Option} from 'standard-data-structures'
-import {SchedulerOptions, TestScheduler, testScheduler} from 'ts-scheduler'
+import {TestScheduler, testScheduler} from 'ts-scheduler'
 
 import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
@@ -12,16 +12,14 @@ import {QIO} from '../main/QIO'
 import {FiberRuntime} from './FiberRuntime'
 
 export class TestRuntime extends FiberRuntime {
-  public readonly scheduler: TestScheduler
   public constructor(
-    private readonly options: SchedulerOptions,
+    public readonly scheduler: TestScheduler,
     public readonly config: FiberConfig
   ) {
     super()
-    this.scheduler = testScheduler(options)
   }
   public configure(config: FiberConfig): TestRuntime {
-    return new TestRuntime(this.options, config)
+    return new TestRuntime(this.scheduler, config)
   }
   public unsafeExecuteSync<A, E>(io: QIO<A, E>): A | E | undefined {
     return this.unsafeExecuteSync0(io)
@@ -37,5 +35,5 @@ export class TestRuntime extends FiberRuntime {
   }
 }
 
-export const testRuntime = (O: SchedulerOptions = {}) =>
-  new TestRuntime(O, FiberConfig.DEFAULT)
+export const testRuntime = (scheduler: TestScheduler = testScheduler()) =>
+  new TestRuntime(scheduler, FiberConfig.DEFAULT)

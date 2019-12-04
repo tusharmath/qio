@@ -15,8 +15,8 @@ import {QIO} from '../main/QIO'
  * Actual implementation is available at [[DefaultRuntime]] & [[TestRuntime]].
  */
 export interface IRuntime {
+  readonly config: FiberConfig
   readonly scheduler: IScheduler
-
   configure(config: FiberConfig): IRuntime
   /**
    * Executes the provided [[QIO]] expression.
