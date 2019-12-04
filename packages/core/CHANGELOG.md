@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [28.0.1](https://github.com/tusharmath/qio/compare/v28.0.0...v28.0.1) (2019-12-04)
+
+**Note:** Version bump only for package @qio/core
+
+
+
+
+
 # [28.0.0](https://github.com/tusharmath/qio/compare/v27.1.1...v28.0.0) (2019-12-04)
 
 
