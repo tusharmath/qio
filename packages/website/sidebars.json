@@ -11,7 +11,8 @@
       "core/environment",
       "core/unit-testing",
       "core/stack-safety",
-      "core/fiber"
+      "core/fiber",
+      "core/multi-task"
     ],
     "Comparison": ["comparison/features", "comparison/benchmarks"]
   },
