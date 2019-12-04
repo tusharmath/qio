@@ -500,6 +500,23 @@ describe('QIO', () => {
         assert.strictEqual(counter.count, 0)
       })
     })
+
+    describe('config', () => {
+      it('should context switch after the provided duration', () => {
+        const snapshot = new Snapshot()
+        const fn = QIO.lazy(
+          (a: number): QIO<void> => (a === 0 ? QIO.void() : fn(a - 1).delay(1))
+        )
+        const slow = fn(1000).and(snapshot.mark('SLOW'))
+        const fast = fn(10).and(snapshot.mark('FAST'))
+        const program = slow.par(fast)
+
+        testRuntime().unsafeExecuteSync(program)
+        const actual = snapshot.timeline
+
+        assert.deepStrictEqual(actual, ['FAST@11', 'SLOW@1001'])
+      })
+    })
   })
 
   describe('zipWith', () => {

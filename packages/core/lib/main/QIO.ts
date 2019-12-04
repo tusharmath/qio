@@ -554,11 +554,12 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Returns a [[Fiber]]
    */
-  public fork(
-    config: FiberConfig = FiberConfig.DEFAULT
-  ): QIO<Fiber<A1, E1>, never, R1> {
+  public fork(config?: FiberConfig): QIO<Fiber<A1, E1>, never, R1> {
     return QIO.env<R1>().zipWithM(QIO.runtime(), (ENV, RTM) =>
-      QIO.fork(this.provide(ENV), RTM.configure(config))
+      QIO.fork(
+        this.provide(ENV),
+        RTM.configure(config === undefined ? RTM.config : config)
+      )
     )
   }
   /**
