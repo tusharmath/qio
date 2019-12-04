@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [28.0.0](https://github.com/tusharmath/qio/compare/v27.1.1...v28.0.0) (2019-12-04)
+
+
+### Code Refactoring
+
+* **qio:** fork signature updated ([ea00676](https://github.com/tusharmath/qio/commit/ea006763e1cc7e139b132c6b9ce89e076fe04865))
+
+
+### BREAKING CHANGES
+
+* **qio:** \`.fork\` is now a method \`.fork()\` instead of a property.
+
+
+
+
+
 # [27.1.0](https://github.com/tusharmath/qio/compare/v27.0.5...v27.1.0) (2019-11-29)
 
 
