@@ -38,7 +38,7 @@ RangeError: Maximum call stack size exceeded
 
 ## Lazy Evaluation
 
-Using `QIO.lazy` we can convert the recursive calls, into lazy ones. That way we make sure the function isn't immediately invoked thus guarantying stack safety.
+Using `QIO.lazy` we can convert the recursive calls, into lazy ones. That way we make sure the function isn't immediately invoked thus guaranteeing stack safety.
 
 ```diff
 + import {QIO} from '@qio/core'
