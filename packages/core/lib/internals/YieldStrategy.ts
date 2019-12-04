@@ -31,8 +31,8 @@ export abstract class YieldStrategy {
     return this.defer(cb, ...T)
   }
   protected abstract defer<T extends unknown[]>(
-    cb: (...T: T) => unknown,
-    ...T: T
+    cb: (...t: T) => unknown,
+    ...t: T
   ): ICancellable
 }
 /**
