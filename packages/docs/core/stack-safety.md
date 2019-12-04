@@ -80,3 +80,22 @@ Calling `fib(10n)` doesn't actually do anything, it just creates a `QIO<number>`
 ```
 
 Now `fib` can theoretically compute the value for any `bigint` value. Practically though, because `bigint` internally uses heap you might be out of system memory eventually which will crash your process.
+
+## Final Program
+
+```ts
+import {QIO, defaultRuntime} from '@qio/core'
+
+const fib = QIO.lazy(
+  (a: bigint, l: bigint = 0n, r: bigint = 1n): QIO<bigint> => {
+    if (a <= 2n) {
+      return QIO.resolve(l + r)
+    }
+
+    return fib(a - 1n, r, l + r)
+  }
+)
+
+const program = fib(1_000_000n) // QIO<number>
+defaultRuntime().unsafeExecute(program) // A 208,988 digit long number
+```
