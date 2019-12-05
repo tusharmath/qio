@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [28.0.2](https://github.com/tusharmath/qio/compare/v28.0.1...v28.0.2) (2019-12-05)
+
+
+### Bug Fixes
+
+* **queue:** rename variable ([7c3bd17](https://github.com/tusharmath/qio/commit/7c3bd17e5ec0617a252e0fb832b5fdf28f2e5aea))
+
+
+
+
+
 ## [28.0.1](https://github.com/tusharmath/qio/compare/v28.0.0...v28.0.1) (2019-12-04)
 
 **Note:** Version bump only for package @qio/core
