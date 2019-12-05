@@ -31,10 +31,10 @@ export class Queue<A = never> {
 
       return QIO.flatten(
         Await.of<A>().chain(
-          QIO.encase(await => {
-            this.T.add(await)
+          QIO.encase(awt => {
+            this.T.add(awt)
 
-            return await.get
+            return awt.get
           })
         )
       )
