@@ -61,14 +61,11 @@ const createFSSpecR = <S extends ISpec<Promise<unknown>>>(S: S): iQSpecR<S> => {
  * Creates a spec object that has functions that don't have any external dependency on env.
  */
 const createFSSpec = <S extends ISpec<Promise<unknown>>>(S: S): iQSpec<S> => {
-  const out: {[k in keyof S]?: (...t: unknown[]) => unknown} = {}
+  const out: {[k in keyof S]?: (...t: never[]) => unknown} = {}
 
   for (const key in S) {
     if (S.hasOwnProperty(key)) {
-      out[key] = (...t: unknown[]) =>
-        QIO.accessM((_: IFSEnv<unknown[], unknown, typeof key>) =>
-          _.fs[key](...t)
-        )
+      out[key] = QIO.encaseP((...t: never[]) => S[key](...t))
     }
   }
 
