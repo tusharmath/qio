@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [28.1.0](https://github.com/tusharmath/qio/compare/v28.0.4...v28.1.0) (2019-12-08)
+
+
+### Features
+
+* **core:** add \`rejectWith\` operator ([80aac26](https://github.com/tusharmath/qio/commit/80aac263846fdb359f4e1546e1b7066f11840567))
+* **managed:** add Managed.par ([73b7ba6](https://github.com/tusharmath/qio/commit/73b7ba687b15b592563018b5c7e7a74d405e51e5))
+
+
+
+
+
 ## [28.0.4](https://github.com/tusharmath/qio/compare/v28.0.3...v28.0.4) (2019-12-08)
 
 **Note:** Version bump only for package qio
