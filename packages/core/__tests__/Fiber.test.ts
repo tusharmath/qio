@@ -189,7 +189,7 @@ describe('FiberContext', () => {
             .fork()
             .chain(F => F.await.chain(_ => snapshot.mark(_)))
             .fork()
-            .chain(F => F.abort.delay(500)),
+            .chain(F => F.abort().delay(500)),
           runtime
         )
 

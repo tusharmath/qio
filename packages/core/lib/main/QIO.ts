@@ -614,8 +614,8 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A1 | A2, E1 | E2, R1 & R2> {
     return this.raceWith(
       that,
-      (E, F) => F.abort.const(E),
-      (E, F) => F.abort.const(E)
+      (E, F) => F.abort().const(E),
+      (E, F) => F.abort().const(E)
     ).chain(E => QIO.fromEither<A1 | A2, E1 | E2>(E))
   }
 
@@ -700,12 +700,12 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       that,
       (E, F) =>
         E.biMap(
-          cause => F.abort.and(QIO.reject(cause)),
+          cause => F.abort().and(QIO.reject(cause)),
           a1 => F.join.map(a2 => c(a1, a2))
         ).reduce<QIO<C, E1 | E2>>(Id, Id),
       (E, F) =>
         E.biMap(
-          cause => F.abort.and(QIO.reject(cause)),
+          cause => F.abort().and(QIO.reject(cause)),
           a2 => F.join.map(a1 => c(a1, a2))
         ).reduce<QIO<C, E1 | E2>>(Id, Id)
     )

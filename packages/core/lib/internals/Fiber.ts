@@ -53,10 +53,10 @@ export abstract class Fiber<A1, E1> {
   ): ICancellable {
     return FiberContext.unsafeExecuteWith<A1, E1>(io, runtime, cb)
   }
-  public abstract abort: QIO<void>
   public abstract await: QIO<Option<Either<E1, A1>>>
   public readonly id = FIBER_ID++
   public abstract runtime: FiberRuntime
+  public abstract abort(): QIO<void>
 }
 /**
  * FiberContext actually evaluates the QIO expression.
@@ -66,9 +66,6 @@ export abstract class Fiber<A1, E1> {
  */
 export class FiberContext<A1, E1> extends Fiber<A1, E1>
   implements ICancellable {
-  public get abort(): QIO<void> {
-    return QIO.lift(() => this.cancel())
-  }
   /**
    * Aborting the IO produced by await should abort the complete IO.
    */
@@ -121,6 +118,9 @@ export class FiberContext<A1, E1> extends Fiber<A1, E1>
     D(this.id, 'this.constructor()')
     this.stackA.push(instruction)
     this.init()
+  }
+  public abort(): QIO<void> {
+    return QIO.lift(() => this.cancel())
   }
   public cancel(): void {
     D(this.id, 'this.cancel()')

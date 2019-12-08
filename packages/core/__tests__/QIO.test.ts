@@ -481,7 +481,7 @@ describe('QIO', () => {
           counter
             .inc()
             .fork()
-            .chain(fiber => fiber.abort)
+            .chain(fiber => fiber.abort())
         )
 
         assert.strictEqual(counter.count, 0)
@@ -494,7 +494,7 @@ describe('QIO', () => {
           QIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
             .fork()
-            .chain(fiber => fiber.abort)
+            .chain(fiber => fiber.abort())
         )
 
         assert.strictEqual(counter.count, 0)
@@ -678,8 +678,8 @@ describe('QIO', () => {
         runtime.unsafeExecuteSync(
           F1.raceWith(
             F2,
-            (E, F) => F.abort.and(QIO.fromEither(E)),
-            (E, F) => F.abort.and(QIO.fromEither(E))
+            (E, F) => F.abort().and(QIO.fromEither(E)),
+            (E, F) => F.abort().and(QIO.fromEither(E))
           ).and(snapshot.mark('C'))
         )
 
@@ -694,8 +694,8 @@ describe('QIO', () => {
         const actual = runtime.unsafeExecuteSync(
           F1.raceWith(
             F2,
-            (E, F) => F.abort.and(QIO.fromEither(E)),
-            (E, F) => F.abort.and(QIO.fromEither(E))
+            (E, F) => F.abort().and(QIO.fromEither(E)),
+            (E, F) => F.abort().and(QIO.fromEither(E))
           )
         )
 
