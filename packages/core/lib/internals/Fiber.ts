@@ -37,8 +37,8 @@ let FIBER_ID = 0
  * @typeparam E Exceptions that can be thrown
  * @typeparam A The success value
  */
-export abstract class Fiber<A, E> {
-  public get join(): QIO<A, E> {
+export abstract class Fiber<A1, E1> {
+  public get join(): QIO<A1, E1> {
     return this.await.chain(O => O.map(QIO.fromEither).getOrElse(QIO.never()))
   }
 
@@ -46,15 +46,15 @@ export abstract class Fiber<A, E> {
    * Uses a shared runtime to evaluate a [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
-  public static unsafeExecuteWith<A, E>(
-    io: QIO<A, E>,
+  public static unsafeExecuteWith<A1, E1>(
+    io: QIO<A1, E1>,
     runtime: FiberRuntime,
-    cb?: CBOption<A, E>
+    cb?: CBOption<A1, E1>
   ): ICancellable {
-    return FiberContext.unsafeExecuteWith<A, E>(io, runtime, cb)
+    return FiberContext.unsafeExecuteWith<A1, E1>(io, runtime, cb)
   }
   public abstract abort: QIO<void>
-  public abstract await: QIO<Option<Either<E, A>>>
+  public abstract await: QIO<Option<Either<E1, A1>>>
   public readonly id = FIBER_ID++
   public abstract runtime: FiberRuntime
 }
@@ -64,14 +64,15 @@ export abstract class Fiber<A, E> {
  * As soon as its created it starts to evaluate the QIO expression.
  * It provides public APIs to [[Fiber]] to consume.
  */
-export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
+export class FiberContext<A1, E1> extends Fiber<A1, E1>
+  implements ICancellable {
   public get abort(): QIO<void> {
     return QIO.lift(() => this.cancel())
   }
   /**
    * Aborting the IO produced by await should abort the complete IO.
    */
-  public get await(): QIO<Option<Either<E, A>>> {
+  public get await(): QIO<Option<Either<E1, A1>>> {
     D(this.id, 'this.await()')
 
     return QIO.asyncUIO(cb => {
@@ -103,8 +104,8 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   }
   private readonly cancellationList = new CancellationList()
   private node?: LinkedListNode<ICancellable>
-  private readonly observers = DoublyLinkedList.of<CBOption<A, E>>()
-  private result: Option<Either<E, A>> = Option.none()
+  private readonly observers = DoublyLinkedList.of<CBOption<A1, E1>>()
+  private result: Option<Either<E1, A1>> = Option.none()
   private readonly stackA = new Array<Instruction>()
   private readonly stackEnv = new Array<unknown>()
   private status = FiberStatus.PENDING
@@ -134,7 +135,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
    * It will never cancel the complete Fiber.
    * To cancel the Fiber one must call the [[FiberContext.cancel]] method.
    */
-  public unsafeObserve(cb: CBOption<A, E>): ICancellable {
+  public unsafeObserve(cb: CBOption<A1, E1>): ICancellable {
     D(this.id, 'this.unsafeObserve()')
     if (this.status === FiberStatus.CANCELLED) {
       return this.runtime.scheduler.asap(
@@ -164,7 +165,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
       }
     }
   }
-  private dispatchResult(result: Either<E, A>): void {
+  private dispatchResult(result: Either<E1, A1>): void {
     this.status = FiberStatus.COMPLETED
     this.result = Option.some(result)
     this.observers.map(_ => _(this.result))
@@ -187,7 +188,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
       try {
         const j = this.stackA.pop()
         if (j === undefined) {
-          return this.dispatchResult(Either.right(data as A))
+          return this.dispatchResult(Either.right(data as A1))
         }
         switch (j.tag) {
           case Tag.Constant:
@@ -206,7 +207,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             ) {
               this.stackA.pop()
             }
-            const cause = j.i0 as E
+            const cause = j.i0 as E1
             const handler = this.stackA.pop()
             if (handler !== undefined && handler.tag === Tag.Capture) {
               this.stackA.push(handler.i0(cause))
