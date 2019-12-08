@@ -2,19 +2,9 @@
 title: Fiber
 ---
 
-Fiber provides a low level API to manage the execution of any QIO expression. It can be accessed via the `fork` operator which is available on all QIO instances.
+The `Fiber` API provides low level concurrency handles, that helps in writing **asynchronous** programs which can be **paused** or **aborted**.
 
-```ts
-const program = QIO.resolve(1000)
-  .fork()
-  .chain(F => F.abort)
-```
-
-The value `F` is an instance of `Fiber`.
-
-## API
-
-A Fiber takes in two type params viz.
+`Fiber` is represented with two type params viz.
 
 1. `A` The type of the success value that will be emitted once the Fiber is completely evaluated.
 2. `E` The error type that can be emitted in case of failure.
@@ -26,40 +16,96 @@ interface Fiber<A, E> {
 }
 ```
 
-### `F.abort`
+## Use case
 
-The `abort` operator allows us to cancel the execution in a purely functional manner. A more reasonable use case would be to timeout an HTTP request.
+Consider running the following `program`:
 
 ```ts
 import {QIO} from '@qio/core'
-import {request} from '@qio/http'
 
 const putStrLn = QIO.encase(console.log)
-const program = request({url: 'http://www.abc.com'})
-  .chain(putStrLn)
-  .fork()
-  .chain(F => F.abort.delay(1000))
 
-defaultRuntime().unsafeExecute(program)
+const A = putStrLn('A').delay(1000) // QIO<string>
+const B = putStrLn('B') // QIO<string>
+
+const program = A.and(B)
 ```
 
-Here the `program` tries to make an HTTP request to `abc.com` and if the response is not received within `1000ms`, the request is safely aborted.
+**Output**
+
+```bash
+A
+B
+```
+
+`A` is printed first and then `B` is printed. This guarantee is provided by the `and` operator.
+
+To make sure that the computation continues with `B` and doesn't wait for `A` to complete we can use the `fork()` operator on `A`.
+
+```diff
+  import {QIO} from '@qio/core'
+
+  const putStrLn = QIO.encase(console.log)
+
+- const A = putStrLn('A').delay(1000) // QIO<string>
++ const A = putStrLn('A').delay(1000).fork() // QIO<Fiber<string>>
+  const B = putStrLn('B') // QIO<string>
+
+  const program = A.and(B)
+```
+
+**Output**
+
+```bash
+B
+A
+```
+
+Calling `fork()` makes sure that `A` runs in its own Fiber, asynchronously and moves on to computing `B` as soon as possible. That way `B` is printed first and then after `1000ms`, `A` is printed.
+
+### `F.abort`
+
+```diff
+  import {QIO} from '@qio/core'
+
+  const putStrLn = QIO.encase(console.log)
+
+- const A = putStrLn('A').delay(1000).fork()
++ const A = putStrLn('A').delay(1000).fork().chain(F => F.abort.delay(100))
+  const B = putStrLn('B')
+
+  const program = A.and(B)
+```
+
+**Output:**
+
+```bash
+B
+```
+
+`F` represents a `Fiber` and using `abort.delay(100)` we are aborting the computation after `100ms` that way `A` is never computed and thus only `B` is printed on the screen.
 
 ### `F.join`
 
-The `join` operator waits for the execution to complete and resolves with either a success or a failure value. A typical use case for this could be to run two QIO instances in parallel.
+```diff
+  import {QIO} from '@qio/core'
 
-```ts
-import {QIO} from '@qio/core'
+  const putStrLn = QIO.encase(console.log)
 
-const L = QIO.timeout('L', 1000).fork()
-const R = QIO.timeout('R', 2000).fork()
+- const A = putStrLn('A').delay(1000).fork().chain(F => F.abort.delay(100))
++ const A = putStrLn('A').delay(1000).fork().chain(F => F.join)
+  const B = putStrLn('B')
 
-const program = L.zip(R).chain(([FL, FR]) => {
-  return FL.join.zip(FR.join)
-})
-
-defaultRuntime().unsafeExecute(program) // QIO<[string, string]>
+  const program = A.and(B)
 ```
 
-`FL` and `FR` are the two fibers that are created for `L` and `R` respectively. As soon as they are created, the computation for the two timeouts being in parallel. Using the `join` operator, we later wait for each of them to finish and return a `[string, string]`.
+**Output:**
+
+```bash
+A
+B
+```
+
+`F.join` waits for the fiber to compute its value and move on to the next. In the above case `A` is printed after `1000ms` and then immediately `B` is printed.
+
+Once the fiber is computed internally, using `join` multiple times will resolve with the same cached, value every time.
