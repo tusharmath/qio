@@ -656,6 +656,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   /**
+   * Forcefully fails the current program with the provided error.
+   */
+  public rejectWith<E2>(error: E2): QIO<A1, E1 | E2, R1> {
+    return this.and(QIO.reject(error))
+  }
+
+  /**
    * Used to perform side-effects but ignore their values
    */
   public tap<E2, R2>(
