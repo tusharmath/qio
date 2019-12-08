@@ -6,12 +6,12 @@ import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 describe('Managed', () => {
-  const Resource = () => {
-    let i = 0
+  const Resource = (initialCount: number = 0) => {
+    let i = initialCount
 
     return {
-      acquire: QIO.lift(() => i++),
-      release: QIO.encase(() => void i--),
+      acquire: QIO.lift(() => ++i),
+      release: QIO.encase(() => void --i),
       get count(): number {
         return i
       },
@@ -95,5 +95,23 @@ describe('Managed', () => {
 
     const expected = new Error('FAILURE_ON_CLOSURE')
     deepStrictEqual(actual, expected)
+  })
+
+  describe('par', () => {
+    it('should create resources in parallel', () => {
+      const A = Resource(10)
+      const B = Resource(100)
+      const C = Resource(1000)
+      const M = Managed.par([
+        Managed.make(A.acquire, A.release),
+        Managed.make(B.acquire, B.release),
+        Managed.make(C.acquire, C.release)
+      ])
+
+      const actual = testRuntime().unsafeExecuteSync(M.use(QIO.resolve))
+      const expected = [11, 101, 1001]
+
+      assert.deepStrictEqual(actual, expected)
+    })
   })
 })

@@ -48,6 +48,19 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     return new Managed(reservation)
   }
 
+  public static par<A1, E1, R1>(
+    arr: Array<Managed<A1, E1, R1>>
+  ): Managed<A1[], E1, R1> {
+    const seed: Managed<List<A1>, E1, R1> = Managed.make(
+      QIO.resolve(List.empty<A1>()).addEnv<R1>(),
+      QIO.void
+    )
+
+    return arr
+      .reduce((acc, m) => acc.zipWith(m, (L, A) => L.prepend(A)), seed)
+      .map(_ => _.asArray.reverse())
+  }
+
   public static zip<A1, E1, R1>(
     managed: Array<Managed<A1, E1, R1>>
   ): Managed<A1[], E1, R1> {
@@ -78,6 +91,10 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     return Managed.of(QIO.resolve(reservation).addEnv())
   }
 
+  public do<A2, E2, R2>(io: QIO<A2, E2, R2>): QIO<A2, E1 | E2, R1 & R2> {
+    return this.use(() => io)
+  }
+
   public map<A2>(fn: (a: A1) => A2): Managed<A2, E1, R1> {
     return Managed.of(
       this.reservation.map(r1 => Reservation.of(r1.acquire.map(fn), r1.release))
@@ -100,6 +117,7 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
         )
     )
   }
+
   public zipWith<A2, E2, R2, X>(
     that: Managed<A2, E2, R2>,
     fn: (a1: A1, a2: A2) => X
