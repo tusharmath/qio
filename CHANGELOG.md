@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [28.1.2](https://github.com/tusharmath/qio/compare/v28.1.1...v28.1.2) (2019-12-16)
+
+
+### Bug Fixes
+
+* **fs:** update types for fs.remove ([165a3f5](https://github.com/tusharmath/qio/commit/165a3f5d8c1dbbab4da4e56bac1b8e32c23bbe05))
+
+
+
+
+
 ## [28.1.1](https://github.com/tusharmath/qio/compare/v28.1.0...v28.1.1) (2019-12-16)
 
 

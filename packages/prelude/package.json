@@ -1,6 +1,6 @@
 {
   "name": "@qio/prelude",
-  "version": "28.0.3",
+  "version": "28.1.2",
   "description": "helper utilities for QIO and its sister project",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
