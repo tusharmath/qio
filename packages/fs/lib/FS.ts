@@ -1,7 +1,9 @@
-/* tslint:disable no-unbound-method no-for-in */
+/* tslint:disable no-unbound-method no-for-in only-arrow-functions*/
 
 import {QIO} from '@qio/core'
 import * as fse from 'fs-extra'
+
+import {FnTypeOverride as HACK_ARG_TYPE} from './internals/FnTypeOverride'
 
 export * from 'fs-extra'
 
@@ -116,7 +118,7 @@ const FSPromises = {
   readdir: fse.readdir,
   readlink: fse.readlink,
   realpath: fse.realpath,
-  remove: fse.remove,
+  remove: HACK_ARG_TYPE(fse.remove),
   rename: fse.rename,
   rmdir: fse.rmdir,
   stat: fse.stat,
