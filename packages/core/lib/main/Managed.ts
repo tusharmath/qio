@@ -57,7 +57,7 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
           a.zipWith(b, (x, y) => x.prepend(y)),
         Managed.make(QIO.resolve(List.empty<A1>()).addEnv<R1>(), QIO.void)
       )
-      .map(_ => _.asArray)
+      .map(_ => _.asArray.reverse())
   }
 
   private constructor(

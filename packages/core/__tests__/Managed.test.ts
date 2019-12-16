@@ -102,7 +102,7 @@ describe('Managed', () => {
       const A = Resource(10)
       const B = Resource(100)
       const C = Resource(1000)
-      const M = Managed.par([
+      const M = Managed.zip([
         Managed.make(A.acquire, A.release),
         Managed.make(B.acquire, B.release),
         Managed.make(C.acquire, C.release)
