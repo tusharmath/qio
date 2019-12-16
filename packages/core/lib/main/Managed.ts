@@ -48,19 +48,6 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     return new Managed(reservation)
   }
 
-  public static par<A1, E1, R1>(
-    arr: Array<Managed<A1, E1, R1>>
-  ): Managed<A1[], E1, R1> {
-    const seed: Managed<List<A1>, E1, R1> = Managed.make(
-      QIO.resolve(List.empty<A1>()).addEnv<R1>(),
-      QIO.void
-    )
-
-    return arr
-      .reduce((acc, m) => acc.zipWith(m, (L, A) => L.prepend(A)), seed)
-      .map(_ => _.asArray.reverse())
-  }
-
   public static zip<A1, E1, R1>(
     managed: Array<Managed<A1, E1, R1>>
   ): Managed<A1[], E1, R1> {
