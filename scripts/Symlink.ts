@@ -6,9 +6,10 @@ import {FS, FSEnv} from '@qio/fs'
 import * as p from 'path'
 
 const PATH_PACKAGES = p.resolve(__dirname, '../packages')
-const PATH_NPM_IGNORE = p.resolve(__dirname, '../.npmignore')
+const PATH_NPM_IGNORE = '../../.npmignore'
 
 const qSymLink = (path: string) => FS.symlink(PATH_NPM_IGNORE, path, 'file')
+const qSymLinkForced = (path: string) => FS.remove(path).and(qSymLink(path))
 
 interface INodeError {
   code: string
@@ -28,7 +29,9 @@ const program = FS.readdir(PATH_PACKAGES).chain(fileList =>
         .catch(err =>
           QIO.if(
             isNodeError(err) && err.code === 'EEXIST',
-            putStrLn('EXISTS', path),
+            putStrLn('EXISTS', path)
+              .and(qSymLinkForced(path))
+              .and(putStrLn('RETRY OK', path)),
             QIO.reject(err)
           )
         )
