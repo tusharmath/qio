@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [28.1.1](https://github.com/tusharmath/qio/compare/v28.1.0...v28.1.1) (2019-12-16)
+
+
+### Bug Fixes
+
+* **managed:** remove \`par\` since we already have \`zip\` ([1b0e057](https://github.com/tusharmath/qio/commit/1b0e057056a4dee1a037184d97a24e53ae282c70))
+
+
+
+
+
 # [28.1.0](https://github.com/tusharmath/qio/compare/v28.0.4...v28.1.0) (2019-12-08)
 
 
