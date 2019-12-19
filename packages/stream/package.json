@@ -1,6 +1,6 @@
 {
   "name": "@qio/stream",
-  "version": "28.1.2",
+  "version": "28.1.3",
   "description": "Streams based on QIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
@@ -20,7 +20,7 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "@qio/core": "^28.1.2",
+    "@qio/core": "^28.1.3",
     "@qio/prelude": "^28.1.2",
     "standard-data-structures": "^4.0.0"
   },
