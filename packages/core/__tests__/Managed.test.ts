@@ -35,12 +35,53 @@ const itShouldFollowSpec = (fn: (M: Managed) => Managed) => {
 //#endregion
 
 describe('Managed', () => {
-  it('should release resource on exception', () => {
-    const r = Resource()
-    testRuntime().unsafeExecuteSync(
-      Managed.make(r.acquire, r.release).use(() => QIO.reject('Failure'))
-    )
-    assert.strictEqual(r.count, 0)
+  context('on failure', () => {
+    it('should release resource', () => {
+      const r = Resource()
+      testRuntime().unsafeExecuteSync(
+        Managed.make(r.acquire, r.release).use(() => QIO.reject('Failure'))
+      )
+      assert.strictEqual(r.count, 0)
+    })
+  })
+  context('on success', () => {
+    it('should release resource', () => {
+      const r = Resource()
+      testRuntime().unsafeExecuteSync(
+        Managed.make(r.acquire, r.release).use(() => QIO.void())
+      )
+      assert.strictEqual(r.count, 0)
+    })
+  })
+  context('on cancellation', () => {
+    it('should release resource', () => {
+      const r = Resource()
+      const runtime = testRuntime()
+
+      runtime.unsafeExecuteSync(
+        Managed.make(r.acquire, r.release)
+          .use(() => QIO.timeout(0, 1000))
+          .fork()
+          .chain(F => F.abort.delay(500))
+      )
+
+      assert.ok(r.isReleased)
+    })
+
+    // Keep it for regression
+    it('should release only once on abort', () => {
+      const r = Resource()
+      const runtime = testRuntime()
+
+      runtime.unsafeExecuteSync(
+        Managed.make(r.acquire, r.release)
+          .use(() => QIO.timeout(0, 1000))
+          .fork()
+          .chain(F => F.join.and(F.abort))
+      )
+
+      assert.strictEqual(r.count, 0)
+    })
   })
 
   it('should return the cause of the failure', () => {
@@ -53,12 +94,13 @@ describe('Managed', () => {
     assert.strictEqual(actual, 'Failure')
   })
 
-  it('should release resource on completion', () => {
+  it('should hold resource until completion', () => {
     const r = Resource()
     testRuntime().unsafeExecuteSync(
-      Managed.make(r.acquire, r.release).use(() => QIO.void())
+      Managed.make(r.acquire, r.release).use(QIO.never)
     )
-    assert.strictEqual(r.count, 0)
+
+    assert.strictEqual(r.count, 1)
   })
 
   it('should acquire the resource', () => {
@@ -68,34 +110,6 @@ describe('Managed', () => {
     )
 
     assert.strictEqual(r.count, 1)
-  })
-
-  it('should release resource on cancellation', () => {
-    const r = Resource()
-    const runtime = testRuntime()
-
-    runtime.unsafeExecuteSync(
-      Managed.make(r.acquire, r.release)
-        .use(() => QIO.timeout(0, 1000))
-        .fork()
-        .chain(F => F.abort.delay(500))
-    )
-
-    assert.ok(r.isReleased)
-  })
-
-  it('should release only once on abort', () => {
-    const r = Resource()
-    const runtime = testRuntime()
-
-    runtime.unsafeExecuteSync(
-      Managed.make(r.acquire, r.release)
-        .use(() => QIO.timeout(0, 1000))
-        .fork()
-        .chain(F => F.join.and(F.abort))
-    )
-
-    assert.strictEqual(r.count, 0)
   })
 
   it('should acquire only once', () => {

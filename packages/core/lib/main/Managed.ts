@@ -31,14 +31,9 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     release: (a: A1) => QIO<void, E2, R2>
   ): Managed<A1, E1 | E2, R1 & R2> {
     return Managed.of<A1, E1 | E2, R1 & R2>(
-      acquire.chain(a1 =>
-        release(a1).map(a2 =>
-          Reservation.of<A1, E1, R1, E2, R2>(
-            QIO.resolve(a1).addEnv(),
-            QIO.resolve(a2).addEnv()
-          )
-        )
-      )
+      acquire
+        .map(a1 => Reservation.of(QIO.resolve(a1).addEnv<R1>(), release(a1)))
+        .addEnv<R2>()
     )
   }
 
@@ -95,16 +90,18 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     fn: (a: A1) => QIO<A2, E2, R2>
   ): QIO<A2, E1 | E2, R1 & R2> {
     return this.reservation.zipWithM(QIO.env<R1 & R2>(), (R, ENV) =>
-      R.acquire
-        .chain(fn)
-        .catch(e12 => R.release.and(QIO.reject(e12)))
-        .chain(a2 => R.release.const(a2))
-        .fork()
-        .chain(F =>
-          F.await
-            .chain(O => O.map(QIO.fromEither).getOrElse(F.join))
-            .do(R.release.provide(ENV))
-        )
+      R.release.once.chain(release =>
+        R.acquire
+          .chain(fn)
+          .catch(e12 => release.and(QIO.reject(e12)))
+          .chain(a2 => release.const(a2))
+          .fork()
+          .chain(F =>
+            F.await
+              .chain(O => O.map(QIO.fromEither).getOrElse(F.join))
+              .chain(_ => release.provide(ENV).const(_))
+          )
+      )
     )
   }
 
