@@ -5,22 +5,36 @@ import {Managed} from '../lib/main/Managed'
 import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
+import {Resource} from './internals/Resource'
+
+//#region Regression Suite
+const itShouldAcquireOnce = (fn: (M: Managed) => Managed) => {
+  it('should acquire only once', () => {
+    const r = Resource()
+    testRuntime().unsafeExecuteSync(
+      fn(Managed.make(r.acquire, QIO.void)).use(QIO.void)
+    )
+    assert.strictEqual(r.count, 1, `Resource was acquired ${r.count} times`)
+  })
+}
+
+const itShouldReleaseOnce = (fn: (M: Managed) => Managed) => {
+  it('should release only once', () => {
+    const r = Resource()
+    testRuntime().unsafeExecuteSync(
+      fn(Managed.make(QIO.void(), r.release)).use(QIO.void)
+    )
+    assert.strictEqual(r.count, -1, `Resource was released ${r.count} times`)
+  })
+}
+
+const itShouldFollowSpec = (fn: (M: Managed) => Managed) => {
+  itShouldAcquireOnce(fn)
+  itShouldReleaseOnce(fn)
+}
+//#endregion
+
 describe('Managed', () => {
-  const Resource = (initialCount: number = 0) => {
-    let i = initialCount
-
-    return {
-      acquire: QIO.lift(() => ++i),
-      release: QIO.encase(() => void --i),
-      get count(): number {
-        return i
-      },
-      get isReleased(): boolean {
-        return i === 0
-      }
-    }
-  }
-
   it('should release resource on exception', () => {
     const r = Resource()
     testRuntime().unsafeExecuteSync(
@@ -70,7 +84,7 @@ describe('Managed', () => {
     assert.ok(r.isReleased)
   })
 
-  it('should release only once', () => {
+  it('should release only once on abort', () => {
     const r = Resource()
     const runtime = testRuntime()
 
@@ -82,6 +96,16 @@ describe('Managed', () => {
     )
 
     assert.strictEqual(r.count, 0)
+  })
+
+  it('should acquire only once', () => {
+    const r = Resource()
+
+    testRuntime().unsafeExecuteSync(
+      Managed.make(r.acquire, QIO.void).use(QIO.void)
+    )
+
+    assert.strictEqual(r.count, 1)
   })
 
   it('should reject if release causes an error', () => {
@@ -97,8 +121,8 @@ describe('Managed', () => {
     deepStrictEqual(actual, expected)
   })
 
-  describe('par', () => {
-    it('should create resources in parallel', () => {
+  describe('zip', () => {
+    it('should create resources simultaneously', () => {
       const A = Resource(10)
       const B = Resource(100)
       const C = Resource(1000)
@@ -113,5 +137,13 @@ describe('Managed', () => {
 
       assert.deepStrictEqual(actual, expected)
     })
+  })
+
+  describe('chain', () => {
+    itShouldFollowSpec(m => m.chain(() => Managed.make(QIO.void(), QIO.void)))
+  })
+
+  describe('map', () => {
+    itShouldFollowSpec(m => m.map(() => 0))
   })
 })

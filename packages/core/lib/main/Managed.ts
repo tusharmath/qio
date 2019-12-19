@@ -32,10 +32,10 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
   ): Managed<A1, E1 | E2, R1 & R2> {
     return Managed.of<A1, E1 | E2, R1 & R2>(
       acquire.chain(a1 =>
-        release(a1).once.map(a2 =>
+        release(a1).map(a2 =>
           Reservation.of<A1, E1, R1, E2, R2>(
             QIO.resolve(a1).addEnv(),
-            a2.addEnv()
+            QIO.resolve(a2).addEnv()
           )
         )
       )
@@ -67,15 +67,18 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
   public chain<A2, E2, R2>(
     fn: (a: A1) => Managed<A2, E2, R2>
   ): Managed<A2, E1 | E2, R1 & R2> {
-    const a1 = this.reservation.chain(_ => _.acquire)
-    const r1 = this.reservation.chain(_ => _.release)
+    return Managed.of(
+      this.reservation.chain(r1 =>
+        r1.acquire.chain(a1 =>
+          fn(a1).reservation.map(r2 => {
+            const acquire = r2.acquire
+            const release = r2.release.and(r1.release)
 
-    const a2 = a1.chain(_ => fn(_).reservation).chain(_ => _.acquire)
-    const r2 = a1.chain(_ => fn(_).reservation).chain(_ => _.release)
-
-    const reservation = Reservation.of(a2, r1.and(r2))
-
-    return Managed.of(QIO.resolve(reservation).addEnv())
+            return Reservation.of(acquire, release)
+          })
+        )
+      )
+    )
   }
 
   public do<A2, E2, R2>(io: QIO<A2, E2, R2>): QIO<A2, E1 | E2, R1 & R2> {
