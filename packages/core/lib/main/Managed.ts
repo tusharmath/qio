@@ -76,10 +76,6 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     )
   }
 
-  public do<A2, E2, R2>(io: QIO<A2, E2, R2>): QIO<A2, E1 | E2, R1 & R2> {
-    return this.use(() => io)
-  }
-
   public map<A2>(fn: (a: A1) => A2): Managed<A2, E1, R1> {
     return Managed.of(
       this.reservation.map(r1 => Reservation.of(r1.acquire.map(fn), r1.release))
@@ -89,20 +85,11 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
   public use<A2, E2, R2>(
     fn: (a: A1) => QIO<A2, E2, R2>
   ): QIO<A2, E1 | E2, R1 & R2> {
-    return this.reservation.zipWithM(QIO.env<R1 & R2>(), (R, ENV) =>
-      R.release.once.chain(release =>
-        R.acquire
-          .chain(fn)
-          .catch(e12 => release.and(QIO.reject(e12)))
-          .chain(a2 => release.const(a2))
-          .fork()
-          .chain(F =>
-            F.await
-              .chain(O => O.map(QIO.fromEither).getOrElse(F.join))
-              .chain(_ => release.provide(ENV).const(_))
-          )
-      )
-    )
+    return this.reservation.chain(R => R.acquire.bracket_(R.release)(fn))
+  }
+
+  public use_<A2, E2, R2>(io: QIO<A2, E2, R2>): QIO<A2, E1 | E2, R1 & R2> {
+    return this.use(() => io)
   }
 
   public zipWith<A2, E2, R2, X>(
