@@ -228,23 +228,23 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Alternative to ternary operator in typescript that forcefully narrows down the envs
    */
-  public static if<E1, R1, A, E2, R2>(
+  public static if<A1, E1, R1, A2, E2, R2>(
     cond: boolean,
-    left: QIO<A, E1, R1>,
-    right: QIO<A, E2, R2>
-  ): QIO<A, E1 | E2, R1 & R2> {
-    return ((cond ? left : right) as unknown) as QIO<A, E1 | E2, R1 & R2>
+    left: QIO<A1, E1, R1>,
+    right: QIO<A2, E2, R2>
+  ): QIO<A1 | A2, E1 | E2, R1 & R2> {
+    return ((cond ? left : right) as unknown) as QIO<A1 | A2, E1 | E2, R1 & R2>
   }
   /**
    * A different flavour of qio.if]] that takes in functions instead of c instances.
    */
   public static if0<T extends unknown[]>(
     ...args: T
-  ): <E1, R1, A, E2, R2>(
+  ): <A1, E1, R1, A2, E2, R2>(
     cond: (...args: T) => boolean,
-    left: (...args: T) => QIO<A, E1, R1>,
-    right: (...args: T) => QIO<A, E2, R2>
-  ) => QIO<A, E1 | E2, R1 & R2> {
+    left: (...args: T) => QIO<A1, E1, R1>,
+    right: (...args: T) => QIO<A2, E2, R2>
+  ) => QIO<A1 | A2, E1 | E2, R1 & R2> {
     return (cond, left, right) =>
       // tslint:disable-next-line: no-any
       cond(...args) ? left(...args) : (right(...args) as any)
