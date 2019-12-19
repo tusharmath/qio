@@ -14,6 +14,7 @@ import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
+import {Exit, FiberCancelled, FiberFailure, FiberSuccess} from './Exit'
 import {YieldStrategy} from './YieldStrategy'
 
 const D = debug('qio:fiber')
@@ -22,6 +23,7 @@ class InvalidInstruction extends Error {
     super(`${Tag[ins.tag]}`)
   }
 }
+
 enum FiberStatus {
   PENDING,
   COMPLETED,
@@ -55,6 +57,18 @@ export abstract class Fiber<A, E> {
   }
   public abstract abort: QIO<void>
   public abstract await: QIO<Option<Either<E, A>>>
+  public get await0(): QIO<Exit<A, E>> {
+    return this.await.map(o =>
+      o
+        .map(e =>
+          e.reduce<Exit<A, E>>(
+            cause => new FiberFailure(cause),
+            value => new FiberSuccess(value)
+          )
+        )
+        .getOrElse(new FiberCancelled())
+    )
+  }
   public readonly id = FIBER_ID++
   public abstract runtime: FiberRuntime
 }
