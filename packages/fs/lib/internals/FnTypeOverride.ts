@@ -1,6 +1,4 @@
 /* tslint:disable only-arrow-functions*/
-// prettier-ignore
-
 
 /**
  * Converts any overloaded function that accepts both promise and callbacks
@@ -9,6 +7,7 @@
  * THIS IS A HACK. It is not a generic implementation.
  *
  * - It doesn't work for `fs.open`.
+ * - It works for `fs.remove`.
  * - It should be used with care.
  */
 export function FnTypeOverride<X>(fn: () => Promise<X>): () => Promise<X>
