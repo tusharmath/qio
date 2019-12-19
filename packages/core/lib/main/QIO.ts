@@ -225,6 +225,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static fromEither<A, E>(exit: Either<E, A>): QIO<A, E> {
     return exit.fold<QIO<A, E>>(QIO.never(), QIO.reject, QIO.resolve)
   }
+
   /**
    * Alternative to ternary operator in typescript that forcefully narrows down the envs
    */
@@ -497,6 +498,19 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public and<A2, E2, R2>(aFb: QIO<A2, E2, R2>): QIO<A2, E1 | E2, R1 & R2> {
     // TODO: can improve PERF by add a new instruction type
     return this.chain(() => aFb)
+  }
+
+  public bracket<E2, R2>(
+    release: (A1: A1) => QIO<void, E2, R2>
+  ): <A3, E3, R3>(
+    usage: (A1: A1) => QIO<A3, E3, R3>
+  ) => QIO<A3, E1 | E2 | E3, R1 & R2 & R3> {
+    return usage =>
+      this.chain(a1 =>
+        usage(a1)
+          .fork()
+          .chain(F => F.await0.and(release(a1)).chain(_ => F.join))
+      )
   }
 
   /**
