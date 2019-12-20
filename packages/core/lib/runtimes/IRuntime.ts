@@ -3,7 +3,7 @@
  */
 import {ICancellable, IScheduler} from 'ts-scheduler'
 
-import {CBOption} from '../internals/CBOption'
+import {CBExit} from '../internals/CBExit'
 import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
 
@@ -22,5 +22,5 @@ export interface IRuntime {
    * Executes the provided [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
    */
-  unsafeExecute<A, E>(io: QIO<A, E>, cb?: CBOption<A, E>): ICancellable
+  unsafeExecute<A, E>(io: QIO<A, E>, cb?: CBExit<A, E>): ICancellable
 }

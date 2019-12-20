@@ -9,7 +9,7 @@ import {QIO} from '../main/QIO'
 import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
-import {CBOption} from './CBOption'
+import {CBExit} from './CBExit'
 import {YieldStrategy} from './YieldStrategy'
 
 const D = debug('qio:fiber')
@@ -46,7 +46,7 @@ export abstract class Fiber<A, E> {
   public static unsafeExecuteWith<A, E>(
     io: QIO<A, E>,
     runtime: FiberRuntime,
-    cb?: CBOption<A, E>
+    cb?: CBExit<A, E>
   ): ICancellable {
     return FiberContext.unsafeExecuteWith<A, E>(io, runtime, cb)
   }
@@ -83,7 +83,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public static unsafeExecuteWith<A, E>(
     io: QIO<A, E>,
     runtime: FiberRuntime,
-    cb?: CBOption<A, E>
+    cb?: CBExit<A, E>
   ): FiberContext<A, E> {
     const context = new FiberContext<A, E>(io.asInstruction, runtime)
     if (cb !== undefined) {
@@ -94,13 +94,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   }
   private static dispatchResult<A, E>(
     result: Exit<A, E>,
-    cb: CBOption<A, E>
+    cb: CBExit<A, E>
   ): void {
     cb(result)
   }
   private readonly cancellationList = new CancellationList()
   private node?: LinkedListNode<ICancellable>
-  private readonly observers = DoublyLinkedList.of<CBOption<A, E>>()
+  private readonly observers = DoublyLinkedList.of<CBExit<A, E>>()
   private result?: Exit<A, E>
   private readonly stackA = new Array<Instruction>()
   private readonly stackEnv = new Array<unknown>()
@@ -131,7 +131,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
    * It will never cancel the complete Fiber.
    * To cancel the Fiber one must call the [[FiberContext.cancel]] method.
    */
-  public unsafeObserve(cb: CBOption<A, E>): ICancellable {
+  public unsafeObserve(cb: CBExit<A, E>): ICancellable {
     D(this.id, 'this.unsafeObserve()')
     if (this.status === FiberStatus.CANCELLED) {
       return this.runtime.scheduler.asap(
