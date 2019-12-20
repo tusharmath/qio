@@ -8,9 +8,9 @@ import {Either, List} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
-import {Exit} from '../internals/Exit'
 import {Fiber} from '../internals/Fiber'
 import {FiberConfig} from '../internals/FiberConfig'
+import {Exit} from '../main/Exit'
 import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'

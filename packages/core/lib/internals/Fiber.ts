@@ -3,13 +3,13 @@ import {debug} from 'debug'
 import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
+import {Exit} from '../main/Exit'
 import {Instruction, Tag} from '../main/Instructions'
 import {QIO} from '../main/QIO'
 import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBOption} from './CBOption'
-import {Exit} from './Exit'
 import {YieldStrategy} from './YieldStrategy'
 
 const D = debug('qio:fiber')

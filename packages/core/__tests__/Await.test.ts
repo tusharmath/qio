@@ -1,7 +1,7 @@
 import {assert, spy} from 'chai'
 
-import {Exit} from '../lib/internals/Exit'
 import {Await} from '../lib/main/Await'
+import {Exit} from '../lib/main/Exit'
 import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 

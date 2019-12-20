@@ -1,7 +1,7 @@
 import {IScheduler, scheduler as dScheduler} from 'ts-scheduler'
 
-import {Exit} from '../internals/Exit'
 import {FiberConfig} from '../internals/FiberConfig'
+import {Exit} from '../main/Exit'
 import {QIO} from '../main/QIO'
 
 import {FiberRuntime} from './FiberRuntime'

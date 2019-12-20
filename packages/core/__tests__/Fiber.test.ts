@@ -1,8 +1,8 @@
 import {assert, spy} from 'chai'
 
-import {Exit} from '../lib/internals/Exit'
 import {FiberContext} from '../lib/internals/Fiber'
 import {FiberConfig} from '../lib/internals/FiberConfig'
+import {Exit} from '../lib/main/Exit'
 import {QIO} from '../lib/main/QIO'
 import {Snapshot} from '../lib/main/Snapshot'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
