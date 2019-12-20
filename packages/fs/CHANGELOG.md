@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [29.0.0](https://github.com/tusharmath/qio/compare/v28.1.3...v29.0.0) (2019-12-20)
+
+**Note:** Version bump only for package @qio/fs
+
+
+
+
+
 ## [28.1.3](https://github.com/tusharmath/qio/compare/v28.1.2...v28.1.3) (2019-12-19)
 
 **Note:** Version bump only for package @qio/fs

@@ -1,7 +1,7 @@
 {
   "name": "@qio/example",
   "private": true,
-  "version": "28.1.3",
+  "version": "29.0.0",
   "description": "> TODO: description",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
@@ -35,9 +35,9 @@
     "source-map-support": "^0.5.16"
   },
   "dependencies": {
-    "@qio/console": "^28.1.3",
-    "@qio/core": "^28.1.3",
-    "@qio/prelude": "^28.1.2",
-    "@qio/stream": "^28.1.3"
+    "@qio/console": "^29.0.0",
+    "@qio/core": "^29.0.0",
+    "@qio/prelude": "^29.0.0",
+    "@qio/stream": "^29.0.0"
   }
 }

@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [29.0.0](https://github.com/tusharmath/qio/compare/v28.1.3...v29.0.0) (2019-12-20)
+
+
+### Bug Fixes
+
+* **managed:** fix resource holding ([908db4b](https://github.com/tusharmath/qio/commit/908db4b89b595b60737f7e5c739e52e2b29e97c2))
+
+
+### Code Refactoring
+
+* **fiber:** remove dependency on \`Either\` type internally. ([db926a8](https://github.com/tusharmath/qio/commit/db926a8934013c2543888ae055c329230902078d))
+* **managed:** update function signature for \`Managed.do\` ([75ba5a6](https://github.com/tusharmath/qio/commit/75ba5a63a8d400b878099167953ac9304c396ab4))
+
+
+### Features
+
+* **package:** export \`Exit\` for external use ([6c044d0](https://github.com/tusharmath/qio/commit/6c044d07a7167a58206024aeaec6247de5b0e760))
+* **qio:** add \`QIO.bracket_\` ([93428a4](https://github.com/tusharmath/qio/commit/93428a499db48485d8ec8b9dbc8cbee4f4b97128))
+* **qio:** add \`QIO.bracket\` ([a95dfec](https://github.com/tusharmath/qio/commit/a95dfec806f19a6057e7eacd0be5197192d8aef6))
+* **qio:** update types for \`QIO.if\` ([31d5665](https://github.com/tusharmath/qio/commit/31d5665341ed0f8e27ac2720db6cc42dc09e2eb2))
+
+
+### BREAKING CHANGES
+
+* **fiber:** \`Fiber.await\` now returns an \`Exit\` status instead of a nested \`Option<Either>\`. This is done to
+improve performane and simplify parsing.
+* **managed:** Rename \`Managed.do\` to \`Managed.use_\`
+
+
+
+
+
 ## [28.1.3](https://github.com/tusharmath/qio/compare/v28.1.2...v28.1.3) (2019-12-19)
 
 
