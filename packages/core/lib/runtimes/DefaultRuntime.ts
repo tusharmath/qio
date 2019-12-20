@@ -1,5 +1,6 @@
 import {IScheduler, scheduler as dScheduler} from 'ts-scheduler'
 
+import {Exit} from '../internals/Exit'
 import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
 
@@ -19,7 +20,7 @@ export class DefaultRuntime extends FiberRuntime {
 
   public async unsafeExecutePromise<A, E>(io: QIO<A, E>): Promise<A> {
     return new Promise((res, rej) => {
-      this.unsafeExecute(io, O => O.map(_ => _.reduce(rej, res)))
+      this.unsafeExecute(io, exit => Exit.fold(exit)(undefined, res, rej))
     })
   }
 }

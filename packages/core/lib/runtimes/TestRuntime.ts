@@ -3,9 +3,9 @@
  */
 
 import {Id} from '@qio/prelude'
-import {Either, Option} from 'standard-data-structures'
 import {TestScheduler, testScheduler} from 'ts-scheduler'
 
+import {Exit} from '../internals/Exit'
 import {FiberConfig} from '../internals/FiberConfig'
 import {QIO} from '../main/QIO'
 
@@ -22,12 +22,14 @@ export class TestRuntime extends FiberRuntime {
     return new TestRuntime(this.scheduler, config)
   }
   public unsafeExecuteSync<A, E>(io: QIO<A, E>): A | E | undefined {
-    return this.unsafeExecuteSync0(io)
-      .map(_ => _.reduce<A | E | undefined>(Id, Id))
-      .getOrElse(undefined)
+    const exit = this.unsafeExecuteSync0(io)
+
+    return exit !== undefined
+      ? Exit.fold(exit)<A | E | undefined>(undefined, Id, Id)
+      : undefined
   }
-  public unsafeExecuteSync0<A, E>(io: QIO<A, E>): Option<Either<E, A>> {
-    let result: Option<Either<E, A>> = Option.none()
+  public unsafeExecuteSync0<A, E>(io: QIO<A, E>): Exit<A, E> | undefined {
+    let result: undefined | Exit<A, E>
     this.unsafeExecute(io, _ => (result = _))
     this.scheduler.run()
 

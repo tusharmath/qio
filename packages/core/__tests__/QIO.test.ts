@@ -678,8 +678,8 @@ describe('QIO', () => {
         runtime.unsafeExecuteSync(
           F1.raceWith(
             F2,
-            (E, F) => F.abort.and(QIO.fromEither(E)),
-            (E, F) => F.abort.and(QIO.fromEither(E))
+            (E, F) => F.abort.and(QIO.fromExit(E)),
+            (E, F) => F.abort.and(QIO.fromExit(E))
           ).and(snapshot.mark('C'))
         )
 
@@ -694,8 +694,8 @@ describe('QIO', () => {
         const actual = runtime.unsafeExecuteSync(
           F1.raceWith(
             F2,
-            (E, F) => F.abort.and(QIO.fromEither(E)),
-            (E, F) => F.abort.and(QIO.fromEither(E))
+            (E, F) => F.abort.and(QIO.fromExit(E)),
+            (E, F) => F.abort.and(QIO.fromExit(E))
           )
         )
 

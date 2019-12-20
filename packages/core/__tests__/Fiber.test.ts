@@ -1,6 +1,6 @@
 import {assert, spy} from 'chai'
-import {Either, Option} from 'standard-data-structures'
 
+import {Exit} from '../lib/internals/Exit'
 import {FiberContext} from '../lib/internals/Fiber'
 import {FiberConfig} from '../lib/internals/FiberConfig'
 import {QIO} from '../lib/main/QIO'
@@ -54,7 +54,7 @@ describe('FiberContext', () => {
       context.cancel()
       runtime.scheduler.run()
 
-      cb.should.be.called.with(Option.none())
+      cb.should.be.called.with(Exit.cancel())
     })
 
     context('observer is added', () => {
@@ -67,7 +67,7 @@ describe('FiberContext', () => {
         context.unsafeObserve(cb)
         runtime.scheduler.run()
 
-        cb.should.be.called.with(Option.none())
+        cb.should.be.called.with(Exit.cancel())
       })
     })
   })
@@ -94,7 +94,7 @@ describe('FiberContext', () => {
       FiberContext.unsafeExecuteWith(QIO.reject(1), runtime).unsafeObserve(cb)
       runtime.scheduler.run()
 
-      cb.should.called.with(Option.some(Either.left(1)))
+      cb.should.called.with(Exit.fail(1))
     })
   })
 
@@ -106,7 +106,7 @@ describe('FiberContext', () => {
       FiberContext.unsafeExecuteWith(QIO.resolve(1), runtime).unsafeObserve(cb)
       runtime.scheduler.run()
 
-      cb.should.called.with(Option.some(Either.left(1)))
+      cb.should.called.with(Exit.succeed(1))
     })
   })
 
@@ -120,7 +120,7 @@ describe('FiberContext', () => {
       context.unsafeObserve(cb)
       runtime.scheduler.run()
 
-      cb.should.called.with(Option.some(Either.right(1)))
+      cb.should.called.with(Exit.succeed(1))
     })
 
     it('should call rej with computed cause', () => {
@@ -132,7 +132,7 @@ describe('FiberContext', () => {
       context.unsafeObserve(cb)
       runtime.scheduler.run()
 
-      cb.should.called.with(Option.some(Either.left(1)))
+      cb.should.called.with(Exit.fail(1))
     })
   })
 
@@ -175,13 +175,13 @@ describe('FiberContext', () => {
             .fork()
             .chain(_ => _.await)
         )
-        const expected = Option.some(Either.right(0))
+        const expected = Exit.succeed(0)
         assert.deepStrictEqual(actual, expected)
       })
     })
     context('on cancellation', () => {
       it('should resolve with None', () => {
-        const snapshot = new Snapshot<Option<Either<never, string | number>>>()
+        const snapshot = new Snapshot<Exit<string | number, never>>()
         const runtime = testRuntime()
 
         FiberContext.unsafeExecuteWith(
@@ -195,7 +195,7 @@ describe('FiberContext', () => {
 
         runtime.scheduler.run()
 
-        assert.deepStrictEqual(snapshot.timelineData, [[Option.none(), 501]])
+        assert.deepStrictEqual(snapshot.timelineData, [[Exit.cancel(), 501]])
       })
     })
   })

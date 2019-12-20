@@ -4,10 +4,11 @@
 
 import {Id} from '@qio/prelude'
 import {debug} from 'debug'
-import {Either, List, Option} from 'standard-data-structures'
+import {Either, List} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
+import {Exit} from '../internals/Exit'
 import {Fiber} from '../internals/Fiber'
 import {FiberConfig} from '../internals/FiberConfig'
 import {IRuntime} from '../runtimes/IRuntime'
@@ -224,6 +225,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static fromEither<A, E>(exit: Either<E, A>): QIO<A, E> {
     return exit.fold<QIO<A, E>>(QIO.never(), QIO.reject, QIO.resolve)
+  }
+
+  /**
+   * Creates an IO from `Exit`
+   */
+  public static fromExit<A, E>(exit: Exit<A, E>): QIO<A, E> {
+    return Exit.fold(exit)<QIO<A, E>>(QIO.never(), QIO.resolve, QIO.reject)
   }
 
   /**
@@ -509,7 +517,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       this.chain(a1 =>
         usage(a1)
           .fork()
-          .chain(F => F.await0.and(release(a1)).chain(_ => F.join))
+          .chain(F => F.await.and(release(a1)).chain(_ => F.join))
       )
   }
 
@@ -638,7 +646,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       that,
       (E, F) => F.abort.const(E),
       (E, F) => F.abort.const(E)
-    ).chain(E => QIO.fromEither<A1 | A2, E1 | E2>(E))
+    ).chain(E => QIO.fromExit<A1 | A2, E1 | E2>(E))
   }
 
   /**
@@ -646,8 +654,8 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public raceWith<A2, E2, R2, A3, E3, A4, E4>(
     that: QIO<A2, E2, R2>,
-    cb1: (exit: Either<E1, A1>, fiber: Fiber<A2, E2>) => QIO<A3, E3>,
-    cb2: (exit: Either<E2, A2>, fiber: Fiber<A1, E1>) => QIO<A4, E4>
+    cb1: (exit: Exit<A1, E1>, fiber: Fiber<A2, E2>) => QIO<A3, E3>,
+    cb2: (exit: Exit<A2, E2>, fiber: Fiber<A1, E1>) => QIO<A4, E4>
   ): QIO<A3 | A4, E3 | E4, R1 & R2> {
     return Await.of<A3 | A4, E3 | E4>().chain(done =>
       this.fork()
@@ -657,16 +665,12 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
           const resume1 = L.await.chain(exit => {
             D('zip', 'L cb')
 
-            return Option.isSome(exit)
-              ? done.set(cb1(exit.value, R))
-              : QIO.resolve(true)
+            return done.set(cb1(exit, R)).const(true)
           })
           const resume2 = R.await.chain(exit => {
             D('zip', 'R cb')
 
-            return Option.isSome(exit)
-              ? done.set(cb2(exit.value, L))
-              : QIO.resolve(true)
+            return done.set(cb2(exit, L)).const(true)
           })
 
           return resume1
@@ -728,15 +732,17 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return this.raceWith(
       that,
       (E, F) =>
-        E.biMap(
-          cause => F.abort.and(QIO.reject(cause)),
-          a1 => F.join.map(a2 => c(a1, a2))
-        ).reduce<QIO<C, E1 | E2>>(Id, Id),
+        Exit.fold(E)<QIO<C, E1 | E2>>(
+          QIO.never(),
+          value => F.join.map(_ => c(value, _)),
+          cause => F.abort.and(QIO.reject(cause))
+        ),
       (E, F) =>
-        E.biMap(
-          cause => F.abort.and(QIO.reject(cause)),
-          a2 => F.join.map(a1 => c(a1, a2))
-        ).reduce<QIO<C, E1 | E2>>(Id, Id)
+        Exit.fold(E)<QIO<C, E1 | E2>>(
+          QIO.never(),
+          value => F.join.map(_ => c(_, value)),
+          cause => F.abort.and(QIO.reject(cause))
+        )
     )
   }
 }

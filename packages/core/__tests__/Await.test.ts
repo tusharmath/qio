@@ -1,6 +1,6 @@
 import {assert, spy} from 'chai'
-import {Either, Option} from 'standard-data-structures'
 
+import {Exit} from '../lib/internals/Exit'
 import {Await} from '../lib/main/Await'
 import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
@@ -115,7 +115,7 @@ describe('Await', () => {
 
       res.should.not.be.called()
       runtime.scheduler.run()
-      res.should.be.called.with(Option.some(Either.right('Hey')))
+      res.should.be.called.with(Exit.succeed('Hey'))
     })
   })
 

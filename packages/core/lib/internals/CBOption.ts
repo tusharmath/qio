@@ -1,3 +1,3 @@
-import {Either, Option} from 'standard-data-structures'
+import {Exit} from './Exit'
 
-export type CBOption<A, E> = (O: Option<Either<E, A>>) => void
+export type CBOption<A, E> = (O: Exit<A, E>) => void
