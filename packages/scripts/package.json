@@ -1,0 +1,38 @@
+{
+  "name": "@qio/scripts",
+  "private": true,
+  "version": "28.1.3",
+  "description": "Private scripts for lerna",
+  "keywords": [
+    "qio",
+    "script"
+  ],
+  "author": "Tushar Mathur <tusharmath@gmail.com>",
+  "homepage": "https://github.com/tusharmath/qio#readme",
+  "license": "ISC",
+  "main": "lib/scripts.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tusharmath/qio.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/tusharmath/qio/issues"
+  },
+  "dependencies": {
+    "@qio/console": "^28.1.3",
+    "@qio/core": "^28.1.3"
+  }
+}
