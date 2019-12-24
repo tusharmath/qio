@@ -10,7 +10,6 @@
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
   "license": "ISC",
-  "main": "lib/scripts.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
