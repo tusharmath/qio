@@ -5,30 +5,29 @@ import {defaultRuntime, QIO} from '@qio/core'
 import {FS, FSEnv} from '@qio/fs'
 import * as p from 'path'
 
-const PATH_PACKAGES = p.resolve(__dirname, '../packages')
+interface IExitEnv {
+  exit(code: number): void
+}
+interface ICwdEnc {
+  cwd(): string
+}
+const PATH_PACKAGES = p.resolve(process.cwd(), 'packages')
 const PATH_NPM_IGNORE = '../../.npmignore'
-
+const qExit = (code: number) => QIO.access((_: IExitEnv) => _.exit(code))
 const qSymLink = (path: string) => FS.symlink(PATH_NPM_IGNORE, path)
 const qSymLinkForced = (path: string) => FS.unlink(path).and(qSymLink(path))
+const qCwd = QIO.access((_: ICwdEnc) => _.cwd())
 
-interface INodeError {
-  code: string
-  message: string
-  stack?: string
-}
-const isNodeError = (err: unknown): err is INodeError =>
-  err instanceof Error && err.hasOwnProperty('code')
-
-const program = FS.readdir(PATH_PACKAGES).chain(fileList =>
+const program = FS.readdir(PATH_PACKAGES).zipWithM(qCwd, (fileList, cwd) =>
   QIO.par(
     fileList.map(F => {
-      const path = p.resolve(__dirname, '../packages', F, '.npmignore')
+      const path = p.resolve(process.cwd(), 'packages', F, '.npmignore')
 
       return qSymLink(path)
         .and(putStrLn('OK', path))
         .catch(err =>
           QIO.if(
-            isNodeError(err) && err.code === 'EEXIST',
+            err.code === 'EEXIST',
             putStrLn('EXISTS', path)
               .and(qSymLinkForced(path))
               .and(putStrLn('RETRY OK', path)),
@@ -39,4 +38,13 @@ const program = FS.readdir(PATH_PACKAGES).chain(fileList =>
   )
 )
 
-defaultRuntime().unsafeExecute(program.provide({fs: FSEnv, tty: TTY}))
+defaultRuntime().unsafeExecute(
+  program
+    .catch(err => putStrLn(err.message).and(qExit(1)))
+    .provide({
+      cwd: () => process.cwd(),
+      exit: code => process.exit(code),
+      fs: FSEnv,
+      tty: TTY
+    })
+)
