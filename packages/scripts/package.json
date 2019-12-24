@@ -1,7 +1,7 @@
 {
   "name": "@qio/scripts",
   "private": true,
-  "version": "29.0.4",
+  "version": "29.0.5",
   "description": "Private scripts for lerna",
   "keywords": [
     "qio",
@@ -28,7 +28,7 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "@qio/console": "^29.0.4",
-    "@qio/core": "^29.0.4"
+    "@qio/console": "^29.0.5",
+    "@qio/core": "^29.0.5"
   }
 }
