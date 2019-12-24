@@ -79,22 +79,21 @@ describe('fs', () => {
       })
     })
 
-    describe('write', () => {
+    describe('writeFile', () => {
       it('should be able to write', () => {
-        const actual = testRuntime().unsafeExecuteSync(
+        const writeFile = spy()
+        testRuntime().unsafeExecuteSync(
           FS.open('data.txt', 'w')
-            .chain(H => FS.write(H, 'DATA'))
+            .chain(H => FS.writeFile(H, 'DATA'))
             .provide({
               fs: {
                 open: () => QIO.resolve(10),
-                write: () =>
-                  QIO.resolve({bytesWritten: 100, buffer: Buffer.from('DATA')})
+                writeFile: QIO.encase(writeFile)
               }
             })
         )
-        const expected = {bytesWritten: 100, buffer: Buffer.from('DATA')}
 
-        assert.deepStrictEqual(actual, expected)
+        writeFile.should.be.called.with(10, 'DATA')
       })
     })
   })

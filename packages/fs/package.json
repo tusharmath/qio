@@ -35,12 +35,10 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.5",
-    "@types/fs-extra": "^8.0.1"
+    "@types/chai": "^4.2.5"
   },
   "dependencies": {
     "@qio/core": "^29.0.0",
-    "chai": "^4.2.0",
-    "fs-extra": "^8.1.0"
+    "chai": "^4.2.0"
   }
 }

@@ -1,18 +1,27 @@
-/* tslint:disable no-unbound-method no-for-in only-arrow-functions*/
+/* tslint:disable strict-boolean-expressions no-unbound-method no-for-in */
 
 import {QIO} from '@qio/core'
-import * as fse from 'fs-extra'
+import * as fs from 'fs'
 
-import {FnTypeOverride as HACK_ARG_TYPE} from './internals/FnTypeOverride'
-
-export * from 'fs-extra'
+type QIOErrno<A> = QIO<A, NodeJS.ErrnoException>
 
 /**
- * A spec object that has keys and values of type function.
+ * Creates an uninterruptible effect from an async function
  */
-interface ISpec<A> {
-  [k: string]: (...T: never[]) => A
-}
+const U = <A>(
+  fn: (CB: (err: NodeJS.ErrnoException, data: A) => void) => void
+): QIOErrno<A> =>
+  QIO.uninterruptible((res, rej) =>
+    fn((err, data) => (err ? rej(err) : res(data)))
+  )
+
+/**
+ * Creates an uninterruptible effect from an async function that returns `void`
+ */
+const V = <A, E>(
+  fn: (CB: (err: NodeJS.ErrnoException) => void) => void
+): QIOErrno<void> =>
+  QIO.uninterruptible((res, rej) => fn(err => (err ? rej(err) : res())))
 
 /**
  * An environment for FS
@@ -24,27 +33,49 @@ interface IFSEnv<T extends unknown[], A, K extends string | number | symbol> {
 }
 
 /**
- * Converts ISpec<Promise<?>> to ISpec<QIO<?, Error, IFSEnv>>
+ * TODO: Keep adding all the node fs methods on by one.
  */
-type iQSpecR<S extends ISpec<unknown>> = {
-  [K in keyof S]: S[K] extends (...T: infer T) => Promise<infer A>
-    ? (...T: T) => QIO<A, Error, IFSEnv<T, A, K>>
+export const FSEnv = {
+  open: (path: fs.PathLike, mode: string, flag?: number) =>
+    U<number>(CB => fs.open(path, mode, flag, CB)),
+
+  close: (fd: number): QIOErrno<void> => V(CB => fs.close(fd, CB)),
+
+  readFile: (
+    path: fs.PathLike | number,
+    options?: {encoding?: null; flag?: string}
+  ) => U<string | Buffer>(CB => fs.readFile(path, options, CB)),
+
+  writeFile: (
+    path: fs.PathLike | number,
+    data: unknown,
+    options: fs.WriteFileOptions = {}
+  ) => V(CB => fs.writeFile(path, data, options, CB)),
+
+  readdir: (
+    path: string,
+    options?:
+      | {encoding: BufferEncoding | null; withFileTypes?: false}
+      | BufferEncoding
+  ) => U<string[]>(CB => fs.readdir(path, options, CB)),
+
+  unlink: (path: fs.PathLike): QIOErrno<void> => V(CB => fs.unlink(path, CB)),
+
+  symlink: (target: fs.PathLike, path: fs.PathLike): QIOErrno<void> =>
+    V(cb => fs.symlink(target, path, cb))
+}
+
+type FSWithEnv<O extends ISpec> = {
+  [k in keyof O]: O[k] extends (...t: infer T) => QIO<infer A, infer E>
+    ? (...t: T) => QIO<A, E, {fs: {[kk in k]: (...t: T) => QIO<A, E>}}>
     : never
 }
 
-/**
- * Converts ISpec<Promise<?>> to ISpec<QIO<?, Error>>
- */
-type iQSpec<S extends ISpec<Promise<unknown>>> = {
-  [K in keyof S]: S[K] extends (...T: infer T) => Promise<infer A>
-    ? (...T: T) => QIO<A, Error>
-    : never
+interface ISpec {
+  [k: string]: (...t: never[]) => unknown
 }
 
-/**
- * Creates a spec object that has functions that have external dependency on IFSEnv
- */
-const createFSSpecR = <S extends ISpec<Promise<unknown>>>(S: S): iQSpecR<S> => {
+const createFSWithEnv = <S extends ISpec>(S: S): FSWithEnv<S> => {
   const out: {[k in keyof S]?: (...t: unknown[]) => unknown} = {}
 
   for (const key in S) {
@@ -56,81 +87,7 @@ const createFSSpecR = <S extends ISpec<Promise<unknown>>>(S: S): iQSpecR<S> => {
     }
   }
 
-  return out as iQSpecR<S>
+  return out as FSWithEnv<S>
 }
 
-/**
- * Creates a spec object that has functions that don't have any external dependency on env.
- */
-const createFSSpec = <S extends ISpec<Promise<unknown>>>(S: S): iQSpec<S> => {
-  const out: {[k in keyof S]?: (...t: never[]) => unknown} = {}
-
-  for (const key in S) {
-    if (S.hasOwnProperty(key)) {
-      out[key] = QIO.encaseP((...t: never[]) => S[key](...t))
-    }
-  }
-
-  return out as iQSpec<S>
-}
-
-/**
- * Pick only sync APIs
- */
-const FSPromises = {
-  access: fse.access,
-  appendFile: fse.appendFile,
-  chmod: fse.chmod,
-  chown: fse.chown,
-  close: fse.close,
-  copy: fse.copy,
-  copyFile: fse.copyFile,
-  createFile: fse.createFile,
-  emptyDir: fse.emptyDir,
-  ensureDir: fse.ensureDir,
-  ensureFile: fse.ensureFile,
-  ensureLink: fse.ensureLink,
-  ensureSymlink: fse.ensureSymlink,
-  fchmod: fse.fchmod,
-  fchown: fse.fchown,
-  fdatasync: fse.fdatasync,
-  fstat: fse.fstat,
-  fsync: fse.fsync,
-  ftruncate: fse.ftruncate,
-  futimes: fse.futimes,
-  lchown: fse.lchown,
-  link: fse.link,
-  lstat: fse.lstat,
-  mkdir: fse.mkdir,
-  mkdirp: fse.mkdirp,
-  mkdirs: fse.mkdirs,
-  mkdtemp: fse.mkdtemp,
-  move: fse.move,
-  open: fse.open,
-  outputFile: fse.outputFile,
-  outputJSON: fse.outputJSON,
-  outputJson: fse.outputJson,
-  pathExists: fse.pathExists,
-  read: fse.read,
-  readFile: fse.readFile,
-  readJSON: fse.readJSON,
-  readJson: fse.readJson,
-  readdir: fse.readdir,
-  readlink: fse.readlink,
-  realpath: fse.realpath,
-  remove: HACK_ARG_TYPE(fse.remove),
-  rename: fse.rename,
-  rmdir: fse.rmdir,
-  stat: fse.stat,
-  symlink: fse.symlink,
-  truncate: fse.truncate,
-  unlink: fse.unlink,
-  utimes: fse.utimes,
-  write: fse.write,
-  writeFile: fse.writeFile,
-  writeJSON: fse.writeJSON,
-  writeJson: fse.writeJson
-}
-
-export const FS = createFSSpecR(FSPromises)
-export const FSEnv = createFSSpec(FSPromises)
+export const FS = createFSWithEnv(FSEnv)
