@@ -50,7 +50,7 @@ export class Await<A, E> {
     })
   }
   private get wait(): QIO<A, E> {
-    return QIO.asyncIO((res, rej) => {
+    return QIO.interruptible((res, rej) => {
       const id = this.Q.add([res, rej])
 
       return {

@@ -71,7 +71,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public get await(): QIO<Exit<A, E>> {
     D(this.id, 'this.await()')
 
-    return QIO.asyncUIO(cb => {
+    return QIO.uninterruptible(cb => {
       this.unsafeObserve(cb)
 
       return this

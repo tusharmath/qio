@@ -55,7 +55,7 @@ const putStrLn0 = (...t: unknown[]) =>
 
 const getStrLn0 = (question: string = '') =>
   managedRL.use(RL =>
-    QIO.uninterruptibleIO<string>(cb => RL.question(question, cb))
+    QIO.uninterruptible<string>(cb => RL.question(question, cb))
   )
 
 export const TTY: ITextTerminal = {

@@ -56,7 +56,7 @@ class QIOServer {
     }
   }
   public get close(): QIO<void> {
-    return QIO.uninterruptibleIO<void, Error>((res, rej) => () =>
+    return QIO.uninterruptible<void, Error>((res, rej) => () =>
       this.server.close(E => (E !== undefined ? rej(E) : res()))
     ).catch(Exit)
   }

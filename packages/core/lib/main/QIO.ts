@@ -19,16 +19,6 @@ import {Instruction, Tag} from './Instructions'
 const D = debug('qio:core')
 
 /**
- * Callback function used in node.js to handle async operations.
- * @ignore
- */
-export type NodeJSCallback<T extends unknown[], E> = (
-  // tslint:disable-next-line: no-null-undefined-union
-  err: E | null | undefined,
-  ...t: T
-) => void
-
-/**
  * @typeparam A1 The output of the running the program successfully.
  * @typeparam E1 Possible errors that could be thrown by the program.
  * @typeparam R1 Environment needed to execute this instance.
@@ -74,6 +64,17 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static access<R, A>(cb: (R: R) => A): QIO<A, never, R> {
     return new QIO(Tag.Access, cb)
   }
+
+  /**
+   * Asynchronously access an env
+   */
+  public static accessA<A, E, R>(
+    fn: (A: CB<A>, E: CB<E>, R: R) => void
+  ): QIO<A, E, R> {
+    return QIO.accessM((RR: R) =>
+      QIO.uninterruptible((AA, EE) => fn(AA, EE, RR))
+    )
+  }
   /**
    * Effectfully creates a new c instance with the provided environment
    */
@@ -100,23 +101,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return qio.map(ab => ab(input))
   }
   /**
-   * **NOTE:** The default type is set to `never` because it hard for typescript to infer the types based on how we use `res`.
-   * Using `never` will give users compile time error always while using.
-   */
-  public static asyncIO<A1 = never, E1 = never>(
-    cb: (res: CB<A1>, rej: CB<E1>) => ICancellable
-  ): QIO<A1, E1> {
-    return new QIO(Tag.Async, cb)
-  }
-  /**
-   * Creates a [[QIO]] using a callback
-   */
-  public static asyncUIO<A1 = never>(
-    cb: (res: CB<A1>) => ICancellable
-  ): QIO<A1> {
-    return QIO.asyncIO((res, rej) => cb(res))
-  }
-  /**
    * Calls the provided Effect-full function with the provided arguments.
    * Useful particularly when calling a recursive function with stack safety.
    */
@@ -140,14 +124,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     aFe: (e: E1) => QIO<A2, E2, R2>
   ): QIO<A2, E2, R1 & R2> {
     return new QIO(Tag.Catch, fa, aFe)
-  }
-  /**
-   * Creates a [[QIO]] using a callback function.
-   */
-  public static cb<A1>(fn: (cb: (A1: A1) => void) => void): QIO<A1> {
-    return QIO.runtime().chain(RTM =>
-      QIO.asyncUIO<A1>(res => RTM.scheduler.asap(fn, res))
-    )
   }
 
   /**
@@ -187,7 +163,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): (...t: T) => QIO<A, Error> {
     return (...t) =>
       QIO.runtime().chain(RTM =>
-        QIO.asyncIO((res, rej) =>
+        QIO.interruptible((res, rej) =>
           RTM.scheduler.asap(() => {
             void cb(...t)
               .then(res)
@@ -258,6 +234,16 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       // tslint:disable-next-line: no-any
       cond(...args) ? left(...args) : (right(...args) as any)
   }
+  /**
+   * **NOTE:** The default type for value is set to `never`,
+   * because it hard for typescript to infer the types based on how we use `res`.
+   * Using `never` will give users compile time error always while using.
+   */
+  public static interruptible<A1 = never, E1 = never>(
+    cb: (res: CB<A1>, rej: CB<E1>) => ICancellable
+  ): QIO<A1, E1> {
+    return new QIO(Tag.Async, cb)
+  }
 
   /**
    * Converts a normal function to a lazy function.
@@ -290,32 +276,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static never(): QIO<never> {
     return new QIO(Tag.Never, undefined)
   }
-  /**
-   * Simple API to create IOs from a node.js based callback.
-   *
-   * **Example:**
-   * ```ts
-   * // c<NodeJS.ErrnoException, number, unknown>
-   * const fsOpen = c.node(cb => fs.open('./data.txt', cb))
-   * ```
-   */
-  public static node<A extends unknown[], E = never>(
-    fn: (cb: NodeJSCallback<A, E>) => void
-  ): QIO<A, E> {
-    return QIO.runtime().chain(RTM =>
-      QIO.asyncIO<A, E>((res, rej) =>
-        RTM.scheduler.asap(() => {
-          try {
-            fn((err, ...t) =>
-              err === null || err === undefined ? res(t) : rej(err)
-            )
-          } catch (e) {
-            rej(e as E)
-          }
-        })
-      )
-    )
-  }
+
   /**
    * Runs multiple IOs in parallel. Checkout [[QIO.seq]] to run IOs in sequence.
    */
@@ -413,7 +374,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static timeout<A>(value: A, duration: number): QIO<A> {
     return QIO.runtime().chain(RTM =>
-      QIO.asyncUIO(res => RTM.scheduler.delay(res, duration, value))
+      QIO.interruptible(res => RTM.scheduler.delay(res, duration, value))
     )
   }
 
@@ -455,11 +416,19 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Creates an IO from an async/callback based function ie. non cancellable.
    * It tries to make it cancellable by delaying the function call.
    */
-  public static uninterruptibleIO<A1 = never, E1 = never>(
+  public static uninterruptible<A1 = never, E1 = never>(
     fn: (res: CB<A1>, rej: CB<E1>) => unknown
   ): QIO<A1, E1> {
     return QIO.runtime().chain(RTM =>
-      QIO.asyncIO<A1, E1>((res, rej) => RTM.scheduler.asap(fn, res, rej))
+      QIO.interruptible<A1, E1>((res, rej) =>
+        RTM.scheduler.asap(() => {
+          try {
+            fn(res, rej)
+          } catch (e) {
+            rej(e as E1)
+          }
+        })
+      )
     )
   }
 

@@ -46,7 +46,7 @@ export interface IHttpEnv {
 
 export const httpEnv = {
   request: (config: IHttpRequestConfig) =>
-    QIO.asyncIO<AxiosResponse, AxiosError>((res, rej) => {
+    QIO.interruptible<AxiosResponse, AxiosError>((res, rej) => {
       let cancelRequest = () => {}
       Axios.request({
         ...config,
