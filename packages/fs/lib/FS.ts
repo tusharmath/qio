@@ -61,8 +61,11 @@ export const FSEnv = {
 
   unlink: (path: fs.PathLike): QIOErrno<void> => V(CB => fs.unlink(path, CB)),
 
-  symlink: (target: fs.PathLike, path: fs.PathLike): QIOErrno<void> =>
-    V(cb => fs.symlink(target, path, cb))
+  symlink: (target: fs.PathLike, path: fs.PathLike) =>
+    V(cb => fs.symlink(target, path, cb)),
+
+  copyFile: (src: fs.PathLike, dest: fs.PathLike) =>
+    V(cb => fs.copyFile(src, dest, cb))
 }
 
 type FSWithEnv<O extends ISpec> = {
