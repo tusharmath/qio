@@ -1,7 +1,7 @@
 {
   "name": "@qio/scripts",
   "private": true,
-  "version": "29.0.1",
+  "version": "29.0.2",
   "description": "Private scripts for lerna",
   "keywords": [
     "qio",
