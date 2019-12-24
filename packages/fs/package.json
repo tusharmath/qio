@@ -35,7 +35,9 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.5"
+    "@types/chai": "^4.2.7",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^13.1.0"
   },
   "dependencies": {
     "@qio/core": "^29.0.0",

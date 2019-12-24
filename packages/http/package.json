@@ -39,7 +39,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.5",
+    "@types/chai": "^4.2.7",
     "chai": "^4.2.0"
   }
 }

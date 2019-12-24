@@ -31,7 +31,7 @@
     "@types/benchmark": "^1.0.31",
     "@types/bluebird": "^3.5.29",
     "benchmark": "^2.1.4",
-    "bluebird": "^3.7.1",
+    "bluebird": "^3.7.2",
     "fluture": "^11.0.3"
   },
   "dependencies": {
