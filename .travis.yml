@@ -12,7 +12,6 @@ branches:
     - /^v\d+\.\d+\.\d+$/
 script:
   - yarn lint
-  - yarn tsc -b
   - yarn test -R=min
 before_install: yarn global add greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update

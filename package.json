@@ -21,7 +21,7 @@
   },
   "scripts": {
     "lint": "tslint --project .",
-    "postinstall": "node packages/scripts/lib/Symlink.js",
+    "postinstall": "yarn tsc -b && node packages/scripts/lib/Symlink.js",
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep -E '.*\\.(ts)$' | xargs prettier --write --config=.prettierrc",
     "test": "mocha --opts=packages/chai/mocha.opts",
