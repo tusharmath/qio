@@ -1,6 +1,6 @@
 {
   "name": "@qio/http",
-  "version": "29.0.3",
+  "version": "29.0.4",
   "description": "QIO bindings for HTTP",
   "keywords": [
     "http",
@@ -32,7 +32,7 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "@qio/core": "^29.0.3",
+    "@qio/core": "^29.0.4",
     "axios": "^0.19.0"
   },
   "publishConfig": {
