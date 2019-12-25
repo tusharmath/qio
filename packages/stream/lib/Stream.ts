@@ -25,6 +25,14 @@ const Id = <A>(a: A) => a
  * ```
  */
 export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
+  /**
+   * Collects all the values from a stream and returns an Array of those values.
+   */
+  public get asArray(): QIO<A1[], E1, R1> {
+    return this.foldLeft(List.empty<A1>(), (S, A) => S.prepend(A)).map(
+      _ => _.reverse.asArray
+    )
+  }
   public get drain(): QIO<void, E1, R1> {
     return this.fold(true, T, FTrueCb).void
   }
@@ -301,6 +309,26 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   ): Stream<A2, E2, R2> {
     return fn(this)
   }
+
+  /**
+   * Creates a new stream of accumulator values, using an initial accumulator
+   * and a function that produces the next set of values.
+   */
+  public scanM<A3, E3, R3>(
+    acc: A3,
+    fn: (s: A3, a: A1) => QIO<A3, E3, R3>
+  ): Stream<A3, E1 | E3, R1 & R3> {
+    return new Stream((state, cont, next) =>
+      this.fold(
+        {state, seed: acc},
+        _ => cont(_.state),
+        (_, a1) =>
+          fn(_.seed, a1).chain(a3 =>
+            next(_.state, a3).map(nState => ({seed: a3, state: nState}))
+          )
+      ).map(_ => _.state)
+    )
+  }
   /**
    * Emits the first N values skipping the rest.
    */
@@ -311,15 +339,6 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
         s => cont(s.state) && s.count < count,
         (s, a) => next(s.state, a).map(s2 => ({count: s.count + 1, state: s2}))
       ).map(_ => _.state)
-    )
-  }
-
-  /**
-   * Collects all the values from a stream and returns an Array of those values.
-   */
-  public get asArray(): QIO<A1[], E1, R1> {
-    return this.foldLeft(List.empty<A1>(), (S, A) => S.prepend(A)).map(
-      _ => _.reverse.asArray
     )
   }
 }

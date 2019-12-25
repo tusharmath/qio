@@ -95,4 +95,18 @@ describe('Stream', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
+
+  describe('scanM', () => {
+    it('should keep producing accumulated values', () => {
+      const source = Stream.range(1, 5).scanM(0, (a, b) => QIO.resolve(a + b))
+
+      const actual = testRuntime().unsafeExecuteSync(source.asArray)
+      const expected = [1, 3, 6, 10, 15]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
+  describe('takeUntil', () => {
+    it.skip('should take value until the io resolves', () => {})
+  })
 })
