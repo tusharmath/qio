@@ -1,11 +1,10 @@
 import {Await, Managed, QIO, Queue, Ref} from '@qio/core'
-import {T} from '@qio/prelude'
+import {Id, T} from '@qio/prelude'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
 const FTrue = QIO.resolve(true)
 const FTrueCb = () => FTrue
-const Id = <A>(a: A) => a
 
 /**
  * Represents a sequence of values that are emitted over time.
@@ -285,10 +284,13 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Halt the current stream as soon as the io completes.
    */
-  public haltWhenM<A3, E3>(io: QIO<A3, E3>): Stream<A1, E1, R1> {
+  public haltWhenM<A3, E3, R3>(io: QIO<A3, E3, R3>): Stream<A1, E1, R1 & R3> {
     return new Stream((state, cont, next) =>
-      Await.of<A3, E3>().chain(awt =>
-        this.foldUntil(state, cont, next, awt).zipWithPar(awt.set(io), a => a)
+      Await.of<A3, E3>().zipWithM(QIO.env<R3>(), (awt, env) =>
+        this.foldUntil(state, cont, next, awt).zipWithPar(
+          awt.set(io.provide(env)),
+          Id
+        )
       )
     )
   }
