@@ -30,7 +30,6 @@
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "debug": "^4.1.1",
     "mocha": "^6.2.2"
   },
   "publishConfig": {
