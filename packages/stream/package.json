@@ -1,6 +1,6 @@
 {
   "name": "@qio/stream",
-  "version": "29.1.0",
+  "version": "29.2.0",
   "description": "Streams based on QIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",

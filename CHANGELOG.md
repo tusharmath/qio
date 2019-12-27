@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [29.2.0](https://github.com/tusharmath/qio/compare/v29.1.0...v29.2.0) (2019-12-27)
+
+
+### Features
+
+* **haltWhenM:** add support for QIO<A, E, R> ([6b9705b](https://github.com/tusharmath/qio/commit/6b9705b8c82525c0e929618df8a4253886e9e243))
+
+
+
+
+
 # [29.1.0](https://github.com/tusharmath/qio/compare/v29.0.5...v29.1.0) (2019-12-27)
 
 
