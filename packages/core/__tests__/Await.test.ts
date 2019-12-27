@@ -86,6 +86,23 @@ describe('Await', () => {
       )
       assert.notOk(actual)
     })
+
+    context('double call', () => {
+      it('should return false for second try', () => {
+        type AA = Await<number, never>
+        const runtime = testRuntime()
+        const awt = runtime.unsafeExecuteSync(Await.of<number>()) as AA
+
+        runtime.unsafeExecute(awt.set(QIO.resolve(10).delay(100)))
+        runtime.scheduler.runTo(50)
+
+        const actual = runtime.unsafeExecuteSync(
+          awt.set(QIO.resolve(10).delay(20))
+        )
+
+        assert.notOk(actual)
+      })
+    })
   })
 
   describe('get', () => {
@@ -134,6 +151,17 @@ describe('Await', () => {
       )
 
       assert.ok(actual)
+    })
+
+    it('should return true after the IO resolves', () => {
+      type AA = Await<number, never>
+      const runtime = testRuntime()
+      const awt = runtime.unsafeExecuteSync(Await.of<number>()) as AA
+      runtime.unsafeExecute(awt.set(QIO.resolve(10).delay(100)))
+      runtime.scheduler.runTo(50)
+
+      const actual = runtime.unsafeExecuteSync(awt.isSet)
+      assert.notOk(actual)
     })
   })
 })

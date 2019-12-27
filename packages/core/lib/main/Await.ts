@@ -4,6 +4,12 @@ import {CB} from '../internals/CB'
 
 import {QIO} from './QIO'
 
+enum AwaitStatus {
+  PENDING,
+  STARTED,
+  COMPLETED
+}
+
 /**
  * A special data structure that can be set only once.
  * Any get operation on Await will "wait" for a set to happen first.
@@ -15,7 +21,7 @@ export class Await<A, E> {
   public static of<A = never, E = never>(): QIO<Await<A, E>> {
     return QIO.lift(() => new Await())
   }
-  private flag = false
+  private flag = AwaitStatus.PENDING
   private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
   private result: Option<Either<E, A>> = Option.none()
   public get get(): QIO<A, E> {
@@ -26,16 +32,18 @@ export class Await<A, E> {
     )
   }
   public get isSet(): QIO<boolean> {
-    return QIO.lift(() => this.flag)
+    return QIO.lift(() => this.flag === AwaitStatus.COMPLETED)
   }
   public set(io: QIO<A, E>): QIO<boolean> {
     return QIO.tryM(() => {
-      if (this.flag) {
+      if (this.flag > AwaitStatus.PENDING) {
         return QIO.resolve(false)
       }
-      this.flag = true
+
+      this.flag = AwaitStatus.STARTED
 
       return io.asEither.encase(either => {
+        this.flag = AwaitStatus.COMPLETED
         this.result = Option.some(either)
         while (this.Q.length > 0) {
           const node = this.Q.shift()
