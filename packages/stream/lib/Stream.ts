@@ -231,6 +231,25 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   public foldLeft<S2>(seed: S2, fn: (s: S2, a: A1) => S2): QIO<S2, E1, R1> {
     return this.fold(seed, T, (s, a) => QIO.resolve(fn(s, a)))
   }
+
+  /**
+   * Folds a stream until the Await is set
+   */
+  public foldUntil<A2, E2, R2, A3, E3>(
+    state: A2,
+    cont: (s: A2) => boolean,
+    next: (s: A2, a: A1) => QIO<A2, E2, R2>,
+    awt: Await<A3, E3>
+  ): QIO<A2, E1 | E2, R1 & R2> {
+    return this.fold(
+      {state, canContinue: true},
+      s => cont(s.state) && s.canContinue,
+      (s, a) =>
+        next(s.state, a).chain(nState =>
+          awt.isSet.map(isSet => ({state: nState, canContinue: !isSet}))
+        )
+    ).map(_ => _.state)
+  }
   /**
    * Performs the given effect-full function for each value of the stream
    */
@@ -257,16 +276,20 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream that halts after the Await is set.
    */
-  public haltWhen(awt: Await<A1, E1>): Stream<A1, E1, R1> {
+  public haltWhen<A3, E3>(awt: Await<A3, E3>): Stream<A1, E1, R1> {
     return new Stream((state, cont, next) =>
-      this.fold(
-        {state, canContinue: true},
-        s => cont(s.state) && s.canContinue,
-        (s, a) =>
-          next(s.state, a).chain(nState =>
-            awt.isSet.map(isSet => ({state: nState, canContinue: !isSet}))
-          )
-      ).map(_ => _.state)
+      this.foldUntil(state, cont, next, awt)
+    )
+  }
+
+  /**
+   * Halt the current stream as soon as the io completes.
+   */
+  public haltWhenM<A3, E3>(io: QIO<A3, E3>): Stream<A1, E1, R1> {
+    return new Stream((state, cont, next) =>
+      Await.of<A3, E3>().chain(awt =>
+        this.foldUntil(state, cont, next, awt).zipWithPar(awt.set(io), a => a)
+      )
     )
   }
 

@@ -124,4 +124,17 @@ describe('Stream', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
+
+  describe('haltWhenM', () => {
+    it('should take value until the io resolves', () => {
+      const program = Stream.range(0, 10)
+        .mapM(_ => QIO.timeout(_, 10))
+        .haltWhenM(QIO.void().delay(50)).asArray
+
+      const actual = testRuntime().unsafeExecuteSync(program)
+      const expected = [0, 1, 2, 3, 4]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
 })
