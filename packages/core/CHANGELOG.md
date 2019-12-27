@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [29.1.0](https://github.com/tusharmath/qio/compare/v29.0.5...v29.1.0) (2019-12-27)
+
+
+### Bug Fixes
+
+* **await:** fix \`isSet\` implementation ([4fc9185](https://github.com/tusharmath/qio/commit/4fc918587d83335d389270927ccd4222982b13e6))
+
+
+
+
+
 # [29.0.0](https://github.com/tusharmath/qio/compare/v28.1.3...v29.0.0) (2019-12-20)
 
 

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [29.1.0](https://github.com/tusharmath/qio/compare/v29.0.5...v29.1.0) (2019-12-27)
+
+
+### Bug Fixes
+
+* **await:** fix \`isSet\` implementation ([4fc9185](https://github.com/tusharmath/qio/commit/4fc918587d83335d389270927ccd4222982b13e6))
+
+
+### Features
+
+* **scanM:** add \`Stream.scanM\` operator ([e7cb7d0](https://github.com/tusharmath/qio/commit/e7cb7d042ec3747d9518aab4669a9d07b2177d88))
+* **stream:** add support for \`haltWhen\` ([8674aea](https://github.com/tusharmath/qio/commit/8674aeab7d89027a2da49fb41e7de3f4d1d6c6ab))
+* **stream:** add support for \`haltWhenM\` ([9179186](https://github.com/tusharmath/qio/commit/917918695927c41ff71678facfd15f601979899b))
+
+
+
+
+
 ## [29.0.2](https://github.com/tusharmath/qio/compare/v29.0.1...v29.0.2) (2019-12-24)
 
 
