@@ -1,4 +1,4 @@
-import {FiberConfig, QIO, Snapshot, testRuntime} from '@qio/core'
+import {Await, FiberConfig, QIO, Snapshot, testRuntime} from '@qio/core'
 import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 
@@ -106,7 +106,22 @@ describe('Stream', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
-  describe('takeUntil', () => {
-    it.skip('should take value until the io resolves', () => {})
+  describe('haltWhen', () => {
+    it('should take value until the io resolves', () => {
+      const program = Await.of<number>().chain(awt => {
+        const setter = awt.set(QIO.timeout(-100, 50))
+
+        const source = Stream.range(0, 10)
+          .mapM(_ => QIO.timeout(_, 10))
+          .haltWhen(awt)
+
+        return source.asArray.zipWithPar(setter, a => a)
+      })
+
+      const actual = testRuntime().unsafeExecuteSync(program)
+      const expected = [0, 1, 2, 3, 4]
+
+      assert.deepStrictEqual(actual, expected)
+    })
   })
 })

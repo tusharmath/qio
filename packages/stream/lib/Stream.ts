@@ -1,4 +1,4 @@
-import {Managed, QIO, Queue, Ref} from '@qio/core'
+import {Await, Managed, QIO, Queue, Ref} from '@qio/core'
 import {T} from '@qio/prelude'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
@@ -251,6 +251,22 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
         () => f(a),
         () => QIO.resolve(s)
       )
+    )
+  }
+
+  /**
+   * Creates a stream that halts after the Await is set.
+   */
+  public haltWhen(awt: Await<A1, E1>): Stream<A1, E1, R1> {
+    return new Stream((state, cont, next) =>
+      this.fold(
+        {state, canContinue: true},
+        s => cont(s.state) && s.canContinue,
+        (s, a) =>
+          next(s.state, a).chain(nState =>
+            awt.isSet.map(isSet => ({state: nState, canContinue: !isSet}))
+          )
+      ).map(_ => _.state)
     )
   }
 
