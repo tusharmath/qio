@@ -136,5 +136,22 @@ describe('Stream', () => {
 
       assert.deepStrictEqual(actual, expected)
     })
+
+    context('IO never completes', () => {
+      it('should still complete', () => {
+        const program = Stream.range(1, 3)
+          .haltWhenM(QIO.never())
+          .fold(
+            new Array<number>(),
+            () => true,
+            (s, a) => QIO.resolve([...s, a])
+          )
+
+        const actual = testRuntime().unsafeExecuteSync(program)
+        const expected = [1, 2, 3]
+
+        assert.deepStrictEqual(actual, expected)
+      })
+    })
   })
 })

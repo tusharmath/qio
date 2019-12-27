@@ -1,10 +1,14 @@
 import {Await, Managed, QIO, Queue, Ref} from '@qio/core'
 import {Id, T} from '@qio/prelude'
+import {debug} from 'debug'
 import {EventEmitter} from 'events'
 import {List} from 'standard-data-structures'
 
 const FTrue = QIO.resolve(true)
 const FTrueCb = () => FTrue
+
+const D = (scope: string, f: unknown, ...t: unknown[]) =>
+  debug('qio:stream:' + scope)(f, ...t)
 
 /**
  * Represents a sequence of values that are emitted over time.
@@ -92,10 +96,14 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
 
       return Managed.make(
-        QIO.lift(() => ev.addListener(name, onEvent)).const(
-          Stream.fromQueue(Q)
-        ),
-        QIO.encase(() => void ev.off(name, onEvent))
+        QIO.lift(() => {
+          D('evEmit', 'on')
+          ev.on(name, onEvent)
+        }).const(Stream.fromQueue(Q)),
+        QIO.encase(() => {
+          D('evEmit', 'off')
+          ev.off(name, onEvent)
+        })
       )
     })
   }
@@ -170,9 +178,23 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       ) => {
         const itar = (s: typeof state, i: number): QIO<S, E, R> =>
           QIO.if0()(
-            () => i <= max && cont(s),
+            () => {
+              const c1 = i <= max
+              const c2 = cont(s)
+              const c3 = c1 && c2
+
+              D('range', 'continue', 'i <= max', i, max, c1)
+              D('range', 'continue', 'cont(s)', c2)
+              D('range', 'continue', c3)
+
+              return c3
+            },
             () => next(s, i).chain(ss => itar(ss, i + 1)),
-            () => QIO.resolve(s)
+            () => {
+              D('range', 'exit', s)
+
+              return QIO.resolve(s)
+            }
           )
 
         return itar(state, min)
@@ -242,10 +264,23 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A2, E1 | E2, R1 & R2> {
     return this.fold(
       {state, canContinue: true},
-      s => cont(s.state) && s.canContinue,
+      s => {
+        const c1 = cont(s.state)
+        const c2 = s.canContinue
+        const c3 = c1 && c2
+        D('foldUntil', 'continue', 'cont(s.state)', c1)
+        D('foldUntil', 'continue', 's.canContinue', c2)
+        D('foldUntil', 'continue', c3)
+
+        return c3
+      },
       (s, a) =>
         next(s.state, a).chain(nState =>
-          awt.isSet.map(isSet => ({state: nState, canContinue: !isSet}))
+          awt.isSet.map(isSet => {
+            D('foldUntil', 'await.isSet', isSet)
+
+            return {state: nState, canContinue: !isSet}
+          })
         )
     ).map(_ => _.state)
   }
@@ -287,10 +322,10 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   public haltWhenM<A3, E3, R3>(io: QIO<A3, E3, R3>): Stream<A1, E1, R1 & R3> {
     return new Stream((state, cont, next) =>
       Await.of<A3, E3>().zipWithM(QIO.env<R3>(), (awt, env) =>
-        this.foldUntil(state, cont, next, awt).zipWithPar(
-          awt.set(io.provide(env)),
-          Id
-        )
+        awt
+          .set(io.provide(env))
+          .fork()
+          .and(this.foldUntil(state, cont, next, awt))
       )
     )
   }
