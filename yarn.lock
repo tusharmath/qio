@@ -11084,10 +11084,10 @@ ts-node@^8.4.1:
     source-map-support "^0.5.6"
     yn "^3.0.0"
 
-ts-scheduler@^8.0.3:
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/ts-scheduler/-/ts-scheduler-8.0.3.tgz#d7c9e4f1384b1f686f73e68d1c7d15226f007cb1"
-  integrity sha512-upnZBRy81NJ4eohxR1+peB2vHCsD1qzY7maJFxl3wJcz4rQ2oRbJ0nF+ofldgaOeEfwy6+wQUxIHZ88DXWn+kg==
+ts-scheduler@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/ts-scheduler/-/ts-scheduler-8.0.4.tgz#216a5da5de401efe20c522f4c69f2f1d8f774d4f"
+  integrity sha512-9FYN7pqLaVtQt+vgwn2R5qamevKU7ca+ucO4zNr+LmsznA9Zeco1dIErKfUZ/D46e7i9zAliLGnyQXZL7uF55Q==
   dependencies:
     checked-exceptions "^1.2.0"
     in-node "^1.0.0"
