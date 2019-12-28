@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [29.2.1](https://github.com/tusharmath/qio/compare/v29.2.0...v29.2.1) (2019-12-28)
+
+
+### Bug Fixes
+
+* **dependency:** update ts-scheduler dependency ([6063549](https://github.com/tusharmath/qio/commit/606354954306bb3a3e327b3f143a78e46b7eeece))
+* fix dependencies ([05182b9](https://github.com/tusharmath/qio/commit/05182b93884badc18588275e91ba10de81392af0))
+* **haltWhenM:** fix \`haltWhenM\` when provided \`QIO<never>\` ([589d8e5](https://github.com/tusharmath/qio/commit/589d8e5c9649a68484dccd3fb5142c5b47c78e17))
+
+
+
+
+
 # [29.2.0](https://github.com/tusharmath/qio/compare/v29.1.0...v29.2.0) (2019-12-27)
 
 
