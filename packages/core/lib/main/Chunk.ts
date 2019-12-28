@@ -5,6 +5,9 @@ export abstract class Chunk<A> {
   public static from<A>(arr: A[]): Chunk<A> {
     return new ArrayC(arr)
   }
+  public static of<A>(A: A): Chunk<A> {
+    return new Value(A)
+  }
   public abstract readonly length: number
   public chain<B>(fn: (A: A) => Chunk<B>): Chunk<B> {
     return this.fold(Chunk.empty(), (AA, SS) => SS.concat(fn(AA)))
@@ -19,7 +22,10 @@ export abstract class Chunk<A> {
 
 class Concat<A> extends Chunk<A> {
   public readonly length = this.L.length + this.R.length
-  public constructor(public readonly L: Chunk<A>, public readonly R: Chunk<A>) {
+  public constructor(
+    private readonly L: Chunk<A>,
+    private readonly R: Chunk<A>
+  ) {
     super()
   }
 
@@ -36,7 +42,7 @@ class Concat<A> extends Chunk<A> {
 
 class ArrayC<A> extends Chunk<A> {
   public readonly length = this.array.length
-  public constructor(public readonly array: A[]) {
+  public constructor(private readonly array: A[]) {
     super()
   }
   public filter(fn: (A: A) => boolean): Chunk<A> {
@@ -67,5 +73,21 @@ class Empty extends Chunk<never> {
   }
   public map<B>(fn: (A: never) => B): Chunk<B> {
     return this
+  }
+}
+
+class Value<A> extends Chunk<A> {
+  public length = 1
+  public constructor(private readonly value: A) {
+    super()
+  }
+  public filter(fn: (A: A) => boolean): Chunk<A> {
+    return fn(this.value) ? new Value(this.value) : new Empty()
+  }
+  public fold<S>(S: S, fn: (A: A, S: S) => S): S {
+    return fn(this.value, S)
+  }
+  public map<B>(fn: (A: A) => B): Chunk<B> {
+    return new Value(fn(this.value))
   }
 }
