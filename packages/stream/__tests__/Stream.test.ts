@@ -1,8 +1,11 @@
 import {Await, FiberConfig, QIO, Snapshot, testRuntime} from '@qio/core'
 import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
+import {EventEmitter} from 'events'
 
 import {Stream} from '../lib/Stream'
+
+import {range} from './internals/Range'
 
 describe('Stream', () => {
   describe('of', () => {
@@ -106,6 +109,7 @@ describe('Stream', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
+
   describe('haltWhen', () => {
     it('should take value until the io resolves', () => {
       const program = Await.of<number>().chain(awt => {
@@ -152,6 +156,25 @@ describe('Stream', () => {
 
         assert.deepStrictEqual(actual, expected)
       })
+    })
+  })
+
+  describe('fromEventEmitter', () => {
+    it('should produce emitted values', () => {
+      // Setup
+      const runtime = testRuntime()
+      const emitter = new EventEmitter()
+      const emit = () => range(1, 5, _ => emitter.emit('data', _))
+      runtime.scheduler.delay(emit, 100)
+
+      // Create Program
+      const program = Stream.fromEventEmitter<number>(emitter, 'data').take(5)
+
+      // Assert
+      const actual = runtime.unsafeExecuteSync(program.asArray)
+      const expected = [1, 2, 3, 4, 5]
+
+      assert.deepStrictEqual(actual, expected)
     })
   })
 })

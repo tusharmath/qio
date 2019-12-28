@@ -1,4 +1,4 @@
-import {Await, Managed, QIO, Queue, Ref} from '@qio/core'
+import {Await, QIO, Queue, Ref} from '@qio/core'
 import {Id, T} from '@qio/prelude'
 import {debug} from 'debug'
 import {EventEmitter} from 'events'
@@ -88,24 +88,31 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream of events from an event emitter.
    */
-  public static fromEventEmitter<A = unknown>(
-    ev: EventEmitter,
-    name: string
-  ): QIO<Managed<Stream<A>>> {
-    return QIO.runtime().zipWith(Queue.bounded<A>(1), (RTM, Q) => {
-      const onEvent = (a: A) => RTM.unsafeExecute(Q.offer(a))
+  public static fromEventEmitter<A>(ev: EventEmitter, name: string): Stream<A> {
+    return new Stream((state, cont, next) =>
+      Queue.unbounded<A>().zipWithM(QIO.runtime(), (Q, RTM) => {
+        D('fromEE', 'Q', 'created')
+        const onEvent = (data: A) => {
+          D('fromEE', 'onEvent', data)
 
-      return Managed.make(
-        QIO.lift(() => {
-          D('evEmit', 'on')
+          RTM.unsafeExecute(Q.offer(data))
+        }
+
+        return QIO.lift(() => {
           ev.on(name, onEvent)
-        }).const(Stream.fromQueue(Q)),
-        QIO.encase(() => {
-          D('evEmit', 'off')
-          ev.off(name, onEvent)
+          D('fromEE', 'on', name)
+        }).bracket_(
+          QIO.lift(() => {
+            ev.off(name, onEvent)
+            D('fromEE', 'off', name)
+          })
+        )(() => {
+          D('fromEE', 'fold')
+
+          return Stream.fromQueue(Q).fold(state, cont, next)
         })
-      )
-    })
+      })
+    )
   }
 
   /**
