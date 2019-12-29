@@ -658,13 +658,23 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   /**
+   * Helper on top of [[QIO.tapM]]
+   * Calls the provided effectfull function with the success value of this IO
+   * and ignores it's result and continues.
+   */
+  public tap(fn: (A: A1) => void): QIO<A1, E1, R1> {
+    return this.tapM(QIO.encase(fn))
+  }
+
+  /**
    * Used to perform side-effects but ignore their values
    */
-  public tap<E2, R2>(
+  public tapM<E2, R2>(
     io: (A1: A1) => QIO<unknown, E2, R2>
   ): QIO<A1, E1 | E2, R1 & R2> {
     return this.chain(_ => io(_).const(_))
   }
+
   /**
    * Combine the result of two cs sequentially and return a Tuple
    */

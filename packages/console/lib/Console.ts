@@ -79,7 +79,7 @@ export const testTTY = (
   return {
     getStrLn: (question: string) =>
       input.hasOwnProperty(question)
-        ? log(question).and(input[question].tap(append))
+        ? log(question).and(input[question].tapM(append))
         : log(question).and(QIO.never()),
     putStrLn: (...t: unknown[]) =>
       QIO.lift(() => void stdout.push(t.join(' '))),
