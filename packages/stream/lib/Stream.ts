@@ -8,7 +8,7 @@ const FTrue = QIO.resolve(true)
 const FTrueCb = () => FTrue
 
 const D = (scope: string, f: unknown, ...t: unknown[]) =>
-  debug('qio:stream:' + scope)(f, ...t)
+  debug('qio:stream')(scope, f, ...t)
 
 /**
  * Represents a sequence of values that are emitted over time.
@@ -93,24 +93,20 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       Queue.unbounded<A>().zipWithM(QIO.runtime(), (Q, RTM) => {
         D('fromEE', 'Q', 'created')
         const onEvent = (data: A) => {
-          D('fromEE', 'onEvent', data)
+          D('fromEE', 'event')
 
           RTM.unsafeExecute(Q.offer(data))
         }
 
         return QIO.lift(() => {
           ev.on(name, onEvent)
-          D('fromEE', 'on', name)
+          D('fromEE', `ev.on('${name}', ...)`)
         }).bracket_(
           QIO.lift(() => {
             ev.off(name, onEvent)
-            D('fromEE', 'off', name)
+            D('fromEE', `ev.off('${name}', ...)`)
           })
-        )(() => {
-          D('fromEE', 'fold')
-
-          return Stream.fromQueue(Q).fold(state, cont, next)
-        })
+        )(() => Stream.fromQueue(Q).fold(state, cont, next))
       })
     )
   }
@@ -335,6 +331,13 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
           .and(this.foldUntil(state, cont, next, awt))
       )
     )
+  }
+
+  /**
+   * Holds each value for the given duration amount.
+   */
+  public holdFor(duration: number): Stream<A1, E1, R1> {
+    return this.mapM(_ => QIO.timeout(_, duration))
   }
 
   /**
