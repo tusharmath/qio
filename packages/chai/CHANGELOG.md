@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [30.0.0](https://github.com/tusharmath/qio/compare/v29.2.1...v30.0.0) (2019-12-29)
+
+**Note:** Version bump only for package @qio/chai
+
+
+
+
+
 ## [29.2.1](https://github.com/tusharmath/qio/compare/v29.2.0...v29.2.1) (2019-12-28)
 
 **Note:** Version bump only for package @qio/chai

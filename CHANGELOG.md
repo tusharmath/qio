@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [30.0.0](https://github.com/tusharmath/qio/compare/v29.2.1...v30.0.0) (2019-12-29)
+
+
+### Bug Fixes
+
+* **package:** export TestRuntime as a parameter ([4a7a9e6](https://github.com/tusharmath/qio/commit/4a7a9e6ea32d3ee8d6cbde3d445ce4100cdadcdf))
+
+
+### Code Refactoring
+
+* **stream:** simplify \`Stream.fromEventEmitter\` API ([57a60e9](https://github.com/tusharmath/qio/commit/57a60e961482995b6df6daa088d88d20111a83e8))
+
+
+### Features
+
+* **qio:** add \`QIO.tap\` ([9c68d80](https://github.com/tusharmath/qio/commit/9c68d80a0bbad51df9c83916df9076224898a0ee))
+* **stream:** add \`holdFor\` operator in stream ([357886d](https://github.com/tusharmath/qio/commit/357886d75e566d896ee526c00ef07a26ec2b76b1))
+
+
+### BREAKING CHANGES
+
+* **qio:** \`QIO.tap\` signature has been updated to accept a function that doesn't return a \`QIO\`. Use
+\`QIO.tapM\` if you still want to pass a function that returns a \`QIO\`.
+* **stream:** \`fromEventEmiter\` API has been updated.
+
+
+
+
+
 ## [29.2.1](https://github.com/tusharmath/qio/compare/v29.2.0...v29.2.1) (2019-12-28)
 
 
