@@ -1,7 +1,11 @@
+import {debug} from 'debug'
 import {DoublyLinkedList, List, Option} from 'standard-data-structures'
 
 import {Await} from './Await'
 import {QIO} from './QIO'
+
+const D = (scope: string, f: unknown, ...t: unknown[]) =>
+  debug('qio:queue')(scope, f, ...t)
 
 /**
  * Queue Data Structure
@@ -64,6 +68,7 @@ export class Queue<A = never> {
       (): QIO<void> => {
         if (this.T.length === 0) {
           this.Q.add(a)
+          D('offer', 'Q.add()', a)
 
           return QIO.void()
         }
@@ -71,6 +76,7 @@ export class Queue<A = never> {
         while (this.T.length !== 0) {
           const item = this.T.shift()
           if (Option.isSome(item)) {
+            D('offer', 'Q.shift()', a)
             io.push(item.value.set(QIO.resolve(a)))
           }
         }

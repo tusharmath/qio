@@ -10,6 +10,7 @@ import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
 import {CBExit} from './CBExit'
+import {IDGenerator} from './IDGenerator'
 import {YieldStrategy} from './YieldStrategy'
 
 const D = debug('qio:fiber')
@@ -28,7 +29,7 @@ enum FiberStatus {
 /**
  * Fiber Id is used while debugging
  */
-let FIBER_ID = 0
+const FIBER_ID = new IDGenerator()
 /**
  * Fibers are data structures that provide you a handle to control the execution of its `IO`.
  * @typeparam E Exceptions that can be thrown
@@ -52,7 +53,7 @@ export abstract class Fiber<A, E> {
   }
   public abstract abort: QIO<void>
   public abstract await: QIO<Exit<A, E>>
-  public readonly id = FIBER_ID++
+  public readonly id = FIBER_ID.create()
   public abstract runtime: FiberRuntime
 }
 /**
