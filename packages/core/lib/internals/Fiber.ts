@@ -163,16 +163,19 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     }
   }
   private dispatchResult(result: Exit<A, E>): void {
+    D('%O dispatchResult() // %O', this.id, result)
     this.status = FiberStatus.COMPLETED
     this.result = result
     this.observers.map(_ => _(result))
   }
   private init(data?: unknown): void {
+    D(this.id, 'start()')
     this.node = this.cancellationList.push(
       this.yieldStrategy.insert(this.unsafeEvaluate.bind(this), data)
     )
   }
   private unsafeEvaluate(ddd?: unknown): void {
+    D(this.id, 'unsafeEvaluate()')
     if (this.node !== undefined) {
       this.cancellationList.remove(this.node)
       this.node = undefined

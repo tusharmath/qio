@@ -16,7 +16,8 @@ import {IRuntime} from '../runtimes/IRuntime'
 import {Await} from './Await'
 import {Instruction, Tag} from './Instructions'
 
-const D = debug('qio:core')
+const D = (scope: string, f: unknown, ...t: unknown[]) =>
+  debug('qio:core:' + scope)(f, ...t)
 
 /**
  * @typeparam A1 The output of the running the program successfully.
@@ -285,7 +286,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A1[], E1, R1> {
     return ios
       .reduce(
-        (a, b) => a.zipWithPar(b, (x, y) => x.prepend(y)),
+        (a, b) =>
+          a.zipWithPar(b, (acc, value) => {
+            D('par acc %O', acc, value)
+            D('par value %O', value)
+
+            return acc.prepend(value)
+          }),
         QIO.env<R1>().and(
           QIO.lift<List<A1>, E1>(() => List.empty<A1>())
         )
@@ -626,28 +633,28 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     cb1: (exit: Exit<A1, E1>, fiber: Fiber<A2, E2>) => QIO<A3, E3>,
     cb2: (exit: Exit<A2, E2>, fiber: Fiber<A1, E1>) => QIO<A4, E4>
   ): QIO<A3 | A4, E3 | E4, R1 & R2> {
-    return Await.of<A3 | A4, E3 | E4>().chain(done =>
-      this.fork()
-        .zip(that.fork())
-        .chain(([L, R]) => {
-          D('zip', 'fiber L', L.id, '& fiber R', R.id)
-          const resume1 = L.await.chain(exit => {
-            D('zip', 'L cb')
+    return Await.of<A3 | A4, E3 | E4>().chain(done => {
+      D('raceWith', 'await id:', done.id)
 
-            return done.set(cb1(exit, R)).const(true)
-          })
-          const resume2 = R.await.chain(exit => {
-            D('zip', 'R cb')
+      return this.fork().zipWithM(that.fork(), (L, R) => {
+        D('raceWith', 'fiber L.id', L.id, '& fiber R.id', R.id)
+        const resume1 = L.await.chain(exit => {
+          D('raceWith', 'L cb')
 
-            return done.set(cb2(exit, L)).const(true)
-          })
-
-          return resume1
-            .fork()
-            .and(resume2.fork())
-            .and(done.get)
+          return done.set(cb1(exit, R)).const(true)
         })
-    )
+        const resume2 = R.await.chain(exit => {
+          D('raceWith', 'R cb')
+
+          return done.set(cb2(exit, L)).const(true)
+        })
+
+        return resume1
+          .fork()
+          .and(resume2.fork())
+          .and(done.get)
+      })
+    })
   }
 
   /**

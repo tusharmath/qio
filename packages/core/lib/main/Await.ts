@@ -49,10 +49,15 @@ export class Await<A, E> {
     })
   }
   public static of<A = never, E = never>(): QIO<Await<A, E>> {
-    return QIO.lift(() => new Await())
+    return QIO.lift(() => {
+      const awt = new Await<A, E>()
+      D(awt.id, 'this.constructor()')
+
+      return awt
+    })
   }
+  public readonly id = AWAIT_ID.create()
   private flag = AwaitStatus.PENDING
-  private readonly id = AWAIT_ID.create()
   private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
   private result: Option<Either<E, A>> = Option.none()
   public set(io: QIO<A, E>): QIO<boolean> {

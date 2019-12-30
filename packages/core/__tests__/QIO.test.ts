@@ -733,6 +733,34 @@ describe('QIO', () => {
 
       assert.strictEqual(actual, 10)
     })
+
+    context.skip('when stacked', () => {
+      /**
+       * FAILING TEST
+       * This is bound to happen because of how the fibers are created.
+       * When racing between L & R (two QIO instances) First L is scheduled using F1 and then R using F2.
+       * Once L is evaluated and new L & R are created in the following example.
+       * They are scheduled using F3 & F4 respectively.
+       * Execution follows the same order F1 -> F2 -> F3 -> F4.
+       * So the initial R is evaluated first and then F3 and F4 are evaluated.
+       * Even if we reverse the order ie. scheduled R and then L.
+       * It will have the same effect.
+       * F2 -> F1 -> F4 -> F3.
+       * Again as you can see F2 is evaluated before F3 and F4.
+       *
+       * Thus it is an unsolvable problem at the moment.
+       */
+      it('should maintain in order', () => {
+        const mLogger = new Snapshot()
+        const program = QIO.resolve([])
+          .raceWith(mLogger.mark(1), QIO.void, QIO.void)
+          .raceWith(mLogger.mark(2), QIO.void, QIO.void)
+
+        testRuntime().unsafeExecuteSync(program.provide({logger: mLogger}))
+
+        assert.deepStrictEqual(mLogger.timeline, ['1@1', '2@1'])
+      })
+    })
   })
 
   describe('race', () => {
@@ -851,10 +879,11 @@ describe('QIO', () => {
       ])
 
       const runtime = testRuntime()
-      const actual = runtime.unsafeExecuteSync(io)
-      const expected = [10, 20, 30]
+      runtime.unsafeExecuteSync(io)
+      const actual = runtime.scheduler.now()
 
-      assert.deepStrictEqual(actual, expected)
+      assert.isAbove(actual, 1000)
+      assert.isBelow(actual, 1010)
     })
 
     it('should maintain order', () => {
