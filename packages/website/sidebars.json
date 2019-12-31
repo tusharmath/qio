@@ -1,7 +1,7 @@
 {
   "concepts": {},
   "core": {
-    "Tutorial": [
+    "Basic": [
       "core/installation",
       "core/usage",
       "core/effects",
@@ -9,11 +9,16 @@
       "core/exceptions-anomalies",
       "core/cancellation",
       "core/environment",
-      "core/unit-testing",
+      "core/unit-testing"
+    ],
+    "Advanced": [
       "core/stack-safety",
       "core/fiber",
-      "core/multi-task"
-    ],
+      "core/multi-task",
+      "core/brackets"
+    ]
+  },
+  "comparison": {
     "Comparison": ["comparison/features", "comparison/benchmarks"]
   },
   "entities": {
