@@ -1,3 +1,4 @@
+/* tslint:disable: max-file-line-count */
 /**
  * Created by tushar on 2019-05-24
  */
