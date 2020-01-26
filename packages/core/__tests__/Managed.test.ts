@@ -5,6 +5,7 @@ import {Managed} from '../lib/main/Managed'
 import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
+import {Counter} from './internals/Counter'
 import {Resource} from './internals/Resource'
 
 //#region Regression Suite
@@ -66,6 +67,20 @@ describe('Managed', () => {
       )
 
       assert.ok(r.isReleased)
+    })
+
+    it('should abort usage', () => {
+      const runtime = testRuntime()
+      const counter = new Counter()
+
+      runtime.unsafeExecuteSync(
+        Managed.make(QIO.void(), QIO.void)
+          .use(() => counter.inc().delay(1000))
+          .fork()
+          .chain(F => F.abort.delay(500))
+      )
+
+      assert.deepStrictEqual(counter.count, 0)
     })
 
     // Keep it for regression
