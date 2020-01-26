@@ -397,6 +397,13 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   /**
+   * Like [[scanM]] it creates new values based on some memory.
+   */
+  public scan<A3>(acc: A3, fn: (s: A3, a: A1) => A3): Stream<A3, E1, R1> {
+    return this.scanM(acc, (s, a) => QIO.resolve(fn(s, a)))
+  }
+
+  /**
    * Creates a new stream of accumulator values, using an initial accumulator
    * and a function that produces the next set of values.
    */
