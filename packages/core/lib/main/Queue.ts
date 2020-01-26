@@ -103,6 +103,6 @@ export class Queue<A = never> {
         () => this.take.chain(_ => itar(i + 1, list.prepend(_)))
       )
 
-    return itar(0, List.empty<A>()).map(_ => _.asArray)
+    return itar(0, List.empty<A>()).map(_ => _.asArray.reverse())
   }
 }

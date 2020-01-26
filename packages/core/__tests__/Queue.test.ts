@@ -76,4 +76,20 @@ describe('Queue', () => {
       assert.strictEqual(actual, 0)
     })
   })
+
+  describe('takeN', () => {
+    it('should resolve after the first N offers', () => {
+      const runtime = testRuntime()
+      const actual = runtime.unsafeExecuteSync(
+        Queue.unbounded<string>().chain(Q =>
+          Q.takeN(5)
+            .par(Q.offerAll('A', 'B', 'C', 'D', 'E', 'F'))
+            .map(_ => _[0])
+        )
+      )
+
+      const expected = ['A', 'B', 'C', 'D', 'E']
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
 })
