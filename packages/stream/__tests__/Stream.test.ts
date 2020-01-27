@@ -1,7 +1,17 @@
-import {Await, FiberConfig, QIO, Snapshot, testRuntime} from '@qio/core'
+import {
+  Await,
+  Fiber,
+  FiberConfig,
+  QIO,
+  Ref,
+  Snapshot,
+  testRuntime
+} from '@qio/core'
+import {Counter} from '@qio/core/__tests__/internals/Counter'
 import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 import {EventEmitter} from 'events'
+import {Option} from 'standard-data-structures'
 
 import {Stream} from '../lib/Stream'
 
@@ -174,6 +184,47 @@ describe('Stream', () => {
       const actual = runtime.unsafeExecuteSync(program.asArray)
       const expected = [1, 2, 3, 4, 5]
 
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
+
+  describe('zipWith', () => {
+    it.skip('should combine the results of two streams', () => {
+      const L = Stream.interval('TEST', 100)
+      const R = Stream.range(0, Infinity)
+      const LR = L.zipWith(R, (str, num) => str + ':' + num).take(5)
+      const actual = testRuntime().unsafeExecuteSync(LR.asArray)
+      const expected = ['TEST:0', 'TEST:1']
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
+
+  describe('forEach', () => {
+    context('async values', () => {
+      it('should stop on abortion', () => {
+        const counter = new Counter()
+        const COUNT = 9
+        const program = Stream.interval(1, 10)
+          .forEach(_ => counter.inc(_))
+          .fork()
+          .chain(F => F.abort.delay(100))
+
+        testRuntime().unsafeExecuteSync(program)
+
+        const actual = counter.count
+        const expected = COUNT
+
+        assert.strictEqual(actual, expected)
+      })
+    })
+  })
+  describe('toQueue', () => {
+    it('should convert a stream to a queue', () => {
+      const program = Stream.range(0, 10)
+        .toQueue()
+        .use(Q => Q.takeN(5))
+      const actual = testRuntime().unsafeExecuteSync(program)
+      const expected = [0, 1, 2, 3, 4]
       assert.deepStrictEqual(actual, expected)
     })
   })

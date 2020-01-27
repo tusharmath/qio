@@ -1,4 +1,4 @@
-import {Await, QIO, Queue, Ref} from '@qio/core'
+import {Await, Managed, QIO, Queue, Ref} from '@qio/core'
 import {Id, T} from '@qio/prelude'
 import {debug} from 'debug'
 import {EventEmitter} from 'events'
@@ -433,5 +433,30 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
         (s, a) => next(s.state, a).map(s2 => ({count: s.count + 1, state: s2}))
       ).map(_ => _.state)
     )
+  }
+
+  /**
+   * Converts a Stream into a managed queue
+   */
+  public toQueue(
+    capacity: number = Number.MAX_SAFE_INTEGER
+  ): Managed<Queue<A1>, E1, R1> {
+    const acquire = Queue.bounded<A1>(capacity).chain(Q =>
+      this.forEach(_ => Q.offer(_))
+        .fork()
+        .map(F => ({F, Q}))
+    )
+
+    return Managed.make(acquire, _ => _.F.abort).map(_ => _.Q)
+  }
+
+  /**
+   * Combines two streams such that only one value from each stream is consumed at a time.
+   */
+  public zipWith<A2, E2, R2, A3>(
+    stream2: Stream<A2, E2, R2>,
+    fn: (A1: A1, A2: A2) => A3
+  ): Stream<A3, E1 | E2, R1 & R2> {
+    throw new Error('TODO: Not Implemented ' + typeof this)
   }
 }
