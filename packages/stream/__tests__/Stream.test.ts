@@ -1,17 +1,14 @@
 import {
   Await,
-  Fiber,
+  Counter,
   FiberConfig,
   QIO,
-  Ref,
   Snapshot,
   testRuntime
 } from '@qio/core'
-import {Counter} from '@qio/core/__tests__/internals/Counter'
 import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 import {EventEmitter} from 'events'
-import {Option} from 'standard-data-structures'
 
 import {Stream} from '../lib/Stream'
 

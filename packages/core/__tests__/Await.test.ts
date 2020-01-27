@@ -1,11 +1,10 @@
 import {assert, spy} from 'chai'
 
 import {Await} from '../lib/main/Await'
+import {Counter} from '../lib/main/Counter'
 import {Exit} from '../lib/main/Exit'
 import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
-
-import {Counter} from './internals/Counter'
 
 describe('Await', () => {
   describe('of', () => {

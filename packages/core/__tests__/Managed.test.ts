@@ -1,11 +1,11 @@
 import {deepStrictEqual} from 'assert'
 import {assert} from 'chai'
 
+import {Counter} from '../lib/main/Counter'
 import {Managed} from '../lib/main/Managed'
 import {QIO} from '../lib/main/QIO'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
-import {Counter} from './internals/Counter'
 import {Resource} from './internals/Resource'
 
 //#region Regression Suite

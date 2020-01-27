@@ -7,12 +7,11 @@ import {assert, spy} from 'chai'
 import {Either} from 'standard-data-structures'
 
 import {FiberContext} from '../lib/internals/Fiber'
+import {Counter} from '../lib/main/Counter'
 import {QIO} from '../lib/main/QIO'
 import {Snapshot} from '../lib/main/Snapshot'
 import {defaultRuntime} from '../lib/runtimes/DefaultRuntime'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
-
-import {Counter} from './internals/Counter'
 
 describe('QIO', () => {
   describe('of', () => {

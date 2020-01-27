@@ -2,12 +2,11 @@ import {assert, spy} from 'chai'
 
 import {FiberContext} from '../lib/internals/Fiber'
 import {FiberConfig} from '../lib/internals/FiberConfig'
+import {Counter} from '../lib/main/Counter'
 import {Exit} from '../lib/main/Exit'
 import {QIO} from '../lib/main/QIO'
 import {Snapshot} from '../lib/main/Snapshot'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
-
-import {Counter} from './internals/Counter'
 
 describe('FiberContext', () => {
   context('on creation', () => {
