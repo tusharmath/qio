@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [31.0.0](https://github.com/tusharmath/qio/compare/v30.0.1...v31.0.0) (2020-01-28)
+
+
+### Bug Fixes
+
+* **queue:** fix \`takeN\` bug ([a694f51](https://github.com/tusharmath/qio/commit/a694f5181c4f65fb455ededc7b08bea0ab2e1650))
+
+
+### Code Refactoring
+
+* **stream:** rename to QStream ([684db9d](https://github.com/tusharmath/qio/commit/684db9d6436875a4dd96f272048879bf7dd224cc))
+
+
+### Features
+
+* **core:** export \`Counter\` for use ([ca92e1d](https://github.com/tusharmath/qio/commit/ca92e1d436ba27155aac1e8bd6aecaaa4541cf9c))
+* **stream:** add \`scan\` operator ([a7cf4a8](https://github.com/tusharmath/qio/commit/a7cf4a896457c0cbd38d1ed86abc1f43109ecbdf))
+* **stream:** add toQueue ([2eb34c0](https://github.com/tusharmath/qio/commit/2eb34c012755bc4b6ed57d9129190662747916e8))
+
+
+### BREAKING CHANGES
+
+* **stream:** Renaming Stream to QStream
+
+
+
+
+
 ## [30.0.1](https://github.com/tusharmath/qio/compare/v30.0.0...v30.0.1) (2019-12-31)
 
 **Note:** Version bump only for package qio

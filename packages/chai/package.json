@@ -1,6 +1,6 @@
 {
   "name": "@qio/chai",
-  "version": "30.0.1",
+  "version": "31.0.0",
   "private": true,
   "description": "Chai setup for QIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
@@ -31,7 +31,7 @@
     "chai-spies": "^1.0.0"
   },
   "dependencies": {
-    "@qio/core": "^30.0.1",
-    "@qio/prelude": "^30.0.0"
+    "@qio/core": "^31.0.0",
+    "@qio/prelude": "^31.0.0"
   }
 }

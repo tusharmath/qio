@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [31.0.0](https://github.com/tusharmath/qio/compare/v30.0.1...v31.0.0) (2020-01-28)
+
+
+### Bug Fixes
+
+* **queue:** fix \`takeN\` bug ([a694f51](https://github.com/tusharmath/qio/commit/a694f5181c4f65fb455ededc7b08bea0ab2e1650))
+
+
+### Features
+
+* **core:** export \`Counter\` for use ([ca92e1d](https://github.com/tusharmath/qio/commit/ca92e1d436ba27155aac1e8bd6aecaaa4541cf9c))
+
+
+
+
+
 ## [30.0.1](https://github.com/tusharmath/qio/compare/v30.0.0...v30.0.1) (2019-12-31)
 
 **Note:** Version bump only for package @qio/core
