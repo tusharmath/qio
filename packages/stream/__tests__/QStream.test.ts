@@ -10,11 +10,11 @@ import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 import {EventEmitter} from 'events'
 
-import {QStream} from '../lib/Stream'
+import {QStream} from '../lib/QStream'
 
 import {range} from './internals/Range'
 
-describe('Stream', () => {
+describe('QStream', () => {
   describe('of', () => {
     it('should emit provided values', () => {
       const actual = testRuntime().unsafeExecuteSync(

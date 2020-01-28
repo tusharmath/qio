@@ -8,7 +8,7 @@ import {Suite} from 'benchmark'
 import {PrintLn} from '../internals/PrintLn'
 import {qioRuntime} from '../internals/RunSuite'
 
-const suite = new Suite('Stream')
+const suite = new Suite('QStream')
 
 const count = 1e6
 const arr = new Array<number>()

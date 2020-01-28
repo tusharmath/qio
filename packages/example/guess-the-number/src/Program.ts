@@ -1,6 +1,6 @@
 import {getStrLn, putStrLn} from '@qio/console'
 import {QIO} from '@qio/core'
-import {Stream} from '@qio/stream'
+import {QStream} from '@qio/stream'
 
 const MAX_NUMBER = 6
 const MIN_NUMBER = 1
@@ -28,7 +28,7 @@ const randomInt = (min: number, max: number) =>
 /**
  * Keeps taking a numeric input from the player.
  */
-const inputNumber = Stream.produce(
+const inputNumber = QStream.produce(
   getStrLn(`Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}: `)
 )
   .map(_ => parseInt(_, 10))

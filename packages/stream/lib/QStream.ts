@@ -18,10 +18,10 @@ const D = (scope: string, f: unknown, ...t: unknown[]) =>
  *
  * **Example:**
  * ```ts
- * import {Stream} from '@qio/core'
+ * import {QStream} from '@qio/core'
  *
  *
- * const s = Stream.of(1, 2, 3).reduce(0, (a, b) => a + b)
+ * const s = QStream.of(1, 2, 3).reduce(0, (a, b) => a + b)
  *
  * const runtime = defaultRuntime()
  * runtime.execute(s.drain, console.log) // 6
