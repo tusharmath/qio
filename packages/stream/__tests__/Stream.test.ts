@@ -10,20 +10,22 @@ import {T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 import {EventEmitter} from 'events'
 
-import {Stream} from '../lib/Stream'
+import {QStream} from '../lib/Stream'
 
 import {range} from './internals/Range'
 
 describe('Stream', () => {
   describe('of', () => {
     it('should emit provided values', () => {
-      const actual = testRuntime().unsafeExecuteSync(Stream.of(1, 2, 3).asArray)
+      const actual = testRuntime().unsafeExecuteSync(
+        QStream.of(1, 2, 3).asArray
+      )
       const expected = [1, 2, 3]
       assert.deepStrictEqual(actual, expected)
     })
 
     it('should one value', () => {
-      const actual = testRuntime().unsafeExecuteSync(Stream.of(999).asArray)
+      const actual = testRuntime().unsafeExecuteSync(QStream.of(999).asArray)
       const expected = [999]
       assert.deepStrictEqual(actual, expected)
     })
@@ -34,7 +36,7 @@ describe('Stream', () => {
       const actual = new Array<number>()
       const push = QIO.encase((I: number) => actual.push(I))
       testRuntime().unsafeExecuteSync(
-        Stream.of(1, 2, 3).forEachWhile(_ => push(_).const(true))
+        QStream.of(1, 2, 3).forEachWhile(_ => push(_).const(true))
       )
       const expected = [1, 2, 3]
       assert.deepStrictEqual(actual, expected)
@@ -44,7 +46,7 @@ describe('Stream', () => {
   describe('range', () => {
     it('should emit values in range', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Stream.range(100, 103).asArray
+        QStream.range(100, 103).asArray
       )
       const expected = [100, 101, 102, 103]
       assert.deepStrictEqual(actual, expected)
@@ -52,7 +54,7 @@ describe('Stream', () => {
 
     it('should call next 4 times', () => {
       const ID = spy(<TT>(_: TT) => QIO.resolve(_))
-      testRuntime().unsafeExecuteSync(Stream.range(100, 103).fold(true, T, ID))
+      testRuntime().unsafeExecuteSync(QStream.range(100, 103).fold(true, T, ID))
 
       ID.should.be.called.exactly(4)
     })
@@ -64,8 +66,8 @@ describe('Stream', () => {
       const runtime = testRuntime()
 
       runtime.unsafeExecuteSync(
-        Stream.of('A')
-          .merge(Stream.of('B'))
+        QStream.of('A')
+          .merge(QStream.of('B'))
           .forEach(_ => actual.mark(_))
       )
 
@@ -82,8 +84,8 @@ describe('Stream', () => {
         )
 
         runtime.unsafeExecuteSync(
-          Stream.range(101, 103)
-            .merge(Stream.range(901, 903))
+          QStream.range(101, 103)
+            .merge(QStream.range(901, 903))
             .mapM(insert).drain
         )
 
@@ -99,7 +101,7 @@ describe('Stream', () => {
   describe('take', () => {
     it('should take first 2 elements', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Stream.of(1, 2, 3).take(2).asArray
+        QStream.of(1, 2, 3).take(2).asArray
       )
       const expected = [1, 2]
       assert.deepStrictEqual(actual, expected)
@@ -108,7 +110,7 @@ describe('Stream', () => {
 
   describe('scanM', () => {
     it('should keep producing accumulated values', () => {
-      const source = Stream.range(1, 5).scanM(0, (a, b) => QIO.resolve(a + b))
+      const source = QStream.range(1, 5).scanM(0, (a, b) => QIO.resolve(a + b))
 
       const actual = testRuntime().unsafeExecuteSync(source.asArray)
       const expected = [1, 3, 6, 10, 15]
@@ -122,7 +124,7 @@ describe('Stream', () => {
       const program = Await.of<number>().chain(awt => {
         const setter = awt.set(QIO.timeout(-100, 50))
 
-        const source = Stream.range(0, 10)
+        const source = QStream.range(0, 10)
           .mapM(_ => QIO.timeout(_, 10))
           .haltWhen(awt)
 
@@ -138,7 +140,7 @@ describe('Stream', () => {
 
   describe('haltWhenM', () => {
     it('should take value until the io resolves', () => {
-      const program = Stream.range(0, 10)
+      const program = QStream.range(0, 10)
         .mapM(_ => QIO.timeout(_, 10))
         .haltWhenM(QIO.void().delay(50)).asArray
 
@@ -150,7 +152,7 @@ describe('Stream', () => {
 
     context('IO never completes', () => {
       it('should still complete', () => {
-        const program = Stream.range(1, 3)
+        const program = QStream.range(1, 3)
           .haltWhenM(QIO.never())
           .fold(
             new Array<number>(),
@@ -175,7 +177,7 @@ describe('Stream', () => {
       runtime.scheduler.delay(emit, 100)
 
       // Create Program
-      const program = Stream.fromEventEmitter<number>(emitter, 'data').take(5)
+      const program = QStream.fromEventEmitter<number>(emitter, 'data').take(5)
 
       // Assert
       const actual = runtime.unsafeExecuteSync(program.asArray)
@@ -187,8 +189,8 @@ describe('Stream', () => {
 
   describe('zipWith', () => {
     it.skip('should combine the results of two streams', () => {
-      const L = Stream.interval('TEST', 100)
-      const R = Stream.range(0, Infinity)
+      const L = QStream.interval('TEST', 100)
+      const R = QStream.range(0, Infinity)
       const LR = L.zipWith(R, (str, num) => str + ':' + num).take(5)
       const actual = testRuntime().unsafeExecuteSync(LR.asArray)
       const expected = ['TEST:0', 'TEST:1']
@@ -201,7 +203,7 @@ describe('Stream', () => {
       it('should stop on abortion', () => {
         const counter = new Counter()
         const COUNT = 9
-        const program = Stream.interval(1, 10)
+        const program = QStream.interval(1, 10)
           .forEach(_ => counter.inc(_))
           .fork()
           .chain(F => F.abort.delay(100))
@@ -217,7 +219,7 @@ describe('Stream', () => {
   })
   describe('toQueue', () => {
     it('should convert a stream to a queue', () => {
-      const program = Stream.range(0, 10)
+      const program = QStream.range(0, 10)
         .toQueue()
         .use(Q => Q.takeN(5))
       const actual = testRuntime().unsafeExecuteSync(program)

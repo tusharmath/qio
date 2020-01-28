@@ -27,7 +27,7 @@ const D = (scope: string, f: unknown, ...t: unknown[]) =>
  * runtime.execute(s.drain, console.log) // 6
  * ```
  */
-export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
+export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Collects all the values from a stream and returns an Array of those values.
    */
@@ -42,8 +42,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream that constantly emits the provided value.
    */
-  public static const<A1>(a: A1): Stream<A1> {
-    return new Stream((s, cont, next) =>
+  public static const<A1>(a: A1): QStream<A1> {
+    return new QStream((s, cont, next) =>
       QIO.if0()(
         () => cont(s),
         () => next(s, a),
@@ -55,8 +55,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Create a stream from an array
    */
-  public static fromArray<A1>(t: A1[]): Stream<A1> {
-    return new Stream(
+  public static fromArray<A1>(t: A1[]): QStream<A1> {
+    return new QStream(
       <S, E, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -75,8 +75,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   }
   public static fromEffect<A1, E1, R1>(
     io: QIO<A1, E1, R1>
-  ): Stream<A1, E1, R1> {
-    return new Stream((state, cont, next) =>
+  ): QStream<A1, E1, R1> {
+    return new QStream((state, cont, next) =>
       QIO.if0()(
         () => cont(state),
         () => io.chain(a => next(state, a)),
@@ -88,8 +88,11 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream of events from an event emitter.
    */
-  public static fromEventEmitter<A>(ev: EventEmitter, name: string): Stream<A> {
-    return new Stream((state, cont, next) =>
+  public static fromEventEmitter<A>(
+    ev: EventEmitter,
+    name: string
+  ): QStream<A> {
+    return new QStream((state, cont, next) =>
       Queue.unbounded<A>().zipWithM(QIO.runtime(), (Q, RTM) => {
         D('fromEE', 'Q', 'created')
         const onEvent = (data: A) => {
@@ -106,7 +109,7 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
             ev.off(name, onEvent)
             D('fromEE', `ev.off('${name}', ...)`)
           })
-        )(() => Stream.fromQueue(Q).fold(state, cont, next))
+        )(() => QStream.fromQueue(Q).fold(state, cont, next))
       })
     )
   }
@@ -114,8 +117,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream from a [[Queue]]
    */
-  public static fromQueue<A1>(Q: Queue<A1>): Stream<A1> {
-    return new Stream(
+  public static fromQueue<A1>(Q: Queue<A1>): QStream<A1> {
+    return new QStream(
       <S, E, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -136,22 +139,22 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream that emits after every given duration of time.
    */
-  public static interval<A1>(A1: A1, duration: number): Stream<A1> {
-    return Stream.produce(QIO.timeout(A1, duration))
+  public static interval<A1>(A1: A1, duration: number): QStream<A1> {
+    return QStream.produce(QIO.timeout(A1, duration))
   }
 
   /**
    * Creates a stream from the provided values
    */
-  public static of<A1>(...t: A1[]): Stream<A1> {
-    return Stream.fromArray(t)
+  public static of<A1>(...t: A1[]): QStream<A1> {
+    return QStream.fromArray(t)
   }
 
   /**
    * Creates a stream by continuously executing the provided IO
    */
-  public static produce<A1, E1, R1>(io: QIO<A1, E1, R1>): Stream<A1, E1, R1> {
-    return new Stream(
+  public static produce<A1, E1, R1>(io: QIO<A1, E1, R1>): QStream<A1, E1, R1> {
+    return new QStream(
       <S, E, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -172,8 +175,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream that emits the given ranges of values
    */
-  public static range(min: number, max: number): Stream<number> {
-    return new Stream(
+  public static range(min: number, max: number): QStream<number> {
+    return new QStream(
       <S, E, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -204,8 +207,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
       }
     )
   }
-  public static reject<E1>(err: E1): Stream<never, E1> {
-    return Stream.fromEffect(QIO.reject(err))
+  public static reject<E1>(err: E1): QStream<never, E1> {
+    return QStream.fromEffect(QIO.reject(err))
   }
   /**
    * Constructor to create a new [[Stream]]
@@ -221,9 +224,9 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    * Flattens the inner stream produced by the each value of the provided stream
    */
   public chain<A2, E2, R2>(
-    aFb: (a: A1) => Stream<A2, E2, R2>
-  ): Stream<A2, E1 | E2, R1 & R2> {
-    return new Stream((state, cont, next) =>
+    aFb: (a: A1) => QStream<A2, E2, R2>
+  ): QStream<A2, E1 | E2, R1 & R2> {
+    return new QStream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => aFb(a1).fold(s1, cont, next))
     )
   }
@@ -231,14 +234,14 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Converts a stream to a constant stream
    */
-  public const<A2>(a: A2): Stream<A2, E1, R1> {
+  public const<A2>(a: A2): QStream<A2, E1, R1> {
     return this.map(_ => a)
   }
   /**
    * Creates a new streams that emits values, satisfied by the provided filter.
    */
-  public filter(f: (a: A1) => boolean): Stream<A1, E1, R1> {
-    return new Stream((state, cont, next) =>
+  public filter(f: (a: A1) => boolean): QStream<A1, E1, R1> {
+    return new QStream((state, cont, next) =>
       this.fold(state, cont, (s, a) =>
         QIO.if0()(
           () => f(a),
@@ -313,8 +316,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a stream that halts after the Await is set.
    */
-  public haltWhen<A3, E3>(awt: Await<A3, E3>): Stream<A1, E1, R1> {
-    return new Stream((state, cont, next) =>
+  public haltWhen<A3, E3>(awt: Await<A3, E3>): QStream<A1, E1, R1> {
+    return new QStream((state, cont, next) =>
       this.foldUntil(state, cont, next, awt)
     )
   }
@@ -322,8 +325,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Halt the current stream as soon as the io completes.
    */
-  public haltWhenM<A3, E3, R3>(io: QIO<A3, E3, R3>): Stream<A1, E1, R1 & R3> {
-    return new Stream((state, cont, next) =>
+  public haltWhenM<A3, E3, R3>(io: QIO<A3, E3, R3>): QStream<A1, E1, R1 & R3> {
+    return new QStream((state, cont, next) =>
       Await.of<A3, E3>().zipWithM(QIO.env<R3>(), (awt, env) =>
         awt
           .set(io.provide(env))
@@ -336,15 +339,15 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Holds each value for the given duration amount.
    */
-  public holdFor(duration: number): Stream<A1, E1, R1> {
+  public holdFor(duration: number): QStream<A1, E1, R1> {
     return this.mapM(_ => QIO.timeout(_, duration))
   }
 
   /**
    * Transforms the values that are being produced by the stream.
    */
-  public map<A2>(ab: (a: A1) => A2): Stream<A2, E1, R1> {
-    return new Stream((state, cont, next) =>
+  public map<A2>(ab: (a: A1) => A2): QStream<A2, E1, R1> {
+    return new QStream((state, cont, next) =>
       this.fold(state, cont, (s, a) => next(s, ab(a)))
     )
   }
@@ -354,8 +357,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public mapM<A2, E2, R2>(
     f: (a: A1) => QIO<A2, E2, R2>
-  ): Stream<A2, E1 | E2, R1 & R2> {
-    return new Stream((state, cont, next) =>
+  ): QStream<A2, E1 | E2, R1 & R2> {
+    return new QStream((state, cont, next) =>
       this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
     )
   }
@@ -363,8 +366,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Merges two streams.
    */
-  public merge(that: Stream<A1, E1, R1>): Stream<A1, E1, R1> {
-    return new Stream(
+  public merge(that: QStream<A1, E1, R1>): QStream<A1, E1, R1> {
+    return new QStream(
       <S, E, R>(
         state: S,
         cont: (s: S) => boolean,
@@ -391,15 +394,15 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    * Pipes the current stream through a function that creates a new Stream.
    */
   public pipe<A2, E2, R2>(
-    fn: (a1: Stream<A1, E1, R1>) => Stream<A2, E2, R2>
-  ): Stream<A2, E2, R2> {
+    fn: (a1: QStream<A1, E1, R1>) => QStream<A2, E2, R2>
+  ): QStream<A2, E2, R2> {
     return fn(this)
   }
 
   /**
    * Like [[scanM]] it creates new values based on some memory.
    */
-  public scan<A3>(acc: A3, fn: (s: A3, a: A1) => A3): Stream<A3, E1, R1> {
+  public scan<A3>(acc: A3, fn: (s: A3, a: A1) => A3): QStream<A3, E1, R1> {
     return this.scanM(acc, (s, a) => QIO.resolve(fn(s, a)))
   }
 
@@ -410,8 +413,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   public scanM<A3, E3, R3>(
     acc: A3,
     fn: (s: A3, a: A1) => QIO<A3, E3, R3>
-  ): Stream<A3, E1 | E3, R1 & R3> {
-    return new Stream((state, cont, next) =>
+  ): QStream<A3, E1 | E3, R1 & R3> {
+    return new QStream((state, cont, next) =>
       this.fold(
         {state, seed: acc},
         _ => cont(_.state),
@@ -425,8 +428,8 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Emits the first N values skipping the rest.
    */
-  public take(count: number): Stream<A1, E1, R1> {
-    return new Stream((state, cont, next) =>
+  public take(count: number): QStream<A1, E1, R1> {
+    return new QStream((state, cont, next) =>
       this.fold(
         {count: 0, state},
         s => cont(s.state) && s.count < count,
@@ -454,9 +457,9 @@ export class Stream<A1 = unknown, E1 = never, R1 = unknown> {
    * Combines two streams such that only one value from each stream is consumed at a time.
    */
   public zipWith<A2, E2, R2, A3>(
-    stream2: Stream<A2, E2, R2>,
+    stream2: QStream<A2, E2, R2>,
     fn: (A1: A1, A2: A2) => A3
-  ): Stream<A3, E1 | E2, R1 & R2> {
+  ): QStream<A3, E1 | E2, R1 & R2> {
     throw new Error('TODO: Not Implemented ' + typeof this)
   }
 }

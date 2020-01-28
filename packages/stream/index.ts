@@ -3,4 +3,4 @@
  * Created by tushar on 31/10/19
  */
 
-export {Stream} from './lib/Stream'
+export {QStream as Stream} from './lib/Stream'
