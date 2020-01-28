@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [31.0.1](https://github.com/tusharmath/qio/compare/v31.0.0...v31.0.1) (2020-01-28)
+
+
+### Bug Fixes
+
+* **stream:** update exported module name ([1c9e6a9](https://github.com/tusharmath/qio/commit/1c9e6a91732c3424e042fbf201cb3ba6a974b4a9))
+
+
+
+
+
 # [31.0.0](https://github.com/tusharmath/qio/compare/v30.0.1...v31.0.0) (2020-01-28)
 
 **Note:** Version bump only for package @qio/example
