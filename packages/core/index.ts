@@ -1,5 +1,7 @@
 /* tslint:disable:file-name-casing */
 export {Await} from './lib/main/Await'
+export {Chunk} from './lib/main/Chunk'
+export {Counter} from './lib/main/Counter'
 export {defaultRuntime} from './lib/runtimes/DefaultRuntime'
 export {Exit} from './lib/main/Exit'
 export {Fiber} from './lib/internals/Fiber'
@@ -11,5 +13,4 @@ export {QIO} from './lib/main/QIO'
 export {Queue} from './lib/main/Queue'
 export {Ref} from './lib/main/Ref'
 export {Snapshot} from './lib/main/Snapshot'
-export {Counter} from './lib/main/Counter'
 export {testRuntime, TestRuntime} from './lib/runtimes/TestRuntime'
