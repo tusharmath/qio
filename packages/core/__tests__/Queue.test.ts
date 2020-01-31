@@ -26,6 +26,34 @@ describe('Queue', () => {
 
       assert.strictEqual(actual, expected)
     })
+
+    context('is full', () => {
+      it('should not add', () => {
+        const program = Queue.bounded<string>(2)
+          .chain(Q => Q.offerAll('A', 'B', 'C').const(Q))
+          .chain(_ => _.asArray)
+
+        const actual = testRuntime().unsafeExecuteSync(program)
+
+        assert.isUndefined(actual)
+      })
+
+      it('should add on remove', () => {
+        const program = Queue.bounded<string>(2)
+          .chain(Q =>
+            Q.offerAll('A', 'B')
+              .and(Q.take)
+              .and(Q.offer('C'))
+              .const(Q)
+          )
+          .chain(_ => _.asArray)
+
+        const actual = testRuntime().unsafeExecuteSync(program)
+        const expected = ['B', 'C']
+
+        assert.deepStrictEqual(actual, expected)
+      })
+    })
   })
 
   describe('offerAll', () => {
@@ -74,6 +102,26 @@ describe('Queue', () => {
       )
 
       assert.strictEqual(actual, 0)
+    })
+
+    context('is full', () => {
+      it('should resolve pending offers', () => {
+        /**
+         * #regression
+         * Any pending offers should be consumed as soon as new space is available.
+         */
+        const program = Queue.bounded<string>(1).chain(Q =>
+          Q.offerAll('A', 'B')
+            .fork()
+            .and(Q.take)
+            .and(Q.asArray.delay(10))
+        )
+
+        const actual = testRuntime().unsafeExecuteSync(program)
+        const expected = ['B']
+
+        assert.deepStrictEqual(actual, expected)
+      })
     })
   })
 

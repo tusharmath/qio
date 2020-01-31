@@ -382,10 +382,9 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
               () => canContinue.set(false).and(QIO.resolve(SS))
             )
 
-          return this.forEachWhile(offer)
-            .par(that.forEachWhile(offer))
-            .par(itar(state))
-            .map(([_, SS]) => SS)
+          return itar(state).par(
+            this.forEachWhile(offer).par(that.forEachWhile(offer))
+          ).map(_ => _[0])
         })
     )
   }
