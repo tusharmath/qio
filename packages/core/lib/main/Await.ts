@@ -86,4 +86,7 @@ export class Await<A, E> {
       })
     })
   }
+  public setTo(a: A): QIO<boolean> {
+    return this.set(QIO.resolve(a))
+  }
 }
