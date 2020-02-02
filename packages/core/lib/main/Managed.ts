@@ -28,7 +28,7 @@ import {Reservation} from './Reservation'
 export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
   public static make<A1, E1, R1, E2, R2>(
     acquire: QIO<A1, E1, R1>,
-    release: (a: A1) => QIO<void, E2, R2>
+    release: (a: A1) => QIO<unknown, E2, R2>
   ): Managed<A1, E1 | E2, R1 & R2> {
     return Managed.of<A1, E1 | E2, R1 & R2>(
       acquire

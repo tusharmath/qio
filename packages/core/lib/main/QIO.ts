@@ -485,7 +485,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   public bracket<E2, R2>(
-    release: (A1: A1) => QIO<void, E2, R2>
+    release: (A1: A1) => QIO<unknown, E2, R2>
   ): <A3, E3, R3>(
     usage: (A1: A1) => QIO<A3, E3, R3>
   ) => QIO<A3, E1 | E2 | E3, R1 & R2 & R3> {
@@ -498,7 +498,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   public bracket_<E2, R2>(
-    release: QIO<void, E2, R2>
+    release: QIO<unknown, E2, R2>
   ): <A3, E3, R3>(
     usage: (A1: A1) => QIO<A3, E3, R3>
   ) => QIO<A3, E1 | E2 | E3, R1 & R2 & R3> {
