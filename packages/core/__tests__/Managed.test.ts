@@ -1,9 +1,11 @@
+import {Id} from '@qio/prelude'
 import {deepStrictEqual} from 'assert'
 import {assert} from 'chai'
 
 import {Counter} from '../lib/main/Counter'
 import {Managed} from '../lib/main/Managed'
 import {QIO} from '../lib/main/QIO'
+import {Snapshot} from '../lib/main/Snapshot'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
 
 import {Resource} from './internals/Resource'
@@ -28,10 +30,26 @@ const itShouldReleaseOnce = (fn: (M: Managed) => Managed) => {
     assert.strictEqual(r.count, -1, `Resource was released ${r.count} times`)
   })
 }
+const itShouldReleaseAfterUsage = (fn: (M: Managed) => Managed) => {
+  it('should release after usage', () => {
+    const snapshot = new Snapshot()
+    testRuntime().unsafeExecuteSync(
+      fn(
+        Managed.make(snapshot.mark('ACQUIRED'), () => snapshot.mark('RELEASED'))
+      ).use(() => snapshot.mark('USED'))
+    )
+    assert.deepStrictEqual(snapshot.timeline, [
+      'ACQUIRED@1',
+      'USED@1',
+      'RELEASED@1'
+    ])
+  })
+}
 
 const itShouldFollowSpec = (fn: (M: Managed) => Managed) => {
   itShouldAcquireOnce(fn)
   itShouldReleaseOnce(fn)
+  itShouldReleaseAfterUsage(fn)
 }
 //#endregion
 
@@ -174,5 +192,9 @@ describe('Managed', () => {
 
   describe('map', () => {
     itShouldFollowSpec(m => m.map(() => 0))
+  })
+
+  describe('id', () => {
+    itShouldFollowSpec(Id)
   })
 })
