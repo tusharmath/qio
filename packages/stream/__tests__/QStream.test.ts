@@ -6,13 +6,11 @@ import {
   Snapshot,
   testRuntime
 } from '@qio/core'
-import {T} from '@qio/prelude'
+import {range, T} from '@qio/prelude'
 import {assert, spy} from 'chai'
 import {EventEmitter} from 'events'
 
 import {QStream} from '../lib/QStream'
-
-import {range} from './internals/Range'
 
 describe('QStream', () => {
   describe('of', () => {
