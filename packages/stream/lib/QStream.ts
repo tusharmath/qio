@@ -1,4 +1,4 @@
-import {Await, Managed, QIO, Queue, Ref} from '@qio/core'
+import {Await, Flag, Managed, QIO, Queue} from '@qio/core'
 import {Id, T} from '@qio/prelude'
 import {debug} from 'debug'
 import {EventEmitter} from 'events'
@@ -373,8 +373,8 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
         cont: (s: S) => boolean,
         next: (s: S, a: A1) => QIO<S, E, R>
       ): QIO<S, E1 | E, R & R1> =>
-        Queue.bounded<A1>(1).zipWithM(Ref.of(true), (Q, canContinue) => {
-          const offer = (_: A1) => Q.offer(_).and(canContinue.read)
+        Queue.bounded<A1>(1).zipWithM(Flag.of(true), (Q, canContinue) => {
+          const offer = (_: A1) => Q.offer(_).and(canContinue.check)
           const itar = (SS: S): QIO<S, E | E1, R & R1> =>
             QIO.if0()(
               () => cont(SS),
@@ -382,9 +382,9 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
               () => canContinue.set(false).and(QIO.resolve(SS))
             )
 
-          return itar(state).par(
-            this.forEachWhile(offer).par(that.forEachWhile(offer))
-          ).map(_ => _[0])
+          return itar(state)
+            .par(this.forEachWhile(offer).par(that.forEachWhile(offer)))
+            .map(_ => _[0])
         })
     )
   }
@@ -443,13 +443,18 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   public toQueue(
     capacity: number = Number.MAX_SAFE_INTEGER
   ): Managed<Queue<A1>, E1, R1> {
-    const acquire = Queue.bounded<A1>(capacity).chain(Q =>
-      this.forEach(_ => Q.offer(_))
+    const acquire = Queue.bounded<A1>(capacity).zipWithM(
+      Flag.of(true),
+      (Q, canContinue) => {
+        const out = {Q, canContinue}
+
+        return this.forEachWhile(_ => Q.offer(_).and(canContinue.check))
         .fork()
-        .map(F => ({F, Q}))
+          .const(out)
+      }
     )
 
-    return Managed.make(acquire, _ => _.F.abort).map(_ => _.Q)
+    return Managed.make(acquire, _ => _.canContinue.set(false)).map(_ => _.Q)
   }
 
   /**

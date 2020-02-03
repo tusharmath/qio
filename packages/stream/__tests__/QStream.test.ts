@@ -89,8 +89,6 @@ describe('QStream', () => {
             .mapM(insert).drain
         )
 
-        runtime.scheduler.run()
-
         const expected = [101, 102, 103, 901, 902, 903]
         assert.sameDeepMembers(actual, expected)
         assert.notDeepEqual(actual, expected)
@@ -221,6 +219,15 @@ describe('QStream', () => {
     it('should convert a stream to a queue', () => {
       const program = QStream.range(0, 10)
         .toQueue()
+        .use(Q => Q.takeN(5))
+      const actual = testRuntime().unsafeExecuteSync(program)
+      const expected = [0, 1, 2, 3, 4]
+      assert.deepStrictEqual(actual, expected)
+    })
+
+    it('should by async', () => {
+      const program = QStream.range(0, 10)
+        .toQueue(1)
         .use(Q => Q.takeN(5))
       const actual = testRuntime().unsafeExecuteSync(program)
       const expected = [0, 1, 2, 3, 4]
