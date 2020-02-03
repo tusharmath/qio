@@ -449,7 +449,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
         const out = {Q, canContinue}
 
         return this.forEachWhile(_ => Q.offer(_).and(canContinue.check))
-        .fork()
+          .fork()
           .const(out)
       }
     )
@@ -460,10 +460,33 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Combines two streams such that only one value from each stream is consumed at a time.
    */
-  public zipWith<A2, E2, R2, A3>(
-    stream2: QStream<A2, E2, R2>,
-    fn: (A1: A1, A2: A2) => A3
-  ): QStream<A3, E1 | E2, R1 & R2> {
-    throw new Error('TODO: Not Implemented ' + typeof this)
+  public zipWith<A2, E2, R2, A>(
+    that: QStream<A2, E2, R2>,
+    fn: (A1: A1, A2: A2) => A
+  ): QStream<A, E1 | E2, R1 & R2> {
+    const M1 = this.toQueue(1)
+    const M2 = that.toQueue(1)
+
+    return new QStream(
+      <S, E, R>(
+        state: S,
+        cont: (s: S) => boolean,
+        next: (s: S, a: A) => QIO<S, E, R>
+      ): QIO<S, E | E1 | E2, R & R1 & R2> =>
+        M1.zipWith(M2, (Q1, Q2) => {
+          const itar = (s: S): QIO<S, E | E1 | E2, R & R1> =>
+            QIO.if0()(
+              () => cont(s),
+              () =>
+                Q1.take
+                  .zipWith(Q2.take, fn)
+                  .chain(a3 => next(s, a3))
+                  .chain(itar),
+              () => QIO.resolve(s)
+            )
+
+          return itar(state)
+        }).use(Id)
+    )
   }
 }

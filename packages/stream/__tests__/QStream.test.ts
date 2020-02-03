@@ -186,12 +186,12 @@ describe('QStream', () => {
   })
 
   describe('zipWith', () => {
-    it.skip('should combine the results of two streams', () => {
+    it('should combine the results of two streams', () => {
       const L = QStream.interval('TEST', 100)
       const R = QStream.range(0, Infinity)
       const LR = L.zipWith(R, (str, num) => str + ':' + num).take(5)
       const actual = testRuntime().unsafeExecuteSync(LR.asArray)
-      const expected = ['TEST:0', 'TEST:1']
+      const expected = ['TEST:0', 'TEST:1', 'TEST:2', 'TEST:3', 'TEST:4']
       assert.deepStrictEqual(actual, expected)
     })
   })
