@@ -40,15 +40,17 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     return this.fold(true, T, FTrueCb).void
   }
   /**
+   * Adds an index to each value emitted by the current stream.
+   */
+  public get zipWithIndex(): QStream<{0: A1; 1: number}, E1, R1> {
+    return this.mapAcc(0, (s, a) => ({0: s + 1, 1: {1: s, 0: a}}))
+  }
+  /**
    * Creates a stream that constantly emits the provided value.
    */
   public static const<A1>(a: A1): QStream<A1> {
     return new QStream((s, cont, next) =>
-      QIO.if0()(
-        () => cont(s),
-        () => next(s, a),
-        () => QIO.resolve(s)
-      )
+      QIO.if0(s, a)(cont, next, QIO.resolve)
     )
   }
 
@@ -353,6 +355,36 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   }
 
   /**
+   * Like [[mapAccM]] but doesn't produce values effectfully.
+   */
+  public mapAcc<S, A3>(
+    acc: S,
+    fn: (S: S, A: A1) => {0: S; 1: A3}
+  ): QStream<A3, E1, R1> {
+    return this.mapAccM(acc, (s, a) => QIO.resolve(fn(s, a)))
+  }
+
+  /**
+   * Effectfully produces new elements using the elements
+   * from the current stream and an initial state.
+   */
+  public mapAccM<S, A3, E2, R2>(
+    acc: S,
+    fn: (S: S, A: A1) => QIO<{0: S; 1: A3}, E2, R2>
+  ): QStream<A3, E1 | E2, R1 & R2> {
+    return new QStream((state, cont, next) =>
+      this.fold(
+        {0: acc, 1: state},
+        s => cont(s[1]),
+        (s, a) =>
+          fn(s[0], a).chain(({0: ss, 1: a3}) =>
+            next(s[1], a3).map(_ => ({1: _, 0: ss}))
+          )
+      ).map(_ => _[1])
+    )
+  }
+
+  /**
    * Performs an effect on each value emitted by the stream.
    */
   public mapM<A2, E2, R2>(
@@ -413,16 +445,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     acc: A3,
     fn: (s: A3, a: A1) => QIO<A3, E3, R3>
   ): QStream<A3, E1 | E3, R1 & R3> {
-    return new QStream((state, cont, next) =>
-      this.fold(
-        {state, seed: acc},
-        _ => cont(_.state),
-        (_, a1) =>
-          fn(_.seed, a1).chain(a3 =>
-            next(_.state, a3).map(nState => ({seed: a3, state: nState}))
-          )
-      ).map(_ => _.state)
-    )
+    return this.mapAccM(acc, (s, a) => fn(s, a).map(ss => ({0: ss, 1: ss})))
   }
   /**
    * Emits the first N values skipping the rest.

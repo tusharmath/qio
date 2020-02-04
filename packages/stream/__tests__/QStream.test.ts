@@ -232,4 +232,22 @@ describe('QStream', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
+  describe('zipWithIndex', () => {
+    it('should create values with index', () => {
+      const actual = testRuntime().unsafeExecuteSync(
+        QStream.range(0, 10)
+          .const('A')
+          .zipWithIndex.take(4).asArray
+      )
+
+      const expected = [
+        {0: 'A', 1: 0},
+        {0: 'A', 1: 1},
+        {0: 'A', 1: 2},
+        {0: 'A', 1: 3}
+      ]
+
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
 })
