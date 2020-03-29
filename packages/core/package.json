@@ -15,9 +15,9 @@
     "type": "git",
     "url": "https://github.com/tusharmath/qio.git"
   },
-  "version": "31.0.0",
+  "version": "31.1.0",
   "dependencies": {
-    "@qio/prelude": "^31.0.0",
+    "@qio/prelude": "^31.1.0",
     "debug": "^4.1.1",
     "in-node": "^1.0.0",
     "standard-data-structures": "^4.0.0",

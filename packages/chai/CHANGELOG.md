@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [31.1.0](https://github.com/tusharmath/qio/compare/v31.0.1...v31.1.0) (2020-03-29)
+
+
+### Bug Fixes
+
+* update dependencies ([06fbfd2](https://github.com/tusharmath/qio/commit/06fbfd2ef833e56f802c4222a9d16f8782a91c10))
+
+
+
+
+
 # [31.0.0](https://github.com/tusharmath/qio/compare/v30.0.1...v31.0.0) (2020-01-28)
 
 **Note:** Version bump only for package @qio/chai

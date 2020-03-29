@@ -1,6 +1,6 @@
 {
   "name": "@qio/prototype",
-  "version": "31.0.0",
+  "version": "31.1.0",
   "private": true,
   "description": "Prototypes for that are based on QIO but are not a part of the core package.",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
@@ -25,6 +25,6 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "@qio/core": "^31.0.0"
+    "@qio/core": "^31.1.0"
   }
 }

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [31.1.0](https://github.com/tusharmath/qio/compare/v31.0.1...v31.1.0) (2020-03-29)
+
+
+### Bug Fixes
+
+* **queue:** fix offer implementation ([5c474f6](https://github.com/tusharmath/qio/commit/5c474f63c61e75fdaac726bbd7b2dabca16b5080))
+
+
+### Features
+
+* **stream:** add \`zipWith\` operator ([c594d5a](https://github.com/tusharmath/qio/commit/c594d5a6596e6ee66344a4379e42fd6df382a125))
+* **stream:** add multiple operators ([b2a188a](https://github.com/tusharmath/qio/commit/b2a188a83706db014e4d0884dc149075f9d3086b))
+
+
+
+
+
 ## [31.0.1](https://github.com/tusharmath/qio/compare/v31.0.0...v31.0.1) (2020-01-28)
 
 
