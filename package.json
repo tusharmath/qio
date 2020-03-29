@@ -45,7 +45,7 @@
     "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.15.5",
     "typedoc-plugin-markdown": "^2.2.14",
-    "typescript": "^3.7.4",
+    "typescript": "^3.8.3",
     "typescript-tslint-plugin": "^0.5.5"
   },
   "workspaces": [
