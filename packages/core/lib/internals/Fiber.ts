@@ -36,7 +36,6 @@ const FIBER_ID = new IDGenerator()
  * @typeparam A The success value
  */
 export abstract class Fiber<A, E> {
-
   /**
    * Uses a shared runtime to evaluate a [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.

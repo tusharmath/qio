@@ -171,7 +171,6 @@ class Empty extends Chunk<never> {
 }
 
 class Value<A> extends Chunk<A> {
-
   public length = 1
   public constructor(private readonly value: A) {
     super()
