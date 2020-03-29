@@ -10,7 +10,7 @@ import * as Fluture from 'fluture'
 import {inc} from '../internals/Inc'
 import {RunSuite} from '../internals/RunSuite'
 
-const MAX = 1e4
+const MAX = 1e3
 
 RunSuite(`NestedMap ${MAX}`, {
   bluebird: () => {
