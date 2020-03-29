@@ -9,6 +9,11 @@ import {PrintLn} from './PrintLn'
 
 export const qioRuntime = defaultRuntime()
 
+/**
+ * Native runs native benchmarks.
+ */
+export const RUN_NATIVE = false
+
 export const RunSuite = (
   name: string,
   test: {
@@ -23,7 +28,7 @@ export const RunSuite = (
   PrintLn('```')
   const suite = new Suite(name)
 
-  if (typeof test.native === 'function') {
+  if (typeof test.native === 'function' && RUN_NATIVE) {
     suite.add('Native', () => {
       ;(test as {native(): void}).native()
     })
