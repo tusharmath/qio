@@ -24,10 +24,12 @@ export const fibFluture = (
   n: bigint
 ): Fluture.FutureInstance<never, bigint> => {
   if (n < 2n) {
-    return Fluture.of(1n)
+    return Fluture.resolve(1n)
   }
 
-  return fibFluture(n - 1n).chain(a => fibFluture(n - 2n).map(b => a + b))
+  return Fluture.chain((a: bigint) =>
+    Fluture.map((b: bigint) => a + b)(fibFluture(n - 2n))
+  )(fibFluture(n - 1n))
 }
 
 /**
@@ -38,7 +40,7 @@ export const fibQIO = (n: bigint): QIO<bigint> => {
     return QIO.resolve(1n)
   }
 
-  return fibQIO(n - 1n).chain(a => fibQIO(n - 2n).map(b => a + b))
+  return fibQIO(n - 1n).chain((a) => fibQIO(n - 2n).map((b) => a + b))
 }
 
 /**
@@ -49,7 +51,7 @@ export const fibBird = (n: bigint): Promise<bigint> => {
     return Promise.resolve(1n)
   }
 
-  return fibBird(n - 1n).then(a => fibBird(n - 2n).then(b => a + b))
+  return fibBird(n - 1n).then((a) => fibBird(n - 2n).then(b => a + b))
 }
 
 const count = 20n

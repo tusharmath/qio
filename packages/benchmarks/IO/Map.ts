@@ -10,6 +10,6 @@ import {RunSuite} from '../internals/RunSuite'
 
 RunSuite('Map', {
   bluebird: () => Promise.resolve(BigInt(10)).then(inc),
-  fluture: () => Fluture.of(BigInt(10)).map(inc),
-  qio: () => QIO.resolve(BigInt(10)).map(inc)
+  fluture: () => Fluture.map(inc)(Fluture.resolve(BigInt(10))),
+  qio: () => QIO.resolve(BigInt(10)).map(inc),
 })

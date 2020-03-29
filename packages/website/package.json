@@ -31,6 +31,6 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "docusaurus": "^1.14.3"
+    "docusaurus": "^1.14.4"
   }
 }

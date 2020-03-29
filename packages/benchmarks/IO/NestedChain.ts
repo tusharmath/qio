@@ -7,7 +7,7 @@ import {RunSuite} from '../internals/RunSuite'
 
 const MAX = 1e4
 
-const flutureMapper = (_: bigint) => Fluture.of(_ + BigInt(1))
+const flutureMapper = (_: bigint) => Fluture.resolve(_ + BigInt(1))
 const bluebirdMapper = (_: bigint) => Promise.resolve(_ + BigInt(1))
 const qioMapper = (_: bigint) => QIO.resolve(_ + BigInt(1))
 const matechsMapper = (_: bigint) => T.effect.pure(_ + BigInt(1))
@@ -22,9 +22,9 @@ RunSuite(`NestedChain ${MAX}`, {
     return bird
   },
   fluture: () => {
-    let fluture = Fluture.of(BigInt(0))
+    let fluture = Fluture.resolve(BigInt(0))
     for (let i = 0; i < MAX; i++) {
-      fluture = fluture.chain(flutureMapper)
+      fluture = Fluture.chain(flutureMapper)(fluture)
     }
 
     return fluture
@@ -44,5 +44,5 @@ RunSuite(`NestedChain ${MAX}`, {
     }
 
     return qio
-  }
+  },
 })

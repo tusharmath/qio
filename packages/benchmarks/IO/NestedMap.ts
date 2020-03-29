@@ -22,9 +22,9 @@ RunSuite(`NestedMap ${MAX}`, {
     return bird
   },
   fluture: () => {
-    let fluture = Fluture.of(BigInt(0))
+    let fluture = Fluture.resolve(BigInt(0))
     for (let i = 0; i < MAX; i++) {
-      fluture = fluture.map(inc)
+      fluture = Fluture.map(inc)(fluture)
     }
 
     return fluture
@@ -44,5 +44,5 @@ RunSuite(`NestedMap ${MAX}`, {
     }
 
     return qio
-  }
+  },
 })

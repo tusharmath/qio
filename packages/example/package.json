@@ -25,7 +25,7 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.7",
+    "@types/chai": "^4.2.11",
     "@types/chai-spies": "^1.0.1",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
