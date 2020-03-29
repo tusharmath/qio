@@ -1,4 +1,5 @@
 /* tslint:disable: no-unbound-method */
+import * as T from '@matechs/effect'
 import {defaultRuntime, QIO} from '@qio/core'
 import {noop} from '@qio/prelude'
 import {Suite} from 'benchmark'
@@ -13,6 +14,7 @@ export const RunSuite = (
   test: {
     bluebird(): PromiseLike<unknown>
     fluture(): FutureInstance<unknown, unknown>
+    matechs?(): T.effect.Effect<unknown, unknown, unknown>
     native?(): void
     qio(): QIO
   }
@@ -25,6 +27,15 @@ export const RunSuite = (
     suite.add('Native', () => {
       ;(test as {native(): void}).native()
     })
+  }
+
+  if (typeof test.matechs === 'function') {
+    const F = test.matechs
+    suite.add(
+      'Matechs',
+      (cb: IDefer) => T.effect.run(F(), () => cb.resolve()),
+      {defer: true}
+    )
   }
 
   suite

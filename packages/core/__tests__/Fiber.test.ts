@@ -201,27 +201,26 @@ describe('FiberContext', () => {
 
   context('instruction count is reduced', () => {
     it('should switch between multiple contexts', () => {
+      const s = new Snapshot()
       const MAX_INSTRUCTION_COUNT = 5
       const runtime = testRuntime().configure(
         FiberConfig.MAX_INSTRUCTION_COUNT(MAX_INSTRUCTION_COUNT)
       )
-      const actual = new Array<number>()
-      const insert = QIO.encase((_: number) => void actual.push(_))
-      const longIO = QIO.resolve(1)
-        .and(QIO.resolve(2))
-        .and(QIO.resolve(3))
-        .and(QIO.resolve(4))
-        .and(QIO.resolve(5))
-        .chain(insert)
-      const shortIO = QIO.resolve(1000).chain(insert)
+
+      const recursion = QIO.lazy(
+        (a: number, e: number): QIO<void> =>
+          a === e ? QIO.void() : recursion(a + 1, e)
+      )
+
+      const longIO = recursion(1, 100).and(s.mark('LONG'))
+      const shortIO = recursion(1, 10).and(s.mark('SHORT'))
 
       FiberContext.unsafeExecuteWith(longIO, runtime)
       FiberContext.unsafeExecuteWith(shortIO, runtime)
 
       runtime.scheduler.run()
 
-      const expected = [1000, 5]
-      assert.deepStrictEqual(actual, expected)
+      assert.deepStrictEqual(s.timeline, ['SHORT@1', 'LONG@1'])
     })
   })
 

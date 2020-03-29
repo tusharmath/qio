@@ -134,6 +134,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fa: QIO<A1, E1, R1>,
     aFb: (a: A1) => QIO<A2, E2, R2>
   ): QIO<A2, E1 | E2, R1 & R2> {
+    if (fa.tag === Tag.Constant) {
+      return aFb(fa.i0 as A1)
+    }
+
     return new QIO(Tag.Chain, fa, aFb)
   }
   /**
@@ -269,6 +273,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fa: QIO<A1, E1, R1>,
     ab: (a: A1) => A2
   ): QIO<A2, E1, R1> {
+    if (fa.tag === Tag.Constant) {
+      return QIO.resolve(ab(fa.i0 as A1))
+    }
+
     return new QIO(Tag.Map, fa, ab)
   }
   /**
