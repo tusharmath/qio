@@ -1,5 +1,6 @@
 /* tslint:disable: promise-function-async strict-comparisons */
 
+import {effect as T} from '@matechs/effect'
 import {QIO} from '@qio/core'
 import {Promise} from 'bluebird'
 import * as Fluture from 'fluture'
@@ -54,10 +55,24 @@ export const fibBird = (n: bigint): Promise<bigint> => {
   return fibBird(n - 1n).then((a) => fibBird(n - 2n).then((b) => a + b))
 }
 
+/**
+ * Matechs based implementation
+ */
+export const fibMatechs = (n: bigint): T.Effect<T.NoEnv, never, bigint> => {
+  if (n < BigInt(2)) {
+    return T.pure(BigInt(1))
+  }
+
+  return T.effect.chain(fibMatechs(n - BigInt(1)), (a) =>
+    T.effect.map(fibMatechs(n - BigInt(2)), (b) => a + b)
+  )
+}
+
 const count = 20n
 RunSuite(`Fibonacci: ${String(count)}`, {
   bluebird: () => fibBird(count),
   fluture: () => fibFluture(count),
+  matechs: () => fibMatechs(count),
   native: () => fib(count),
   qio: () => fibQIO(count),
 })
