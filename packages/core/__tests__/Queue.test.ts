@@ -20,7 +20,7 @@ describe('Queue', () => {
   describe('offer', () => {
     it('should add the element to the queue', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Queue.unbounded<number>().chain(Q => Q.offer(1000).and(Q.length))
+        Queue.unbounded<number>().chain((Q) => Q.offer(1000).and(Q.length))
       )
       const expected = 1
 
@@ -30,8 +30,8 @@ describe('Queue', () => {
     context('is full', () => {
       it('should not add', () => {
         const program = Queue.bounded<string>(2)
-          .chain(Q => Q.offerAll('A', 'B', 'C').const(Q))
-          .chain(_ => _.asArray)
+          .chain((Q) => Q.offerAll('A', 'B', 'C').const(Q))
+          .chain((_) => _.asArray)
 
         const actual = testRuntime().unsafeExecuteSync(program)
 
@@ -40,13 +40,10 @@ describe('Queue', () => {
 
       it('should add on remove', () => {
         const program = Queue.bounded<string>(2)
-          .chain(Q =>
-            Q.offerAll('A', 'B')
-              .and(Q.take)
-              .and(Q.offer('C'))
-              .const(Q)
+          .chain((Q) =>
+            Q.offerAll('A', 'B').and(Q.take).and(Q.offer('C')).const(Q)
           )
-          .chain(_ => _.asArray)
+          .chain((_) => _.asArray)
 
         const actual = testRuntime().unsafeExecuteSync(program)
         const expected = ['B', 'C']
@@ -59,7 +56,7 @@ describe('Queue', () => {
   describe('offerAll', () => {
     it('should add multiple elements to the queue', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Queue.unbounded<number>().chain(Q =>
+        Queue.unbounded<number>().chain((Q) =>
           Q.offerAll(1, 2, 3, 4, 5).and(Q.length)
         )
       )
@@ -70,7 +67,7 @@ describe('Queue', () => {
 
     it('should add the items on the left first', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        Queue.unbounded<number>().chain(Q =>
+        Queue.unbounded<number>().chain((Q) =>
           Q.offerAll(1, 2, 3, 4, 5).and(Q.take)
         )
       )
@@ -84,8 +81,8 @@ describe('Queue', () => {
     it('should wait if the queue is empty', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Queue.unbounded<string>().chain(Q =>
-          Q.take.par(Q.offer('A').delay(1000)).map(_ => _[0])
+        Queue.unbounded<string>().chain((Q) =>
+          Q.take.par(Q.offer('A').delay(1000)).map((_) => _[0])
         )
       )
 
@@ -96,7 +93,7 @@ describe('Queue', () => {
     it('should empty the queue once resolved', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Queue.unbounded<string>().chain(Q =>
+        Queue.unbounded<string>().chain((Q) =>
           Q.take.par(Q.offer('A').delay(1000)).and(Q.length)
         )
       )
@@ -110,11 +107,8 @@ describe('Queue', () => {
          * #regression
          * Any pending offers should be consumed as soon as new space is available.
          */
-        const program = Queue.bounded<string>(1).chain(Q =>
-          Q.offerAll('A', 'B')
-            .fork()
-            .and(Q.take)
-            .and(Q.asArray.delay(10))
+        const program = Queue.bounded<string>(1).chain((Q) =>
+          Q.offerAll('A', 'B').fork().and(Q.take).and(Q.asArray.delay(10))
         )
 
         const actual = testRuntime().unsafeExecuteSync(program)
@@ -129,10 +123,10 @@ describe('Queue', () => {
     it('should resolve after the first N offers', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        Queue.unbounded<string>().chain(Q =>
+        Queue.unbounded<string>().chain((Q) =>
           Q.takeN(5)
             .par(Q.offerAll('A', 'B', 'C', 'D', 'E', 'F'))
-            .map(_ => _[0])
+            .map((_) => _[0])
         )
       )
 

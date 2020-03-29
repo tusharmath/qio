@@ -4,7 +4,7 @@ import {
   FiberConfig,
   QIO,
   Snapshot,
-  testRuntime
+  testRuntime,
 } from '@qio/core'
 import {range, T} from '@qio/prelude'
 import {assert, spy} from 'chai'
@@ -34,7 +34,7 @@ describe('QStream', () => {
       const actual = new Array<number>()
       const push = QIO.encase((I: number) => actual.push(I))
       testRuntime().unsafeExecuteSync(
-        QStream.of(1, 2, 3).forEachWhile(_ => push(_).const(true))
+        QStream.of(1, 2, 3).forEachWhile((_) => push(_).const(true))
       )
       const expected = [1, 2, 3]
       assert.deepStrictEqual(actual, expected)
@@ -66,7 +66,7 @@ describe('QStream', () => {
       runtime.unsafeExecuteSync(
         QStream.of('A')
           .merge(QStream.of('B'))
-          .forEach(_ => actual.mark(_))
+          .forEach((_) => actual.mark(_))
       )
 
       const expected = ['A@1', 'B@1']
@@ -82,9 +82,8 @@ describe('QStream', () => {
         )
 
         runtime.unsafeExecuteSync(
-          QStream.range(101, 103)
-            .merge(QStream.range(901, 903))
-            .mapM(insert).drain
+          QStream.range(101, 103).merge(QStream.range(901, 903)).mapM(insert)
+            .drain
         )
 
         const expected = [101, 102, 103, 901, 902, 903]
@@ -117,14 +116,14 @@ describe('QStream', () => {
 
   describe('haltWhen', () => {
     it('should take value until the io resolves', () => {
-      const program = Await.of<number>().chain(awt => {
+      const program = Await.of<number>().chain((awt) => {
         const setter = awt.set(QIO.timeout(-100, 50))
 
         const source = QStream.range(0, 10)
-          .mapM(_ => QIO.timeout(_, 10))
+          .mapM((_) => QIO.timeout(_, 10))
           .haltWhen(awt)
 
-        return source.asArray.zipWithPar(setter, a => a)
+        return source.asArray.zipWithPar(setter, (a) => a)
       })
 
       const actual = testRuntime().unsafeExecuteSync(program)
@@ -137,7 +136,7 @@ describe('QStream', () => {
   describe('haltWhenM', () => {
     it('should take value until the io resolves', () => {
       const program = QStream.range(0, 10)
-        .mapM(_ => QIO.timeout(_, 10))
+        .mapM((_) => QIO.timeout(_, 10))
         .haltWhenM(QIO.void().delay(50)).asArray
 
       const actual = testRuntime().unsafeExecuteSync(program)
@@ -169,7 +168,7 @@ describe('QStream', () => {
       // Setup
       const runtime = testRuntime()
       const emitter = new EventEmitter()
-      const emit = () => range(1, 5, _ => emitter.emit('data', _))
+      const emit = () => range(1, 5, (_) => emitter.emit('data', _))
       runtime.scheduler.delay(emit, 100)
 
       // Create Program
@@ -200,9 +199,9 @@ describe('QStream', () => {
         const counter = new Counter()
         const COUNT = 9
         const program = QStream.interval(1, 10)
-          .forEach(_ => counter.inc(_))
+          .forEach((_) => counter.inc(_))
           .fork()
-          .chain(F => F.abort.delay(100))
+          .chain((F) => F.abort.delay(100))
 
         testRuntime().unsafeExecuteSync(program)
 
@@ -217,7 +216,7 @@ describe('QStream', () => {
     it('should convert a stream to a queue', () => {
       const program = QStream.range(0, 10)
         .toQueue()
-        .use(Q => Q.takeN(5))
+        .use((Q) => Q.takeN(5))
       const actual = testRuntime().unsafeExecuteSync(program)
       const expected = [0, 1, 2, 3, 4]
       assert.deepStrictEqual(actual, expected)
@@ -226,7 +225,7 @@ describe('QStream', () => {
     it('should by async', () => {
       const program = QStream.range(0, 10)
         .toQueue(1)
-        .use(Q => Q.takeN(5))
+        .use((Q) => Q.takeN(5))
       const actual = testRuntime().unsafeExecuteSync(program)
       const expected = [0, 1, 2, 3, 4]
       assert.deepStrictEqual(actual, expected)
@@ -235,16 +234,14 @@ describe('QStream', () => {
   describe('zipWithIndex', () => {
     it('should create values with index', () => {
       const actual = testRuntime().unsafeExecuteSync(
-        QStream.range(0, 10)
-          .const('A')
-          .zipWithIndex.take(4).asArray
+        QStream.range(0, 10).const('A').zipWithIndex.take(4).asArray
       )
 
       const expected = [
         {0: 'A', 1: 0},
         {0: 'A', 1: 1},
         {0: 'A', 1: 2},
-        {0: 'A', 1: 3}
+        {0: 'A', 1: 3},
       ]
 
       assert.deepStrictEqual(actual, expected)

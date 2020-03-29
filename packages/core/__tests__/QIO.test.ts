@@ -27,7 +27,7 @@ describe('QIO', () => {
     it('should map over the value', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.resolve(1000).map(i => i + 1)
+        QIO.resolve(1000).map((i) => i + 1)
       )
       const expected = 1001
       assert.strictEqual(actual, expected)
@@ -38,7 +38,7 @@ describe('QIO', () => {
     it('should error on first failure', () => {
       const err = new Error('oups')
       const actual = testRuntime().unsafeExecuteSync(
-        QIO.reject(err).chain(_ => QIO.resolve(1))
+        QIO.reject(err).chain((_) => QIO.resolve(1))
       )
 
       assert.deepEqual(actual, err)
@@ -47,7 +47,7 @@ describe('QIO', () => {
     it('should error on second failure', () => {
       const err = new Error('oups')
       const actual = testRuntime().unsafeExecuteSync(
-        QIO.resolve(1).chain(_ => QIO.reject(err))
+        QIO.resolve(1).chain((_) => QIO.reject(err))
       )
 
       assert.deepEqual(actual, err)
@@ -78,8 +78,8 @@ describe('QIO', () => {
     it('should skip pre catch', () => {
       const actual = testRuntime().unsafeExecuteSync(
         QIO.reject(10)
-          .map(_ => _ * 2)
-          .catch(_ => QIO.resolve(_ * 3))
+          .map((_) => _ * 2)
+          .catch((_) => QIO.resolve(_ * 3))
       )
       const expected = 30
       assert.strictEqual(actual, expected)
@@ -88,13 +88,13 @@ describe('QIO', () => {
     it('should pass post catch', () => {
       const actual = testRuntime().unsafeExecuteSync(
         QIO.reject(10)
-          .map(_ => _ * 2)
-          .map(_ => _ * 2)
-          .map(_ => _ * 2)
-          .catch(_ => QIO.resolve(_ * 3))
-          .map(_ => _ + 1)
-          .map(_ => _ + 1)
-          .map(_ => _ + 1)
+          .map((_) => _ * 2)
+          .map((_) => _ * 2)
+          .map((_) => _ * 2)
+          .catch((_) => QIO.resolve(_ * 3))
+          .map((_) => _ + 1)
+          .map((_) => _ + 1)
+          .map((_) => _ + 1)
       )
       const expected = 33
       assert.strictEqual(actual, expected)
@@ -170,7 +170,7 @@ describe('QIO', () => {
       const actual = runtime.unsafeExecuteSync(
         QIO.try(() => {
           throw new Error('foo')
-        }).catch(err => QIO.resolve(err.message + '-bar'))
+        }).catch((err) => QIO.resolve(err.message + '-bar'))
       )
       const expected = 'foo-bar'
       assert.strictEqual(actual, expected)
@@ -286,7 +286,7 @@ describe('QIO', () => {
     it('should capture exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.reject(new Error('Bye')).catch(err => QIO.resolve(err.message))
+        QIO.reject(new Error('Bye')).catch((err) => QIO.resolve(err.message))
       )
       const expected = 'Bye'
       assert.strictEqual(actual, expected)
@@ -297,7 +297,7 @@ describe('QIO', () => {
       const actual = runtime.unsafeExecuteSync(
         QIO.uninterruptible<never, Error>((res, rej) =>
           rej(new Error('Bye'))
-        ).catch(err => QIO.resolve(err.message))
+        ).catch((err) => QIO.resolve(err.message))
       )
       const expected = 'Bye'
       assert.strictEqual(actual, expected)
@@ -307,10 +307,10 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         QIO.uninterruptible<never, Error>((res, rej) => rej(new Error('A')))
-          .catch(err => QIO.reject(new Error(err.message + 'B')))
-          .catch(err => QIO.reject(new Error(err.message + 'C')))
-          .catch(err => QIO.reject(new Error(err.message + 'D')))
-          .catch(err => QIO.resolve(err.message + 'E'))
+          .catch((err) => QIO.reject(new Error(err.message + 'B')))
+          .catch((err) => QIO.reject(new Error(err.message + 'C')))
+          .catch((err) => QIO.reject(new Error(err.message + 'D')))
+          .catch((err) => QIO.resolve(err.message + 'E'))
       )
 
       const expected = 'ABCDE'
@@ -320,8 +320,8 @@ describe('QIO', () => {
     it('should let value pass thru', () => {
       const actual = testRuntime().unsafeExecuteSync(
         QIO.resolve('input')
-          .catch(x => QIO.resolve(['catch', x]))
-          .chain(x => QIO.reject(['chain', x]))
+          .catch((x) => QIO.resolve(['catch', x]))
+          .chain((x) => QIO.reject(['chain', x]))
       )
       const expected = ['chain', 'input']
 
@@ -333,7 +333,7 @@ describe('QIO', () => {
     it('should return a memoized IO', () => {
       const counter = new Counter()
       const runtime = testRuntime()
-      runtime.unsafeExecuteSync(counter.inc().once.chain(_ => _.and(_)))
+      runtime.unsafeExecuteSync(counter.inc().once.chain((_) => _.and(_)))
 
       const actual = counter.count
       const expected = 1
@@ -368,7 +368,7 @@ describe('QIO', () => {
         counter
           .inc()
           .delay(100)
-          .once.chain(_ => _.and(_))
+          .once.chain((_) => _.and(_))
       )
 
       const actual = counter.count
@@ -387,11 +387,7 @@ describe('QIO', () => {
     it('should complete immediately', () => {
       const runtime = testRuntime()
       const counter = new Counter()
-      runtime.unsafeExecute(
-        QIO.timeout('A', 1000)
-          .fork()
-          .and(counter.inc())
-      )
+      runtime.unsafeExecute(QIO.timeout('A', 1000).fork().and(counter.inc()))
       runtime.scheduler.runTo(10)
       assert.isTrue(counter.increased)
     })
@@ -401,10 +397,7 @@ describe('QIO', () => {
         const runtime = testRuntime()
         const counter = new Counter()
         const actual = runtime.unsafeExecuteSync(
-          counter
-            .inc()
-            .fork()
-            .chain(QIO.void)
+          counter.inc().fork().chain(QIO.void)
         )
 
         assert.isUndefined(actual)
@@ -416,7 +409,7 @@ describe('QIO', () => {
         const actual = runtime.unsafeExecuteSync(
           QIO.resolve(10)
             .fork()
-            .chain(fiber => fiber.join)
+            .chain((fiber) => fiber.join)
         )
 
         const expected = 10
@@ -431,7 +424,7 @@ describe('QIO', () => {
             .inc()
             .delay(1000)
             .fork()
-            .chain(fiber => fiber.join.delay(100))
+            .chain((fiber) => fiber.join.delay(100))
         )
 
         const expected = 1
@@ -446,7 +439,7 @@ describe('QIO', () => {
           QIO.resolve(10)
             .delay(100)
             .fork()
-            .chain(fib => fib.join.and(counter.inc()))
+            .chain((fib) => fib.join.and(counter.inc()))
         )
         runtime.scheduler.runTo(50)
 
@@ -462,7 +455,7 @@ describe('QIO', () => {
           const io = counter
             .inc(10)
             .fork()
-            .chain(F =>
+            .chain((F) =>
               F.join
                 .zipWith(F.join, (a, b): number[] => [a, b])
                 .zipWith(F.join, (a, b): number[] => [...a, b])
@@ -483,7 +476,7 @@ describe('QIO', () => {
           counter
             .inc()
             .fork()
-            .chain(fiber => fiber.abort)
+            .chain((fiber) => fiber.abort)
         )
 
         assert.strictEqual(counter.count, 0)
@@ -496,7 +489,7 @@ describe('QIO', () => {
           QIO.reject(new Error('Fail'))
             .catch(() => counter.inc())
             .fork()
-            .chain(fiber => fiber.abort)
+            .chain((fiber) => fiber.abort)
         )
 
         assert.strictEqual(counter.count, 0)
@@ -803,7 +796,7 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         QIO.access((_: string) => _)
-          .chain(s => QIO.access((_: string) => _ + '-' + s))
+          .chain((s) => QIO.access((_: string) => _ + '-' + s))
           .provide('QIO')
       )
       const expected = 'QIO-QIO'
@@ -815,7 +808,7 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         QIO.access((_: string) => _.length)
-          .chain(a => QIO.access((b: number) => b + a).provide(100))
+          .chain((a) => QIO.access((b: number) => b + a).provide(100))
           .provide('QIO')
       )
       const expected = 103
@@ -828,7 +821,7 @@ describe('QIO', () => {
       const actual = runtime.unsafeExecuteSync(
         QIO.access((_: string) => _.length)
           .fork()
-          .chain(_ => _.join)
+          .chain((_) => _.join)
           .provide('ABCD')
       )
 
@@ -842,7 +835,7 @@ describe('QIO', () => {
         QIO.access((_: string) => _.length)
           .provide('QIO')
           .fork()
-          .chain(f =>
+          .chain((f) =>
             f.join.map(
               // FIXME: remove type-casting and use a proper test.
               () =>
@@ -875,7 +868,7 @@ describe('QIO', () => {
       const io = QIO.par([
         QIO.resolve(10).delay(1000),
         QIO.resolve(20).delay(1000),
-        QIO.resolve(30).delay(1000)
+        QIO.resolve(30).delay(1000),
       ])
 
       const runtime = testRuntime()
@@ -902,7 +895,7 @@ describe('QIO', () => {
       const io = QIO.parN(3, [
         QIO.resolve(10).delay(1000),
         QIO.resolve(20).delay(1000),
-        QIO.resolve(30).delay(1000)
+        QIO.resolve(30).delay(1000),
       ])
 
       const runtime = testRuntime()
@@ -916,7 +909,7 @@ describe('QIO', () => {
       const io = QIO.parN(3, [
         QIO.resolve(10),
         QIO.resolve(20),
-        QIO.resolve(30)
+        QIO.resolve(30),
       ])
 
       const runtime = testRuntime()
@@ -927,7 +920,7 @@ describe('QIO', () => {
     })
 
     it('should run max N IOs in parallel', () => {
-      const ID = QIO.runtime().chain(QIO.encase(RTM => RTM.scheduler.now()))
+      const ID = QIO.runtime().chain(QIO.encase((RTM) => RTM.scheduler.now()))
 
       const io = QIO.parN(1, [ID.delay(10), ID.delay(20), ID.delay(30)])
 
@@ -939,7 +932,7 @@ describe('QIO', () => {
     })
 
     it('should run all when concurrency is set to Infinity', () => {
-      const ID = QIO.runtime().chain(QIO.encase(RTM => RTM.scheduler.now()))
+      const ID = QIO.runtime().chain(QIO.encase((RTM) => RTM.scheduler.now()))
 
       const io = QIO.parN(Infinity, [ID.delay(10), ID.delay(20), ID.delay(30)])
 
@@ -973,7 +966,7 @@ describe('QIO', () => {
     it('should capture sync exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptible(cb => {
+        QIO.uninterruptible((cb) => {
           throw new Error('Failed')
         })
       )

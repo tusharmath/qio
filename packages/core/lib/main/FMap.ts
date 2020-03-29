@@ -15,7 +15,7 @@ export class FMap<K, V> {
   private readonly cache = new Map<K, V>()
   private constructor() {}
   public get(key: K): QIO<V, NoSuchElement> {
-    return QIO.lift(() => this.cache.get(key)).chain(_ =>
+    return QIO.lift(() => this.cache.get(key)).chain((_) =>
       _ === undefined ? QIO.reject(new NoSuchElement()) : QIO.resolve(_)
     )
   }
@@ -25,7 +25,7 @@ export class FMap<K, V> {
   public memoize<E1, R1>(
     fn: (a: K) => QIO<V, E1, R1>
   ): (a: K) => QIO<V, E1, R1> {
-    return (a: K) => this.get(a).catch(() => fn(a).chain(r => this.set(a, r)))
+    return (a: K) => this.get(a).catch(() => fn(a).chain((r) => this.set(a, r)))
   }
   public set(key: K, value: V): QIO<V> {
     return QIO.lift(() => void this.cache.set(key, value)).const(value)

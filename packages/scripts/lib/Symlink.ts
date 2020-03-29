@@ -20,12 +20,12 @@ const qCwd = QIO.access((_: ICwdEnc) => _.cwd())
 
 const program = FS.readdir(PATH_PACKAGES).zipWithM(qCwd, (fileList, cwd) =>
   QIO.par(
-    fileList.map(F => {
+    fileList.map((F) => {
       const path = p.resolve(process.cwd(), 'packages', F, '.npmignore')
 
       return qSymLink(path)
         .and(putStrLn('OK', path))
-        .catch(err =>
+        .catch((err) =>
           QIO.if(
             err.code === 'EEXIST',
             putStrLn('EXISTS', path)
@@ -40,11 +40,11 @@ const program = FS.readdir(PATH_PACKAGES).zipWithM(qCwd, (fileList, cwd) =>
 
 defaultRuntime().unsafeExecute(
   program
-    .catch(err => putStrLn(err.message).and(qExit(1)))
+    .catch((err) => putStrLn(err.message).and(qExit(1)))
     .provide({
       cwd: () => process.cwd(),
-      exit: code => process.exit(code),
+      exit: (code) => process.exit(code),
       fs: FSEnv,
-      tty: TTY
+      tty: TTY,
     })
 )

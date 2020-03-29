@@ -21,7 +21,7 @@ const U = <A>(
 const V = <A, E>(
   fn: (CB: (err: NodeJS.ErrnoException) => void) => void
 ): QIOErrno<void> =>
-  QIO.uninterruptible((res, rej) => fn(err => (err ? rej(err) : res())))
+  QIO.uninterruptible((res, rej) => fn((err) => (err ? rej(err) : res())))
 
 /**
  * An environment for FS
@@ -37,35 +37,35 @@ interface IFSEnv<T extends unknown[], A, K extends string | number | symbol> {
  */
 export const FSEnv = {
   open: (path: fs.PathLike, mode: string, flag?: number) =>
-    U<number>(CB => fs.open(path, mode, flag, CB)),
+    U<number>((CB) => fs.open(path, mode, flag, CB)),
 
-  close: (fd: number): QIOErrno<void> => V(CB => fs.close(fd, CB)),
+  close: (fd: number): QIOErrno<void> => V((CB) => fs.close(fd, CB)),
 
   readFile: (
     path: fs.PathLike | number,
     options?: {encoding?: null; flag?: string}
-  ) => U<string | Buffer>(CB => fs.readFile(path, options, CB)),
+  ) => U<string | Buffer>((CB) => fs.readFile(path, options, CB)),
 
   writeFile: (
     path: fs.PathLike | number,
     data: unknown,
     options: fs.WriteFileOptions = {}
-  ) => V(CB => fs.writeFile(path, data, options, CB)),
+  ) => V((CB) => fs.writeFile(path, data, options, CB)),
 
   readdir: (
     path: string,
     options?:
       | {encoding: BufferEncoding | null; withFileTypes?: false}
       | BufferEncoding
-  ) => U<string[]>(CB => fs.readdir(path, options, CB)),
+  ) => U<string[]>((CB) => fs.readdir(path, options, CB)),
 
-  unlink: (path: fs.PathLike): QIOErrno<void> => V(CB => fs.unlink(path, CB)),
+  unlink: (path: fs.PathLike): QIOErrno<void> => V((CB) => fs.unlink(path, CB)),
 
   symlink: (target: fs.PathLike, path: fs.PathLike) =>
-    V(cb => fs.symlink(target, path, cb)),
+    V((cb) => fs.symlink(target, path, cb)),
 
   copyFile: (src: fs.PathLike, dest: fs.PathLike) =>
-    V(cb => fs.copyFile(src, dest, cb))
+    V((cb) => fs.copyFile(src, dest, cb)),
 }
 
 type FSWithEnv<O extends ISpec> = {

@@ -15,6 +15,6 @@ const runtime = defaultRuntime()
 runtime.unsafeExecute(
   program.provide({
     math: Math,
-    tty: TTY
+    tty: TTY,
   })
 )

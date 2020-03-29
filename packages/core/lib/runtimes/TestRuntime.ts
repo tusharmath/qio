@@ -30,7 +30,7 @@ export class TestRuntime extends FiberRuntime {
   }
   public unsafeExecuteSync0<A, E>(io: QIO<A, E>): Exit<A, E> | undefined {
     let result: undefined | Exit<A, E>
-    this.unsafeExecute(io, _ => (result = _))
+    this.unsafeExecute(io, (_) => (result = _))
     this.scheduler.run()
 
     return result

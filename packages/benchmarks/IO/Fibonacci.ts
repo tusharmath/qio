@@ -51,7 +51,7 @@ export const fibBird = (n: bigint): Promise<bigint> => {
     return Promise.resolve(1n)
   }
 
-  return fibBird(n - 1n).then((a) => fibBird(n - 2n).then(b => a + b))
+  return fibBird(n - 1n).then((a) => fibBird(n - 2n).then((b) => a + b))
 }
 
 const count = 20n
@@ -59,5 +59,5 @@ RunSuite(`Fibonacci: ${String(count)}`, {
   bluebird: () => fibBird(count),
   fluture: () => fibFluture(count),
   native: () => fib(count),
-  qio: () => fibQIO(count)
+  qio: () => fibQIO(count),
 })

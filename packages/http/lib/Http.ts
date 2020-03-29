@@ -7,7 +7,7 @@ import Axios, {
   AxiosProxyConfig,
   AxiosResponse,
   Method,
-  ResponseType
+  ResponseType,
 } from 'axios'
 import * as http from 'http'
 import * as https from 'https'
@@ -50,13 +50,15 @@ export const httpEnv = {
       let cancelRequest = () => {}
       Axios.request({
         ...config,
-        cancelToken: new Axios.CancelToken(cancel => (cancelRequest = cancel))
+        cancelToken: new Axios.CancelToken(
+          (cancel) => (cancelRequest = cancel)
+        ),
       }).then(res, rej)
 
       return {
         cancel: () => {
           cancelRequest()
-        }
+        },
       }
-    })
+    }),
 }

@@ -23,7 +23,7 @@ class InvalidInstruction extends Error {
 enum FiberStatus {
   PENDING,
   COMPLETED,
-  CANCELLED
+  CANCELLED,
 }
 
 /**
@@ -36,9 +36,6 @@ const FIBER_ID = new IDGenerator()
  * @typeparam A The success value
  */
 export abstract class Fiber<A, E> {
-  public get join(): QIO<A, E> {
-    return this.await.chain(QIO.fromExit)
-  }
 
   /**
    * Uses a shared runtime to evaluate a [[QIO]] expression.
@@ -55,6 +52,9 @@ export abstract class Fiber<A, E> {
   public abstract await: QIO<Exit<A, E>>
   public readonly id = FIBER_ID.create()
   public abstract runtime: FiberRuntime
+  public get join(): QIO<A, E> {
+    return this.await.chain(QIO.fromExit)
+  }
 }
 /**
  * FiberContext actually evaluates the QIO expression.
@@ -63,21 +63,6 @@ export abstract class Fiber<A, E> {
  * It provides public APIs to [[Fiber]] to consume.
  */
 export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
-  public get abort(): QIO<void> {
-    return QIO.lift(() => this.cancel())
-  }
-  /**
-   * Aborting the IO produced by await should abort the complete IO.
-   */
-  public get await(): QIO<Exit<A, E>> {
-    D(this.id, 'this.await()')
-
-    return QIO.uninterruptible(cb => {
-      this.unsafeObserve(cb)
-
-      return this
-    })
-  }
   /**
    * Evaluates an IO using the provided scheduler
    */
@@ -119,13 +104,28 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     this.stackA.push(instruction)
     this.init()
   }
+  public get abort(): QIO<void> {
+    return QIO.lift(() => this.cancel())
+  }
+  /**
+   * Aborting the IO produced by await should abort the complete IO.
+   */
+  public get await(): QIO<Exit<A, E>> {
+    D(this.id, 'this.await()')
+
+    return QIO.uninterruptible((cb) => {
+      this.unsafeObserve(cb)
+
+      return this
+    })
+  }
   public cancel(): void {
     D(this.id, 'this.cancel()')
     D(this.id, 'this.observers.length == ', this.observers.length)
     this.status = FiberStatus.CANCELLED
     D(this.id, 'this.status ==', FiberStatus[this.status])
     this.cancellationList.cancel()
-    this.observers.map(_ => _(Exit.cancel()))
+    this.observers.map((_) => _(Exit.cancel()))
   }
   /**
    * The `ICancellable` returned when called will only remove the passed on callback.
@@ -159,14 +159,14 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
         this.observers.remove(node)
         D(this.id, 'this.observer.remove()')
         D(this.id, 'this.observers.length == ', this.observers.length)
-      }
+      },
     }
   }
   private dispatchResult(result: Exit<A, E>): void {
     D('%O dispatchResult() // %O', this.id, result)
     this.status = FiberStatus.COMPLETED
     this.result = result
-    this.observers.map(_ => _(result))
+    this.observers.map((_) => _(result))
   }
   private init(data?: unknown): void {
     D(this.id, 'start()')
@@ -249,7 +249,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             break
           case Tag.Provide:
             this.stackA.push(
-              QIO.resume(i => {
+              QIO.resume((i) => {
                 this.stackEnv.pop()
 
                 return i
@@ -265,12 +265,12 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
           case Tag.Async:
             const id = this.cancellationList.push(
               j.i0(
-                val => {
+                (val) => {
                   this.cancellationList.remove(id)
                   this.stackA.push(QIO.resolve(val).asInstruction)
                   this.unsafeEvaluate()
                 },
-                err => {
+                (err) => {
                   this.cancellationList.remove(id)
                   this.stackA.push(QIO.reject(err).asInstruction)
                   this.unsafeEvaluate()

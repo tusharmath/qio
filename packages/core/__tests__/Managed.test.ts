@@ -41,7 +41,7 @@ const itShouldReleaseAfterUsage = (fn: (M: Managed) => Managed) => {
     assert.deepStrictEqual(snapshot.timeline, [
       'ACQUIRED@1',
       'USED@1',
-      'RELEASED@1'
+      'RELEASED@1',
     ])
   })
 }
@@ -81,7 +81,7 @@ describe('Managed', () => {
         Managed.make(r.acquire, r.release)
           .use(() => QIO.timeout(0, 1000))
           .fork()
-          .chain(F => F.abort.delay(500))
+          .chain((F) => F.abort.delay(500))
       )
 
       assert.ok(r.isReleased)
@@ -95,7 +95,7 @@ describe('Managed', () => {
         Managed.make(QIO.void(), QIO.void)
           .use(() => counter.inc().delay(1000))
           .fork()
-          .chain(F => F.abort.delay(500))
+          .chain((F) => F.abort.delay(500))
       )
 
       assert.deepStrictEqual(counter.count, 0)
@@ -110,7 +110,7 @@ describe('Managed', () => {
         Managed.make(r.acquire, r.release)
           .use(() => QIO.timeout(0, 1000))
           .fork()
-          .chain(F => F.join.and(F.abort))
+          .chain((F) => F.join.and(F.abort))
       )
 
       assert.strictEqual(r.count, 0)
@@ -176,7 +176,7 @@ describe('Managed', () => {
       const M = Managed.zip([
         Managed.make(A.acquire, A.release),
         Managed.make(B.acquire, B.release),
-        Managed.make(C.acquire, C.release)
+        Managed.make(C.acquire, C.release),
       ])
 
       const actual = testRuntime().unsafeExecuteSync(M.use(QIO.resolve))
@@ -187,11 +187,11 @@ describe('Managed', () => {
   })
 
   describe('chain', () => {
-    itShouldFollowSpec(m => m.chain(() => Managed.make(QIO.void(), QIO.void)))
+    itShouldFollowSpec((m) => m.chain(() => Managed.make(QIO.void(), QIO.void)))
   })
 
   describe('map', () => {
-    itShouldFollowSpec(m => m.map(() => 0))
+    itShouldFollowSpec((m) => m.map(() => 0))
   })
 
   describe('id', () => {

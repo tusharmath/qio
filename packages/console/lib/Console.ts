@@ -43,7 +43,7 @@ const openRL = QIO.env<IReadLineEnv>().zipWithM(
   QIO.encase((R1, R2) =>
     R1.readLine.createInterface({
       input: R2.process.stdin,
-      output: R2.process.stdout
+      output: R2.process.stdout,
     })
   )
 )
@@ -54,13 +54,13 @@ const putStrLn0 = (...t: unknown[]) =>
   QIO.access((_: IConsoleEnv) => _.console.log(...t))
 
 const getStrLn0 = (question: string = '') =>
-  managedRL.use(RL =>
-    QIO.uninterruptible<string>(cb => RL.question(question, cb))
+  managedRL.use((RL) =>
+    QIO.uninterruptible<string>((cb) => RL.question(question, cb))
   )
 
 export const TTY: ITextTerminal = {
   getStrLn: QIO.pipeEnv(getStrLn0, {process, readLine: R}),
-  putStrLn: QIO.pipeEnv(putStrLn0, {console})
+  putStrLn: QIO.pipeEnv(putStrLn0, {console}),
 }
 
 /**
@@ -83,7 +83,7 @@ export const testTTY = (
         : log(question).and(QIO.never()),
     putStrLn: (...t: unknown[]) =>
       QIO.lift(() => void stdout.push(t.join(' '))),
-    stdout
+    stdout,
   }
 }
 

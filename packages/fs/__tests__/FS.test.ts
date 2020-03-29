@@ -11,8 +11,8 @@ describe('fs', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.readFile('./hello.txt').provide({
             fs: {
-              readFile: path => QIO.resolve(Buffer.from('DATA:' + path))
-            }
+              readFile: (path) => QIO.resolve(Buffer.from('DATA:' + path)),
+            },
           })
         )
         const expected = Buffer.from('DATA:./hello.txt')
@@ -26,8 +26,8 @@ describe('fs', () => {
         testRuntime().unsafeExecuteSync(
           FS.open('./hello.txt', '+w').provide({
             fs: {
-              open: fsOpen
-            }
+              open: fsOpen,
+            },
           })
         )
         fsOpen.should.be.called.with('./hello.txt', '+w')
@@ -37,8 +37,8 @@ describe('fs', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.open('./hello.txt', '+w').provide({
             fs: {
-              open: () => QIO.resolve(10)
-            }
+              open: () => QIO.resolve(10),
+            },
           })
         )
         const expected = 10
@@ -51,12 +51,12 @@ describe('fs', () => {
         const closeSpy = spy()
         testRuntime().unsafeExecuteSync(
           FS.open('./hello.txt', '+w')
-            .chain(_ => FS.close(_))
+            .chain((_) => FS.close(_))
             .provide({
               fs: {
                 close: QIO.encase(closeSpy),
-                open: () => QIO.resolve(10)
-              }
+                open: () => QIO.resolve(10),
+              },
             })
         )
 
@@ -66,12 +66,12 @@ describe('fs', () => {
       it('should fail on close()', () => {
         const actual = testRuntime().unsafeExecuteSync(
           FS.open('./hello.txt', '+w')
-            .chain(_ => FS.close(_))
+            .chain((_) => FS.close(_))
             .provide({
               fs: {
                 close: () => QIO.reject(new Error('INVALID_FILE')),
-                open: () => QIO.resolve(10)
-              }
+                open: () => QIO.resolve(10),
+              },
             })
         )
 
@@ -84,12 +84,12 @@ describe('fs', () => {
         const writeFile = spy()
         testRuntime().unsafeExecuteSync(
           FS.open('data.txt', 'w')
-            .chain(H => FS.writeFile(H, 'DATA'))
+            .chain((H) => FS.writeFile(H, 'DATA'))
             .provide({
               fs: {
                 open: () => QIO.resolve(10),
-                writeFile: QIO.encase(writeFile)
-              }
+                writeFile: QIO.encase(writeFile),
+              },
             })
         )
 

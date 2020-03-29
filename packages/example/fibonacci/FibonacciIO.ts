@@ -3,7 +3,7 @@
 import {defaultRuntime, FMap, QIO} from '@qio/core'
 
 const fib = (N: bigint) =>
-  FMap.of<bigint, bigint>().chain(cache => {
+  FMap.of<bigint, bigint>().chain((cache) => {
     const itar = cache.memoize(
       (n: bigint): QIO<bigint> => {
         if (n <= 2n) {

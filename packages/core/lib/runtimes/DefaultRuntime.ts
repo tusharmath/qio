@@ -20,7 +20,7 @@ export class DefaultRuntime extends FiberRuntime {
 
   public async unsafeExecutePromise<A, E>(io: QIO<A, E>): Promise<A> {
     return new Promise((res, rej) => {
-      this.unsafeExecute(io, exit => Exit.fold(exit)(undefined, res, rej))
+      this.unsafeExecute(io, (exit) => Exit.fold(exit)(undefined, res, rej))
     })
   }
 }

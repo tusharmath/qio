@@ -10,20 +10,20 @@ describe('http', () => {
         data: 'HELLO WORLD',
         headers: {},
         status: 200,
-        statusText: 'ok'
+        statusText: 'ok',
       }
       const config = {url: 'www.abc.com'}
       const actual = testRuntime().unsafeExecuteSync(
         request(config).provide({
           http: {
-            request: config0 =>
-              QIO.resolve<AxiosResponse>({...TEST_RESPONSE, config: config0})
-          }
+            request: (config0) =>
+              QIO.resolve<AxiosResponse>({...TEST_RESPONSE, config: config0}),
+          },
         })
       )
       const expected = {
         ...TEST_RESPONSE,
-        config
+        config,
       }
 
       assert.deepStrictEqual(actual, expected)

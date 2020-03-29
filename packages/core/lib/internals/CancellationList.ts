@@ -4,7 +4,7 @@
 import {
   DoublyLinkedList,
   LinkedListNode,
-  Option
+  Option,
 } from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
@@ -21,6 +21,10 @@ export class CancellationList implements ICancellable {
   private cancelled = false
   private readonly Q = DoublyLinkedList.of<ICancellable>()
 
+  public get isCancelled(): boolean {
+    return this.cancelled
+  }
+
   public cancel(): void {
     this.cancelled = true
     while (this.Q.length > 0) {
@@ -30,10 +34,6 @@ export class CancellationList implements ICancellable {
         node.value.cancel()
       }
     }
-  }
-
-  public get isCancelled(): boolean {
-    return this.cancelled
   }
 
   public push(cancellable: ICancellable): CancelId {

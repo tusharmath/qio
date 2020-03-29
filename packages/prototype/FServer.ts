@@ -11,16 +11,16 @@ interface IQIOServerOptions {
   port: number
 }
 class QIOServerBuilder {
-  public get serve(): QIO<never> {
-    return Managed.make(
-      QIO.runtime().encase(RTM => new QIOServer(RTM, this.options)),
-      server => server.close
-    ).use(QIO.never)
-  }
   public static of(): QIOServerBuilder {
     return new QIOServerBuilder({port: 0, mounted: {}})
   }
   private constructor(private readonly options: IQIOServerOptions) {}
+  public get serve(): QIO<never> {
+    return Managed.make(
+      QIO.runtime().encase((RTM) => new QIOServer(RTM, this.options)),
+      (server) => server.close
+    ).use(QIO.never)
+  }
 
   public bind(port: number): QIOServerBuilder {
     return new QIOServerBuilder({...this.options, port})
@@ -31,7 +31,7 @@ class QIOServerBuilder {
   ): QIOServerBuilder {
     return new QIOServerBuilder({
       ...this.options,
-      mounted: {...this.options.mounted, [path]: fn}
+      mounted: {...this.options.mounted, [path]: fn},
     })
   }
 }
@@ -44,6 +44,11 @@ class QIOServer {
   ) {
     this.server = http.createServer(this.onRequest).listen(this.options.port)
   }
+  public get close(): QIO<void> {
+    return QIO.uninterruptible<void, Error>((res, rej) => () =>
+      this.server.close((E) => (E !== undefined ? rej(E) : res()))
+    ).catch(Exit)
+  }
 
   private readonly onRequest = (
     req: http.IncomingMessage,
@@ -51,14 +56,9 @@ class QIOServer {
   ) => {
     if (req.url !== undefined && this.options.mounted.hasOwnProperty(req.url)) {
       this.RTM.unsafeExecute(
-        this.options.mounted[req.url](req).encase(chunk => res.end(chunk))
+        this.options.mounted[req.url](req).encase((chunk) => res.end(chunk))
       )
     }
-  }
-  public get close(): QIO<void> {
-    return QIO.uninterruptible<void, Error>((res, rej) => () =>
-      this.server.close(E => (E !== undefined ? rej(E) : res()))
-    ).catch(Exit)
   }
 }
 

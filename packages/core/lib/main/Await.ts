@@ -9,7 +9,7 @@ import {QIO} from './QIO'
 enum AwaitStatus {
   PENDING,
   STARTED,
-  COMPLETED
+  COMPLETED,
 }
 const AWAIT_ID = new IDGenerator()
 const D = (id: number, scope: string, ...t: unknown[]) =>
@@ -23,10 +23,22 @@ const D = (id: number, scope: string, ...t: unknown[]) =>
  * @typeparam A Success value
  */
 export class Await<A, E> {
+  public static of<A = never, E = never>(): QIO<Await<A, E>> {
+    return QIO.lift(() => {
+      const awt = new Await<A, E>()
+      D(awt.id, 'this.constructor()')
+
+      return awt
+    })
+  }
+  public readonly id = AWAIT_ID.create()
+  private flag = AwaitStatus.PENDING
+  private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
+  private result: Option<Either<E, A>> = Option.none()
   public get get(): QIO<A, E> {
     return QIO.tryM(() =>
       this.result
-        .map(S => S.reduce<QIO<A, E>>(QIO.reject, XX => QIO.resolve(XX)))
+        .map((S) => S.reduce<QIO<A, E>>(QIO.reject, (XX) => QIO.resolve(XX)))
         .getOrElse(this.wait)
     )
   }
@@ -44,22 +56,10 @@ export class Await<A, E> {
           this.Q.remove(id)
           D(this.id, 'remove wait')
           D(this.id, 'this.Q.length', this.Q.length)
-        }
+        },
       }
     })
   }
-  public static of<A = never, E = never>(): QIO<Await<A, E>> {
-    return QIO.lift(() => {
-      const awt = new Await<A, E>()
-      D(awt.id, 'this.constructor()')
-
-      return awt
-    })
-  }
-  public readonly id = AWAIT_ID.create()
-  private flag = AwaitStatus.PENDING
-  private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
-  private result: Option<Either<E, A>> = Option.none()
   public set(io: QIO<A, E>): QIO<boolean> {
     return QIO.tryM(() => {
       D(this.id, 'set', 'status', AwaitStatus[this.flag])
@@ -70,7 +70,7 @@ export class Await<A, E> {
       this.flag = AwaitStatus.STARTED
       D(this.id, 'set', 'status', AwaitStatus[this.flag])
 
-      return io.asEither.encase(either => {
+      return io.asEither.encase((either) => {
         this.flag = AwaitStatus.COMPLETED
         D(this.id, 'set', 'status', AwaitStatus[this.flag])
         this.result = Option.some(either)

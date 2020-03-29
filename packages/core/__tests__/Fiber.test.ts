@@ -172,7 +172,7 @@ describe('FiberContext', () => {
         const actual = runtime.unsafeExecuteSync(
           QIO.resolve(0)
             .fork()
-            .chain(_ => _.await)
+            .chain((_) => _.await)
         )
         const expected = Exit.succeed(0)
         assert.deepStrictEqual(actual, expected)
@@ -186,9 +186,9 @@ describe('FiberContext', () => {
         FiberContext.unsafeExecuteWith(
           QIO.timeout(0, 1000)
             .fork()
-            .chain(F => F.await.chain(_ => snapshot.mark(_)))
+            .chain((F) => F.await.chain((_) => snapshot.mark(_)))
             .fork()
-            .chain(F => F.abort.delay(500)),
+            .chain((F) => F.abort.delay(500)),
           runtime
         )
 
@@ -231,7 +231,7 @@ describe('FiberContext', () => {
         FiberConfig.MAX_INSTRUCTION_COUNT(0)
       )
       FiberContext.unsafeExecuteWith(
-        QIO.resolve('A').chain(_ => snapshot.mark(_)),
+        QIO.resolve('A').chain((_) => snapshot.mark(_)),
         runtime
       )
       runtime.scheduler.run()
@@ -247,7 +247,7 @@ describe('FiberContext', () => {
         FiberConfig.MAX_INSTRUCTION_COUNT(-100)
       )
       FiberContext.unsafeExecuteWith(
-        QIO.resolve('A').chain(_ => snapshot.mark(_)),
+        QIO.resolve('A').chain((_) => snapshot.mark(_)),
         runtime
       )
       runtime.scheduler.run()

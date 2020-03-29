@@ -20,7 +20,7 @@ describe('Program', () => {
   const mockMath = (...a: number[]) => ({
     random(): number {
       return a.shift() as number
-    }
+    },
   })
 
   it('should greet', () => {
@@ -35,7 +35,7 @@ describe('Program', () => {
   it('should ask user for a number', () => {
     const math = mockMath()
     const tty = testTTY({
-      'Enter your name: ': input('John')
+      'Enter your name: ': input('John'),
     })
     const runtime = testRuntime()
     runtime.unsafeExecuteSync(program.provide({math, tty}))
@@ -44,7 +44,7 @@ describe('Program', () => {
       'Greetings!',
       'Enter your name: John',
       'Welcome to the world of functional programming, John!',
-      'Enter a number between 1 & 6: '
+      'Enter a number between 1 & 6: ',
     ])
   })
 
@@ -52,7 +52,7 @@ describe('Program', () => {
     const math = mockMath(0.1, 0.5, 0.7)
     const tty = testTTY({
       'Enter a number between 1 & 6: ': input('1'),
-      'Enter your name: ': input('John')
+      'Enter your name: ': input('John'),
     })
     const runtime = testRuntime()
     runtime.unsafeExecuteSync(program.provide({math, tty}))
@@ -64,7 +64,7 @@ describe('Program', () => {
       'Enter a number between 1 & 6: 1',
       'Sorry, the correct answer is 2',
       'Press ⏎  to continue (or will exit in 3sec): ',
-      '\nGood bye!'
+      '\nGood bye!',
     ])
   })
 
@@ -72,7 +72,7 @@ describe('Program', () => {
     const math = mockMath(0.1, 0.5, 0.7)
     const tty = testTTY({
       'Enter a number between 1 & 6: ': input('2'),
-      'Enter your name: ': input('John')
+      'Enter your name: ': input('John'),
     })
     const runtime = testRuntime()
     runtime.unsafeExecuteSync(program.provide({math, tty}))
@@ -84,7 +84,7 @@ describe('Program', () => {
       'Enter a number between 1 & 6: 2',
       'You guessed it right!',
       'Press ⏎  to continue (or will exit in 3sec): ',
-      '\nGood bye!'
+      '\nGood bye!',
     ])
   })
 
@@ -93,7 +93,7 @@ describe('Program', () => {
     const tty = testTTY({
       'Enter a number between 1 & 6: ': input('2', '3'),
       'Enter your name: ': input('John'),
-      'Press ⏎  to continue (or will exit in 3sec): ': input('', '')
+      'Press ⏎  to continue (or will exit in 3sec): ': input('', ''),
     })
     const runtime = testRuntime()
     runtime.unsafeExecuteSync(program.provide({math, tty}))
@@ -108,7 +108,7 @@ describe('Program', () => {
       'Enter a number between 1 & 6: 3',
       'Sorry, the correct answer is 2',
       'Press ⏎  to continue (or will exit in 3sec): ',
-      'Enter a number between 1 & 6: '
+      'Enter a number between 1 & 6: ',
     ])
   })
 
@@ -116,7 +116,7 @@ describe('Program', () => {
     context('when newline is provided', () => {
       it('should return true', () => {
         const tty = testTTY({
-          'Press ⏎  to continue (or will exit in 3sec): ': input('')
+          'Press ⏎  to continue (or will exit in 3sec): ': input(''),
         })
         const runtime = testRuntime()
         const actual = runtime.unsafeExecuteSync(canContinue.provide({tty}))
@@ -139,7 +139,7 @@ describe('Program', () => {
 
         assert.deepStrictEqual(tty.stdout, [
           'Press ⏎  to continue (or will exit in 3sec): ',
-          '\nGood bye!'
+          '\nGood bye!',
         ])
       })
     })

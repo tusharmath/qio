@@ -11,6 +11,6 @@ export const Resource = (initialCount: number = 0) => {
     },
     get isReleased(): boolean {
       return i === 0
-    }
+    },
   }
 }

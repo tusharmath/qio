@@ -53,7 +53,7 @@ const createChunks = <A>(arr: A[], chunkCount: number): A[][] => {
 export abstract class Chunk<A> implements Iterable<A> {
   public static createN<A>(arr: A[], n: number): Chunk<A> {
     return createChunks(arr, n)
-      .map(_ => Chunk.from(_))
+      .map((_) => Chunk.from(_))
       .reduce((a, c) => a.concat(c), Chunk.empty())
   }
   public static empty<A>(): Chunk<A> {
@@ -92,15 +92,15 @@ export abstract class Chunk<A> implements Iterable<A> {
 }
 
 class Concat<A> extends Chunk<A> {
-  public get asArray(): A[] {
-    return this.L.asArray.concat(this.R.asArray)
-  }
   public readonly length = this.L.length + this.R.length
   public constructor(
     private readonly L: Chunk<A>,
     private readonly R: Chunk<A>
   ) {
     super()
+  }
+  public get asArray(): A[] {
+    return this.L.asArray.concat(this.R.asArray)
   }
   public *[Symbol.iterator](): Iterator<A> {
     for (const i of this.L) {
@@ -123,12 +123,12 @@ class Concat<A> extends Chunk<A> {
 }
 
 class ArrayC<A> extends Chunk<A> {
-  public get asArray(): A[] {
-    return this.array
-  }
   public readonly length = this.array.length
   public constructor(private readonly array: A[]) {
     super()
+  }
+  public get asArray(): A[] {
+    return this.array
   }
   public [Symbol.iterator](): Iterator<A> {
     return this.array[Symbol.iterator]()
@@ -171,13 +171,13 @@ class Empty extends Chunk<never> {
 }
 
 class Value<A> extends Chunk<A> {
-  public get asArray(): A[] {
-    return [this.value]
-  }
 
   public length = 1
   public constructor(private readonly value: A) {
     super()
+  }
+  public get asArray(): A[] {
+    return [this.value]
   }
   public *[Symbol.iterator](): Iterator<A> {
     yield this.value

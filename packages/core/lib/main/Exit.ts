@@ -2,7 +2,7 @@
 export enum FiberExitTag {
   SUCCESS,
   FAILURE,
-  CANCELLED
+  CANCELLED,
 }
 
 class FiberCancelled {
@@ -39,5 +39,5 @@ export const Exit = {
         return AA(exit.value)
     }
   },
-  succeed: <A>(value: A) => new FiberSuccess<A>(value)
+  succeed: <A>(value: A) => new FiberSuccess<A>(value),
 }

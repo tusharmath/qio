@@ -10,5 +10,5 @@ import {RunSuite} from '../internals/RunSuite'
 RunSuite('Constant', {
   bluebird: () => Promise.resolve(10),
   fluture: () => Fluture.resolve(10),
-  qio: () => QIO.resolve(10)
+  qio: () => QIO.resolve(10),
 })

@@ -26,40 +26,6 @@ const D = (scope: string, f: unknown, ...t: unknown[]) =>
  */
 export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
-   * Safely converts an interuptable IO to non-interuptable one.
-   */
-  public get asEither(): QIO<Either<E1, A1>, never, R1> {
-    return this.map(Either.right).catch(_ => QIO.resolve(Either.left(_)))
-  }
-  /**
-   * @ignore
-   */
-  public get asInstruction(): Instruction {
-    return this as Instruction
-  }
-
-  /**
-   * Purely access the environment provided to the program.
-   */
-  public get env(): QIO<R1, never, R1> {
-    return QIO.access(Id)
-  }
-
-  /**
-   * Memorizes the result and executes the IO only once
-   */
-  public get once(): QIO<QIO<A1, E1>, never, R1> {
-    return this.env.chain(env =>
-      Await.of<A1, E1>().map(AWT => AWT.set(this.provide(env)).and(AWT.get))
-    )
-  }
-  /**
-   * Ignores the result of the c instance
-   */
-  public get void(): QIO<void, E1, R1> {
-    return this.const(undefined)
-  }
-  /**
    * Creates a new c instance with the provided environment
    */
   public static access<R, A>(cb: (R: R) => A): QIO<A, never, R> {
@@ -99,7 +65,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     qio: QIO<(a: A1) => A2, E1, R1>,
     input: A1
   ): QIO<A2, E1, R1> {
-    return qio.map(ab => ab(input))
+    return qio.map((ab) => ab(input))
   }
   /**
    * Calls the provided Effect-full function with the provided arguments.
@@ -167,7 +133,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     cb: (...t: T) => Promise<A>
   ): (...t: T) => QIO<A, Error> {
     return (...t) =>
-      QIO.runtime().chain(RTM =>
+      QIO.runtime().chain((RTM) =>
         QIO.interruptible((res, rej) =>
           RTM.scheduler.asap(() => {
             void cb(...t)
@@ -305,7 +271,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
           QIO.lift<List<A1>, E1>(() => List.empty<A1>())
         )
       )
-      .map(_ => _.asArray.reverse())
+      .map((_) => _.asArray.reverse())
   }
 
   /**
@@ -319,8 +285,8 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       QIO.if(
         list.length === 0,
         QIO.resolve([]),
-        QIO.par(list.slice(0, N)).chain(l1 =>
-          itar(list.slice(N, list.length)).map(l2 => l1.concat(l2))
+        QIO.par(list.slice(0, N)).chain((l1) =>
+          itar(list.slice(N, list.length)).map((l2) => l1.concat(l2))
         )
       )
 
@@ -378,18 +344,19 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A1[], E1, R1> {
     return ios
       .reduce(
-        (fList, f) => fList.chain(list => f.map(value => list.prepend(value))),
+        (fList, f) =>
+          fList.chain((list) => f.map((value) => list.prepend(value))),
         QIO.lift<List<A1>, E1>(() => List.empty<A1>()).addEnv<R1>()
       )
-      .map(_ => _.asArray)
+      .map((_) => _.asArray)
   }
 
   /**
    * Resolves with the provided value after the given time
    */
   public static timeout<A>(value: A, duration: number): QIO<A> {
-    return QIO.runtime().chain(RTM =>
-      QIO.interruptible(res => RTM.scheduler.delay(res, duration, value))
+    return QIO.runtime().chain((RTM) =>
+      QIO.interruptible((res) => RTM.scheduler.delay(res, duration, value))
     )
   }
 
@@ -434,7 +401,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static uninterruptible<A1 = never, E1 = never>(
     fn: (res: CB<A1>, rej: CB<E1>) => unknown
   ): QIO<A1, E1> {
-    return QIO.runtime().chain(RTM =>
+    return QIO.runtime().chain((RTM) =>
       QIO.interruptible<A1, E1>((res, rej) =>
         RTM.scheduler.asap(() => {
           try {
@@ -477,6 +444,40 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
      */
     public readonly i1?: unknown
   ) {}
+  /**
+   * Safely converts an interuptable IO to non-interuptable one.
+   */
+  public get asEither(): QIO<Either<E1, A1>, never, R1> {
+    return this.map(Either.right).catch((_) => QIO.resolve(Either.left(_)))
+  }
+  /**
+   * @ignore
+   */
+  public get asInstruction(): Instruction {
+    return this as Instruction
+  }
+
+  /**
+   * Purely access the environment provided to the program.
+   */
+  public get env(): QIO<R1, never, R1> {
+    return QIO.access(Id)
+  }
+
+  /**
+   * Memorizes the result and executes the IO only once
+   */
+  public get once(): QIO<QIO<A1, E1>, never, R1> {
+    return this.env.chain((env) =>
+      Await.of<A1, E1>().map((AWT) => AWT.set(this.provide(env)).and(AWT.get))
+    )
+  }
+  /**
+   * Ignores the result of the c instance
+   */
+  public get void(): QIO<void, E1, R1> {
+    return this.const(undefined)
+  }
 
   /**
    * Gives access to additional env
@@ -497,11 +498,11 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): <A3, E3, R3>(
     usage: (A1: A1) => QIO<A3, E3, R3>
   ) => QIO<A3, E1 | E2 | E3, R1 & R2 & R3> {
-    return usage =>
-      this.chain(a1 =>
+    return (usage) =>
+      this.chain((a1) =>
         usage(a1)
           .fork()
-          .chain(F => F.await.and(release(a1)).chain(_ => F.join))
+          .chain((F) => F.await.and(release(a1)).chain((_) => F.join))
       )
   }
 
@@ -545,7 +546,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Like [[QIO.tap]] but takes in an IO instead of a callback.
    */
   public do<E2, R2>(io: QIO<unknown, E2, R2>): QIO<A1, E1 | E2, R1 & R2> {
-    return this.chain(_ => io.const(_))
+    return this.chain((_) => io.const(_))
   }
 
   /**
@@ -580,7 +581,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Creates a separate [[Fiber]] with a different [[IRuntime]].
    */
   public forkWith(runtime: IRuntime): QIO<Fiber<A1, E1>, never, R1> {
-    return QIO.env<R1>().chain(ENV => QIO.fork(this.provide(ENV), runtime))
+    return QIO.env<R1>().chain((ENV) => QIO.fork(this.provide(ENV), runtime))
   }
   /**
    * Applies transformation on the success value of the c.
@@ -606,7 +607,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Provides the current instance of c the required env that is accessed effect-fully.
    */
   public provideM<E2, R2>(io: QIO<R1, E2, R2>): QIO<A1, E1 | E2, R2> {
-    return io.chain(ENV => this.provide(ENV))
+    return io.chain((ENV) => this.provide(ENV))
   }
   /**
    * Provide only some of the environment
@@ -618,7 +619,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Provide only some of the environment using an effect
    */
   public provideSomeM<E2, R0>(qio: QIO<R1, E2, R0>): QIO<A1, E1 | E2, R0> {
-    return qio.chain(_ => this.provide(_))
+    return qio.chain((_) => this.provide(_))
   }
   /**
    * Runs two IOs in parallel in returns the result of the first one.
@@ -630,7 +631,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       that,
       (E, F) => F.abort.const(E),
       (E, F) => F.abort.const(E)
-    ).chain(E => QIO.fromExit<A1 | A2, E1 | E2>(E))
+    ).chain((E) => QIO.fromExit<A1 | A2, E1 | E2>(E))
   }
 
   /**
@@ -641,26 +642,23 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     cb1: (exit: Exit<A1, E1>, fiber: Fiber<A2, E2>) => QIO<A3, E3>,
     cb2: (exit: Exit<A2, E2>, fiber: Fiber<A1, E1>) => QIO<A4, E4>
   ): QIO<A3 | A4, E3 | E4, R1 & R2> {
-    return Await.of<A3 | A4, E3 | E4>().chain(done => {
+    return Await.of<A3 | A4, E3 | E4>().chain((done) => {
       D('raceWith', 'await id:', done.id)
 
       return this.fork().zipWithM(that.fork(), (L, R) => {
         D('raceWith', 'fiber L.id', L.id, '& fiber R.id', R.id)
-        const resume1 = L.await.chain(exit => {
+        const resume1 = L.await.chain((exit) => {
           D('raceWith', 'L cb')
 
           return done.set(cb1(exit, R)).const(true)
         })
-        const resume2 = R.await.chain(exit => {
+        const resume2 = R.await.chain((exit) => {
           D('raceWith', 'R cb')
 
           return done.set(cb2(exit, L)).const(true)
         })
 
-        return resume1
-          .fork()
-          .and(resume2.fork())
-          .and(done.get)
+        return resume1.fork().and(resume2.fork()).and(done.get)
       })
     })
   }
@@ -687,7 +685,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public tapM<E2, R2>(
     io: (A1: A1) => QIO<unknown, E2, R2>
   ): QIO<A1, E1 | E2, R1 & R2> {
-    return this.chain(_ => io(_).const(_))
+    return this.chain((_) => io(_).const(_))
   }
 
   /**
@@ -705,7 +703,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     that: QIO<A2, E2, R2>,
     c: (a1: A1, a2: A2) => C
   ): QIO<C, E1 | E2, R1 & R2> {
-    return this.chain(a1 => that.map(a2 => c(a1, a2)))
+    return this.chain((a1) => that.map((a2) => c(a1, a2)))
   }
   /**
    * Combines the result of two cs and uses a combine function that returns a c
@@ -728,14 +726,14 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       (E, F) =>
         Exit.fold(E)<QIO<C, E1 | E2>>(
           QIO.never(),
-          value => F.join.map(_ => c(value, _)),
-          cause => F.abort.and(QIO.reject(cause))
+          (value) => F.join.map((_) => c(value, _)),
+          (cause) => F.abort.and(QIO.reject(cause))
         ),
       (E, F) =>
         Exit.fold(E)<QIO<C, E1 | E2>>(
           QIO.never(),
-          value => F.join.map(_ => c(_, value)),
-          cause => F.abort.and(QIO.reject(cause))
+          (value) => F.join.map((_) => c(_, value)),
+          (cause) => F.abort.and(QIO.reject(cause))
         )
     )
   }

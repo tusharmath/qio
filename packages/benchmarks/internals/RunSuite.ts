@@ -3,7 +3,7 @@ import * as T from '@matechs/effect'
 import {defaultRuntime, QIO} from '@qio/core'
 import {noop} from '@qio/prelude'
 import {Suite} from 'benchmark'
-import {FutureInstance} from 'fluture'
+import {fork, FutureInstance} from 'fluture'
 
 import {PrintLn} from './PrintLn'
 
@@ -46,18 +46,18 @@ export const RunSuite = (
     )
     .add(
       'Fluture',
-      (cb: IDefer) => test.fluture().fork(noop, () => cb.resolve()),
+      (cb: IDefer) => fork(noop)(() => cb.resolve())(test.fluture()),
       {defer: true}
     )
     .add('bluebird', (cb: IDefer) => test.bluebird().then(() => cb.resolve()), {
-      defer: true
+      defer: true,
     })
 
     .on('cycle', (event: Event) => {
       PrintLn(String(event.target))
     })
 
-    .on('complete', function(this: Suite): void {
+    .on('complete', function (this: Suite): void {
       PrintLn(
         'Fastest is ' +
           this.filter('fastest')

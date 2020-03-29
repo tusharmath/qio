@@ -32,7 +32,7 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
   ): Managed<A1, E1 | E2, R1 & R2> {
     return Managed.of<A1, E1 | E2, R1 & R2>(
       acquire
-        .map(a1 => Reservation.of(QIO.resolve(a1).addEnv<R1>(), release(a1)))
+        .map((a1) => Reservation.of(QIO.resolve(a1).addEnv<R1>(), release(a1)))
         .addEnv<R2>()
     )
   }
@@ -52,7 +52,7 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
           a.zipWith(b, (x, y) => x.prepend(y)),
         Managed.make(QIO.resolve(List.empty<A1>()).addEnv<R1>(), QIO.void)
       )
-      .map(_ => _.asArray.reverse())
+      .map((_) => _.asArray.reverse())
   }
 
   private constructor(
@@ -63,9 +63,9 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     fn: (a: A1) => Managed<A2, E2, R2>
   ): Managed<A2, E1 | E2, R1 & R2> {
     return Managed.of(
-      this.reservation.chain(r1 =>
-        r1.acquire.chain(a1 =>
-          fn(a1).reservation.map(r2 => {
+      this.reservation.chain((r1) =>
+        r1.acquire.chain((a1) =>
+          fn(a1).reservation.map((r2) => {
             const acquire = r2.acquire
             const release = r2.release.and(r1.release)
 
@@ -78,14 +78,16 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
 
   public map<A2>(fn: (a: A1) => A2): Managed<A2, E1, R1> {
     return Managed.of(
-      this.reservation.map(r1 => Reservation.of(r1.acquire.map(fn), r1.release))
+      this.reservation.map((r1) =>
+        Reservation.of(r1.acquire.map(fn), r1.release)
+      )
     )
   }
 
   public use<A2, E2, R2>(
     fn: (a: A1) => QIO<A2, E2, R2>
   ): QIO<A2, E1 | E2, R1 & R2> {
-    return this.reservation.chain(R => R.acquire.bracket_(R.release)(fn))
+    return this.reservation.chain((R) => R.acquire.bracket_(R.release)(fn))
   }
 
   public use_<A2, E2, R2>(io: QIO<A2, E2, R2>): QIO<A2, E1 | E2, R1 & R2> {
@@ -96,6 +98,6 @@ export class Managed<A1 = unknown, E1 = never, R1 = unknown> {
     that: Managed<A2, E2, R2>,
     fn: (a1: A1, a2: A2) => X
   ): Managed<X, E1 | E2, R1 & R2> {
-    return this.chain(a1 => that.map(a2 => fn(a1, a2)))
+    return this.chain((a1) => that.map((a2) => fn(a1, a2)))
   }
 }

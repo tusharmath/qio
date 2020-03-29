@@ -54,7 +54,7 @@ suite
     PrintLn(String(event.target))
   })
 
-  .on('complete', function(this: Suite): void {
+  .on('complete', function (this: Suite): void {
     PrintLn(
       'Fastest is ' +
         this.filter('fastest')

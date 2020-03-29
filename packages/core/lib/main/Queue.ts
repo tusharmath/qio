@@ -27,6 +27,23 @@ const consume = <T>(T: DoublyLinkedList<T>): T[] => {
  */
 export class Queue<A = never> {
   /**
+   * Creates a new bounded Queue
+   */
+  public static bounded<A>(capacity: number): QIO<Queue<A>> {
+    return QIO.lift(() => new Queue(capacity))
+  }
+  /**
+   * Creates a queue which is theoretically unbounded.
+   */
+  public static unbounded<A>(): QIO<Queue<A>> {
+    return Queue.bounded(Number.MAX_SAFE_INTEGER)
+  }
+  private readonly id = QUEUE_ID.create()
+  private readonly O = DoublyLinkedList.of<Await<boolean, never>>()
+  private readonly Q = DoublyLinkedList.of<A>()
+  private readonly T = DoublyLinkedList.of<Await<A, never>>()
+  private constructor(public readonly capacity: number) {}
+  /**
    * Returns the Queue as an array
    */
   public get asArray(): QIO<A[]> {
@@ -52,7 +69,7 @@ export class Queue<A = never> {
       }
 
       return Await.of<A>().chain(
-        QIO.encaseM(awt => {
+        QIO.encaseM((awt) => {
           this.T.add(awt)
 
           return awt.get
@@ -62,29 +79,19 @@ export class Queue<A = never> {
   }
 
   public get waitForSpace(): QIO<boolean> {
-    return Await.of<boolean>().encaseM(AWT => {
+    return Await.of<boolean>().encaseM((AWT) => {
       this.O.add(AWT)
 
       return AWT.get
     })
   }
-  /**
-   * Creates a new bounded Queue
-   */
-  public static bounded<A>(capacity: number): QIO<Queue<A>> {
-    return QIO.lift(() => new Queue(capacity))
+  private get stat(): {pOffers: number; pTakes: number; queue: number} {
+    return {
+      pOffers: this.O.length,
+      pTakes: this.T.length,
+      queue: this.Q.length,
+    }
   }
-  /**
-   * Creates a queue which is theoretically unbounded.
-   */
-  public static unbounded<A>(): QIO<Queue<A>> {
-    return Queue.bounded(Number.MAX_SAFE_INTEGER)
-  }
-  private readonly id = QUEUE_ID.create()
-  private readonly O = DoublyLinkedList.of<Await<boolean, never>>()
-  private readonly Q = DoublyLinkedList.of<A>()
-  private readonly T = DoublyLinkedList.of<Await<A, never>>()
-  private constructor(public readonly capacity: number) {}
   /**
    * Inserts an item into the queue
    */
@@ -107,7 +114,7 @@ export class Queue<A = never> {
    * Adds all the provided items into the queue
    */
   public offerAll(...a: A[]): QIO<void> {
-    return QIO.seq(a.map(_ => this.offer(_))).void
+    return QIO.seq(a.map((_) => this.offer(_))).void
   }
   /**
    * Resolves after `n` items are available in the queue.
@@ -117,29 +124,22 @@ export class Queue<A = never> {
       QIO.if0()(
         () => i === n,
         () => QIO.resolve(list),
-        () => this.take.chain(_ => itar(i + 1, list.prepend(_)))
+        () => this.take.chain((_) => itar(i + 1, list.prepend(_)))
       )
 
-    return itar(0, List.empty<A>()).map(_ => _.asArray.reverse())
+    return itar(0, List.empty<A>()).map((_) => _.asArray.reverse())
   }
   private resolvePendingOffers(): QIO<void> {
-    return QIO.seq(consume(this.O).map(_ => _.setTo(true))).void
+    return QIO.seq(consume(this.O).map((_) => _.setTo(true))).void
   }
   private resolvePendingTakes(): QIO<void> {
     if (this.T.length > 0) {
       const aa = this.Q.shift()
       if (Option.isSome(aa)) {
-        return QIO.seq(consume(this.T).map(_ => _.setTo(aa.value))).void
+        return QIO.seq(consume(this.T).map((_) => _.setTo(aa.value))).void
       }
     }
 
     return QIO.void()
-  }
-  private get stat(): {pOffers: number; pTakes: number; queue: number} {
-    return {
-      pOffers: this.O.length,
-      pTakes: this.T.length,
-      queue: this.Q.length
-    }
   }
 }

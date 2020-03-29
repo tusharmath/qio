@@ -5,7 +5,7 @@
  */
 export enum YieldStrategyTag {
   INS_COUNT,
-  DURATION
+  DURATION,
 }
 
 export interface IAsapM {
@@ -29,5 +29,5 @@ export const FiberConfig = {
   },
   MAX_INSTRUCTION_COUNT(maxInstructionCount?: number): IAsapM {
     return {tag: YieldStrategyTag.INS_COUNT, maxInstructionCount}
-  }
+  },
 }

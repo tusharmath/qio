@@ -29,23 +29,6 @@ const D = (scope: string, f: unknown, ...t: unknown[]) =>
  */
 export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   /**
-   * Collects all the values from a stream and returns an Array of those values.
-   */
-  public get asArray(): QIO<A1[], E1, R1> {
-    return this.foldLeft(List.empty<A1>(), (S, A) => S.prepend(A)).map(
-      _ => _.reverse.asArray
-    )
-  }
-  public get drain(): QIO<void, E1, R1> {
-    return this.fold(true, T, FTrueCb).void
-  }
-  /**
-   * Adds an index to each value emitted by the current stream.
-   */
-  public get zipWithIndex(): QStream<{0: A1; 1: number}, E1, R1> {
-    return this.mapAcc(0, (s, a) => ({0: s + 1, 1: {1: s, 0: a}}))
-  }
-  /**
    * Creates a stream that constantly emits the provided value.
    */
   public static const<A1>(a: A1): QStream<A1> {
@@ -67,7 +50,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
         const itar = (s: S, i: number): QIO<S, E, R> =>
           QIO.if0()(
             () => cont(s) && i < t.length,
-            () => next(s, t[i]).chain(_ => itar(_, i + 1)),
+            () => next(s, t[i]).chain((_) => itar(_, i + 1)),
             () => QIO.resolve(s)
           )
 
@@ -81,7 +64,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     return new QStream((state, cont, next) =>
       QIO.if0()(
         () => cont(state),
-        () => io.chain(a => next(state, a)),
+        () => io.chain((a) => next(state, a)),
         () => QIO.resolve(state)
       )
     )
@@ -129,7 +112,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
         const itar = (s: S): QIO<S, E, R> =>
           QIO.if0()(
             () => cont(s),
-            () => Q.take.chain(a => next(s, a).chain(itar)),
+            () => Q.take.chain((a) => next(s, a).chain(itar)),
             () => QIO.resolve(s)
           )
 
@@ -165,7 +148,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
         const itar = (s: S): QIO<S, E1 | E, R1 & R> =>
           QIO.if0()(
             () => cont(s),
-            () => io.chain(a => next(s, a)).chain(itar),
+            () => io.chain((a) => next(s, a)).chain(itar),
             () => QIO.resolve(s)
           )
 
@@ -197,7 +180,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
 
               return c3
             },
-            () => next(s, i).chain(ss => itar(ss, i + 1)),
+            () => next(s, i).chain((ss) => itar(ss, i + 1)),
             () => {
               D('range', 'exit', s)
 
@@ -223,6 +206,23 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     ) => QIO<A2, E1 | E2, R1 & R2>
   ) {}
   /**
+   * Collects all the values from a stream and returns an Array of those values.
+   */
+  public get asArray(): QIO<A1[], E1, R1> {
+    return this.foldLeft(List.empty<A1>(), (S, A) => S.prepend(A)).map(
+      (_) => _.reverse.asArray
+    )
+  }
+  public get drain(): QIO<void, E1, R1> {
+    return this.fold(true, T, FTrueCb).void
+  }
+  /**
+   * Adds an index to each value emitted by the current stream.
+   */
+  public get zipWithIndex(): QStream<{0: A1; 1: number}, E1, R1> {
+    return this.mapAcc(0, (s, a) => ({0: s + 1, 1: {1: s, 0: a}}))
+  }
+  /**
    * Flattens the inner stream produced by the each value of the provided stream
    */
   public chain<A2, E2, R2>(
@@ -237,7 +237,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
    * Converts a stream to a constant stream
    */
   public const<A2>(a: A2): QStream<A2, E1, R1> {
-    return this.map(_ => a)
+    return this.map((_) => a)
   }
   /**
    * Creates a new streams that emits values, satisfied by the provided filter.
@@ -272,7 +272,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A2, E1 | E2, R1 & R2> {
     return this.fold(
       {state, canContinue: true},
-      s => {
+      (s) => {
         const c1 = cont(s.state)
         const c2 = s.canContinue
         const c3 = c1 && c2
@@ -283,14 +283,14 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
         return c3
       },
       (s, a) =>
-        next(s.state, a).chain(nState =>
-          awt.isSet.map(isSet => {
+        next(s.state, a).chain((nState) =>
+          awt.isSet.map((isSet) => {
             D('foldUntil', 'await.isSet', isSet)
 
             return {state: nState, canContinue: !isSet}
           })
         )
-    ).map(_ => _.state)
+    ).map((_) => _.state)
   }
   /**
    * Performs the given effect-full function for each value of the stream
@@ -298,7 +298,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
   public forEach<A2, E2, R2>(
     f: (a: A1) => QIO<A2, E2, R2>
   ): QIO<boolean, E1 | E2, R1 & R2> {
-    return this.forEachWhile(a => f(a).const(true))
+    return this.forEachWhile((a) => f(a).const(true))
   }
   /**
    * Keeps consuming the stream until the effect-full function returns a false.
@@ -342,7 +342,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
    * Holds each value for the given duration amount.
    */
   public holdFor(duration: number): QStream<A1, E1, R1> {
-    return this.mapM(_ => QIO.timeout(_, duration))
+    return this.mapM((_) => QIO.timeout(_, duration))
   }
 
   /**
@@ -375,12 +375,12 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     return new QStream((state, cont, next) =>
       this.fold(
         {0: acc, 1: state},
-        s => cont(s[1]),
+        (s) => cont(s[1]),
         (s, a) =>
           fn(s[0], a).chain(({0: ss, 1: a3}) =>
-            next(s[1], a3).map(_ => ({1: _, 0: ss}))
+            next(s[1], a3).map((_) => ({1: _, 0: ss}))
           )
-      ).map(_ => _[1])
+      ).map((_) => _[1])
     )
   }
 
@@ -391,7 +391,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     f: (a: A1) => QIO<A2, E2, R2>
   ): QStream<A2, E1 | E2, R1 & R2> {
     return new QStream((state, cont, next) =>
-      this.fold(state, cont, (s1, a1) => f(a1).chain(a2 => next(s1, a2)))
+      this.fold(state, cont, (s1, a1) => f(a1).chain((a2) => next(s1, a2)))
     )
   }
 
@@ -410,13 +410,13 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
           const itar = (SS: S): QIO<S, E | E1, R & R1> =>
             QIO.if0()(
               () => cont(SS),
-              () => Q.take.chain(a => next(SS, a).chain(itar)),
+              () => Q.take.chain((a) => next(SS, a).chain(itar)),
               () => canContinue.set(false).and(QIO.resolve(SS))
             )
 
           return itar(state)
             .par(this.forEachWhile(offer).par(that.forEachWhile(offer)))
-            .map(_ => _[0])
+            .map((_) => _[0])
         })
     )
   }
@@ -445,7 +445,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     acc: A3,
     fn: (s: A3, a: A1) => QIO<A3, E3, R3>
   ): QStream<A3, E1 | E3, R1 & R3> {
-    return this.mapAccM(acc, (s, a) => fn(s, a).map(ss => ({0: ss, 1: ss})))
+    return this.mapAccM(acc, (s, a) => fn(s, a).map((ss) => ({0: ss, 1: ss})))
   }
   /**
    * Emits the first N values skipping the rest.
@@ -454,9 +454,10 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
     return new QStream((state, cont, next) =>
       this.fold(
         {count: 0, state},
-        s => cont(s.state) && s.count < count,
-        (s, a) => next(s.state, a).map(s2 => ({count: s.count + 1, state: s2}))
-      ).map(_ => _.state)
+        (s) => cont(s.state) && s.count < count,
+        (s, a) =>
+          next(s.state, a).map((s2) => ({count: s.count + 1, state: s2}))
+      ).map((_) => _.state)
     )
   }
 
@@ -471,13 +472,15 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
       (Q, canContinue) => {
         const out = {Q, canContinue}
 
-        return this.forEachWhile(_ => Q.offer(_).and(canContinue.check))
+        return this.forEachWhile((_) => Q.offer(_).and(canContinue.check))
           .fork()
           .const(out)
       }
     )
 
-    return Managed.make(acquire, _ => _.canContinue.set(false)).map(_ => _.Q)
+    return Managed.make(acquire, (_) => _.canContinue.set(false)).map(
+      (_) => _.Q
+    )
   }
 
   /**
@@ -503,7 +506,7 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
               () =>
                 Q1.take
                   .zipWith(Q2.take, fn)
-                  .chain(a3 => next(s, a3))
+                  .chain((a3) => next(s, a3))
                   .chain(itar),
               () => QIO.resolve(s)
             )

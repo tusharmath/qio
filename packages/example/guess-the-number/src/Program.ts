@@ -23,7 +23,7 @@ const randomNumber = QIO.access((env: IMath) => env.math.random())
  * Returns a random number within the provide range.
  */
 const randomInt = (min: number, max: number) =>
-  randomNumber.map(_ => Math.round(_ * (max - min) + min))
+  randomNumber.map((_) => Math.round(_ * (max - min) + min))
 
 /**
  * Keeps taking a numeric input from the player.
@@ -31,16 +31,16 @@ const randomInt = (min: number, max: number) =>
 const inputNumber = QStream.produce(
   getStrLn(`Enter a number between ${MIN_NUMBER} & ${MAX_NUMBER}: `)
 )
-  .map(_ => parseInt(_, 10))
+  .map((_) => parseInt(_, 10))
   .filter(
-    input =>
+    (input) =>
       Number.isFinite(input) && input >= MIN_NUMBER && input <= MAX_NUMBER
   )
 
 /**
  * Takes the player's name.
  */
-const inputName = getStrLn('Enter your name: ').chain(name =>
+const inputName = getStrLn('Enter your name: ').chain((name) =>
   putStrLn(`Welcome to the world of functional programming, ${name}!`)
 )
 
@@ -51,17 +51,13 @@ export const canContinue = getStrLn(
   'Press ⏎  to continue (or will exit in 3sec): '
 )
   .const(true)
-  .race(
-    putStrLn('\nGood bye!')
-      .delay(3000)
-      .const(false)
-  )
+  .race(putStrLn('\nGood bye!').delay(3000).const(false))
 
 /**
  * Takes an input integer and checks if it matches with a random number.
  */
 const checkWithRandom = (guess: number) =>
-  randomInt(MIN_NUMBER, MAX_NUMBER).chain(random =>
+  randomInt(MIN_NUMBER, MAX_NUMBER).chain((random) =>
     guess === random
       ? putStrLn(`You guessed it right!`)
       : putStrLn(`Sorry, the correct answer is ${random}`)

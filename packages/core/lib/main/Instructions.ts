@@ -21,7 +21,7 @@ export enum Tag {
   Reject,
   Runtime,
   Try,
-  TryM
+  TryM,
 }
 
 export interface ICall<T extends unknown[] = unknown[]> {

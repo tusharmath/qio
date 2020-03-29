@@ -31,7 +31,7 @@ describe('Chunk', () => {
         assert.deepStrictEqual(
           createMockChunks(n, c),
           expected
-            .map(_ => Chunk.from(_))
+            .map((_) => Chunk.from(_))
             .reduce((_, that) => _.concat(that), Chunk.empty())
         )
       })
@@ -39,17 +39,17 @@ describe('Chunk', () => {
 
     spec(6, 2, [
       [1, 2, 3],
-      [4, 5, 6]
+      [4, 5, 6],
     ])
 
     spec(7, 2, [
       [1, 2, 3],
-      [4, 5, 6, 7]
+      [4, 5, 6, 7],
     ])
 
     spec(9, 2, [
       [1, 2, 3, 4],
-      [5, 6, 7, 8, 9]
+      [5, 6, 7, 8, 9],
     ])
 
     spec(5, 3, [[1], [2, 3], [4, 5]])
@@ -60,7 +60,7 @@ describe('Chunk', () => {
       [3, 4],
       [5, 6],
       [7, 8],
-      [9, 10, 11]
+      [9, 10, 11],
     ])
 
     spec(9, 5, [[1], [2, 3], [4, 5], [6, 7], [8, 9]])
@@ -73,7 +73,7 @@ describe('Chunk', () => {
         3
       )
 
-      const actual = chunks.filter(_ => _ % 2 === 0).asArray
+      const actual = chunks.filter((_) => _ % 2 === 0).asArray
       const expected = [0, 2, 4, 6, 8]
 
       assert.deepStrictEqual(actual, expected)
@@ -95,7 +95,7 @@ describe('Chunk', () => {
     it('should transform the values', () => {
       const testArray = createArray(5)
 
-      const actual = Chunk.from(testArray).map(_ => _ * 10).asArray
+      const actual = Chunk.from(testArray).map((_) => _ * 10).asArray
       const expected = [0, 10, 20, 30, 40]
 
       assert.deepStrictEqual(actual, expected)
