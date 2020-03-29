@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-cp internals/BENCHMARKS.tmpl.md $2
+DESTINATION="../docs/others/benchmarks.md"
 
-ls -d $1/*.js | xargs -L 1 node >> $2
+cp internals/BENCHMARKS.tmpl.md "$DESTINATION"
+
+ls -d IO/*.js | xargs -L 1 node >> $DESTINATION
