@@ -1,6 +1,11 @@
 /* tslint:disable: no-unbound-method cyclomatic-complexity */
 import {debug} from 'debug'
-import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
+import {
+  DoublyLinkedList,
+  LinkedListNode,
+  List,
+  Option,
+} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {Exit} from '../main/Exit'
@@ -24,6 +29,20 @@ enum FiberStatus {
   PENDING,
   COMPLETED,
   CANCELLED,
+}
+
+class StupidCancel implements ICancellable {
+  cancel(): void {}
+}
+
+class RemoveNode<A, E> implements ICancellable {
+  public constructor(
+    private readonly node: LinkedListNode<CBExit<A, E>>,
+    public readonly list: DoublyLinkedList<CBExit<A, E>>
+  ) {}
+  public cancel(): void {
+    this.list.remove(this.node)
+  }
 }
 
 /**
@@ -77,12 +96,6 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
 
     return context
   }
-  private static dispatchResult<A, E>(
-    result: Exit<A, E>,
-    cb: CBExit<A, E>
-  ): void {
-    cb(result)
-  }
   private readonly cancellationList = new CancellationList()
   private node?: LinkedListNode<ICancellable>
   private readonly observers = DoublyLinkedList.of<CBExit<A, E>>()
@@ -101,7 +114,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     super()
     D(this.id, 'this.constructor()')
     this.stackA.push(instruction)
-    this.init()
+    this.pauseAndUnsafeEvaluate()
   }
   public get abort(): QIO<void> {
     return QIO.lift(() => this.cancel())
@@ -124,7 +137,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     this.status = FiberStatus.CANCELLED
     D(this.id, 'this.status ==', FiberStatus[this.status])
     this.cancellationList.cancel()
-    this.observers.map((_) => _(Exit.cancel()))
+    this.dispatchResult(Exit.cancel())
   }
   /**
    * The `ICancellable` returned when called will only remove the passed on callback.
@@ -134,40 +147,44 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public unsafeObserve(cb: CBExit<A, E>): ICancellable {
     D(this.id, 'this.unsafeObserve()')
     if (this.status === FiberStatus.CANCELLED) {
-      return this.runtime.scheduler.asap(
-        FiberContext.dispatchResult,
-        Exit.cancel(),
-        cb
-      )
+      cb(Exit.cancel())
+
+      return new StupidCancel()
     }
     if (this.status === FiberStatus.COMPLETED && this.result !== undefined) {
-      return this.runtime.scheduler.asap(
-        FiberContext.dispatchResult,
-        this.result,
-        cb
-      )
+      cb(this.result)
+
+      return new StupidCancel()
     }
     const node = this.observers.add(cb)
     D(this.id, 'this.status ==', FiberStatus[this.status])
     D(this.id, 'this.observers.add()')
     D(this.id, 'this.observers.length == ', this.observers.length)
 
-    return {
-      cancel: () => {
-        D(this.id, 'this.observers.length == ', this.observers.length)
-        this.observers.remove(node)
-        D(this.id, 'this.observer.remove()')
-        D(this.id, 'this.observers.length == ', this.observers.length)
-      },
-    }
+    D(this.id, 'this.observers.length == ', this.observers.length)
+    const c = new RemoveNode(node, this.observers)
+    D(this.id, 'this.observer.remove()')
+    D(this.id, 'this.observers.length == ', this.observers.length)
+
+    return c
   }
-  private dispatchResult(result: Exit<A, E>): void {
+  private completeFiber(result: Exit<A, E>): void {
     D('%O dispatchResult() // %O', this.id, result)
     this.status = FiberStatus.COMPLETED
     this.result = result
-    this.observers.map((_) => _(result))
+    this.dispatchResult(result)
   }
-  private init(data?: unknown): void {
+
+  private dispatchResult(result: Exit<A, E>): void {
+    while (this.observers.length > 0) {
+      const element = this.observers.shift()
+      if (Option.isSome(element)) {
+        element.value(result)
+      }
+    }
+  }
+
+  private pauseAndUnsafeEvaluate(data?: unknown): void {
     D(this.id, 'start()')
     this.node = this.cancellationList.push(
       this.yieldStrategy.insert(this.unsafeEvaluate.bind(this), data)
@@ -182,12 +199,12 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     let data: unknown = ddd
     while (true) {
       if (this.yieldStrategy.canYield()) {
-        return this.init(data)
+        return this.pauseAndUnsafeEvaluate(data)
       }
       try {
         const j = this.stackA.pop()
         if (j === undefined) {
-          return this.dispatchResult(Exit.succeed(data as A))
+          return this.completeFiber(Exit.succeed(data as A))
         }
         switch (j.tag) {
           case Tag.Constant:
@@ -211,7 +228,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             if (handler !== undefined && handler.tag === Tag.Capture) {
               this.stackA.push(handler.i0(cause))
             } else {
-              return this.dispatchResult(Exit.fail(cause))
+              return this.completeFiber(Exit.fail(cause))
             }
             break
           case Tag.Try:
