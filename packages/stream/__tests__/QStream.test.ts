@@ -102,6 +102,22 @@ describe('QStream', () => {
       assert.deepStrictEqual(actual, expected)
     })
   })
+  describe('takeUntil', () => {
+    it('should take passed predicate is true', () => {
+      const actual = testRuntime().unsafeExecuteSync(
+        QStream.of(
+          1,
+          2,
+          3,
+          4
+        ).takeUntil((s: {isEmpty?: boolean; head?: number}) =>
+          !s.isEmpty && s.head ? s.head === 3 : false
+        ).asArray
+      )
+      const expected = [1, 2, 3]
+      assert.deepStrictEqual(actual, expected)
+    })
+  })
 
   describe('scanM', () => {
     it('should keep producing accumulated values', () => {

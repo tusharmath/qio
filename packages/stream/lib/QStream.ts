@@ -460,6 +460,19 @@ export class QStream<A1 = unknown, E1 = never, R1 = unknown> {
       ).map((_) => _.state)
     )
   }
+  /**
+   * Emits the values till the predicate is true.
+   */
+
+  public takeUntil(pred: <A3>(a: A3) => boolean): QStream<A1, E1, R1> {
+    return new QStream((state, cont, next) =>
+      this.fold(
+        state,
+        (s) => cont(s) && !pred(s),
+        (s, a) => next(s, a).map((s2) => s2)
+      )
+    )
+  }
 
   /**
    * Converts a Stream into a managed queue
