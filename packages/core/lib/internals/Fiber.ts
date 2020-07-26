@@ -1,6 +1,6 @@
 /* tslint:disable: no-unbound-method cyclomatic-complexity */
 import {debug} from 'debug'
-import {DoublyLinkedList, LinkedListNode} from 'standard-data-structures'
+import {DoublyLinkedList} from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
 
 import {Exit} from '../main/Exit'
@@ -9,9 +9,10 @@ import {QIO} from '../main/QIO'
 import {FiberRuntime} from '../runtimes/FiberRuntime'
 
 import {CancellationList} from './CancellationList'
-import {CBExit} from './CBExit'
+import {CB} from '../internals/CB'
 import {IDGenerator} from './IDGenerator'
-import {YieldStrategy} from './YieldStrategy'
+import { CBExit } from './CBExit'
+import { defaultRuntime } from '../runtimes/DefaultRuntime'
 
 const D = debug('qio:fiber')
 class InvalidInstruction extends Error {
@@ -85,16 +86,12 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     cb(result)
   }
   private readonly cancellationList = new CancellationList()
-  private node?: LinkedListNode<ICancellable>
+  private asyncOperation?: ICancellable;
   private readonly observers = DoublyLinkedList.of<CBExit<A, E>>()
   private result?: Exit<A, E>
   private readonly stackA = new Array<Instruction>()
   private readonly stackEnv = new Array<unknown>()
   private status = FiberStatus.PENDING
-  private readonly yieldStrategy = YieldStrategy.create(
-    this.runtime.scheduler,
-    this.runtime.config
-  )
   private constructor(
     instruction: Instruction,
     public readonly runtime: FiberRuntime
@@ -107,17 +104,39 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public get abort(): QIO<void> {
     return QIO.lift(() => this.cancel())
   }
+
   /**
    * Aborting the IO produced by await should abort the complete IO.
    */
   public get await(): QIO<Exit<A, E>> {
     D(this.id, 'this.await()')
 
-    return QIO.uninterruptible((cb) => {
-      this.unsafeObserve(cb)
 
+    // cb: CB<QIO<Exit<A, E>>>
+    // we want CBExit<A, E>
+    return QIO.fromAsync((cb) => {
+
+      const fromExit = (exit: Exit<A, E>) => {
+        return cb(QIO.resolve(exit))
+      }
+
+      this.unsafeObserve(fromExit);
       return this
     })
+    // Converts a QIO to an exit  Returns QIO<Exit<A, E>>
+
+    // PR #1 -> Done
+    // Rename interruptible
+    // Delete uninterruptible
+
+    // PR #2 -> Done
+    // FromAsync takes a CB<QIO> and not two Callbacks  
+
+    // PR #3 -> Done
+    // add a toExit method that returns a QIO<Exit<A, E>>
+
+    // PR #4 
+    // fix all of the broken tests
   }
   public cancel(): void {
     D(this.id, 'this.cancel()')
@@ -125,6 +144,9 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     this.status = FiberStatus.CANCELLED
     D(this.id, 'this.status ==', FiberStatus[this.status])
     this.cancellationList.cancel()
+    // if (this.asyncOperation !== undefined) {
+    //   this.asyncOperation.cancel() 
+    // }
     this.observers.map((_) => _(Exit.cancel()))
   }
   /**
@@ -135,20 +157,12 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public unsafeObserve(cb: CBExit<A, E>): ICancellable {
     D(this.id, 'this.unsafeObserve()')
     if (this.status === FiberStatus.CANCELLED) {
-      return this.runtime.scheduler.asap(
-        FiberContext.dispatchResult,
-        Exit.cancel(),
-        cb
-      )
+      FiberContext.dispatchResult(Exit.cancel(), cb)
     }
     if (this.status === FiberStatus.COMPLETED && this.result !== undefined) {
-      return this.runtime.scheduler.asap(
-        FiberContext.dispatchResult,
-        this.result,
-        cb
-      )
+      FiberContext.dispatchResult(this.result, cb)
     }
-    const node = this.observers.add(cb)
+    const current = this.observers.add(cb)
     D(this.id, 'this.status ==', FiberStatus[this.status])
     D(this.id, 'this.observers.add()')
     D(this.id, 'this.observers.length == ', this.observers.length)
@@ -156,12 +170,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     return {
       cancel: () => {
         D(this.id, 'this.observers.length == ', this.observers.length)
-        this.observers.remove(node)
+        this.observers.remove(current)
         D(this.id, 'this.observer.remove()')
         D(this.id, 'this.observers.length == ', this.observers.length)
       },
     }
   }
+  
   private dispatchResult(result: Exit<A, E>): void {
     D('%O dispatchResult() // %O', this.id, result)
     this.status = FiberStatus.COMPLETED
@@ -170,21 +185,12 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   }
   private init(data?: unknown): void {
     D(this.id, 'start()')
-    this.node = this.cancellationList.push(
-      this.yieldStrategy.insert(this.unsafeEvaluate.bind(this), data)
-    )
+    this.unsafeEvaluate.apply(this, [data])
   }
   private unsafeEvaluate(ddd?: unknown): void {
     D(this.id, 'unsafeEvaluate()')
-    if (this.node !== undefined) {
-      this.cancellationList.remove(this.node)
-      this.node = undefined
-    }
     let data: unknown = ddd
     while (true) {
-      if (this.yieldStrategy.canYield()) {
-        return this.init(data)
-      }
       try {
         const j = this.stackA.pop()
         if (j === undefined) {
@@ -263,20 +269,29 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             data = j.i0(env)
             break
           case Tag.Async:
-            const id = this.cancellationList.push(
-              j.i0(
+
+            this.asyncOperation = j.i0(
                 (val) => {
-                  this.cancellationList.remove(id)
-                  this.stackA.push(QIO.resolve(val).asInstruction)
-                  this.unsafeEvaluate()
-                },
-                (err) => {
-                  this.cancellationList.remove(id)
-                  this.stackA.push(QIO.reject(err).asInstruction)
-                  this.unsafeEvaluate()
+                  this.asyncOperation = undefined;
+                  this.stackA.push(val.asInstruction)
+                  this.init()
                 }
-              )
             )
+
+            // const id = this.cancellationList.push(
+            //   j.i0(
+            //     (val) => {
+            //       this.cancellationList.remove(id)
+            //       this.stackA.push(QIO.resolve(val).asInstruction)
+            //       this.unsafeEvaluate()
+            //     },
+            //     (err) => {
+            //       this.cancellationList.remove(id)
+            //       this.stackA.push(QIO.reject(err).asInstruction)
+            //       this.unsafeEvaluate()
+            //     }
+            //   )
+            // )
 
             return
           default:
