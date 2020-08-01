@@ -164,6 +164,18 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<Fiber<A1, E1>> {
     return new QIO(Tag.Fork, io, runtime)
   }
+
+  /**
+   * **NOTE:** The default type for value is set to `never`,
+   * because it hard for typescript to infer the types based on how we use `res`.
+   * Using `never` will give users compile time error always while using.
+   */
+  public static fromAsync<A1 = never, E1 = never>(
+    cb: (res: CB<QIO<A1, E1>>) => unknown
+  ): QIO<A1, E1> {
+    return new QIO(Tag.Async, cb)
+  }
+  
   /**
    * Creates an IO from `Either`
    */
@@ -201,16 +213,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return (cond, left, right) =>
       // tslint:disable-next-line: no-any
       cond(...args) ? left(...args) : (right(...args) as any)
-  }
-  /**
-   * **NOTE:** The default type for value is set to `never`,
-   * because it hard for typescript to infer the types based on how we use `res`.
-   * Using `never` will give users compile time error always while using.
-   */
-  public static fromAsync<A1 = never, E1 = never>(
-    cb: (res: CB<QIO<A1, E1>>) => unknown
-  ): QIO<A1, E1> {
-    return new QIO(Tag.Async, cb)
   }
 
   /**

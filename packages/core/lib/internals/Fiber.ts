@@ -265,8 +265,9 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
           case Tag.Async:
             this.asyncOp = this.cancellationList.push(
               j.i0((val) => {
-                if (this.asyncOp !== undefined)
+                if (this.asyncOp !== undefined) {
                   this.cancellationList.remove(this.asyncOp)
+                }
                 this.stackA.push(val.asInstruction)
                 this.unsafeEvaluate()
               })
