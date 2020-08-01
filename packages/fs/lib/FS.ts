@@ -11,8 +11,8 @@ type QIOErrno<A> = QIO<A, NodeJS.ErrnoException>
 const U = <A>(
   fn: (CB: (err: NodeJS.ErrnoException, data: A) => void) => void
 ): QIOErrno<A> =>
-  QIO.uninterruptible((res, rej) =>
-    fn((err, data) => (err ? rej(err) : res(data)))
+  QIO.fromAsync((res) =>
+    fn((err, data) => (err ? res(QIO.reject(err)) : res(QIO.resolve(data))))
   )
 
 /**
@@ -21,7 +21,7 @@ const U = <A>(
 const V = <A, E>(
   fn: (CB: (err: NodeJS.ErrnoException) => void) => void
 ): QIOErrno<void> =>
-  QIO.uninterruptible((res, rej) => fn((err) => (err ? rej(err) : res())))
+  QIO.fromAsync((res) => fn((err) => (err ? res(QIO.reject(err)) : res(QIO.void()))))
 
 /**
  * An environment for FS

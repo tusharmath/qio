@@ -46,8 +46,8 @@ export class Await<A, E> {
     return QIO.lift(() => this.flag === AwaitStatus.COMPLETED)
   }
   private get wait(): QIO<A, E> {
-    return QIO.interruptible((res, rej) => {
-      const id = this.Q.add([res, rej])
+    return QIO.fromAsync((res) => {
+      const id = this.Q.add([(val) => res(QIO.resolve(val)), (err) => res(QIO.reject(err))])
       D(this.id, 'add wait')
       D(this.id, 'this.Q.length', this.Q.length)
 

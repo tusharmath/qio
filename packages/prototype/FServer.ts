@@ -45,8 +45,8 @@ class QIOServer {
     this.server = http.createServer(this.onRequest).listen(this.options.port)
   }
   public get close(): QIO<void> {
-    return QIO.uninterruptible<void, Error>((res, rej) => () =>
-      this.server.close((E) => (E !== undefined ? rej(E) : res()))
+    return QIO.fromAsync<void, Error>((res) => () =>
+      this.server.close((E) => (E !== undefined ? res(QIO.reject(E)) : res(QIO.void())))
     ).catch(Exit)
   }
 
