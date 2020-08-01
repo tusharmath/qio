@@ -47,7 +47,10 @@ export class Await<A, E> {
   }
   private get wait(): QIO<A, E> {
     return QIO.fromAsync((res) => {
-      const id = this.Q.add([(val) => res(QIO.resolve(val)), (err) => res(QIO.reject(err))])
+      const id = this.Q.add([
+        (val) => res(QIO.resolve(val)),
+        (err) => res(QIO.reject(err)),
+      ])
       D(this.id, 'add wait')
       D(this.id, 'this.Q.length', this.Q.length)
 

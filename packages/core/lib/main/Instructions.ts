@@ -2,7 +2,7 @@ import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {FiberRuntime} from '../runtimes/FiberRuntime'
-import { QIO } from './QIO'
+import {QIO} from './QIO'
 
 /**
  * @ignore

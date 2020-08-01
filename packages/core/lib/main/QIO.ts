@@ -37,9 +37,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static accessA<A, E, R>(
     fn: (cb: CB<QIO<A, E>>, R: R) => void
   ): QIO<A, E, R> {
-    return QIO.accessM((RR: R) =>
-      QIO.fromAsync((AA) => fn(AA, RR))
-    )
+    return QIO.accessM((RR: R) => QIO.fromAsync((AA) => fn(AA, RR)))
   }
   /**
    * Effectfully creates a new c instance with the provided environment
@@ -355,7 +353,9 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static timeout<A>(value: A, duration: number): QIO<A> {
     return QIO.runtime().chain((RTM) =>
-      QIO.fromAsync((res) => RTM.scheduler.delay(res, duration, QIO.resolve(value)))
+      QIO.fromAsync((res) =>
+        RTM.scheduler.delay(res, duration, QIO.resolve(value))
+      )
     )
   }
 

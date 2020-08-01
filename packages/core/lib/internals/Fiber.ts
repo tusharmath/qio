@@ -36,7 +36,6 @@ const FIBER_ID = new IDGenerator()
  * @typeparam A The success value
  */
 export abstract class Fiber<A, E> {
-
   /**
    * Uses a shared runtime to evaluate a [[QIO]] expression.
    * Returns a `ICancellable` that can be used to interrupt the execution.
@@ -264,15 +263,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             data = j.i0(env)
             break
           case Tag.Async:
-
             this.asyncOp = this.cancellationList.push(
-              j.i0(
-                (val) => {
-                  if (this.asyncOp !== undefined) this.cancellationList.remove(this.asyncOp)
-                  this.stackA.push(val.asInstruction)
-                  this.unsafeEvaluate()
-                }
-              )
+              j.i0((val) => {
+                if (this.asyncOp !== undefined)
+                  this.cancellationList.remove(this.asyncOp)
+                this.stackA.push(val.asInstruction)
+                this.unsafeEvaluate()
+              })
             )
 
             return

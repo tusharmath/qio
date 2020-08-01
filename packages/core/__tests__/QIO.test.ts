@@ -118,9 +118,7 @@ describe('QIO', () => {
     it('should be cancellable', () => {
       const cancel = spy()
       const runtime = testRuntime()
-      const cancellable = runtime.unsafeExecute(
-        QIO.fromAsync(() => ({cancel}))
-      )
+      const cancellable = runtime.unsafeExecute(QIO.fromAsync(() => ({cancel})))
       runtime.scheduler.run()
       cancellable.cancel()
       cancel.should.be.called()
@@ -294,9 +292,9 @@ describe('QIO', () => {
 
     it('should capture async exceptions', () => {
       const runtime = testRuntime()
-      const error = new Error('Bye');
+      const error = new Error('Bye')
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<string, never>((res) =>
+        QIO.fromAsync<string>((res) =>
           res(QIO.reject(error).catch((err) => QIO.resolve(err.message)))
         )
       )

@@ -21,7 +21,9 @@ const U = <A>(
 const V = <A, E>(
   fn: (CB: (err: NodeJS.ErrnoException) => void) => void
 ): QIOErrno<void> =>
-  QIO.fromAsync((res) => fn((err) => (err ? res(QIO.reject(err)) : res(QIO.void()))))
+  QIO.fromAsync((res) =>
+    fn((err) => (err ? res(QIO.reject(err)) : res(QIO.void())))
+  )
 
 /**
  * An environment for FS

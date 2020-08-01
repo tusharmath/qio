@@ -46,7 +46,9 @@ class QIOServer {
   }
   public get close(): QIO<void> {
     return QIO.fromAsync<void, Error>((res) => () =>
-      this.server.close((E) => (E !== undefined ? res(QIO.reject(E)) : res(QIO.void())))
+      this.server.close((E) =>
+        E !== undefined ? res(QIO.reject(E)) : res(QIO.void())
+      )
     ).catch(Exit)
   }
 
