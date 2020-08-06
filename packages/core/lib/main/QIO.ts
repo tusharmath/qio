@@ -175,7 +175,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A1, E1> {
     return new QIO(Tag.Async, cb)
   }
-  
+
   /**
    * Creates an IO from `Either`
    */

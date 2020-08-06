@@ -83,7 +83,6 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   ): void {
     cb(result)
   }
-  private asyncOp?: LinkedListNode<ICancellable>
   private readonly cancellationList = new CancellationList()
   private node?: LinkedListNode<ICancellable>
   private readonly observers = DoublyLinkedList.of<CBExit<A, E>>()
@@ -263,16 +262,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             data = j.i0(env)
             break
           case Tag.Async:
-            this.asyncOp = this.cancellationList.push(
-              j.i0((val) => {
-                if (this.asyncOp !== undefined) {
-                  this.cancellationList.remove(this.asyncOp)
-                }
-                this.stackA.push(val.asInstruction)
+            const id = this.cancellationList.push(
+              j.i0((qio) => {
+                this.cancellationList.remove(id)
+                this.stackA.push(qio.asInstruction)
                 this.unsafeEvaluate()
               })
             )
-
             return
           default:
             this.stackA.push(

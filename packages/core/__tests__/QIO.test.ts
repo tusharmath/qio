@@ -292,10 +292,17 @@ describe('QIO', () => {
 
     it('should capture async exceptions', () => {
       const runtime = testRuntime()
-      const error = new Error('Bye')
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<string>((res) =>
-          res(QIO.reject(error).catch((err) => QIO.resolve(err.message)))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<string, never>((res) => {
+            RTM.scheduler.asap(() =>
+              res(
+                QIO.reject(new Error('Bye')).catch((err) =>
+                  QIO.resolve(err.message)
+                )
+              )
+            )
+          })
         )
       )
       const expected = 'Bye'
@@ -305,11 +312,19 @@ describe('QIO', () => {
     it('should capture nested async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<never, Error>((res) => res(QIO.reject(new Error('A'))))
-          .catch((err) => QIO.reject(new Error(err.message + 'B')))
-          .catch((err) => QIO.reject(new Error(err.message + 'C')))
-          .catch((err) => QIO.reject(new Error(err.message + 'D')))
-          .catch((err) => QIO.resolve(err.message + 'E'))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<unknown, Error>((res) => {
+            RTM.scheduler.asap(() =>
+              res(
+                QIO.reject(new Error('A'))
+                  .catch((err) => QIO.reject(new Error(err.message + 'B')))
+                  .catch((err) => QIO.reject(new Error(err.message + 'C')))
+                  .catch((err) => QIO.reject(new Error(err.message + 'D')))
+                  .catch((err) => QIO.resolve(err.message + 'E'))
+              )
+            )
+          })
+        )
       )
 
       const expected = 'ABCDE'
@@ -954,12 +969,18 @@ describe('QIO', () => {
   describe('uninterruptible', () => {
     it('should capture exceptions from uninterruptibleIO API', () => {
       const runtime = testRuntime()
+      const error = new Error('Bye')
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<[], Error>((res) => res(QIO.reject(new Error('Failed'))))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<string>((res) => {
+            RTM.scheduler.asap(() =>
+              res(QIO.reject(error).catch((err) => QIO.resolve(err.message)))
+            )
+          })
+        )
       )
-      const expected = new Error('Failed')
-
-      assert.deepStrictEqual('' + String(actual), '' + String(expected))
+      const expected = 'Bye'
+      assert.strictEqual(actual, expected)
     })
 
     it('should capture sync exceptions', () => {
@@ -978,9 +999,12 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         // tslint:disable-next-line: no-null-keyword
-        QIO.fromAsync<number>((res) => res(QIO.resolve(1000)))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<number, never>((res) => {
+            RTM.scheduler.asap(() => res(QIO.resolve(1000)))
+          })
+        )
       )
-
       assert.deepStrictEqual(actual, 1000)
     })
   })

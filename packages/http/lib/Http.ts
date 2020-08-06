@@ -53,7 +53,10 @@ export const httpEnv = {
         cancelToken: new Axios.CancelToken(
           (cancel) => (cancelRequest = cancel)
         ),
-      }).then((val) => res(QIO.resolve(val)), (err) => res(QIO.reject(err)))
+      }).then(
+        (val) => res(QIO.resolve(val)),
+        (err) => res(QIO.reject(err))
+      )
 
       return {
         cancel: () => {
