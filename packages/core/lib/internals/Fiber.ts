@@ -269,6 +269,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
                 this.unsafeEvaluate()
               })
             )
+            
             return
           default:
             this.stackA.push(

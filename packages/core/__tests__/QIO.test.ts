@@ -294,7 +294,7 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         QIO.runtime().chain((RTM) =>
-          QIO.fromAsync<string, never>((res) => {
+          QIO.fromAsync<string>((res) => {
             RTM.scheduler.asap(() =>
               res(
                 QIO.reject(new Error('Bye')).catch((err) =>
@@ -1000,7 +1000,7 @@ describe('QIO', () => {
       const actual = runtime.unsafeExecuteSync(
         // tslint:disable-next-line: no-null-keyword
         QIO.runtime().chain((RTM) =>
-          QIO.fromAsync<number, never>((res) => {
+          QIO.fromAsync<number>((res) => {
             RTM.scheduler.asap(() => res(QIO.resolve(1000)))
           })
         )
