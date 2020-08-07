@@ -12,13 +12,12 @@ import {QIO} from '../lib/main/QIO'
 import {Snapshot} from '../lib/main/Snapshot'
 import {defaultRuntime} from '../lib/runtimes/DefaultRuntime'
 import {testRuntime} from '../lib/runtimes/TestRuntime'
-import { ICancellable } from 'ts-scheduler'
 
-describe.only('QIO', () => {
+describe('QIO', () => {
   describe('of', () => {
     it('should evaluate to a constant value', () => {
-
-      const actual = testRuntime().unsafeExecuteSync(QIO.resolve(1000))
+      const runtime = testRuntime()
+      const actual = runtime.unsafeExecuteSync(QIO.resolve(1000))
       const expected = 1000
       assert.strictEqual(actual, expected)
     })
@@ -44,6 +43,7 @@ describe.only('QIO', () => {
 
       assert.deepEqual(actual, err)
     })
+
     it('should error on second failure', () => {
       const err = new Error('oups')
       const actual = testRuntime().unsafeExecuteSync(
@@ -53,6 +53,7 @@ describe.only('QIO', () => {
       assert.deepEqual(actual, err)
     })
   })
+
   describe('access', () => {
     it('should access a value and transform', () => {
       const runtime = testRuntime()
@@ -104,12 +105,11 @@ describe.only('QIO', () => {
     it('should evaluate asynchronously', async () => {
       const runtime = defaultRuntime()
       const actual = await runtime.unsafeExecutePromise(
-        /*QIO.fromAsync((res) => {
-          const id = setTimeout(res, 100, QIO.resolve(1000))
+        QIO.interruptible((res, rej) => {
+          const id = setTimeout(res, 100, 1000)
 
           return {cancel: () => clearTimeout(id)}
-        })*/
-        QIO.timeout(QIO.resolve(1000), 100)
+        })
       )
       const expected = 1000
       assert.strictEqual(actual, expected)
@@ -119,7 +119,7 @@ describe.only('QIO', () => {
       const cancel = spy()
       const runtime = testRuntime()
       const cancellable = runtime.unsafeExecute(
-        QIO.fromAsync(cancel)
+        QIO.interruptible(() => ({cancel}))
       )
       runtime.scheduler.run()
       cancellable.cancel()
@@ -146,6 +146,7 @@ describe.only('QIO', () => {
       assert.deepEqual(actual, err)
     })
   })
+
   describe('try', () => {
     it('should call the cb function', () => {
       const cb = spy()
@@ -155,7 +156,6 @@ describe.only('QIO', () => {
       cb.should.be.called()
     })
 
-    // I'm not sure how to fix this
     it('should be cancellable', () => {
       let actual = 1000
       const runtime = testRuntime()
@@ -202,19 +202,16 @@ describe.only('QIO', () => {
   })
 
   describe('timeout', () => {
-    it('should emit the provided value', async () => {
-      const runtime = defaultRuntime()
-      const actual = await runtime.unsafeExecutePromise(
-        QIO.timeout(QIO.resolve('Happy'), 100)
-      )
+    it('should emit the provided value', () => {
+      const runtime = testRuntime()
+      const actual = runtime.unsafeExecuteSync(QIO.timeout('Happy', 100))
+
       const expected = 'Happy'
       assert.strictEqual(actual, expected)
     })
     it('should emit after the provided duration', () => {
       const runtime = testRuntime()
-      runtime.unsafeExecute(
-        QIO.timeout(QIO.resolve('Happy'), 100)
-      )
+      runtime.unsafeExecuteSync(QIO.timeout('Happy', 100))
       const actual = runtime.scheduler.now()
       const expected = 101
       assert.strictEqual(actual, expected)
@@ -234,7 +231,7 @@ describe.only('QIO', () => {
     })
     it('should emit after the provided duration', () => {
       const runtime = testRuntime()
-      runtime.unsafeExecuteSync(QIO.timeout(QIO.resolve('Happy'), 100))
+      runtime.unsafeExecuteSync(QIO.timeout('Happy', 100))
       const actual = runtime.scheduler.now()
       const expected = 101
       assert.strictEqual(actual, expected)
@@ -269,7 +266,7 @@ describe.only('QIO', () => {
     it('should resolve the encased function', async () => {
       const runtime = defaultRuntime()
       const actual = await runtime.unsafeExecutePromise(
-        QIO.encaseP((a: number, b: number) => Promise.resolve(QIO.resolve(a + b)))(1, 1000)
+        QIO.encaseP((a: number, b: number) => Promise.resolve(a + b))(1, 1000)
       )
       const expected = 1001
       assert.strictEqual(actual, expected)
@@ -298,8 +295,8 @@ describe.only('QIO', () => {
     it('should capture async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<never, Error, unknown>((res) =>
-          QIO.reject(new Error('Bye'))
+        QIO.uninterruptible<never, Error>((res, rej) =>
+          rej(new Error('Bye'))
         ).catch((err) => QIO.resolve(err.message))
       )
       const expected = 'Bye'
@@ -309,7 +306,7 @@ describe.only('QIO', () => {
     it('should capture nested async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<never, Error, unknown>((res) => QIO.reject(new Error('A')))
+        QIO.uninterruptible<never, Error>((res, rej) => rej(new Error('A')))
           .catch((err) => QIO.reject(new Error(err.message + 'B')))
           .catch((err) => QIO.reject(new Error(err.message + 'C')))
           .catch((err) => QIO.reject(new Error(err.message + 'D')))
@@ -390,7 +387,7 @@ describe.only('QIO', () => {
     it('should complete immediately', () => {
       const runtime = testRuntime()
       const counter = new Counter()
-      runtime.unsafeExecute(QIO.timeout(QIO.resolve('A'), 1000).fork().and(counter.inc()))
+      runtime.unsafeExecute(QIO.timeout('A', 1000).fork().and(counter.inc()))
       runtime.scheduler.runTo(10)
       assert.isTrue(counter.increased)
     })
@@ -496,21 +493,6 @@ describe.only('QIO', () => {
         )
 
         assert.strictEqual(counter.count, 0)
-      })
-
-      it('should not increment counter', () => {
-        let count = 0
-        const inc = QIO.lift(() => count++)
-        const expensiveComputation = (duration: number) => {
-          return QIO.resolve(1).delay(duration).and(inc);
-        }
-
-        const program =  expensiveComputation(1000).fork().chain(F => F.abort.delay(500));
-
-        const runtime = testRuntime()
-        runtime.unsafeExecute(program);
-
-        assert.strictEqual(count, 0)
       })
     })
 
@@ -974,7 +956,7 @@ describe.only('QIO', () => {
     it('should capture exceptions from uninterruptibleIO API', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync<[], Error, unknown>((res) => new Error('Failed'))
+        QIO.uninterruptible<[], Error>((res, rej) => rej(new Error('Failed')))
       )
       const expected = new Error('Failed')
 
@@ -984,7 +966,7 @@ describe.only('QIO', () => {
     it('should capture sync exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.fromAsync((cb) => {
+        QIO.uninterruptible((cb) => {
           throw new Error('Failed')
         })
       )
@@ -997,7 +979,7 @@ describe.only('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         // tslint:disable-next-line: no-null-keyword
-        QIO.fromAsync<number, unknown, unknown>((res) => res(QIO.resolve(1000)))
+        QIO.uninterruptible<number>((res, rej) => res(1000))
       )
 
       assert.deepStrictEqual(actual, 1000)

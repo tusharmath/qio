@@ -5,6 +5,7 @@
 import {Id} from '@qio/prelude'
 import {debug} from 'debug'
 import {Either, List} from 'standard-data-structures'
+import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {Fiber} from '../internals/Fiber'
@@ -14,7 +15,6 @@ import {IRuntime} from '../runtimes/IRuntime'
 
 import {Await} from './Await'
 import {Instruction, Tag} from './Instructions'
-import { defaultRuntime } from '../runtimes/DefaultRuntime'
 
 const D = (scope: string, f: unknown, ...t: unknown[]) =>
   debug('qio:core:' + scope)(f, ...t)
@@ -35,18 +35,11 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Asynchronously access an env
    */
-  // public static accessA<A, E, R>(
-  //   fn: (A: CB<A>, E: CB<E>, R: R) => void
-  // ): QIO<A, E, R> {
-  //   return QIO.accessM((RR: R) =>
-  //     QIO.uninterruptible((AA, EE) => fn(AA, EE, RR))
-  //   )
-  // }
   public static accessA<A, E, R>(
-    fn: (res: CB<QIO<A, E, R>>) => void
+    fn: (A: CB<A>, E: CB<E>, R: R) => void
   ): QIO<A, E, R> {
     return QIO.accessM((RR: R) =>
-      QIO.fromAsync(fn)
+      QIO.uninterruptible((AA, EE) => fn(AA, EE, RR))
     )
   }
   /**
@@ -61,7 +54,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Creates a new c instance with the provided environment by invoking a promise returning function.
    */
   public static accessP<A1, R1>(
-    cb: (R: R1) => Promise<QIO<A1, Error>>
+    cb: (R: R1) => Promise<A1>
   ): QIO<A1, Error, R1> {
     return QIO.env<R1>().chain(QIO.encaseP(cb))
   }
@@ -137,14 +130,19 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Converts a function returning a Promise to a function that returns an [[QIO]]
    */
   public static encaseP<A, T extends unknown[]>(
-      cb: (...t: T) => Promise<QIO<A, Error>>
-    ): (...t: T) => QIO<A, Error> {
-      return (...t) =>
-        QIO.fromAsync((res) =>
+    cb: (...t: T) => Promise<A>
+  ): (...t: T) => QIO<A, Error> {
+    return (...t) =>
+      QIO.runtime().chain((RTM) =>
+        QIO.interruptible((res, rej) =>
+          RTM.scheduler.asap(() => {
             void cb(...t)
-                .then(res)
+              .then(res)
+              .catch(rej)
+          })
         )
-    }
+      )
+  }
 
   /**
    * Creates a [[QIO]] that needs an environment and when resolved outputs the same environment
@@ -212,11 +210,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give users compile time error always while using.
    */
-  // Interruptible rename to fromAsync --> Done
-  public static fromAsync<A1, E1, R1>(
-    cb: (res: CB<QIO<A1, E1, R1>>) => any
-  ): QIO<A1, E1, R1> {
-    return new QIO(Tag.Async, cb);
+  public static interruptible<A1 = never, E1 = never>(
+    cb: (res: CB<A1>, rej: CB<E1>) => ICancellable
+  ): QIO<A1, E1> {
+    return new QIO(Tag.Async, cb)
   }
 
   /**
@@ -310,8 +307,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Creates a c that rejects with the provided error
    */
-  public static reject<E1>(error?: E1): QIO<never, E1> {
-    if (error === undefined) return new QIO(Tag.Reject, new Error('Follow up not found.'));
+  public static reject<E1>(error: E1): QIO<never, E1> {
     return new QIO(Tag.Reject, error)
   }
 
@@ -358,8 +354,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Resolves with the provided value after the given time
    */
-  public static timeout<A1, E1>(value: QIO<A1, E1>, duration: number): QIO<A1, E1> {
-    return QIO.fromAsync((res) => setTimeout(res, duration, value))
+  public static timeout<A>(value: A, duration: number): QIO<A> {
+    return QIO.runtime().chain((RTM) =>
+      QIO.interruptible((res) => RTM.scheduler.delay(res, duration, value))
+    )
   }
 
   /**
@@ -393,13 +391,29 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   /**
    * Tries to run an function that returns a promise.
    */
-  public static tryP<A>(cb: () => Promise<QIO<A, Error>>): QIO<A, Error> {
+  public static tryP<A>(cb: () => Promise<A>): QIO<A, Error> {
     return QIO.encaseP(cb)()
   }
   /**
    * Creates an IO from an async/callback based function ie. non cancellable.
    * It tries to make it cancellable by delaying the function call.
    */
+  public static uninterruptible<A1 = never, E1 = never>(
+    fn: (res: CB<A1>, rej: CB<E1>) => unknown
+  ): QIO<A1, E1> {
+    return QIO.runtime().chain((RTM) =>
+      QIO.interruptible<A1, E1>((res, rej) =>
+        RTM.scheduler.asap(() => {
+          try {
+            fn(res, rej)
+          } catch (e) {
+            rej(e as E1)
+          }
+        })
+      )
+    )
+  }
+
   /**
    * Returns a [[QIO]] of void.
    */
@@ -526,7 +540,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Delays the execution of the [[QIO]] by the provided time.
    */
   public delay(duration: number): QIO<A1, E1, R1> {
-    return QIO.timeout(this, duration)
+    return QIO.timeout(this, duration).chain(Id)
   }
   /**
    * Like [[QIO.tap]] but takes in an IO instead of a callback.

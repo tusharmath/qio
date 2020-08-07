@@ -2,7 +2,6 @@ import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {FiberRuntime} from '../runtimes/FiberRuntime'
-import { QIO } from './QIO'
 
 /**
  * @ignore
@@ -22,7 +21,7 @@ export enum Tag {
   Reject,
   Runtime,
   Try,
-  TryM
+  TryM,
 }
 
 export interface ICall<T extends unknown[] = unknown[]> {
@@ -65,8 +64,7 @@ export interface ICatch<E = unknown> {
 export interface IAsync<A = unknown, E = unknown> {
   tag: Tag.Async
 
-  // i0(res: CB<A>, rej: CB<E>): ICancellable
-  i0(cb: CB<QIO<A, E>>): ICancellable
+  i0(res: CB<A>, rej: CB<E>): ICancellable
 }
 export interface INever {
   tag: Tag.Never
