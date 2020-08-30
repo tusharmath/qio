@@ -37,7 +37,11 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static accessA<A, E, R>(
     fn: (cb: CB<QIO<A, E>>, R: R) => void
   ): QIO<A, E, R> {
-    return QIO.accessM((RR: R) => QIO.fromAsync((AA) => fn(AA, RR)))
+    return QIO.accessM((RR: R) =>
+      QIO.runtime().chain((RTM) =>
+        QIO.fromAsync((AA) => RTM.scheduler.asap(() => fn(AA, RR)))
+      )
+    )
   }
   /**
    * Effectfully creates a new c instance with the provided environment
@@ -170,9 +174,9 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * because it hard for typescript to infer the types based on how we use `res`.
    * Using `never` will give users compile time error always while using.
    */
-  public static fromAsync<A1 = never, E1 = never>(
-    cb: (res: CB<QIO<A1, E1>>) => unknown
-  ): QIO<A1, E1> {
+  public static fromAsync<A1 = never, E1 = never, R1 = unknown>(
+    cb: (res: CB<QIO<A1, E1, R1>>) => unknown
+  ): QIO<A1, E1, R1> {
     return new QIO(Tag.Async, cb)
   }
 
@@ -402,6 +406,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static void(): QIO<void> {
     return QIO.resolve(void 0)
   }
+
+  public static yield<A1, E1, R1>(f: QIO<A1, E1, R1>): QIO<A1, E1, R1> {
+    return QIO.runtime().chain((RTM) =>
+      QIO.fromAsync((res) => RTM.scheduler.asap(res, f))
+    )
+  }
+
   /**
    * Hack: The property $R1 is added to enable stricter checks.
    * More specifically enable contravariant check on R1.
@@ -668,6 +679,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     io: (A1: A1) => QIO<unknown, E2, R2>
   ): QIO<A1, E1 | E2, R1 & R2> {
     return this.chain((_) => io(_).const(_))
+  }
+
+  public yield(): QIO<A1, E1, R1> {
+    return QIO.yield(this)
   }
 
   /**

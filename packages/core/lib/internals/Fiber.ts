@@ -112,11 +112,15 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public get await(): QIO<Exit<A, E>> {
     D(this.id, 'this.await()')
 
-    return QIO.fromAsync((cb) => {
-      this.unsafeObserve((val) => cb(QIO.resolve(val)))
+    return QIO.runtime().chain((RTM) =>
+      QIO.fromAsync((cb) =>
+        RTM.scheduler.asap(() => {
+          this.unsafeObserve((val) => cb(QIO.resolve(val)))
 
-      return this
-    })
+          return this
+        })
+      )
+    )
   }
   public cancel(): void {
     D(this.id, 'this.cancel()')
@@ -269,7 +273,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
                 this.unsafeEvaluate()
               })
             )
-            
+
             return
           default:
             this.stackA.push(
