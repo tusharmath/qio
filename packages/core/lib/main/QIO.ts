@@ -788,3 +788,15 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 ) => void
   ? I
   : never
+
+/**
+ * Ask for an Env type. Useful in QIO.do
+ *
+ * Same as QIO.access((env: Env) => env)
+ *
+ * @example
+ * // test: QIO<{ name: string }, never, { name: string }>
+ * const test = ask<{ name: string }>()
+ */
+
+export const ask = <Env>() => QIO.access((env: Env) => env)
