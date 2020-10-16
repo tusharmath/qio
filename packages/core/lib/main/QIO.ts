@@ -741,4 +741,50 @@ export class QIO<A1 = unknown, E1 = never, R1 = {}> {
         )
     )
   }
+  *[Symbol.iterator](): Generator<QIO<A1, E1, R1>, A1, any> {
+    return (yield this) as any
+  }
+
+  /**
+   * Allows for a do notation using generator functions
+   * @param fun Generator function
+   *
+   * @example
+   * // result: QIO<string, Error, { port: number }>
+   * const result = QIO.do(function*() {
+   *    const { port } = yield* ask<{ port: number }>()
+   *    if (port > 9999999) {
+   *      yield* QIO.reject(Error("Port too big"))
+   *    }
+   *    return `port: ${port}`
+   * })
+   */
+  static do<
+    R,
+    Qio extends QIO<any, any, any>,
+    L = Qio extends QIO<any, infer L> ? L : never,
+    Env = Qio extends QIO<any, any, infer E> ? E : never,
+    UnionEnv = UnionToIntersection<Env>
+  >(fun: () => Generator<Qio, R, never>): QIO<R, L, UnionEnv> {
+    const iterator = fun()
+    const state = iterator.next()
+    function run(
+      state: IteratorYieldResult<Qio> | IteratorReturnResult<R>
+    ): QIO<R, any, any> {
+      if (state.done) {
+        return QIO.resolve(state.value)
+      }
+      return state.value.chain((val) => {
+        const next = iterator.next(val as never) // typescript
+        return run(next)
+      })
+    }
+    return run(state)
+  }
 }
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
+  ? I
+  : never
