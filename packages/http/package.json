@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@qio/core": "^31.1.0",
-    "axios": "^0.19.2"
+    "axios": "^0.20.0"
   },
   "publishConfig": {
     "access": "public"
