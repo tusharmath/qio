@@ -3,7 +3,6 @@ import {debug} from 'debug'
 import {
   DoublyLinkedList,
   LinkedListNode,
-  List,
   Option,
 } from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
@@ -32,7 +31,8 @@ enum FiberStatus {
 }
 
 class StupidCancel implements ICancellable {
-  cancel(): void {}
+  // tslint:disable-next-line: prefer-function-over-method
+  public cancel(): void {}
 }
 
 class RemoveNode<A, E> implements ICancellable {

@@ -24,7 +24,7 @@
     "postinstall": "yarn tsc -b && node packages/scripts/lib/Symlink.js",
     "prepublishOnly": "tsc -d",
     "prettier": "git ls-files | grep -E '.*\\.(ts)$' | xargs prettier --write --config=.prettierrc",
-    "test": "mocha --opts=packages/chai/mocha.opts",
+    "test": "mocha --config=packages/chai/.mocharc.yml ./packages/**/__tests__/*.test.js",
     "doc": "./scripts/docs.sh",
     "doc:typedoc": "yarn typedoc --plugin typedoc-plugin-markdown",
     "example": "node packages/example/guess-the-number/src/Run",

@@ -1,1 +1,0 @@
---require=./packages/chai ./packages/**/__tests__/*.test.js
