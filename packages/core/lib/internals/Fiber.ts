@@ -15,7 +15,6 @@ import {FiberRuntime} from '../runtimes/FiberRuntime'
 import {CancellationList} from './CancellationList'
 import {CBExit} from './CBExit'
 import {IDGenerator} from './IDGenerator'
-import {YieldStrategy} from './YieldStrategy'
 
 const D = debug('qio:fiber')
 class InvalidInstruction extends Error {
@@ -31,7 +30,8 @@ enum FiberStatus {
 }
 
 class StupidCancel implements ICancellable {
-  cancel(): void {}
+  // tslint:disable-next-line: prefer-function-over-method
+  public cancel(): void {}
 }
 
 class RemoveNode<A, E> implements ICancellable {
@@ -102,10 +102,6 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   private readonly stackA = new Array<Instruction>()
   private readonly stackEnv = new Array<unknown>()
   private status = FiberStatus.PENDING
-  private readonly yieldStrategy = YieldStrategy.create(
-    this.runtime.scheduler,
-    this.runtime.config
-  )
   private constructor(
     instruction: Instruction,
     public readonly runtime: FiberRuntime
@@ -113,7 +109,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     super()
     D(this.id, 'this.constructor()')
     this.stackA.push(instruction)
-    this.pauseAndUnsafeEvaluate()
+    this.unsafeEvaluate()
   }
   public get abort(): QIO<void> {
     return QIO.lift(() => this.cancel())
@@ -183,12 +179,6 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     }
   }
 
-  private pauseAndUnsafeEvaluate(data?: unknown): void {
-    D(this.id, 'start()')
-    this.node = this.cancellationList.push(
-      this.yieldStrategy.insert(this.unsafeEvaluate.bind(this), data)
-    )
-  }
   private unsafeEvaluate(ddd?: unknown): void {
     D(this.id, 'unsafeEvaluate()')
     if (this.node !== undefined) {
@@ -197,9 +187,6 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
     }
     let data: unknown = ddd
     while (true) {
-      if (this.yieldStrategy.canYield()) {
-        return this.pauseAndUnsafeEvaluate(data)
-      }
       try {
         const j = this.stackA.pop()
         if (j === undefined) {

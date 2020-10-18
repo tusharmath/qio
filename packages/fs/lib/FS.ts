@@ -8,7 +8,7 @@ type QIOErrno<A> = QIO<A, NodeJS.ErrnoException>
 /**
  * Creates an uninterruptible effect from an async function
  */
-const U = <A>(  
+const U = <A>(
   fn: (CB: (err: NodeJS.ErrnoException | null, data: A) => void) => void
 ): QIOErrno<A> =>
   QIO.uninterruptible((res, rej) =>
