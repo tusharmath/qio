@@ -8,8 +8,8 @@ type QIOErrno<A> = QIO<A, NodeJS.ErrnoException>
 /**
  * Creates an uninterruptible effect from an async function
  */
-const U = <A>(
-  fn: (CB: (err: NodeJS.ErrnoException, data: A) => void) => void
+const U = <A>(  
+  fn: (CB: (err: NodeJS.ErrnoException | null, data: A) => void) => void
 ): QIOErrno<A> =>
   QIO.uninterruptible((res, rej) =>
     fn((err, data) => (err ? rej(err) : res(data)))
@@ -19,7 +19,7 @@ const U = <A>(
  * Creates an uninterruptible effect from an async function that returns `void`
  */
 const V = <A, E>(
-  fn: (CB: (err: NodeJS.ErrnoException) => void) => void
+  fn: (CB: (err: NodeJS.ErrnoException | null) => void) => void
 ): QIOErrno<void> =>
   QIO.uninterruptible((res, rej) => fn((err) => (err ? rej(err) : res())))
 
@@ -48,7 +48,7 @@ export const FSEnv = {
 
   writeFile: (
     path: fs.PathLike | number,
-    data: unknown,
+    data: string | NodeJS.ArrayBufferView,
     options: fs.WriteFileOptions = {}
   ) => V((CB) => fs.writeFile(path, data, options, CB)),
 

@@ -3,7 +3,6 @@ import {debug} from 'debug'
 import {
   DoublyLinkedList,
   LinkedListNode,
-  List,
   Option,
 } from 'standard-data-structures'
 import {ICancellable} from 'ts-scheduler'
