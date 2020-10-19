@@ -75,8 +75,9 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fn: (...t: T) => QIO<A1, E1, R1>,
     ...args: T
   ): QIO<A1, E1, R1> {
-    return new QIO<A1, E1, R1>(Tag.Call, fn, args)
+    return new QIO<A1, E1, R1>(Tag.Call_DEPRECATED, fn, args)
   }
+
   /**
    * @ignore
    */
@@ -100,7 +101,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fa: QIO<A1, E1, R1>,
     aFb: (a: A1) => QIO<A2, E2, R2>
   ): QIO<A2, E1 | E2, R1 & R2> {
-    if (fa.tag === Tag.Constant) {
+    if (fa.tag === Tag.Resolve) {
       return aFb(fa.i0 as A1)
     }
 
@@ -168,6 +169,12 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return new QIO(Tag.Fork, io, runtime)
   }
   /**
+   * @ignore
+   */
+  public static fromEffect<A1, A2>(cb: (A: A1) => A2): QIO<A2> {
+    return new QIO(Tag.Effect, cb)
+  }
+  /**
    * Creates an IO from `Either`
    */
   public static fromEither<A, E>(exit: Either<E, A>): QIO<A, E> {
@@ -179,6 +186,12 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static fromExit<A, E>(exit: Exit<A, E>): QIO<A, E> {
     return Exit.fold(exit)<QIO<A, E>>(QIO.never(), QIO.resolve, QIO.reject)
+  }
+
+  public static fromExitCallback<A = unknown, E = never>(
+    cb: (_: (_: Exit<A, E>) => void) => void
+  ): QIO<A, E> {
+    return new QIO(Tag.ExitCallback, cb)
   }
 
   /**
@@ -213,7 +226,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static interruptible<A1 = never, E1 = never>(
     cb: (res: CB<A1>, rej: CB<E1>) => ICancellable
   ): QIO<A1, E1> {
-    return new QIO(Tag.Async, cb)
+    return new QIO(Tag.Async_DEPRECATED, cb)
   }
 
   /**
@@ -230,7 +243,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Lifts an effectful hunk of code into a QIO.
    */
   public static lift<A1 = unknown, E1 = never>(cb: () => A1): QIO<A1, E1> {
-    return QIO.resume(cb)
+    return QIO.fromEffect(cb)
   }
   /**
    * Transforms the success value using the specified function
@@ -239,11 +252,11 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fa: QIO<A1, E1, R1>,
     ab: (a: A1) => A2
   ): QIO<A2, E1, R1> {
-    if (fa.tag === Tag.Constant) {
+    if (fa.tag === Tag.Resolve) {
       return QIO.resolve(ab(fa.i0 as A1))
     }
 
-    return new QIO(Tag.Map, fa, ab)
+    return new QIO(Tag.Map_DEPRECATED, fa, ab)
   }
   /**
    * Returns a [[QIO]] that never resolves.
@@ -315,25 +328,19 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Represents a constant value
    */
   public static resolve<A1>(value: A1): QIO<A1> {
-    return new QIO(Tag.Constant, value)
-  }
-  /**
-   * @ignore
-   */
-  public static resume<A1, A2>(cb: (A: A1) => A2): QIO<A2> {
-    return new QIO(Tag.Try, cb)
+    return new QIO(Tag.Resolve, value)
   }
   /**
    * @ignore
    */
   public static resumeM<A1, E1, A2>(cb: (A: A1) => Instruction): QIO<A2, E1> {
-    return new QIO(Tag.TryM, cb)
+    return new QIO(Tag.TryM_DEPRECATED, cb)
   }
   /**
    * Returns the current runtime in a pure way.
    */
   public static runtime(): QIO<IRuntime> {
-    return new QIO(Tag.Runtime)
+    return new QIO(Tag.Runtime_DEPRECATED)
   }
   /**
    * Executes the provided IOs in sequences and returns their intermediatory results as an Array.

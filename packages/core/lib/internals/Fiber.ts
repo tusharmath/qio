@@ -196,25 +196,25 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
       this.cancellationList.remove(this.node)
       this.node = undefined
     }
-    let data: unknown = ddd
+    let s: unknown = ddd
     while (true) {
       if (this.yieldStrategy.canYield()) {
-        return this.pauseAndUnsafeEvaluate(data)
+        return this.pauseAndUnsafeEvaluate(s)
       }
       try {
-        const j = this.stackA.pop()
-        if (j === undefined) {
-          return this.completeFiber(Exit.succeed(data as A))
+        const i = this.stackA.pop()
+        if (i === undefined) {
+          return this.completeFiber(Exit.succeed(s as A))
         }
-        switch (j.tag) {
-          case Tag.Constant:
-            data = j.i0
+        switch (i.tag) {
+          case Tag.Resolve:
+            s = i.i0
             break
-          case Tag.Call:
-            this.stackA.push(j.i0(...j.i1))
+          case Tag.Call_DEPRECATED:
+            this.stackA.push(i.i0(...i.i1))
             break
-          case Tag.Runtime:
-            data = this.runtime
+          case Tag.Runtime_DEPRECATED:
+            s = this.runtime
             break
           case Tag.Reject:
             while (
@@ -223,7 +223,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             ) {
               this.stackA.pop()
             }
-            const cause = j.i0 as E
+            const cause = i.i0 as E
             const handler = this.stackA.pop()
             if (handler !== undefined && handler.tag === Tag.Capture) {
               this.stackA.push(handler.i0(cause))
@@ -231,25 +231,25 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
               return this.completeFiber(Exit.fail(cause))
             }
             break
-          case Tag.Try:
-            data = j.i0(data)
+          case Tag.Effect:
+            s = i.i0(s)
             break
-          case Tag.TryM:
-            this.stackA.push(j.i0(data))
+          case Tag.TryM_DEPRECATED:
+            this.stackA.push(i.i0(s))
             break
-          case Tag.Map:
-            this.stackA.push(QIO.resume(j.i1).asInstruction)
-            this.stackA.push(j.i0)
+          case Tag.Map_DEPRECATED:
+            this.stackA.push(QIO.fromEffect(i.i1).asInstruction)
+            this.stackA.push(i.i0)
             break
           case Tag.Capture:
             break
           case Tag.Chain:
-            this.stackA.push(QIO.resumeM(j.i1).asInstruction)
-            this.stackA.push(j.i0)
+            this.stackA.push(QIO.resumeM(i.i1).asInstruction)
+            this.stackA.push(i.i0)
             break
           case Tag.Catch:
-            this.stackA.push(QIO.capture(j.i1).asInstruction)
-            this.stackA.push(j.i0)
+            this.stackA.push(QIO.capture(i.i1).asInstruction)
+            this.stackA.push(i.i0)
             break
           case Tag.Never:
             return
@@ -259,28 +259,28 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             // A new context is created so that computation from that instruction can happen separately.
             // and then join back into the current context.
             // Using the same stack will corrupt it completely.
-            const nContext = new FiberContext(j.i0, j.i1)
+            const nContext = new FiberContext(i.i0, i.i1)
             this.cancellationList.push(nContext)
-            data = nContext
+            s = nContext
             break
           case Tag.Provide:
             this.stackA.push(
-              QIO.resume((i) => {
+              QIO.fromEffect((i) => {
                 this.stackEnv.pop()
 
                 return i
               }).asInstruction
             )
-            this.stackA.push(j.i0)
-            this.stackEnv.push(j.i1)
+            this.stackA.push(i.i0)
+            this.stackEnv.push(i.i1)
             break
           case Tag.Access:
             const env = this.stackEnv[this.stackEnv.length - 1]
-            data = j.i0(env)
+            s = i.i0(env)
             break
-          case Tag.Async:
+          case Tag.Async_DEPRECATED:
             const id = this.cancellationList.push(
-              j.i0(
+              i.i0(
                 (val) => {
                   this.cancellationList.remove(id)
                   this.stackA.push(QIO.resolve(val).asInstruction)
@@ -297,7 +297,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             return
           default:
             this.stackA.push(
-              QIO.reject(new InvalidInstruction(j)).asInstruction
+              QIO.reject(new InvalidInstruction(i)).asInstruction
             )
         }
       } catch (e) {
