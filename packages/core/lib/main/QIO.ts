@@ -24,7 +24,7 @@ const D = (scope: string, f: unknown, ...t: unknown[]) =>
  * @typeparam E1 Possible errors that could be thrown by the program.
  * @typeparam R1 Environment needed to execute this instance.
  */
-export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
+export class QIO<A1 = unknown, E1 = never, R1 = {}> {
   /**
    * Creates a new c instance with the provided environment
    */
@@ -39,8 +39,8 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fn: (A: CB<A>, E: CB<E>, R: R) => void
   ): QIO<A, E, R> {
     return QIO.accessM((RR: R) =>
-      QIO.uninterruptible((AA, EE) => fn(AA, EE, RR))
-    )
+      QIO.uninterruptible((AA, EE) => fn(AA as any, EE as any, RR))
+    ) as any
   }
   /**
    * Effectfully creates a new c instance with the provided environment
@@ -56,7 +56,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static accessP<A1, R1>(
     cb: (R: R1) => Promise<A1>
   ): QIO<A1, Error, R1> {
-    return QIO.env<R1>().chain(QIO.encaseP(cb))
+    return QIO.env<R1>().chain(QIO.encaseP(cb)) as any
   }
   /**
    * Converts a [[QIO]] of a function into a [[QIO]] of a value.
@@ -240,7 +240,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     ab: (a: A1) => A2
   ): QIO<A2, E1, R1> {
     if (fa.tag === Tag.Constant) {
-      return QIO.resolve(ab(fa.i0 as A1))
+      return QIO.resolve(ab(fa.i0 as A1)) as any
     }
 
     return new QIO(Tag.Map, fa, ab)
@@ -271,7 +271,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
           QIO.lift<List<A1>, E1>(() => List.empty<A1>())
         )
       )
-      .map((_) => _.asArray.reverse())
+      .map((_) => _.asArray.reverse()) as any
   }
 
   /**
@@ -288,7 +288,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
         QIO.par(list.slice(0, N)).chain((l1) =>
           itar(list.slice(N, list.length)).map((l2) => l1.concat(l2))
         )
-      )
+      ) as any
 
     return itar(ios)
   }
@@ -348,7 +348,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
           fList.chain((list) => f.map((value) => list.prepend(value))),
         QIO.lift<List<A1>, E1>(() => List.empty<A1>()).addEnv<R1>()
       )
-      .map((_) => _.asArray)
+      .map((_) => _.asArray) as any
   }
 
   /**
@@ -386,7 +386,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * ```
    */
   public static tryM<A1, E1, R1>(qio: () => QIO<A1, E1, R1>): QIO<A1, E1, R1> {
-    return QIO.flatten(QIO.lift(qio))
+    return QIO.flatten(QIO.lift(qio)) as any
   }
   /**
    * Tries to run an function that returns a promise.
@@ -448,7 +448,9 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Safely converts an interuptable IO to non-interuptable one.
    */
   public get asEither(): QIO<Either<E1, A1>, never, R1> {
-    return this.map(Either.right).catch((_) => QIO.resolve(Either.left(_)))
+    return this.map(Either.right).catch((_) =>
+      QIO.resolve(Either.left(_))
+    ) as any
   }
   /**
    * @ignore
@@ -470,7 +472,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public get once(): QIO<QIO<A1, E1>, never, R1> {
     return this.env.chain((env) =>
       Await.of<A1, E1>().map((AWT) => AWT.set(this.provide(env)).and(AWT.get))
-    )
+    ) as any
   }
   /**
    * Ignores the result of the c instance
@@ -503,7 +505,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
         usage(a1)
           .fork()
           .chain((F) => F.await.and(release(a1)).chain((_) => F.join))
-      )
+      ) as any
   }
 
   public bracket_<E2, R2>(
@@ -534,13 +536,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Ignores the original value of the c and resolves with the provided value
    */
   public const<A2>(a: A2): QIO<A2, E1, R1> {
-    return this.and(QIO.resolve(a))
+    return this.and(QIO.resolve(a)) as any
   }
   /**
    * Delays the execution of the [[QIO]] by the provided time.
    */
   public delay(duration: number): QIO<A1, E1, R1> {
-    return QIO.timeout(this, duration).chain(Id)
+    return QIO.timeout(this, duration).chain(Id) as any
   }
   /**
    * Like [[QIO.tap]] but takes in an IO instead of a callback.
@@ -555,7 +557,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public encase<A2 = unknown, E2 = never>(
     fn: (A1: A1) => A2
   ): QIO<A2, E1 | E2, R1> {
-    return this.chain(QIO.encase(fn))
+    return this.chain(QIO.encase(fn)) as any
   }
 
   /**
@@ -575,13 +577,15 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
         this.provide(ENV),
         RTM.configure(config === undefined ? RTM.config : config)
       )
-    )
+    ) as any
   }
   /**
    * Creates a separate [[Fiber]] with a different [[IRuntime]].
    */
   public forkWith(runtime: IRuntime): QIO<Fiber<A1, E1>, never, R1> {
-    return QIO.env<R1>().chain((ENV) => QIO.fork(this.provide(ENV), runtime))
+    return QIO.env<R1>().chain((ENV) =>
+      QIO.fork(this.provide(ENV), runtime)
+    ) as any
   }
   /**
    * Applies transformation on the success value of the c.
@@ -607,19 +611,19 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Provides the current instance of c the required env that is accessed effect-fully.
    */
   public provideM<E2, R2>(io: QIO<R1, E2, R2>): QIO<A1, E1 | E2, R2> {
-    return io.chain((ENV) => this.provide(ENV))
+    return io.chain((ENV) => this.provide(ENV)) as any
   }
   /**
    * Provide only some of the environment
    */
   public provideSome<R0>(fn: (R2: R0) => R1): QIO<A1, E1, R0> {
-    return QIO.accessM((r0: R0) => this.provide(fn(r0)))
+    return QIO.accessM((r0: R0) => this.provide(fn(r0))) as any
   }
   /**
    * Provide only some of the environment using an effect
    */
   public provideSomeM<E2, R0>(qio: QIO<R1, E2, R0>): QIO<A1, E1 | E2, R0> {
-    return qio.chain((_) => this.provide(_))
+    return qio.chain((_) => this.provide(_)) as any
   }
   /**
    * Runs two IOs in parallel in returns the result of the first one.
@@ -631,7 +635,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
       that,
       (E, F) => F.abort.const(E),
       (E, F) => F.abort.const(E)
-    ).chain((E) => QIO.fromExit<A1 | A2, E1 | E2>(E))
+    ).chain((E) => QIO.fromExit<A1 | A2, E1 | E2>(E)) as any
   }
 
   /**
@@ -660,14 +664,14 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
 
         return resume1.fork().and(resume2.fork()).and(done.get)
       })
-    })
+    }) as any
   }
 
   /**
    * Forcefully fails the current program with the provided error.
    */
   public rejectWith<E2>(error: E2): QIO<A1, E1 | E2, R1> {
-    return this.and(QIO.reject(error))
+    return this.and(QIO.reject(error)) as any
   }
 
   /**
@@ -676,7 +680,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * and ignores it's result and continues.
    */
   public tap(fn: (A: A1) => void): QIO<A1, E1, R1> {
-    return this.tapM(QIO.encase(fn))
+    return this.tapM(QIO.encase(fn)) as any
   }
 
   /**
@@ -737,4 +741,62 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
         )
     )
   }
+  *[Symbol.iterator](): Generator<QIO<A1, E1, R1>, A1, any> {
+    return (yield this) as any
+  }
+
+  /**
+   * Allows for a do notation using generator functions
+   * @param fun Generator function
+   *
+   * @example
+   * // result: QIO<string, Error, { port: number }>
+   * const result = QIO.do(function*() {
+   *    const { port } = yield* ask<{ port: number }>()
+   *    if (port > 9999999) {
+   *      yield* QIO.reject(Error("Port too big"))
+   *    }
+   *    return `port: ${port}`
+   * })
+   */
+  static do<
+    R,
+    Qio extends QIO<any, any, any>,
+    L = Qio extends QIO<any, infer L> ? L : never,
+    Env = Qio extends QIO<any, any, infer E> ? E : never,
+    UnionEnv = UnionToIntersection<Env>
+  >(fun: () => Generator<Qio, R, never>): QIO<R, L, UnionEnv> {
+    const iterator = fun()
+    const state = iterator.next()
+    function run(
+      state: IteratorYieldResult<Qio> | IteratorReturnResult<R>
+    ): QIO<R, any, any> {
+      if (state.done) {
+        return QIO.resolve(state.value)
+      }
+      return state.value.chain((val) => {
+        const next = iterator.next(val as never) // typescript
+        return run(next)
+      })
+    }
+    return run(state)
+  }
 }
+
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
+  ? I
+  : never
+
+/**
+ * Ask for an Env type. Useful in QIO.do
+ *
+ * Same as QIO.access((env: Env) => env)
+ *
+ * @example
+ * // test: QIO<{ name: string }, never, { name: string }>
+ * const test = ask<{ name: string }>()
+ */
+
+export const ask = <Env>() => QIO.access((env: Env) => env)
