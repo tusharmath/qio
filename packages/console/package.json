@@ -1,6 +1,6 @@
 {
   "name": "@qio/console",
-  "version": "31.1.0",
+  "version": "31.1.1",
   "description": "Console API using QIO",
   "author": "Tushar Mathur <tusharmath@gmail.com>",
   "homepage": "https://github.com/tusharmath/qio#readme",
@@ -31,7 +31,7 @@
     "url": "https://github.com/tusharmath/qio/issues"
   },
   "dependencies": {
-    "@qio/core": "^31.1.0"
+    "@qio/core": "^31.1.1"
   },
   "devDependencies": {
     "chai": "^4.2.0"

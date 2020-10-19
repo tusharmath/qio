@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [31.1.1](https://github.com/tusharmath/qio/compare/v31.1.0...v31.1.1) (2020-10-19)
+
+**Note:** Version bump only for package @qio/docs
+
+
+
+
+
 # [31.0.0](https://github.com/tusharmath/qio/compare/v30.0.1...v31.0.0) (2020-01-28)
 
 **Note:** Version bump only for package @qio/docs

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [31.1.1](https://github.com/tusharmath/qio/compare/v31.1.0...v31.1.1) (2020-10-19)
+
+
+### Performance Improvements
+
+* **fiber:** add basic performance optimizations ([fffed03](https://github.com/tusharmath/qio/commit/fffed033f224f9777d2392f033f009b3055aa878))
+
+
+
+
+
 # [31.1.0](https://github.com/tusharmath/qio/compare/v31.0.1...v31.1.0) (2020-03-29)
 
 
