@@ -33,7 +33,7 @@ export class Await<A, E> {
   }
   public readonly id = AWAIT_ID.create()
   private flag = AwaitStatus.PENDING
-  private readonly Q = DoublyLinkedList.of<[CB<A>, CB<E>]>()
+  private readonly Q = DoublyLinkedList.of<CB<QIO<A, E>>>()
   private result: Option<Either<E, A>> = Option.none()
   public get get(): QIO<A, E> {
     return QIO.tryM(() =>
@@ -46,8 +46,8 @@ export class Await<A, E> {
     return QIO.lift(() => this.flag === AwaitStatus.COMPLETED)
   }
   private get wait(): QIO<A, E> {
-    return QIO.interruptible((res, rej) => {
-      const id = this.Q.add([res, rej])
+    return QIO.fromAsync((res) => {
+      const id = this.Q.add(res)
       D(this.id, 'add wait')
       D(this.id, 'this.Q.length', this.Q.length)
 
@@ -78,7 +78,10 @@ export class Await<A, E> {
           const node = this.Q.shift()
 
           if (Option.isSome(node)) {
-            either.reduce(node.value[1], node.value[0])
+            either.reduce(
+              (e) => node.value(QIO.reject(e)),
+              (val) => node.value(QIO.resolve(val))
+            )
           }
         }
 

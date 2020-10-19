@@ -105,8 +105,8 @@ describe('QIO', () => {
     it('should evaluate asynchronously', async () => {
       const runtime = defaultRuntime()
       const actual = await runtime.unsafeExecutePromise(
-        QIO.interruptible((res, rej) => {
-          const id = setTimeout(res, 100, 1000)
+        QIO.fromAsync((res) => {
+          const id = setTimeout(res, 100, QIO.resolve(1000))
 
           return {cancel: () => clearTimeout(id)}
         })
@@ -118,9 +118,7 @@ describe('QIO', () => {
     it('should be cancellable', () => {
       const cancel = spy()
       const runtime = testRuntime()
-      const cancellable = runtime.unsafeExecute(
-        QIO.interruptible(() => ({cancel}))
-      )
+      const cancellable = runtime.unsafeExecute(QIO.fromAsync(() => ({cancel})))
       runtime.scheduler.run()
       cancellable.cancel()
       cancel.should.be.called()
@@ -295,9 +293,17 @@ describe('QIO', () => {
     it('should capture async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptible<never, Error>((res, rej) =>
-          rej(new Error('Bye'))
-        ).catch((err) => QIO.resolve(err.message))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<string>((res) => {
+            RTM.scheduler.asap(() =>
+              res(
+                QIO.reject(new Error('Bye')).catch((err) =>
+                  QIO.resolve(err.message)
+                )
+              )
+            )
+          })
+        )
       )
       const expected = 'Bye'
       assert.strictEqual(actual, expected)
@@ -306,11 +312,19 @@ describe('QIO', () => {
     it('should capture nested async exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptible<never, Error>((res, rej) => rej(new Error('A')))
-          .catch((err) => QIO.reject(new Error(err.message + 'B')))
-          .catch((err) => QIO.reject(new Error(err.message + 'C')))
-          .catch((err) => QIO.reject(new Error(err.message + 'D')))
-          .catch((err) => QIO.resolve(err.message + 'E'))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<unknown, Error>((res) => {
+            RTM.scheduler.asap(() =>
+              res(
+                QIO.reject(new Error('A'))
+                  .catch((err) => QIO.reject(new Error(err.message + 'B')))
+                  .catch((err) => QIO.reject(new Error(err.message + 'C')))
+                  .catch((err) => QIO.reject(new Error(err.message + 'D')))
+                  .catch((err) => QIO.resolve(err.message + 'E'))
+              )
+            )
+          })
+        )
       )
 
       const expected = 'ABCDE'
@@ -955,18 +969,24 @@ describe('QIO', () => {
   describe('uninterruptible', () => {
     it('should capture exceptions from uninterruptibleIO API', () => {
       const runtime = testRuntime()
+      const error = new Error('Bye')
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptible<[], Error>((res, rej) => rej(new Error('Failed')))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<string>((res) => {
+            RTM.scheduler.asap(() =>
+              res(QIO.reject(error).catch((err) => QIO.resolve(err.message)))
+            )
+          })
+        )
       )
-      const expected = new Error('Failed')
-
-      assert.deepStrictEqual('' + String(actual), '' + String(expected))
+      const expected = 'Bye'
+      assert.strictEqual(actual, expected)
     })
 
     it('should capture sync exceptions', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
-        QIO.uninterruptible((cb) => {
+        QIO.fromAsync((cb) => {
           throw new Error('Failed')
         })
       )
@@ -979,9 +999,12 @@ describe('QIO', () => {
       const runtime = testRuntime()
       const actual = runtime.unsafeExecuteSync(
         // tslint:disable-next-line: no-null-keyword
-        QIO.uninterruptible<number>((res, rej) => res(1000))
+        QIO.runtime().chain((RTM) =>
+          QIO.fromAsync<number>((res) => {
+            RTM.scheduler.asap(() => res(QIO.resolve(1000)))
+          })
+        )
       )
-
       assert.deepStrictEqual(actual, 1000)
     })
   })

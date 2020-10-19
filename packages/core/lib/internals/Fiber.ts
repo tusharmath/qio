@@ -125,8 +125,8 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
   public get await(): QIO<Exit<A, E>> {
     D(this.id, 'this.await()')
 
-    return QIO.uninterruptible((cb) => {
-      this.unsafeObserve(cb)
+    return QIO.fromAsync((cb) => {
+      this.unsafeObserve((val) => cb(QIO.resolve(val)))
 
       return this
     })
@@ -280,20 +280,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             break
           case Tag.Async:
             const id = this.cancellationList.push(
-              j.i0(
-                (val) => {
-                  this.cancellationList.remove(id)
-                  this.stackA.push(QIO.resolve(val).asInstruction)
-                  this.unsafeEvaluate()
-                },
-                (err) => {
-                  this.cancellationList.remove(id)
-                  this.stackA.push(QIO.reject(err).asInstruction)
-                  this.unsafeEvaluate()
-                }
-              )
+              j.i0((qio) => {
+                this.cancellationList.remove(id)
+                this.stackA.push(qio.asInstruction)
+                this.unsafeEvaluate()
+              })
             )
-
+            
             return
           default:
             this.stackA.push(

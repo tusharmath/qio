@@ -46,14 +46,17 @@ export interface IHttpEnv {
 
 export const httpEnv = {
   request: (config: IHttpRequestConfig) =>
-    QIO.interruptible<AxiosResponse, AxiosError>((res, rej) => {
+    QIO.fromAsync<AxiosResponse, AxiosError>((res) => {
       let cancelRequest = () => {}
       Axios.request({
         ...config,
         cancelToken: new Axios.CancelToken(
           (cancel) => (cancelRequest = cancel)
         ),
-      }).then(res, rej)
+      }).then(
+        (val) => res(QIO.resolve(val)),
+        (err) => res(QIO.reject(err))
+      )
 
       return {
         cancel: () => {
