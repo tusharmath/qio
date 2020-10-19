@@ -5,7 +5,6 @@
 import {Id} from '@qio/prelude'
 import {debug} from 'debug'
 import {Either, List} from 'standard-data-structures'
-import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {Fiber} from '../internals/Fiber'
@@ -36,10 +35,12 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * Asynchronously access an env
    */
   public static accessA<A, E, R>(
-    fn: (A: CB<A>, E: CB<E>, R: R) => void
+    fn: (cb: CB<QIO<A, E>>, R: R) => void
   ): QIO<A, E, R> {
     return QIO.accessM((RR: R) =>
-      QIO.uninterruptible((AA, EE) => fn(AA, EE, RR))
+      QIO.runtime().chain((RTM) =>
+        QIO.fromAsync((AA) => RTM.scheduler.asap(() => fn(AA, RR)))
+      )
     )
   }
   /**
@@ -134,11 +135,11 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): (...t: T) => QIO<A, Error> {
     return (...t) =>
       QIO.runtime().chain((RTM) =>
-        QIO.interruptible((res, rej) =>
+        QIO.fromAsync((res) =>
           RTM.scheduler.asap(() => {
             void cb(...t)
-              .then(res)
-              .catch(rej)
+              .then((val) => res(QIO.resolve(val)))
+              .catch(res)
           })
         )
       )
@@ -167,6 +168,18 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<Fiber<A1, E1>> {
     return new QIO(Tag.Fork, io, runtime)
   }
+
+  /**
+   * **NOTE:** The default type for value is set to `never`,
+   * because it hard for typescript to infer the types based on how we use `res`.
+   * Using `never` will give users compile time error always while using.
+   */
+  public static fromAsync<A1 = never, E1 = never, R1 = unknown>(
+    cb: (res: CB<QIO<A1, E1, R1>>) => unknown
+  ): QIO<A1, E1, R1> {
+    return new QIO(Tag.Async, cb)
+  }
+
   /**
    * Creates an IO from `Either`
    */
@@ -204,16 +217,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     return (cond, left, right) =>
       // tslint:disable-next-line: no-any
       cond(...args) ? left(...args) : (right(...args) as any)
-  }
-  /**
-   * **NOTE:** The default type for value is set to `never`,
-   * because it hard for typescript to infer the types based on how we use `res`.
-   * Using `never` will give users compile time error always while using.
-   */
-  public static interruptible<A1 = never, E1 = never>(
-    cb: (res: CB<A1>, rej: CB<E1>) => ICancellable
-  ): QIO<A1, E1> {
-    return new QIO(Tag.Async, cb)
   }
 
   /**
@@ -356,7 +359,9 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    */
   public static timeout<A>(value: A, duration: number): QIO<A> {
     return QIO.runtime().chain((RTM) =>
-      QIO.interruptible((res) => RTM.scheduler.delay(res, duration, value))
+      QIO.fromAsync((res) =>
+        RTM.scheduler.delay(res, duration, QIO.resolve(value))
+      )
     )
   }
 
@@ -394,25 +399,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static tryP<A>(cb: () => Promise<A>): QIO<A, Error> {
     return QIO.encaseP(cb)()
   }
-  /**
-   * Creates an IO from an async/callback based function ie. non cancellable.
-   * It tries to make it cancellable by delaying the function call.
-   */
-  public static uninterruptible<A1 = never, E1 = never>(
-    fn: (res: CB<A1>, rej: CB<E1>) => unknown
-  ): QIO<A1, E1> {
-    return QIO.runtime().chain((RTM) =>
-      QIO.interruptible<A1, E1>((res, rej) =>
-        RTM.scheduler.asap(() => {
-          try {
-            fn(res, rej)
-          } catch (e) {
-            rej(e as E1)
-          }
-        })
-      )
-    )
-  }
 
   /**
    * Returns a [[QIO]] of void.
@@ -420,6 +406,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static void(): QIO<void> {
     return QIO.resolve(void 0)
   }
+
+  public static yield<A1, E1, R1>(f: QIO<A1, E1, R1>): QIO<A1, E1, R1> {
+    return QIO.runtime().chain((RTM) =>
+      QIO.fromAsync((res) => RTM.scheduler.asap(res, f))
+    )
+  }
+
   /**
    * Hack: The property $R1 is added to enable stricter checks.
    * More specifically enable contravariant check on R1.
@@ -686,6 +679,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     io: (A1: A1) => QIO<unknown, E2, R2>
   ): QIO<A1, E1 | E2, R1 & R2> {
     return this.chain((_) => io(_).const(_))
+  }
+
+  public yield(): QIO<A1, E1, R1> {
+    return QIO.yield(this)
   }
 
   /**
