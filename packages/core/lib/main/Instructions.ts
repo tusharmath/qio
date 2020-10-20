@@ -2,6 +2,7 @@ import {ICancellable} from 'ts-scheduler'
 
 import {CB} from '../internals/CB'
 import {FiberRuntime} from '../runtimes/FiberRuntime'
+
 import {Exit} from './Exit'
 
 /**
@@ -11,7 +12,7 @@ export enum Tag {
   Access,
   Async_DEPRECATED,
   Call_DEPRECATED,
-  Capture,
+  Halt,
   Catch,
   Chain,
   ExitCallback,
@@ -23,7 +24,9 @@ export enum Tag {
   Reject,
   Runtime_DEPRECATED,
   Effect,
+  EffectTotal,
   TryM_DEPRECATED,
+  Continuation,
 }
 
 export interface ICall<T extends unknown[] = unknown[]> {
@@ -43,6 +46,14 @@ export interface IReject<A = unknown> {
 export interface IEffect<A = unknown, B = unknown> {
   tag: Tag.Effect
   i0(a: A): B
+}
+export interface IEffectTotal<B = unknown> {
+  tag: Tag.EffectTotal
+  i0(): B
+}
+export interface IContinuation<A = unknown> {
+  tag: Tag.Continuation
+  i0(a: A): Instruction
 }
 export interface ITryM<A = unknown> {
   tag: Tag.TryM_DEPRECATED
@@ -91,7 +102,7 @@ export interface IProvide<R = unknown> {
 }
 
 export interface ICapture<A = unknown> {
-  tag: Tag.Capture
+  tag: Tag.Halt
   i0(i: A): Instruction
 }
 
@@ -119,3 +130,5 @@ export type Instruction =
   | IRTime
   | IEffect
   | ITryM
+  | IContinuation
+  | IEffectTotal

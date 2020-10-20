@@ -77,13 +77,6 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   ): QIO<A1, E1, R1> {
     return new QIO<A1, E1, R1>(Tag.Call_DEPRECATED, fn, args)
   }
-
-  /**
-   * @ignore
-   */
-  public static capture<A1, E1, A2>(cb: (A: A1) => Instruction): QIO<A2, E1> {
-    return new QIO(Tag.Capture, cb)
-  }
   /**
    * @ignore
    */
@@ -174,6 +167,10 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
   public static fromEffect<A1, A2>(cb: (A: A1) => A2): QIO<A2> {
     return new QIO(Tag.Effect, cb)
   }
+
+  public static fromEffectTotal<A>(cb: () => A): QIO<A> {
+    return new QIO(Tag.EffectTotal, cb)
+  }
   /**
    * Creates an IO from `Either`
    */
@@ -192,6 +189,13 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     cb: (_: (_: Exit<A, E>) => void) => void
   ): QIO<A, E> {
     return new QIO(Tag.ExitCallback, cb)
+  }
+
+  /**
+   * @ignore
+   */
+  public static halt<A1, E1, A2>(cb: (A: A1) => Instruction): QIO<A2, E1> {
+    return new QIO(Tag.Halt, cb)
   }
 
   /**
@@ -252,11 +256,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     fa: QIO<A1, E1, R1>,
     ab: (a: A1) => A2
   ): QIO<A2, E1, R1> {
-    if (fa.tag === Tag.Resolve) {
-      return QIO.resolve(ab(fa.i0 as A1))
-    }
-
-    return new QIO(Tag.Map_DEPRECATED, fa, ab)
+    return fa.chain((_) => QIO.resolve(ab(_)))
   }
   /**
    * Returns a [[QIO]] that never resolves.
@@ -452,7 +452,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
     public readonly i1?: unknown
   ) {}
   /**
-   * Safely converts an interuptable IO to non-interuptable one.
+   * Safely converts an interruptible IO to non-interruptible one.
    */
   public get asEither(): QIO<Either<E1, A1>, never, R1> {
     return this.map(Either.right).catch((_) => QIO.resolve(Either.left(_)))
