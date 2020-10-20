@@ -1,4 +1,4 @@
-/* tslint:disable: no-unbound-method cyclomatic-complexity */
+/* tslint:disable: no-unbound-method cyclomatic-complexity no-console */
 import {Exit} from '../main/Exit'
 import {Instruction, Tag} from '../main/Instructions'
 import {QIO} from '../main/QIO'
@@ -38,8 +38,8 @@ export const Evaluator = {
     return new QIO(Tag.Continuation, cb)
   },
 
-  halt<A1>(cb: (A: A1) => Instruction): Instruction {
-    return new QIO(Tag.Halt, cb).asInstruction
+  catchHandler<A1>(cb: (A: A1) => Instruction): Instruction {
+    return new QIO(Tag.CatchHandler, cb).asInstruction
   },
 
   evaluate<A, E>(
@@ -68,11 +68,12 @@ export const Evaluator = {
 
           return
 
-        case Tag.Halt:
+        case Tag.CatchHandler:
+          stackA.push(i.i0(s))
           break
 
         case Tag.Catch:
-          stackA.push(this.halt(i.i1))
+          stackA.push(this.catchHandler(i.i1))
           stackA.push(i.i0)
           break
 
@@ -104,21 +105,16 @@ export const Evaluator = {
         case Tag.Reject:
           while (
             stackA.length > 0 &&
-            stackA[stackA.length - 1].tag !== Tag.Halt
+            stackA[stackA.length - 1].tag !== Tag.CatchHandler
           ) {
             stackA.pop()
           }
 
+          if (stackA.length === 0) {
+            return cb(Exit.fail(i.i0 as E))
+          }
           s = i.i0
 
-          const cause = i.i0 as E
-          const f = stackA.pop()
-
-          if (f !== undefined && f.tag === Tag.Halt) {
-            stackA.push(f.i0(cause))
-          } else {
-            return cb(Exit.fail(cause))
-          }
           break
 
         case Tag.Continuation:

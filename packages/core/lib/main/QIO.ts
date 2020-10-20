@@ -195,7 +195,7 @@ export class QIO<A1 = unknown, E1 = never, R1 = unknown> {
    * @ignore
    */
   public static halt<A1, E1, A2>(cb: (A: A1) => Instruction): QIO<A2, E1> {
-    return new QIO(Tag.Halt, cb)
+    return new QIO(Tag.CatchHandler, cb)
   }
 
   /**

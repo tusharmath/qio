@@ -219,13 +219,13 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
           case Tag.Reject:
             while (
               this.stackA.length > 0 &&
-              this.stackA[this.stackA.length - 1].tag !== Tag.Halt
+              this.stackA[this.stackA.length - 1].tag !== Tag.CatchHandler
             ) {
               this.stackA.pop()
             }
             const cause = i.i0 as E
             const handler = this.stackA.pop()
-            if (handler !== undefined && handler.tag === Tag.Halt) {
+            if (handler !== undefined && handler.tag === Tag.CatchHandler) {
               this.stackA.push(handler.i0(cause))
             } else {
               return this.completeFiber(Exit.fail(cause))
@@ -241,7 +241,7 @@ export class FiberContext<A, E> extends Fiber<A, E> implements ICancellable {
             this.stackA.push(QIO.fromEffect(i.i1).asInstruction)
             this.stackA.push(i.i0)
             break
-          case Tag.Halt:
+          case Tag.CatchHandler:
             break
           case Tag.Chain:
             this.stackA.push(QIO.resumeM(i.i1).asInstruction)

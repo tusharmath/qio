@@ -12,7 +12,7 @@ export enum Tag {
   Access,
   Async_DEPRECATED,
   Call_DEPRECATED,
-  Halt,
+  CatchHandler,
   Catch,
   Chain,
   ExitCallback,
@@ -102,7 +102,7 @@ export interface IProvide<R = unknown> {
 }
 
 export interface ICapture<A = unknown> {
-  tag: Tag.Halt
+  tag: Tag.CatchHandler
   i0(i: A): Instruction
 }
 
