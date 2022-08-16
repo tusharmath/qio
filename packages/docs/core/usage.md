@@ -32,7 +32,7 @@ const greet = () => console.log('Hello World!') // void
 ```ts
 import {QIO} from '@qio/core'
 
-const greetIO = QIO.lift(greet) // QIO<never, void, unknown>
+const greetIO = QIO.lift(greet) // QIO<void, never, unknown>
 ```
 
 | Parameter | Value     |                                               |
